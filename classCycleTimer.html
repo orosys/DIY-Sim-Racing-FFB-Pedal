@@ -83,10 +83,12 @@ Collaboration diagram for CycleTimer:</div>
 <div class="dyncontent">
 <div class="center"><img src="classCycleTimer__coll__graph.png" border="0" usemap="#aCycleTimer_coll__map" alt="Collaboration graph"/></div>
 <map name="aCycleTimer_coll__map" id="aCycleTimer_coll__map">
-<area shape="rect" title=" " alt="" coords="95,93,182,119"/>
-<area shape="rect" title=" " alt="" coords="5,5,61,31"/>
-<area shape="rect" title=" " alt="" coords="115,5,162,31"/>
-<area shape="rect" title=" " alt="" coords="187,5,277,31"/>
+<area shape="rect" title=" " alt="" coords="241,181,327,207"/>
+<area shape="rect" href="classRTDebugOutput.html" title=" " alt="" coords="54,93,229,119"/>
+<area shape="rect" href="classQueueHandle__t.html" title=" " alt="" coords="5,5,117,31"/>
+<area shape="rect" title=" " alt="" coords="142,5,301,31"/>
+<area shape="rect" title=" " alt="" coords="253,93,315,119"/>
+<area shape="rect" title=" " alt="" coords="339,93,429,119"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -101,10 +103,10 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr class="memitem:a59ae7d0a583b55e969ce5352d1419567"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCycleTimer.html#a59ae7d0a583b55e969ce5352d1419567">_timerName</a></td></tr>
-<tr class="separator:a59ae7d0a583b55e969ce5352d1419567"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adb6590d16759b682d994d239ef132b4a"><td class="memItemLeft" align="right" valign="top">unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCycleTimer.html#adb6590d16759b682d994d239ef132b4a">_timeFirst</a></td></tr>
-<tr class="separator:adb6590d16759b682d994d239ef132b4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3973cee4f0e37253354e43a28c7ec900"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classRTDebugOutput.html">RTDebugOutput</a>&lt; float, 1 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCycleTimer.html#a3973cee4f0e37253354e43a28c7ec900">_rtOutput</a></td></tr>
+<tr class="separator:a3973cee4f0e37253354e43a28c7ec900"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6397e279a5cacd5ac98924de1e402aa3"><td class="memItemLeft" align="right" valign="top">int64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCycleTimer.html#a6397e279a5cacd5ac98924de1e402aa3">_timeFirst</a></td></tr>
+<tr class="separator:a6397e279a5cacd5ac98924de1e402aa3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1a84fb6d54e411225b327f29b576a441"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCycleTimer.html#a1a84fb6d54e411225b327f29b576a441">_cycleCount</a></td></tr>
 <tr class="separator:a1a84fb6d54e411225b327f29b576a441"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -137,22 +139,13 @@ Private Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p class="definition">Definition at line <a class="el" href="CycleTimer_8h_source.html#l00015">15</a> of file <a class="el" href="CycleTimer_8h_source.html">CycleTimer.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   16</span>    : <a class="code hl_variable" href="classCycleTimer.html#a59ae7d0a583b55e969ce5352d1419567">_timerName</a>(timerName)</div>
+<div class="fragment"><div class="line"><span class="lineno">   16</span>    : <a class="code hl_variable" href="classCycleTimer.html#a3973cee4f0e37253354e43a28c7ec900">_rtOutput</a>({ timerName })</div>
 <div class="line"><span class="lineno">   17</span>  {</div>
 <div class="line"><span class="lineno">   18</span>    <a class="code hl_function" href="classCycleTimer.html#af9e34e9ae6c3dd3d66bfbfd02fa01c3e">ResetTimer</a>();</div>
 <div class="line"><span class="lineno">   19</span>  }</div>
-<div class="ttc" id="aclassCycleTimer_html_a59ae7d0a583b55e969ce5352d1419567"><div class="ttname"><a href="classCycleTimer.html#a59ae7d0a583b55e969ce5352d1419567">CycleTimer::_timerName</a></div><div class="ttdeci">String _timerName</div><div class="ttdef"><b>Definition:</b> <a href="CycleTimer_8h_source.html#l00010">CycleTimer.h:10</a></div></div>
+<div class="ttc" id="aclassCycleTimer_html_a3973cee4f0e37253354e43a28c7ec900"><div class="ttname"><a href="classCycleTimer.html#a3973cee4f0e37253354e43a28c7ec900">CycleTimer::_rtOutput</a></div><div class="ttdeci">RTDebugOutput&lt; float, 1 &gt; _rtOutput</div><div class="ttdef"><b>Definition:</b> <a href="CycleTimer_8h_source.html#l00010">CycleTimer.h:10</a></div></div>
 <div class="ttc" id="aclassCycleTimer_html_af9e34e9ae6c3dd3d66bfbfd02fa01c3e"><div class="ttname"><a href="classCycleTimer.html#af9e34e9ae6c3dd3d66bfbfd02fa01c3e">CycleTimer::ResetTimer</a></div><div class="ttdeci">void ResetTimer()</div><div class="ttdef"><b>Definition:</b> <a href="CycleTimer_8h_source.html#l00021">CycleTimer.h:21</a></div></div>
-</div><!-- fragment --><div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="classCycleTimer_a44f50f3de5cdd8f2226364f679a54c65_cgraph.png" border="0" usemap="#aclassCycleTimer_a44f50f3de5cdd8f2226364f679a54c65_cgraph" alt=""/></div>
-<map name="aclassCycleTimer_a44f50f3de5cdd8f2226364f679a54c65_cgraph" id="aclassCycleTimer_a44f50f3de5cdd8f2226364f679a54c65_cgraph">
-<area shape="rect" title=" " alt="" coords="5,5,164,31"/>
-<area shape="rect" href="classCycleTimer.html#af9e34e9ae6c3dd3d66bfbfd02fa01c3e" title=" " alt="" coords="212,5,372,31"/>
-</map>
-</div>
-
+</div><!-- fragment -->
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -183,27 +176,27 @@ Here is the call graph for this function:</div>
 <div class="fragment"><div class="line"><span class="lineno">   26</span>              {</div>
 <div class="line"><span class="lineno">   27</span>    <a class="code hl_variable" href="classCycleTimer.html#a1a84fb6d54e411225b327f29b576a441">_cycleCount</a>++;</div>
 <div class="line"><span class="lineno">   28</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classCycleTimer.html#a1a84fb6d54e411225b327f29b576a441">_cycleCount</a> &gt; <a class="code hl_variable" href="CycleTimer_8h.html#afe5d4021405adb70aa4a916d05632c05">MAX_CYCLES</a>) {</div>
-<div class="line"><span class="lineno">   29</span> </div>
-<div class="line"><span class="lineno">   30</span>      ;</div>
-<div class="line"><span class="lineno">   31</span>      <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> timeEnd = esp_timer_get_time();<span class="comment">//micros();</span></div>
-<div class="line"><span class="lineno">   32</span>      <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> timeElapsed = timeEnd - <a class="code hl_variable" href="classCycleTimer.html#adb6590d16759b682d994d239ef132b4a">_timeFirst</a>;</div>
-<div class="line"><span class="lineno">   33</span>              </div>
-<div class="line"><span class="lineno">   34</span>      <span class="keywordtype">double</span> averageCycleTime = ((double)timeElapsed) / ((double)<a class="code hl_variable" href="CycleTimer_8h.html#afe5d4021405adb70aa4a916d05632c05">MAX_CYCLES</a>); </div>
-<div class="line"><span class="lineno">   35</span>      Serial.print(<a class="code hl_variable" href="classCycleTimer.html#a59ae7d0a583b55e969ce5352d1419567">_timerName</a>); Serial.print(<span class="stringliteral">&quot;: &quot;</span>); Serial.println(averageCycleTime);</div>
-<div class="line"><span class="lineno">   36</span> </div>
-<div class="line"><span class="lineno">   37</span>      <a class="code hl_function" href="classCycleTimer.html#af9e34e9ae6c3dd3d66bfbfd02fa01c3e">ResetTimer</a>();</div>
-<div class="line"><span class="lineno">   38</span>    }</div>
-<div class="line"><span class="lineno">   39</span>  }</div>
+<div class="line"><span class="lineno">   29</span>      int64_t timeEnd = esp_timer_get_time();</div>
+<div class="line"><span class="lineno">   30</span>      int64_t timeElapsed = timeEnd - <a class="code hl_variable" href="classCycleTimer.html#a6397e279a5cacd5ac98924de1e402aa3">_timeFirst</a>;</div>
+<div class="line"><span class="lineno">   31</span>              </div>
+<div class="line"><span class="lineno">   32</span>      <span class="keywordtype">float</span> averageCycleTime = float(timeElapsed) / <a class="code hl_variable" href="CycleTimer_8h.html#afe5d4021405adb70aa4a916d05632c05">MAX_CYCLES</a>;</div>
+<div class="line"><span class="lineno">   33</span>      <a class="code hl_variable" href="classCycleTimer.html#a3973cee4f0e37253354e43a28c7ec900">_rtOutput</a>.<a class="code hl_function" href="classRTDebugOutput.html#a5af3bb9ea5c877fe34db54b41c2f9f81">offerData</a>({ averageCycleTime });</div>
+<div class="line"><span class="lineno">   34</span> </div>
+<div class="line"><span class="lineno">   35</span>      <a class="code hl_function" href="classCycleTimer.html#af9e34e9ae6c3dd3d66bfbfd02fa01c3e">ResetTimer</a>();</div>
+<div class="line"><span class="lineno">   36</span>    }</div>
+<div class="line"><span class="lineno">   37</span>  }</div>
 <div class="ttc" id="aCycleTimer_8h_html_afe5d4021405adb70aa4a916d05632c05"><div class="ttname"><a href="CycleTimer_8h.html#afe5d4021405adb70aa4a916d05632c05">MAX_CYCLES</a></div><div class="ttdeci">static const int MAX_CYCLES</div><div class="ttdef"><b>Definition:</b> <a href="CycleTimer_8h_source.html#l00006">CycleTimer.h:6</a></div></div>
 <div class="ttc" id="aclassCycleTimer_html_a1a84fb6d54e411225b327f29b576a441"><div class="ttname"><a href="classCycleTimer.html#a1a84fb6d54e411225b327f29b576a441">CycleTimer::_cycleCount</a></div><div class="ttdeci">unsigned int _cycleCount</div><div class="ttdef"><b>Definition:</b> <a href="CycleTimer_8h_source.html#l00012">CycleTimer.h:12</a></div></div>
-<div class="ttc" id="aclassCycleTimer_html_adb6590d16759b682d994d239ef132b4a"><div class="ttname"><a href="classCycleTimer.html#adb6590d16759b682d994d239ef132b4a">CycleTimer::_timeFirst</a></div><div class="ttdeci">unsigned long _timeFirst</div><div class="ttdef"><b>Definition:</b> <a href="CycleTimer_8h_source.html#l00011">CycleTimer.h:11</a></div></div>
+<div class="ttc" id="aclassCycleTimer_html_a6397e279a5cacd5ac98924de1e402aa3"><div class="ttname"><a href="classCycleTimer.html#a6397e279a5cacd5ac98924de1e402aa3">CycleTimer::_timeFirst</a></div><div class="ttdeci">int64_t _timeFirst</div><div class="ttdef"><b>Definition:</b> <a href="CycleTimer_8h_source.html#l00011">CycleTimer.h:11</a></div></div>
+<div class="ttc" id="aclassRTDebugOutput_html_a5af3bb9ea5c877fe34db54b41c2f9f81"><div class="ttname"><a href="classRTDebugOutput.html#a5af3bb9ea5c877fe34db54b41c2f9f81">RTDebugOutput::offerData</a></div><div class="ttdeci">void offerData(std::array&lt; TVALUE, NVALS &gt; values)</div><div class="ttdef"><b>Definition:</b> <a href="RTDebugOutput_8h_source.html#l00020">RTDebugOutput.h:20</a></div></div>
 </div><!-- fragment --><div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
 <div class="center"><img src="classCycleTimer_a5f96d14fae8bac80580841ca6a1f5b0d_cgraph.png" border="0" usemap="#aclassCycleTimer_a5f96d14fae8bac80580841ca6a1f5b0d_cgraph" alt=""/></div>
 <map name="aclassCycleTimer_a5f96d14fae8bac80580841ca6a1f5b0d_cgraph" id="aclassCycleTimer_a5f96d14fae8bac80580841ca6a1f5b0d_cgraph">
-<area shape="rect" title=" " alt="" coords="5,5,132,31"/>
-<area shape="rect" href="classCycleTimer.html#af9e34e9ae6c3dd3d66bfbfd02fa01c3e" title=" " alt="" coords="180,5,340,31"/>
+<area shape="rect" title=" " alt="" coords="5,31,132,56"/>
+<area shape="rect" href="classRTDebugOutput.html#a5af3bb9ea5c877fe34db54b41c2f9f81" title=" " alt="" coords="180,5,353,31"/>
+<area shape="rect" href="classCycleTimer.html#af9e34e9ae6c3dd3d66bfbfd02fa01c3e" title=" " alt="" coords="187,55,347,80"/>
 </map>
 </div>
 
@@ -234,7 +227,7 @@ Here is the call graph for this function:</div>
 
 <p class="definition">Definition at line <a class="el" href="CycleTimer_8h_source.html#l00021">21</a> of file <a class="el" href="CycleTimer_8h_source.html">CycleTimer.h</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">   21</span>                    {</div>
-<div class="line"><span class="lineno">   22</span>    <a class="code hl_variable" href="classCycleTimer.html#adb6590d16759b682d994d239ef132b4a">_timeFirst</a> = esp_timer_get_time();<span class="comment">//micros();</span></div>
+<div class="line"><span class="lineno">   22</span>    <a class="code hl_variable" href="classCycleTimer.html#a6397e279a5cacd5ac98924de1e402aa3">_timeFirst</a> = esp_timer_get_time();</div>
 <div class="line"><span class="lineno">   23</span>    <a class="code hl_variable" href="classCycleTimer.html#a1a84fb6d54e411225b327f29b576a441">_cycleCount</a> = 0;</div>
 <div class="line"><span class="lineno">   24</span>  }</div>
 </div><!-- fragment --><div class="dynheader">
@@ -242,9 +235,8 @@ Here is the caller graph for this function:</div>
 <div class="dyncontent">
 <div class="center"><img src="classCycleTimer_af9e34e9ae6c3dd3d66bfbfd02fa01c3e_icgraph.png" border="0" usemap="#aclassCycleTimer_af9e34e9ae6c3dd3d66bfbfd02fa01c3e_icgraph" alt=""/></div>
 <map name="aclassCycleTimer_af9e34e9ae6c3dd3d66bfbfd02fa01c3e_icgraph" id="aclassCycleTimer_af9e34e9ae6c3dd3d66bfbfd02fa01c3e_icgraph">
-<area shape="rect" title=" " alt="" coords="212,31,372,56"/>
-<area shape="rect" href="classCycleTimer.html#a5f96d14fae8bac80580841ca6a1f5b0d" title=" " alt="" coords="21,5,148,31"/>
-<area shape="rect" href="classCycleTimer.html#a44f50f3de5cdd8f2226364f679a54c65" title=" " alt="" coords="5,55,164,80"/>
+<area shape="rect" title=" " alt="" coords="180,5,340,31"/>
+<area shape="rect" href="classCycleTimer.html#a5f96d14fae8bac80580841ca6a1f5b0d" title=" " alt="" coords="5,5,132,31"/>
 </map>
 </div>
 
@@ -275,8 +267,8 @@ Here is the caller graph for this function:</div>
 
 </div>
 </div>
-<a id="adb6590d16759b682d994d239ef132b4a" name="adb6590d16759b682d994d239ef132b4a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adb6590d16759b682d994d239ef132b4a">&#9670;&#160;</a></span>_timeFirst</h2>
+<a id="a3973cee4f0e37253354e43a28c7ec900" name="a3973cee4f0e37253354e43a28c7ec900"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3973cee4f0e37253354e43a28c7ec900">&#9670;&#160;</a></span>_rtOutput</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -285,31 +277,7 @@ Here is the caller graph for this function:</div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">unsigned long CycleTimer::_timeFirst</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="CycleTimer_8h_source.html#l00011">11</a> of file <a class="el" href="CycleTimer_8h_source.html">CycleTimer.h</a>.</p>
-
-</div>
-</div>
-<a id="a59ae7d0a583b55e969ce5352d1419567" name="a59ae7d0a583b55e969ce5352d1419567"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a59ae7d0a583b55e969ce5352d1419567">&#9670;&#160;</a></span>_timerName</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">String CycleTimer::_timerName</td>
+          <td class="memname"><a class="el" href="classRTDebugOutput.html">RTDebugOutput</a>&lt;float, 1&gt; CycleTimer::_rtOutput</td>
         </tr>
       </table>
   </td>
@@ -320,6 +288,30 @@ Here is the caller graph for this function:</div>
 </div><div class="memdoc">
 
 <p class="definition">Definition at line <a class="el" href="CycleTimer_8h_source.html#l00010">10</a> of file <a class="el" href="CycleTimer_8h_source.html">CycleTimer.h</a>.</p>
+
+</div>
+</div>
+<a id="a6397e279a5cacd5ac98924de1e402aa3" name="a6397e279a5cacd5ac98924de1e402aa3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6397e279a5cacd5ac98924de1e402aa3">&#9670;&#160;</a></span>_timeFirst</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int64_t CycleTimer::_timeFirst</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="CycleTimer_8h_source.html#l00011">11</a> of file <a class="el" href="CycleTimer_8h_source.html">CycleTimer.h</a>.</p>
 
 </div>
 </div>

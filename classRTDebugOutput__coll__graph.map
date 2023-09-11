@@ -1,7 +1,5 @@
-<map id="RTDebugOutput&lt; TVALUE, NVALS &gt;" name="RTDebugOutput&lt; TVALUE, NVALS &gt;">
-<area shape="rect" id="node1" title=" " alt="" coords="253,108,436,148"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,5,145,31"/>
-<area shape="rect" id="node3" title=" " alt="" coords="169,5,328,31"/>
-<area shape="rect" id="node4" title=" " alt="" coords="353,5,529,31"/>
-<area shape="rect" id="node5" title=" " alt="" coords="553,5,600,31"/>
+<map id="RTDebugOutput&lt; TVALUE, NVALS, FLOAT_PRECISION &gt;" name="RTDebugOutput&lt; TVALUE, NVALS, FLOAT_PRECISION &gt;">
+<area shape="rect" id="node1" title=" " alt="" coords="36,93,247,133"/>
+<area shape="rect" id="node2" href="$classQueueHandle__t.html" title=" " alt="" coords="5,5,117,31"/>
+<area shape="rect" id="node3" title=" " alt="" coords="142,5,301,31"/>
 </map>
