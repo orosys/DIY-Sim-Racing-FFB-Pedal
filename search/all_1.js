@@ -8,5 +8,6 @@ var searchData=
   ['absoscillation_2eh_5',['ABSOscillation.h',['../ABSOscillation_8h.html',1,'']]],
   ['adc_6',['ADC',['../LoadCell_8cpp.html#a69012c93d090a7bd675a327d08fad6a9',1,'LoadCell.cpp']]],
   ['adc_5fclock_5fmhz_7',['ADC_CLOCK_MHZ',['../LoadCell_8cpp.html#ab87b6f0a9d90ea68987f71d0b3860e54',1,'LoadCell.cpp']]],
-  ['adc_5fvref_8',['ADC_VREF',['../LoadCell_8cpp.html#ada119110b2eacdba43c61972c46963e9',1,'LoadCell.cpp']]]
+  ['adc_5fsample_5frate_8',['ADC_SAMPLE_RATE',['../Main_8h.html#a795571e675fa978442745d27f0ba2b2a',1,'Main.h']]],
+  ['adc_5fvref_9',['ADC_VREF',['../LoadCell_8cpp.html#ada119110b2eacdba43c61972c46963e9',1,'LoadCell.cpp']]]
 ];
