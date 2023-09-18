@@ -243,7 +243,7 @@ $(function() {
 <div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span> </div>
 <div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>#include &quot;StepperWithLimits.h&quot;</div>
 <div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>StepperWithLimits* stepper = NULL;</div>
-<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>static const int32_t MIN_STEPS = 5;</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>//static const int32_t MIN_STEPS = 5;</div>
 <div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span> </div>
 <div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>#include &quot;StepperMovementStrategy.h&quot;</div>
 <div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span> </div>
@@ -622,9 +622,9 @@ $(function() {
 <div class="line"><a id="l00544" name="l00544"></a><span class="lineno">  544</span> </div>
 <div class="line"><a id="l00545" name="l00545"></a><span class="lineno">  545</span>    // get current stepper position right before sheduling a new move</div>
 <div class="line"><a id="l00546" name="l00546"></a><span class="lineno">  546</span>    //int32_t stepperPosCurrent = stepper-&gt;getCurrentPositionSteps();</div>
-<div class="line"><a id="l00547" name="l00547"></a><span class="lineno">  547</span>    int32_t stepperPosCurrent = stepper-&gt;getTargetPositionSteps();</div>
-<div class="line"><a id="l00548" name="l00548"></a><span class="lineno">  548</span>    int32_t movement = abs(stepperPosCurrent - Position_Next);</div>
-<div class="line"><a id="l00549" name="l00549"></a><span class="lineno">  549</span>    if (movement &gt; MIN_STEPS)</div>
+<div class="line"><a id="l00547" name="l00547"></a><span class="lineno">  547</span>    //int32_t stepperPosCurrent = stepper-&gt;getTargetPositionSteps();</div>
+<div class="line"><a id="l00548" name="l00548"></a><span class="lineno">  548</span>    //int32_t movement = abs(stepperPosCurrent - Position_Next);</div>
+<div class="line"><a id="l00549" name="l00549"></a><span class="lineno">  549</span>    //if (movement &gt; MIN_STEPS)</div>
 <div class="line"><a id="l00550" name="l00550"></a><span class="lineno">  550</span>    {</div>
 <div class="line"><a id="l00551" name="l00551"></a><span class="lineno">  551</span>      stepper-&gt;moveTo(Position_Next, false);</div>
 <div class="line"><a id="l00552" name="l00552"></a><span class="lineno">  552</span>    }</div>

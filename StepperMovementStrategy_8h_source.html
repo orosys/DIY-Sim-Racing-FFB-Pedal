@@ -144,214 +144,225 @@ $(function() {
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="comment">//turn the PID on</span></div>
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    myPID.SetTunings(<a class="code hl_variable" href="StepperMovementStrategy_8h.html#afd070d90e3f8bb3e9bb9c6dff310503b">Kp</a>, <a class="code hl_variable" href="StepperMovementStrategy_8h.html#aad5977a9e83736178f3b724a1d228652">Ki</a>, <a class="code hl_variable" href="StepperMovementStrategy_8h.html#ab9e6bbb0361dc98bc2f5399d014c6c01">Kd</a>);</div>
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    myPID.SetMode(myPID.Control::automatic);</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <a class="code hl_variable" href="StepperMovementStrategy_8h.html#a378de9cfb2041f4a60cabf4d77e79e6e">pidWasInitialized</a> = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    myPID.SetSampleTimeUs(<a class="code hl_define" href="Main_8h.html#a04dac192055253ed6a6c3d3b653dc356">PUT_TARGET_CYCLE_TIME_IN_US</a>);</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    myPID.SetOutputLimits(-1.0,0.0);</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <span class="comment">//myPID.SetAntiWindupMode(myPID.iAwMode::iAwCondition);</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    myPID.SetAntiWindupMode(myPID.iAwMode::iAwClamp);</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="comment">//myPID.SetAntiWindupMode(myPID.iAwMode::iAwOff);</span></div>
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    myPID.SetTunings(config_st-&gt;<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#a73eda7d15ccb63e6558a0549428049f9">PID_p_gain</a>, config_st-&gt;<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#a747c38aae6133b6cdea1921867be0a1e">PID_i_gain</a>, config_st-&gt;<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#ad18927d606b6f756d32ff1ee500b8468">PID_d_gain</a>);</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>  }</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>  <span class="keywordtype">float</span> loadCellTargetKg = forceCurve-&gt;<a class="code hl_function" href="classForceCurve__Interpolated.html#a765eedafeea4e8688e418b35cda4f840">EvalForceCubicSpline</a>(config_st, calc_st, stepperPosFraction);</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>  loadCellTargetKg -=absForceOffset_fl32;</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>  </div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>  <span class="comment">// ToDO</span></div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>  <span class="comment">// - Min and Max force need to be identified from forceCurve-&gt;forceAtPosition() as they migh differ from calc_st.Force_Min &amp; calc_st.Force_Max</span></div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>  <span class="comment">// - model predictive control, see e.g. https://www.researchgate.net/profile/Mohamed-Mourad-Lafifi/post/Model-Predictive-Control-examples/attachment/60202ac761fb570001029f61/AS%3A988637009301508%401612720839656/download/An+Introduction+to+Model-based+Predictive+Control+%28MPC%29.pdf</span></div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>  <span class="comment">//    https://www.youtube.com/watch?v=XaD8Lngfkzk</span></div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>  <span class="comment">//    https://github.com/pronenewbits/Arduino_Constrained_MPC_Library</span></div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  </div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>  <span class="comment">// clip to min &amp; max force to prevent Ki to overflow</span></div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>  <span class="keywordtype">float</span> loadCellReadingKg_clip = constrain(loadCellReadingKg, calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958">Force_Min</a>, calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#a1c2f7c9db353e05269035de94cd82aba">Force_Max</a>);</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>  </div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>  <span class="comment">// normalize input &amp; setpoint</span></div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>  <span class="comment">//Setpoint = (loadCellReadingKg_clip - calc_st.Force_Min) / calc_st.Force_Range;</span></div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>  <span class="comment">//Input = (loadCellTargetKg - calc_st.Force_Min) / calc_st.Force_Range; </span></div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>  <a class="code hl_variable" href="StepperMovementStrategy_8h.html#a08c9249c57b274375c6fe56a2dac7ac1">Setpoint</a> = (loadCellTargetKg - calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958">Force_Min</a>) / calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">Force_Range</a>;</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>  <a class="code hl_variable" href="StepperMovementStrategy_8h.html#a651f98f57843e7ac1d346db755aefb98">Input</a> = (loadCellReadingKg_clip - calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958">Force_Min</a>) / calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">Force_Range</a>; </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    <a class="code hl_variable" href="StepperMovementStrategy_8h.html#a378de9cfb2041f4a60cabf4d77e79e6e">pidWasInitialized</a> = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    myPID.SetSampleTimeUs(<a class="code hl_define" href="Main_8h.html#a04dac192055253ed6a6c3d3b653dc356">PUT_TARGET_CYCLE_TIME_IN_US</a>);</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    myPID.SetOutputLimits(-1.0,0.0);</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    myPID.SetTunings(config_st-&gt;<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#a73eda7d15ccb63e6558a0549428049f9">PID_p_gain</a>, config_st-&gt;<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#a747c38aae6133b6cdea1921867be0a1e">PID_i_gain</a>, config_st-&gt;<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#ad18927d606b6f756d32ff1ee500b8468">PID_d_gain</a>);</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>  }</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>  <span class="keywordtype">float</span> loadCellTargetKg = forceCurve-&gt;<a class="code hl_function" href="classForceCurve__Interpolated.html#a765eedafeea4e8688e418b35cda4f840">EvalForceCubicSpline</a>(config_st, calc_st, stepperPosFraction);</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>  loadCellTargetKg -=absForceOffset_fl32;</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>  </div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  <span class="comment">// ToDO</span></div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  <span class="comment">// - Min and Max force need to be identified from forceCurve-&gt;forceAtPosition() as they migh differ from calc_st.Force_Min &amp; calc_st.Force_Max</span></div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>  <span class="comment">// - model predictive control, see e.g. https://www.researchgate.net/profile/Mohamed-Mourad-Lafifi/post/Model-Predictive-Control-examples/attachment/60202ac761fb570001029f61/AS%3A988637009301508%401612720839656/download/An+Introduction+to+Model-based+Predictive+Control+%28MPC%29.pdf</span></div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>  <span class="comment">//    https://www.youtube.com/watch?v=XaD8Lngfkzk</span></div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>  <span class="comment">//    https://github.com/pronenewbits/Arduino_Constrained_MPC_Library</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>  </div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>  <span class="comment">// clip to min &amp; max force to prevent Ki to overflow</span></div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>  <span class="keywordtype">float</span> loadCellReadingKg_clip = constrain(loadCellReadingKg, calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958">Force_Min</a>, calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#a1c2f7c9db353e05269035de94cd82aba">Force_Max</a>);</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>  <span class="keywordtype">float</span> loadCellTargetKg_clip = constrain(loadCellTargetKg, calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958">Force_Min</a>, calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#a1c2f7c9db353e05269035de94cd82aba">Force_Max</a>);</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
 <div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>  <span class="comment">// compute PID output</span></div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>  myPID.Compute();</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>  </div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>  <span class="comment">// unnormalize output</span></div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>  int32_t posStepperNew = -1.0 * <a class="code hl_variable" href="StepperMovementStrategy_8h.html#acda7a5c6dbdb658e7ce3704bc39e7eb6">Output</a> * (calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#acec2fd87af191ca72ecea92b5450274e">stepperPosMax</a> - calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#aa158b70f0328e458133519d9acbbf267">stepperPosMin</a>);<span class="comment">//stepper-&gt;getTravelSteps();</span></div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>  posStepperNew += calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#aa158b70f0328e458133519d9acbbf267">stepperPosMin</a>;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>  <span class="comment">// normalize input &amp; setpoint</span></div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>  <span class="comment">//Setpoint = (loadCellReadingKg_clip - calc_st.Force_Min) / calc_st.Force_Range;</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>  <span class="comment">//Input = (loadCellTargetKg - calc_st.Force_Min) / calc_st.Force_Range; </span></div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>  <a class="code hl_variable" href="StepperMovementStrategy_8h.html#a08c9249c57b274375c6fe56a2dac7ac1">Setpoint</a> = (loadCellTargetKg_clip - calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958">Force_Min</a>) / calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">Force_Range</a>;</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>  <a class="code hl_variable" href="StepperMovementStrategy_8h.html#a651f98f57843e7ac1d346db755aefb98">Input</a> = (loadCellReadingKg_clip - calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958">Force_Min</a>) / calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">Force_Range</a>; </div>
 <div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>  <span class="comment">//#define PLOT_PID_VALUES</span></div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span><span class="preprocessor">  #ifdef PLOT_PID_VALUES</span></div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    <span class="keyword">static</span> <a class="code hl_class" href="classRTDebugOutput.html">RTDebugOutput&lt;float, 8&gt;</a> rtDebugFilter({ <span class="stringliteral">&quot;stepperPosFraction&quot;</span>, <span class="stringliteral">&quot;loadCellTargetKg&quot;</span>, <span class="stringliteral">&quot;loadCellReadingKg&quot;</span>, <span class="stringliteral">&quot;loadCellReadingKg_clip&quot;</span>, <span class="stringliteral">&quot;Setpoint&quot;</span>, <span class="stringliteral">&quot;Input&quot;</span>, <span class="stringliteral">&quot;Output&quot;</span>, <span class="stringliteral">&quot;posStepperNew&quot;</span>});</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    rtDebugFilter.<a class="code hl_function" href="classRTDebugOutput.html#a5af3bb9ea5c877fe34db54b41c2f9f81">offerData</a>({ stepperPosFraction, loadCellTargetKg, loadCellReadingKg, loadCellReadingKg_clip, <a class="code hl_variable" href="StepperMovementStrategy_8h.html#a08c9249c57b274375c6fe56a2dac7ac1">Setpoint</a>, <a class="code hl_variable" href="StepperMovementStrategy_8h.html#a651f98f57843e7ac1d346db755aefb98">Input</a>, <a class="code hl_variable" href="StepperMovementStrategy_8h.html#acda7a5c6dbdb658e7ce3704bc39e7eb6">Output</a>, posStepperNew});       </div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="preprocessor">  #endif</span></div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>  </div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>  <span class="comment">// compute PID output</span></div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>  myPID.Compute();</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>  </div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>  <span class="comment">// unnormalize output</span></div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>  <span class="comment">//int32_t posStepperNew = -1.0 * Output * (float)(calc_st-&gt;stepperPosMax - calc_st-&gt;stepperPosMin);//stepper-&gt;getTravelSteps();</span></div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>  <span class="comment">//posStepperNew += calc_st-&gt;stepperPosMin;</span></div>
 <div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>  <span class="keywordflow">return</span> posStepperNew;</div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>}</div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>  <span class="keywordtype">float</span> posStepperNew_fl32 = -1.0 * <a class="code hl_variable" href="StepperMovementStrategy_8h.html#acda7a5c6dbdb658e7ce3704bc39e7eb6">Output</a> * (float)(calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#acec2fd87af191ca72ecea92b5450274e">stepperPosMax</a> - calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#aa158b70f0328e458133519d9acbbf267">stepperPosMin</a>);<span class="comment">//stepper-&gt;getTravelSteps();</span></div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>  posStepperNew_fl32 += calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#aa158b70f0328e458133519d9acbbf267">stepperPosMin</a>;</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>  int32_t posStepperNew = floor(posStepperNew_fl32);</div>
 <div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span> </div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno"><a class="line" href="StepperMovementStrategy_8h.html#a97b4fb21147fbe5fab1d571f341b61f9">  118</a></span>int32_t <a class="code hl_function" href="StepperMovementStrategy_8h.html#a97b4fb21147fbe5fab1d571f341b61f9">mpcBasedMove</a>(<span class="keywordtype">float</span> loadCellReadingKg, <span class="keywordtype">float</span> stepperPosFraction, <a class="code hl_class" href="classStepperWithLimits.html">StepperWithLimits</a>* stepper, <a class="code hl_class" href="classForceCurve__Interpolated.html">ForceCurve_Interpolated</a>* forceCurve, <span class="keyword">const</span> <a class="code hl_struct" href="structDAP__calculationVariables__st.html">DAP_calculationVariables_st</a>* calc_st, <a class="code hl_struct" href="structDAP__config__st.html">DAP_config_st</a>* config_st, <span class="keywordtype">float</span> absForceOffset_fl32) </div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>{</div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span> </div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>  <span class="comment">//#define PLOT_PID_VALUES</span></div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span><span class="preprocessor">  #ifdef PLOT_PID_VALUES</span></div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>    <span class="keyword">static</span> <a class="code hl_class" href="classRTDebugOutput.html">RTDebugOutput&lt;float, 8&gt;</a> rtDebugFilter({ <span class="stringliteral">&quot;stepperPosFraction&quot;</span>, <span class="stringliteral">&quot;loadCellTargetKg&quot;</span>, <span class="stringliteral">&quot;loadCellReadingKg&quot;</span>, <span class="stringliteral">&quot;loadCellReadingKg_clip&quot;</span>, <span class="stringliteral">&quot;Setpoint&quot;</span>, <span class="stringliteral">&quot;Input&quot;</span>, <span class="stringliteral">&quot;Output&quot;</span>, <span class="stringliteral">&quot;posStepperNew&quot;</span>});</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    rtDebugFilter.<a class="code hl_function" href="classRTDebugOutput.html#a5af3bb9ea5c877fe34db54b41c2f9f81">offerData</a>({ stepperPosFraction, loadCellTargetKg, loadCellReadingKg, loadCellReadingKg_clip, <a class="code hl_variable" href="StepperMovementStrategy_8h.html#a08c9249c57b274375c6fe56a2dac7ac1">Setpoint</a>, <a class="code hl_variable" href="StepperMovementStrategy_8h.html#a651f98f57843e7ac1d346db755aefb98">Input</a>, <a class="code hl_variable" href="StepperMovementStrategy_8h.html#acda7a5c6dbdb658e7ce3704bc39e7eb6">Output</a>, posStepperNew});       </div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span><span class="preprocessor">  #endif</span></div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>  </div>
 <div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span> </div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>  <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">float</span> MOVE_MM_FOR_1KG = 3.0;</div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>  <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">float</span> MOVE_STEPS_FOR_1KG = (MOVE_MM_FOR_1KG / <a class="code hl_variable" href="PedalGeometry_8h.html#a6393674b6c2a8915f78b5bca3a6651cf">TRAVEL_PER_ROTATION_IN_MM</a>) * <a class="code hl_variable" href="StepperWithLimits_8h.html#a5e757657a6f06254eb1446089d6444a6">STEPS_PER_MOTOR_REVOLUTION</a>;</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>  <span class="keywordflow">return</span> posStepperNew;</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>}</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
 <div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span> </div>
 <div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
 <div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span> </div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>  <span class="comment">// get target force at current location</span></div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>  <span class="keywordtype">float</span> loadCellTargetKg = forceCurve-&gt;<a class="code hl_function" href="classForceCurve__Interpolated.html#a765eedafeea4e8688e418b35cda4f840">EvalForceCubicSpline</a>(config_st, calc_st, stepperPosFraction);</div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>  loadCellTargetKg -=absForceOffset_fl32;</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno"><a class="line" href="StepperMovementStrategy_8h.html#a97b4fb21147fbe5fab1d571f341b61f9">  129</a></span>int32_t <a class="code hl_function" href="StepperMovementStrategy_8h.html#a97b4fb21147fbe5fab1d571f341b61f9">mpcBasedMove</a>(<span class="keywordtype">float</span> loadCellReadingKg, <span class="keywordtype">float</span> stepperPosFraction, <a class="code hl_class" href="classStepperWithLimits.html">StepperWithLimits</a>* stepper, <a class="code hl_class" href="classForceCurve__Interpolated.html">ForceCurve_Interpolated</a>* forceCurve, <span class="keyword">const</span> <a class="code hl_struct" href="structDAP__calculationVariables__st.html">DAP_calculationVariables_st</a>* calc_st, <a class="code hl_struct" href="structDAP__config__st.html">DAP_config_st</a>* config_st, <span class="keywordtype">float</span> absForceOffset_fl32) </div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>{</div>
 <div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span> </div>
-<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>  </div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span> </div>
 <div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span> </div>
-<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>  <span class="comment">// get loadcell reading</span></div>
-<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>  <span class="keywordtype">float</span> loadCellReadingKg_clip = constrain(loadCellReadingKg, calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958">Force_Min</a>, calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#a1c2f7c9db353e05269035de94cd82aba">Force_Max</a>);</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>  <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">float</span> MOVE_MM_FOR_1KG = 3.0;</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>  <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">float</span> MOVE_STEPS_FOR_1KG = (MOVE_MM_FOR_1KG / <a class="code hl_variable" href="PedalGeometry_8h.html#a6393674b6c2a8915f78b5bca3a6651cf">TRAVEL_PER_ROTATION_IN_MM</a>) * <a class="code hl_variable" href="StepperWithLimits_8h.html#a5e757657a6f06254eb1446089d6444a6">STEPS_PER_MOTOR_REVOLUTION</a>;</div>
 <div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span> </div>
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>  </div>
-<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>  </div>
-<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>  <span class="comment">// if target force at location is lower than loadcell reading --&gt; move towards the foot k_f * n_steps</span></div>
-<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span> </div>
-<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>  <span class="comment">// Take into account system constraints like stepper rpm &amp; acceleration</span></div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span> </div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span> </div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>  <span class="comment">// get target force at current location</span></div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>  <span class="keywordtype">float</span> loadCellTargetKg = forceCurve-&gt;<a class="code hl_function" href="classForceCurve__Interpolated.html#a765eedafeea4e8688e418b35cda4f840">EvalForceCubicSpline</a>(config_st, calc_st, stepperPosFraction);</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>  loadCellTargetKg -=absForceOffset_fl32;</div>
 <div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span> </div>
 <div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>  </div>
 <div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span> </div>
-<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>  <span class="comment">// if target force at location is lower than loadcell reading --&gt; move away from the foot -k_f * n_steps</span></div>
-<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span> </div>
-<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>  </div>
-<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span> </div>
-<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>  <span class="comment">// predict target force at new location and compare to predicted force --&gt; compute cost matrix</span></div>
-<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span> </div>
-<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>  </div>
-<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>  </div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>  <span class="comment">// get loadcell reading</span></div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>  <span class="keywordtype">float</span> loadCellReadingKg_clip = constrain(loadCellReadingKg, calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958">Force_Min</a>, calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#a1c2f7c9db353e05269035de94cd82aba">Force_Max</a>);</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span> </div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>  </div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>  </div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>  <span class="comment">// if target force at location is lower than loadcell reading --&gt; move towards the foot k_f * n_steps</span></div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span> </div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>  <span class="comment">// Take into account system constraints like stepper rpm &amp; acceleration</span></div>
 <div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span> </div>
 <div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>  </div>
 <div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span> </div>
-<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>  </div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>  <span class="comment">// if target force at location is lower than loadcell reading --&gt; move away from the foot -k_f * n_steps</span></div>
 <div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span> </div>
-<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>  <span class="comment">// e_k = r^2 = (F_lc - k * (delta_x_0) - F_t(x_0 + delta_x_0))^2</span></div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>  </div>
 <div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span> </div>
-<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>  <span class="comment">// r: force residue</span></div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>  <span class="comment">// predict target force at new location and compare to predicted force --&gt; compute cost matrix</span></div>
 <div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span> </div>
-<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>  <span class="comment">// e: cost</span></div>
-<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span> </div>
-<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>  <span class="comment">// F_lc: current loadcell measurement</span></div>
-<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span> </div>
-<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>  <span class="comment">// k: sping stiffness of the foot</span></div>
-<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span> </div>
-<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>  <span class="comment">// x_0: current stepper position</span></div>
-<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span> </div>
-<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>  <span class="comment">// x_1: next stepper pos</span></div>
-<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span> </div>
-<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>  <span class="comment">// delta_x_0 = x_1 - x_0: step update at time step 0</span></div>
-<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span> </div>
-<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>  <span class="comment">// F_t(x): target force at location</span></div>
-<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span> </div>
-<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>  </div>
-<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span> </div>
-<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>  </div>
-<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span> </div>
-<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>  <span class="comment">// minimize e with x_1</span></div>
-<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span> </div>
-<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>  <span class="comment">// d[e(delta_x_0)] / d[delta_x_0] == 0</span></div>
-<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span> </div>
-<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>  </div>
-<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span> </div>
-<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>  <span class="comment">// d[e] / d[delta_x_0] = d[e] / d[r] * d[r] / d[delta_x_0]</span></div>
-<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span> </div>
-<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>  <span class="comment">// d[e] / d[r] = 2 * r</span></div>
-<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span> </div>
-<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>  </div>
-<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span> </div>
-<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>  <span class="comment">// d[r] / d[delta_x_0] = d[F_lc - k * (delta_x_0) - F_t(x_0 + delta_x_0)] = -k  - d[F_t]/d[delta_x_0]</span></div>
-<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span> </div>
-<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>  </div>
-<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span> </div>
-<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>  </div>
-<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span> </div>
-<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>  <span class="comment">// MPC: sum up over planing horizon and optimize costs</span></div>
-<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span> </div>
-<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>  <span class="comment">// take only the first control value &amp; repeat in the next cycle</span></div>
-<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span> </div>
-<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>  <span class="comment">// constraint |delta_x_0| &lt; max step rate</span></div>
-<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span> </div>
-<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>  </div>
-<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span> </div>
-<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>  <span class="comment">// l = sum_k( e_k(delta_x_k, x_0) )</span></div>
-<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span> </div>
-<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>  <span class="comment">// where k = [0, 1, ..., N]</span></div>
-<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span> </div>
-<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>  </div>
-<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>}</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>  </div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>  </div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span> </div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>  </div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span> </div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>  </div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span> </div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>  <span class="comment">// e_k = r^2 = (F_lc - k * (delta_x_0) - F_t(x_0 + delta_x_0))^2</span></div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span> </div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>  <span class="comment">// r: force residue</span></div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span> </div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>  <span class="comment">// e: cost</span></div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span> </div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>  <span class="comment">// F_lc: current loadcell measurement</span></div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span> </div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>  <span class="comment">// k: sping stiffness of the foot</span></div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span> </div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>  <span class="comment">// x_0: current stepper position</span></div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span> </div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>  <span class="comment">// x_1: next stepper pos</span></div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span> </div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>  <span class="comment">// delta_x_0 = x_1 - x_0: step update at time step 0</span></div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span> </div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>  <span class="comment">// F_t(x): target force at location</span></div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span> </div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>  </div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span> </div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>  </div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span> </div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>  <span class="comment">// minimize e with x_1</span></div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span> </div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>  <span class="comment">// d[e(delta_x_0)] / d[delta_x_0] == 0</span></div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span> </div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>  </div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span> </div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>  <span class="comment">// d[e] / d[delta_x_0] = d[e] / d[r] * d[r] / d[delta_x_0]</span></div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span> </div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>  <span class="comment">// d[e] / d[r] = 2 * r</span></div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span> </div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>  </div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span> </div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>  <span class="comment">// d[r] / d[delta_x_0] = d[F_lc - k * (delta_x_0) - F_t(x_0 + delta_x_0)] = -k  - d[F_t]/d[delta_x_0]</span></div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span> </div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>  </div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span> </div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>  </div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span> </div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>  <span class="comment">// MPC: sum up over planing horizon and optimize costs</span></div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span> </div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>  <span class="comment">// take only the first control value &amp; repeat in the next cycle</span></div>
 <div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span> </div>
-<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span> </div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>  <span class="comment">// constraint |delta_x_0| &lt; max step rate</span></div>
 <div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span> </div>
-<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span><span class="comment">// see https://pidtuner.com</span></div>
-<div class="line"><a id="l00216" name="l00216"></a><span class="lineno"><a class="line" href="StepperMovementStrategy_8h.html#a930e00dcd29fd9a4153d2e96cf2f0dd3">  216</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="StepperMovementStrategy_8h.html#a930e00dcd29fd9a4153d2e96cf2f0dd3">measureStepResponse</a>(<a class="code hl_class" href="classStepperWithLimits.html">StepperWithLimits</a>* stepper, <span class="keyword">const</span> <a class="code hl_struct" href="structDAP__calculationVariables__st.html">DAP_calculationVariables_st</a>* calc_st, <span class="keyword">const</span> <a class="code hl_struct" href="structDAP__config__st.html">DAP_config_st</a>* config_st, <span class="keyword">const</span> <a class="code hl_class" href="classLoadCell__ADS1256.html">LoadCell_ADS1256</a>* loadcell)</div>
-<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>{</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>  </div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span> </div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>  <span class="comment">// l = sum_k( e_k(delta_x_k, x_0) )</span></div>
 <div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span> </div>
-<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>  int32_t currentPos = stepper-&gt;<a class="code hl_function" href="classStepperWithLimits.html#a9b99ba97ab1e2c39165bdbbc4a1cf87c">getCurrentPositionSteps</a>();</div>
-<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>  int32_t minPos = currentPos - dap_calculationVariables_st.stepperPosRange * 0.05;</div>
-<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>  int32_t maxPos = currentPos + dap_calculationVariables_st.stepperPosRange * 0.05;</div>
-<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span> </div>
-<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>  stepper-&gt;<a class="code hl_function" href="classStepperWithLimits.html#afbc22a07418cfeee8055f98b534dc4fd">moveTo</a>(minPos, <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>  <span class="comment">// where k = [0, 1, ..., N]</span></div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span> </div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>  </div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>}</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span> </div>
 <div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span> </div>
-<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>  Serial.println(<span class="stringliteral">&quot;======================================&quot;</span>);</div>
-<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>  Serial.println(<span class="stringliteral">&quot;Start system identification data:&quot;</span>);</div>
-<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span> </div>
-<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>  <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> initialTime = micros();</div>
-<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>  <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> t = micros();</div>
-<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>  <span class="keywordtype">bool</span> targetPosHasBeenSet_b = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>  <span class="keywordtype">float</span> loadcellReading;</div>
-<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span> </div>
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>  int32_t targetPos;</div>
-<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span> </div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>  <span class="keywordflow">for</span> (uint32_t cycleIdx = 0; cycleIdx &lt; 5; cycleIdx++)</div>
-<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>  {</div>
-<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>    <span class="comment">// toogle target position</span></div>
-<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>    <span class="keywordflow">if</span> (cycleIdx % 2 == 0)</div>
-<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>    {</div>
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>      targetPos = maxPos;</div>
-<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>    }</div>
-<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>    <span class="keywordflow">else</span></div>
-<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>    {</div>
-<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>      targetPos = minPos;</div>
-<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>    }</div>
-<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span> </div>
-<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>    targetPos = (int32_t)constrain(targetPos, dap_calculationVariables_st.stepperPosMin, dap_calculationVariables_st.stepperPosMax);</div>
-<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span> </div>
-<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>    <span class="comment">// execute move to target position and meaure system response</span></div>
-<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>    <span class="keywordtype">float</span> currentPos;</div>
-<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>    <span class="keywordflow">for</span> (uint32_t sampleIdx_u32 = 0; sampleIdx_u32 &lt; 2000; sampleIdx_u32++)</div>
-<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>    {</div>
-<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>      <span class="comment">// get loadcell reading</span></div>
-<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>      loadcellReading = loadcell-&gt;<a class="code hl_function" href="classLoadCell__ADS1256.html#ae8d01b4992be881e0d0e94fa8e2ba13c">getReadingKg</a>();</div>
-<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span> </div>
-<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>      <span class="comment">// update time</span></div>
-<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>      t = micros() - initialTime;</div>
-<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span> </div>
-<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>      <span class="comment">// after some time, set target position</span></div>
-<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>      <span class="keywordflow">if</span> (sampleIdx_u32 == 50)</div>
-<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>      {</div>
-<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>        stepper-&gt;<a class="code hl_function" href="classStepperWithLimits.html#afbc22a07418cfeee8055f98b534dc4fd">moveTo</a>(targetPos, <span class="keyword">false</span>);</div>
-<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>      }</div>
-<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span> </div>
-<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>      <span class="comment">// get current position</span></div>
-<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>      currentPos = stepper-&gt;<a class="code hl_function" href="classStepperWithLimits.html#aef91cbf9e5f772215cecfc46977aa7c3">getCurrentPositionFraction</a>();</div>
-<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>      loadcellReading = (loadcellReading - calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958">Force_Min</a>) / calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">Force_Range</a>; </div>
-<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span> </div>
-<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>      <span class="keyword">static</span> <a class="code hl_class" href="classRTDebugOutput.html">RTDebugOutput&lt;float, 3, 9&gt;</a> rtDebugFilter;</div>
-<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>      rtDebugFilter.<a class="code hl_function" href="classRTDebugOutput.html#a5af3bb9ea5c877fe34db54b41c2f9f81">offerData</a>({ ((<span class="keywordtype">float</span>)t) *1e-6 , currentPos,  loadcellReading});   </div>
-<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>    }</div>
-<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>  }</div>
-<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span> </div>
-<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>  Serial.println(<span class="stringliteral">&quot;======================================&quot;</span>);</div>
-<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>  Serial.println(<span class="stringliteral">&quot;End system identification data&quot;</span>);</div>
-<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>}</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span> </div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span><span class="comment">// see https://pidtuner.com</span></div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno"><a class="line" href="StepperMovementStrategy_8h.html#a930e00dcd29fd9a4153d2e96cf2f0dd3">  227</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="StepperMovementStrategy_8h.html#a930e00dcd29fd9a4153d2e96cf2f0dd3">measureStepResponse</a>(<a class="code hl_class" href="classStepperWithLimits.html">StepperWithLimits</a>* stepper, <span class="keyword">const</span> <a class="code hl_struct" href="structDAP__calculationVariables__st.html">DAP_calculationVariables_st</a>* calc_st, <span class="keyword">const</span> <a class="code hl_struct" href="structDAP__config__st.html">DAP_config_st</a>* config_st, <span class="keyword">const</span> <a class="code hl_class" href="classLoadCell__ADS1256.html">LoadCell_ADS1256</a>* loadcell)</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>{</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span> </div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>  int32_t currentPos = stepper-&gt;<a class="code hl_function" href="classStepperWithLimits.html#a9b99ba97ab1e2c39165bdbbc4a1cf87c">getCurrentPositionSteps</a>();</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>  int32_t minPos = currentPos - dap_calculationVariables_st.stepperPosRange * 0.05;</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>  int32_t maxPos = currentPos + dap_calculationVariables_st.stepperPosRange * 0.05;</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span> </div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>  stepper-&gt;<a class="code hl_function" href="classStepperWithLimits.html#afbc22a07418cfeee8055f98b534dc4fd">moveTo</a>(minPos, <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span> </div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>  Serial.println(<span class="stringliteral">&quot;======================================&quot;</span>);</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>  Serial.println(<span class="stringliteral">&quot;Start system identification data:&quot;</span>);</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span> </div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>  <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> initialTime = micros();</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>  <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> t = micros();</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>  <span class="keywordtype">bool</span> targetPosHasBeenSet_b = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>  <span class="keywordtype">float</span> loadcellReading;</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span> </div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>  int32_t targetPos;</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span> </div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>  <span class="keywordflow">for</span> (uint32_t cycleIdx = 0; cycleIdx &lt; 5; cycleIdx++)</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>  {</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>    <span class="comment">// toogle target position</span></div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>    <span class="keywordflow">if</span> (cycleIdx % 2 == 0)</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>    {</div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>      targetPos = maxPos;</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>    }</div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>    <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>    {</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>      targetPos = minPos;</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>    }</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span> </div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>    targetPos = (int32_t)constrain(targetPos, dap_calculationVariables_st.stepperPosMin, dap_calculationVariables_st.stepperPosMax);</div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span> </div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>    <span class="comment">// execute move to target position and meaure system response</span></div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>    <span class="keywordtype">float</span> currentPos;</div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>    <span class="keywordflow">for</span> (uint32_t sampleIdx_u32 = 0; sampleIdx_u32 &lt; 2000; sampleIdx_u32++)</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>    {</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>      <span class="comment">// get loadcell reading</span></div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>      loadcellReading = loadcell-&gt;<a class="code hl_function" href="classLoadCell__ADS1256.html#ae8d01b4992be881e0d0e94fa8e2ba13c">getReadingKg</a>();</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span> </div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>      <span class="comment">// update time</span></div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>      t = micros() - initialTime;</div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span> </div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>      <span class="comment">// after some time, set target position</span></div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>      <span class="keywordflow">if</span> (sampleIdx_u32 == 50)</div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>      {</div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>        stepper-&gt;<a class="code hl_function" href="classStepperWithLimits.html#afbc22a07418cfeee8055f98b534dc4fd">moveTo</a>(targetPos, <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>      }</div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span> </div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>      <span class="comment">// get current position</span></div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>      currentPos = stepper-&gt;<a class="code hl_function" href="classStepperWithLimits.html#aef91cbf9e5f772215cecfc46977aa7c3">getCurrentPositionFraction</a>();</div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>      loadcellReading = (loadcellReading - calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958">Force_Min</a>) / calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">Force_Range</a>; </div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span> </div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>      <span class="keyword">static</span> <a class="code hl_class" href="classRTDebugOutput.html">RTDebugOutput&lt;float, 3, 9&gt;</a> rtDebugFilter;</div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span>      rtDebugFilter.<a class="code hl_function" href="classRTDebugOutput.html#a5af3bb9ea5c877fe34db54b41c2f9f81">offerData</a>({ ((<span class="keywordtype">float</span>)t) *1e-6 , currentPos,  loadcellReading});   </div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span>    }</div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>  }</div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span> </div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>  Serial.println(<span class="stringliteral">&quot;======================================&quot;</span>);</div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>  Serial.println(<span class="stringliteral">&quot;End system identification data&quot;</span>);</div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>}</div>
 <div class="ttc" id="aDiyActivePedal__types_8h_html"><div class="ttname"><a href="DiyActivePedal__types_8h.html">DiyActivePedal_types.h</a></div></div>
 <div class="ttc" id="aMain_8h_html"><div class="ttname"><a href="Main_8h.html">Main.h</a></div></div>
 <div class="ttc" id="aMain_8h_html_a04dac192055253ed6a6c3d3b653dc356"><div class="ttname"><a href="Main_8h.html#a04dac192055253ed6a6c3d3b653dc356">PUT_TARGET_CYCLE_TIME_IN_US</a></div><div class="ttdeci">#define PUT_TARGET_CYCLE_TIME_IN_US</div><div class="ttdef"><b>Definition:</b> <a href="Main_8h_source.html#l00026">Main.h:26</a></div></div>
@@ -361,8 +372,8 @@ $(function() {
 <div class="ttc" id="aStepperMovementStrategy_8h_html_a378de9cfb2041f4a60cabf4d77e79e6e"><div class="ttname"><a href="StepperMovementStrategy_8h.html#a378de9cfb2041f4a60cabf4d77e79e6e">pidWasInitialized</a></div><div class="ttdeci">bool pidWasInitialized</div><div class="ttdef"><b>Definition:</b> <a href="StepperMovementStrategy_8h_source.html#l00023">StepperMovementStrategy.h:23</a></div></div>
 <div class="ttc" id="aStepperMovementStrategy_8h_html_a651f98f57843e7ac1d346db755aefb98"><div class="ttname"><a href="StepperMovementStrategy_8h.html#a651f98f57843e7ac1d346db755aefb98">Input</a></div><div class="ttdeci">float Input</div><div class="ttdef"><b>Definition:</b> <a href="StepperMovementStrategy_8h_source.html#l00014">StepperMovementStrategy.h:14</a></div></div>
 <div class="ttc" id="aStepperMovementStrategy_8h_html_a88f8ffc5bd073eed6c45dda7dc8528e9"><div class="ttname"><a href="StepperMovementStrategy_8h.html#a88f8ffc5bd073eed6c45dda7dc8528e9">MoveByPidStrategy</a></div><div class="ttdeci">int32_t MoveByPidStrategy(float loadCellReadingKg, float stepperPosFraction, StepperWithLimits *stepper, ForceCurve_Interpolated *forceCurve, const DAP_calculationVariables_st *calc_st, DAP_config_st *config_st, float absForceOffset_fl32)</div><div class="ttdef"><b>Definition:</b> <a href="StepperMovementStrategy_8h_source.html#l00062">StepperMovementStrategy.h:62</a></div></div>
-<div class="ttc" id="aStepperMovementStrategy_8h_html_a930e00dcd29fd9a4153d2e96cf2f0dd3"><div class="ttname"><a href="StepperMovementStrategy_8h.html#a930e00dcd29fd9a4153d2e96cf2f0dd3">measureStepResponse</a></div><div class="ttdeci">void measureStepResponse(StepperWithLimits *stepper, const DAP_calculationVariables_st *calc_st, const DAP_config_st *config_st, const LoadCell_ADS1256 *loadcell)</div><div class="ttdef"><b>Definition:</b> <a href="StepperMovementStrategy_8h_source.html#l00216">StepperMovementStrategy.h:216</a></div></div>
-<div class="ttc" id="aStepperMovementStrategy_8h_html_a97b4fb21147fbe5fab1d571f341b61f9"><div class="ttname"><a href="StepperMovementStrategy_8h.html#a97b4fb21147fbe5fab1d571f341b61f9">mpcBasedMove</a></div><div class="ttdeci">int32_t mpcBasedMove(float loadCellReadingKg, float stepperPosFraction, StepperWithLimits *stepper, ForceCurve_Interpolated *forceCurve, const DAP_calculationVariables_st *calc_st, DAP_config_st *config_st, float absForceOffset_fl32)</div><div class="ttdef"><b>Definition:</b> <a href="StepperMovementStrategy_8h_source.html#l00118">StepperMovementStrategy.h:118</a></div></div>
+<div class="ttc" id="aStepperMovementStrategy_8h_html_a930e00dcd29fd9a4153d2e96cf2f0dd3"><div class="ttname"><a href="StepperMovementStrategy_8h.html#a930e00dcd29fd9a4153d2e96cf2f0dd3">measureStepResponse</a></div><div class="ttdeci">void measureStepResponse(StepperWithLimits *stepper, const DAP_calculationVariables_st *calc_st, const DAP_config_st *config_st, const LoadCell_ADS1256 *loadcell)</div><div class="ttdef"><b>Definition:</b> <a href="StepperMovementStrategy_8h_source.html#l00227">StepperMovementStrategy.h:227</a></div></div>
+<div class="ttc" id="aStepperMovementStrategy_8h_html_a97b4fb21147fbe5fab1d571f341b61f9"><div class="ttname"><a href="StepperMovementStrategy_8h.html#a97b4fb21147fbe5fab1d571f341b61f9">mpcBasedMove</a></div><div class="ttdeci">int32_t mpcBasedMove(float loadCellReadingKg, float stepperPosFraction, StepperWithLimits *stepper, ForceCurve_Interpolated *forceCurve, const DAP_calculationVariables_st *calc_st, DAP_config_st *config_st, float absForceOffset_fl32)</div><div class="ttdef"><b>Definition:</b> <a href="StepperMovementStrategy_8h_source.html#l00129">StepperMovementStrategy.h:129</a></div></div>
 <div class="ttc" id="aStepperMovementStrategy_8h_html_aa379e5029872844e6bd9d12478134eba"><div class="ttname"><a href="StepperMovementStrategy_8h.html#aa379e5029872844e6bd9d12478134eba">MoveByInterpolatedStrategy</a></div><div class="ttdeci">int32_t MoveByInterpolatedStrategy(float filteredLoadReadingKg, float stepperPosFraction, ForceCurve_Interpolated *forceCurve, const DAP_calculationVariables_st *calc_st, const DAP_config_st *config_st)</div><div class="ttdef"><b>Definition:</b> <a href="StepperMovementStrategy_8h_source.html#l00032">StepperMovementStrategy.h:32</a></div></div>
 <div class="ttc" id="aStepperMovementStrategy_8h_html_aad5977a9e83736178f3b724a1d228652"><div class="ttname"><a href="StepperMovementStrategy_8h.html#aad5977a9e83736178f3b724a1d228652">Ki</a></div><div class="ttdeci">double Ki</div><div class="ttdef"><b>Definition:</b> <a href="StepperMovementStrategy_8h_source.html#l00017">StepperMovementStrategy.h:17</a></div></div>
 <div class="ttc" id="aStepperMovementStrategy_8h_html_ab9e6bbb0361dc98bc2f5399d014c6c01"><div class="ttname"><a href="StepperMovementStrategy_8h.html#ab9e6bbb0361dc98bc2f5399d014c6c01">Kd</a></div><div class="ttdeci">double Kd</div><div class="ttdef"><b>Definition:</b> <a href="StepperMovementStrategy_8h_source.html#l00017">StepperMovementStrategy.h:17</a></div></div>
