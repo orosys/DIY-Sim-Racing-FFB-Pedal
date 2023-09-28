@@ -83,12 +83,12 @@ Collaboration diagram for DAP_config_st:</div>
 <div class="dyncontent">
 <div class="center"><img src="structDAP__config__st__coll__graph.png" border="0" usemap="#aDAP__config__st_coll__map" alt="Collaboration graph"/></div>
 <map name="aDAP__config__st_coll__map" id="aDAP__config__st_coll__map">
-<area shape="rect" title=" " alt="" coords="240,328,348,353"/>
-<area shape="rect" href="structpayloadHeader.html" title=" " alt="" coords="349,240,457,265"/>
-<area shape="rect" title=" " alt="" coords="210,5,271,31"/>
+<area shape="rect" title=" " alt="" coords="239,328,347,353"/>
+<area shape="rect" href="structpayloadHeader.html" title=" " alt="" coords="347,240,455,265"/>
+<area shape="rect" title=" " alt="" coords="209,5,270,31"/>
 <area shape="rect" href="structpayloadPedalConfig.html" title=" " alt="" coords="108,240,243,265"/>
-<area shape="rect" title=" " alt="" coords="503,5,571,31"/>
-<area shape="rect" title=" " alt="" coords="391,5,437,31"/>
+<area shape="rect" title=" " alt="" coords="500,5,568,31"/>
+<area shape="rect" title=" " alt="" coords="388,5,435,31"/>
 <area shape="rect" title=" " alt="" coords="5,5,52,31"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
@@ -113,7 +113,7 @@ Public Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00076">76</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00078">78</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a469a52f71c4be84dccdace1e6f2e1d3a" name="a469a52f71c4be84dccdace1e6f2e1d3a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a469a52f71c4be84dccdace1e6f2e1d3a">&#9670;&#160;</a></span>initialiseDefaults()</h2>
@@ -177,11 +177,13 @@ Public Attributes</h2></td></tr>
 <div class="line"><span class="lineno">   54</span>  <a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#ad18927d606b6f756d32ff1ee500b8468">PID_d_gain</a> = 0.0;</div>
 <div class="line"><span class="lineno">   55</span> </div>
 <div class="line"><span class="lineno">   56</span>  <a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#a4ae635b78159a7a32c8700efc5115ee9">maxGameOutput</a> = 100;</div>
-<div class="line"><span class="lineno">   57</span>}</div>
+<div class="line"><span class="lineno">   57</span> </div>
+<div class="line"><span class="lineno">   58</span>  <a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#a2195af7ec0890b96f828b3da7ddafcf4">kf_modelNoise</a> = 128;</div>
+<div class="line"><span class="lineno">   59</span>}</div>
 <div class="ttc" id="aDiyActivePedal__types_8h_html_a414793d4dad4a2e35836fcb6aaedd219"><div class="ttname"><a href="DiyActivePedal__types_8h.html#a414793d4dad4a2e35836fcb6aaedd219">DAP_VERSION_CONFIG</a></div><div class="ttdeci">#define DAP_VERSION_CONFIG</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00006">DiyActivePedal_types.h:6</a></div></div>
 <div class="ttc" id="aDiyActivePedal__types_8h_html_a70628ab1b5541830a738e1df7d4dab76"><div class="ttname"><a href="DiyActivePedal__types_8h.html#a70628ab1b5541830a738e1df7d4dab76">DAP_PAYLOAD_TYPE_CONFIG</a></div><div class="ttdeci">#define DAP_PAYLOAD_TYPE_CONFIG</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00007">DiyActivePedal_types.h:7</a></div></div>
-<div class="ttc" id="astructDAP__config__st_html_a1ec5a3656ddbc7b2705ec005d24e34bb"><div class="ttname"><a href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">DAP_config_st::payLoadPedalConfig_</a></div><div class="ttdeci">payloadPedalConfig payLoadPedalConfig_</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00079">DiyActivePedal_types.h:79</a></div></div>
-<div class="ttc" id="astructDAP__config__st_html_a4c1867d915d2985a594ba7a1e9ef8c9f"><div class="ttname"><a href="structDAP__config__st.html#a4c1867d915d2985a594ba7a1e9ef8c9f">DAP_config_st::payLoadHeader_</a></div><div class="ttdeci">payloadHeader payLoadHeader_</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00078">DiyActivePedal_types.h:78</a></div></div>
+<div class="ttc" id="astructDAP__config__st_html_a1ec5a3656ddbc7b2705ec005d24e34bb"><div class="ttname"><a href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">DAP_config_st::payLoadPedalConfig_</a></div><div class="ttdeci">payloadPedalConfig payLoadPedalConfig_</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00081">DiyActivePedal_types.h:81</a></div></div>
+<div class="ttc" id="astructDAP__config__st_html_a4c1867d915d2985a594ba7a1e9ef8c9f"><div class="ttname"><a href="structDAP__config__st.html#a4c1867d915d2985a594ba7a1e9ef8c9f">DAP_config_st::payLoadHeader_</a></div><div class="ttdeci">payloadHeader payLoadHeader_</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00080">DiyActivePedal_types.h:80</a></div></div>
 <div class="ttc" id="astructpayloadHeader_html_a71e88dbd84c69490551743d5710eed3b"><div class="ttname"><a href="structpayloadHeader.html#a71e88dbd84c69490551743d5710eed3b">payloadHeader::payloadType</a></div><div class="ttdeci">uint8_t payloadType</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00012">DiyActivePedal_types.h:12</a></div></div>
 <div class="ttc" id="astructpayloadHeader_html_a799248824f33f49f45695795884b43dc"><div class="ttname"><a href="structpayloadHeader.html#a799248824f33f49f45695795884b43dc">payloadHeader::version</a></div><div class="ttdeci">uint8_t version</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00015">DiyActivePedal_types.h:15</a></div></div>
 <div class="ttc" id="astructpayloadHeader_html_ab752d162e1148b140a78dabc34d3bfe8"><div class="ttname"><a href="structpayloadHeader.html#ab752d162e1148b140a78dabc34d3bfe8">payloadHeader::storeToEeprom</a></div><div class="ttdeci">bool storeToEeprom</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00021">DiyActivePedal_types.h:21</a></div></div>
@@ -189,6 +191,7 @@ Public Attributes</h2></td></tr>
 <div class="ttc" id="astructpayloadPedalConfig_html_a07217e687ff79b033d50f86effbbc2ee"><div class="ttname"><a href="structpayloadPedalConfig.html#a07217e687ff79b033d50f86effbbc2ee">payloadPedalConfig::dampingPull</a></div><div class="ttdeci">uint8_t dampingPull</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00046">DiyActivePedal_types.h:46</a></div></div>
 <div class="ttc" id="astructpayloadPedalConfig_html_a120e64b1a3b8acf8c4ce5b786a71ebd5"><div class="ttname"><a href="structpayloadPedalConfig.html#a120e64b1a3b8acf8c4ce5b786a71ebd5">payloadPedalConfig::maxForce</a></div><div class="ttdeci">uint8_t maxForce</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00032">DiyActivePedal_types.h:32</a></div></div>
 <div class="ttc" id="astructpayloadPedalConfig_html_a16a037b0447378dbd3c004311f65fff4"><div class="ttname"><a href="structpayloadPedalConfig.html#a16a037b0447378dbd3c004311f65fff4">payloadPedalConfig::dampingPress</a></div><div class="ttdeci">uint8_t dampingPress</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00045">DiyActivePedal_types.h:45</a></div></div>
+<div class="ttc" id="astructpayloadPedalConfig_html_a2195af7ec0890b96f828b3da7ddafcf4"><div class="ttname"><a href="structpayloadPedalConfig.html#a2195af7ec0890b96f828b3da7ddafcf4">payloadPedalConfig::kf_modelNoise</a></div><div class="ttdeci">uint8_t kf_modelNoise</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00072">DiyActivePedal_types.h:72</a></div></div>
 <div class="ttc" id="astructpayloadPedalConfig_html_a2dc083cd69417413e30375acc87f1a81"><div class="ttname"><a href="structpayloadPedalConfig.html#a2dc083cd69417413e30375acc87f1a81">payloadPedalConfig::horPos_AB</a></div><div class="ttdeci">uint8_t horPos_AB</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00055">DiyActivePedal_types.h:55</a></div></div>
 <div class="ttc" id="astructpayloadPedalConfig_html_a2e254a6ece4e48377516312ef4c58c69"><div class="ttname"><a href="structpayloadPedalConfig.html#a2e254a6ece4e48377516312ef4c58c69">payloadPedalConfig::relativeForce_p020</a></div><div class="ttdeci">uint8_t relativeForce_p020</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00038">DiyActivePedal_types.h:38</a></div></div>
 <div class="ttc" id="astructpayloadPedalConfig_html_a329942d1541f55bc396552f179594ed3"><div class="ttname"><a href="structpayloadPedalConfig.html#a329942d1541f55bc396552f179594ed3">payloadPedalConfig::relativeForce_p040</a></div><div class="ttdeci">uint8_t relativeForce_p040</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00039">DiyActivePedal_types.h:39</a></div></div>
@@ -245,31 +248,31 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8cpp_source.html#l00073">73</a> of file <a class="el" href="DiyActivePedal__types_8cpp_source.html">DiyActivePedal_types.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   74</span>{</div>
-<div class="line"><span class="lineno">   75</span>  <a class="code hl_struct" href="structDAP__config__st.html">DAP_config_st</a> local_config_st;</div>
-<div class="line"><span class="lineno">   76</span> </div>
-<div class="line"><span class="lineno">   77</span>  EEPROM.get(0, local_config_st);</div>
-<div class="line"><span class="lineno">   78</span>  EEPROM.commit();</div>
-<div class="line"><span class="lineno">   79</span> </div>
-<div class="line"><span class="lineno">   80</span>  <span class="comment">// check if version matches revision, in case, update the default config</span></div>
-<div class="line"><span class="lineno">   81</span>  <span class="keywordflow">if</span> (local_config_st.<a class="code hl_variable" href="structDAP__config__st.html#a4c1867d915d2985a594ba7a1e9ef8c9f">payLoadHeader_</a>.<a class="code hl_variable" href="structpayloadHeader.html#a799248824f33f49f45695795884b43dc">version</a> == <a class="code hl_define" href="DiyActivePedal__types_8h.html#a414793d4dad4a2e35836fcb6aaedd219">DAP_VERSION_CONFIG</a>)</div>
-<div class="line"><span class="lineno">   82</span>  {</div>
-<div class="line"><span class="lineno">   83</span>    config_st = local_config_st;</div>
-<div class="line"><span class="lineno">   84</span>    Serial.println(<span class="stringliteral">&quot;Successfully loaded config from EPROM!&quot;</span>);</div>
-<div class="line"><span class="lineno">   85</span>  }</div>
-<div class="line"><span class="lineno">   86</span>  <span class="keywordflow">else</span></div>
-<div class="line"><span class="lineno">   87</span>  { </div>
-<div class="line"><span class="lineno">   88</span>    Serial.println(<span class="stringliteral">&quot;Couldn&#39;t load config from EPROM due to version mismatch!&quot;</span>);</div>
-<div class="line"><span class="lineno">   89</span>    Serial.print(<span class="stringliteral">&quot;Target version: &quot;</span>);</div>
-<div class="line"><span class="lineno">   90</span>    Serial.println(<a class="code hl_define" href="DiyActivePedal__types_8h.html#a414793d4dad4a2e35836fcb6aaedd219">DAP_VERSION_CONFIG</a>);</div>
-<div class="line"><span class="lineno">   91</span>    Serial.print(<span class="stringliteral">&quot;Source version: &quot;</span>);</div>
-<div class="line"><span class="lineno">   92</span>    Serial.println(local_config_st.<a class="code hl_variable" href="structDAP__config__st.html#a4c1867d915d2985a594ba7a1e9ef8c9f">payLoadHeader_</a>.<a class="code hl_variable" href="structpayloadHeader.html#a799248824f33f49f45695795884b43dc">version</a>);</div>
-<div class="line"><span class="lineno">   93</span> </div>
-<div class="line"><span class="lineno">   94</span>  }</div>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8cpp_source.html#l00075">75</a> of file <a class="el" href="DiyActivePedal__types_8cpp_source.html">DiyActivePedal_types.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   76</span>{</div>
+<div class="line"><span class="lineno">   77</span>  <a class="code hl_struct" href="structDAP__config__st.html">DAP_config_st</a> local_config_st;</div>
+<div class="line"><span class="lineno">   78</span> </div>
+<div class="line"><span class="lineno">   79</span>  EEPROM.get(0, local_config_st);</div>
+<div class="line"><span class="lineno">   80</span>  EEPROM.commit();</div>
+<div class="line"><span class="lineno">   81</span> </div>
+<div class="line"><span class="lineno">   82</span>  <span class="comment">// check if version matches revision, in case, update the default config</span></div>
+<div class="line"><span class="lineno">   83</span>  <span class="keywordflow">if</span> (local_config_st.<a class="code hl_variable" href="structDAP__config__st.html#a4c1867d915d2985a594ba7a1e9ef8c9f">payLoadHeader_</a>.<a class="code hl_variable" href="structpayloadHeader.html#a799248824f33f49f45695795884b43dc">version</a> == <a class="code hl_define" href="DiyActivePedal__types_8h.html#a414793d4dad4a2e35836fcb6aaedd219">DAP_VERSION_CONFIG</a>)</div>
+<div class="line"><span class="lineno">   84</span>  {</div>
+<div class="line"><span class="lineno">   85</span>    config_st = local_config_st;</div>
+<div class="line"><span class="lineno">   86</span>    Serial.println(<span class="stringliteral">&quot;Successfully loaded config from EPROM!&quot;</span>);</div>
+<div class="line"><span class="lineno">   87</span>  }</div>
+<div class="line"><span class="lineno">   88</span>  <span class="keywordflow">else</span></div>
+<div class="line"><span class="lineno">   89</span>  { </div>
+<div class="line"><span class="lineno">   90</span>    Serial.println(<span class="stringliteral">&quot;Couldn&#39;t load config from EPROM due to version mismatch!&quot;</span>);</div>
+<div class="line"><span class="lineno">   91</span>    Serial.print(<span class="stringliteral">&quot;Target version: &quot;</span>);</div>
+<div class="line"><span class="lineno">   92</span>    Serial.println(<a class="code hl_define" href="DiyActivePedal__types_8h.html#a414793d4dad4a2e35836fcb6aaedd219">DAP_VERSION_CONFIG</a>);</div>
+<div class="line"><span class="lineno">   93</span>    Serial.print(<span class="stringliteral">&quot;Source version: &quot;</span>);</div>
+<div class="line"><span class="lineno">   94</span>    Serial.println(local_config_st.<a class="code hl_variable" href="structDAP__config__st.html#a4c1867d915d2985a594ba7a1e9ef8c9f">payLoadHeader_</a>.<a class="code hl_variable" href="structpayloadHeader.html#a799248824f33f49f45695795884b43dc">version</a>);</div>
 <div class="line"><span class="lineno">   95</span> </div>
-<div class="line"><span class="lineno">   96</span>}</div>
-<div class="ttc" id="astructDAP__config__st_html"><div class="ttname"><a href="structDAP__config__st.html">DAP_config_st</a></div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00076">DiyActivePedal_types.h:76</a></div></div>
+<div class="line"><span class="lineno">   96</span>  }</div>
+<div class="line"><span class="lineno">   97</span> </div>
+<div class="line"><span class="lineno">   98</span>}</div>
+<div class="ttc" id="astructDAP__config__st_html"><div class="ttname"><a href="structDAP__config__st.html">DAP_config_st</a></div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00078">DiyActivePedal_types.h:78</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -289,16 +292,16 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8cpp_source.html#l00062">62</a> of file <a class="el" href="DiyActivePedal__types_8cpp_source.html">DiyActivePedal_types.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   63</span>{</div>
-<div class="line"><span class="lineno">   64</span>  <span class="keywordflow">if</span> (<span class="keyword">true</span> == config_st.<a class="code hl_variable" href="structDAP__config__st.html#a4c1867d915d2985a594ba7a1e9ef8c9f">payLoadHeader_</a>.<a class="code hl_variable" href="structpayloadHeader.html#ab752d162e1148b140a78dabc34d3bfe8">storeToEeprom</a>)</div>
-<div class="line"><span class="lineno">   65</span>  {</div>
-<div class="line"><span class="lineno">   66</span>    config_st.<a class="code hl_variable" href="structDAP__config__st.html#a4c1867d915d2985a594ba7a1e9ef8c9f">payLoadHeader_</a>.<a class="code hl_variable" href="structpayloadHeader.html#ab752d162e1148b140a78dabc34d3bfe8">storeToEeprom</a> = <span class="keyword">false</span>; <span class="comment">// set to false, thus at restart existing EEPROM config isn&#39;t restored to EEPROM</span></div>
-<div class="line"><span class="lineno">   67</span>    EEPROM.put(0, config_st); </div>
-<div class="line"><span class="lineno">   68</span>    EEPROM.commit();</div>
-<div class="line"><span class="lineno">   69</span>    Serial.println(<span class="stringliteral">&quot;Successfully stored config in EPROM!&quot;</span>);</div>
-<div class="line"><span class="lineno">   70</span>  }</div>
-<div class="line"><span class="lineno">   71</span>}</div>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8cpp_source.html#l00064">64</a> of file <a class="el" href="DiyActivePedal__types_8cpp_source.html">DiyActivePedal_types.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   65</span>{</div>
+<div class="line"><span class="lineno">   66</span>  <span class="keywordflow">if</span> (<span class="keyword">true</span> == config_st.<a class="code hl_variable" href="structDAP__config__st.html#a4c1867d915d2985a594ba7a1e9ef8c9f">payLoadHeader_</a>.<a class="code hl_variable" href="structpayloadHeader.html#ab752d162e1148b140a78dabc34d3bfe8">storeToEeprom</a>)</div>
+<div class="line"><span class="lineno">   67</span>  {</div>
+<div class="line"><span class="lineno">   68</span>    config_st.<a class="code hl_variable" href="structDAP__config__st.html#a4c1867d915d2985a594ba7a1e9ef8c9f">payLoadHeader_</a>.<a class="code hl_variable" href="structpayloadHeader.html#ab752d162e1148b140a78dabc34d3bfe8">storeToEeprom</a> = <span class="keyword">false</span>; <span class="comment">// set to false, thus at restart existing EEPROM config isn&#39;t restored to EEPROM</span></div>
+<div class="line"><span class="lineno">   69</span>    EEPROM.put(0, config_st); </div>
+<div class="line"><span class="lineno">   70</span>    EEPROM.commit();</div>
+<div class="line"><span class="lineno">   71</span>    Serial.println(<span class="stringliteral">&quot;Successfully stored config in EPROM!&quot;</span>);</div>
+<div class="line"><span class="lineno">   72</span>  }</div>
+<div class="line"><span class="lineno">   73</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -315,7 +318,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00078">78</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00080">80</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
 
 </div>
 </div>
@@ -331,7 +334,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00079">79</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00081">81</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
 
 </div>
 </div>

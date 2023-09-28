@@ -4,6 +4,7 @@ var searchData=
   ['kalmanfilter_1',['KalmanFilter',['../classKalmanFilter.html',1,'KalmanFilter'],['../classKalmanFilter.html#a17598f8b79110a66a42984b04c4e6611',1,'KalmanFilter::KalmanFilter()']]],
   ['kd_2',['Kd',['../StepperMovementStrategy_8h.html#ab9e6bbb0361dc98bc2f5399d014c6c01',1,'StepperMovementStrategy.h']]],
   ['kf_5fmodel_5fnoise_5fforce_5facceleration_3',['KF_MODEL_NOISE_FORCE_ACCELERATION',['../PedalGeometry_8cpp.html#aec7950ddffacc3f0760bf13c00ffa875',1,'KF_MODEL_NOISE_FORCE_ACCELERATION():&#160;PedalGeometry.cpp'],['../SignalFilter_8cpp.html#aec7950ddffacc3f0760bf13c00ffa875',1,'KF_MODEL_NOISE_FORCE_ACCELERATION():&#160;SignalFilter.cpp']]],
-  ['ki_4',['Ki',['../StepperMovementStrategy_8h.html#aad5977a9e83736178f3b724a1d228652',1,'StepperMovementStrategy.h']]],
-  ['kp_5',['Kp',['../StepperMovementStrategy_8h.html#afd070d90e3f8bb3e9bb9c6dff310503b',1,'StepperMovementStrategy.h']]]
+  ['kf_5fmodelnoise_4',['kf_modelNoise',['../structpayloadPedalConfig.html#a2195af7ec0890b96f828b3da7ddafcf4',1,'payloadPedalConfig']]],
+  ['ki_5',['Ki',['../StepperMovementStrategy_8h.html#aad5977a9e83736178f3b724a1d228652',1,'StepperMovementStrategy.h']]],
+  ['kp_6',['Kp',['../StepperMovementStrategy_8h.html#afd070d90e3f8bb3e9bb9c6dff310503b',1,'StepperMovementStrategy.h']]]
 ];

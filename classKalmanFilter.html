@@ -93,8 +93,8 @@ Collaboration diagram for KalmanFilter:</div>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a17598f8b79110a66a42984b04c4e6611"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKalmanFilter.html#a17598f8b79110a66a42984b04c4e6611">KalmanFilter</a> (float varianceEstimate)</td></tr>
 <tr class="separator:a17598f8b79110a66a42984b04c4e6611"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a103c7802ddac4fac45898b56ec947e10"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKalmanFilter.html#a103c7802ddac4fac45898b56ec947e10">filteredValue</a> (float observation, float command)</td></tr>
-<tr class="separator:a103c7802ddac4fac45898b56ec947e10"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac559f3e571f567c9db4fc66a6b8c78c8"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKalmanFilter.html#ac559f3e571f567c9db4fc66a6b8c78c8">filteredValue</a> (float observation, float command, uint8_t modelNoiseScaling_u8)</td></tr>
+<tr class="separator:ac559f3e571f567c9db4fc66a6b8c78c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac3fffc5e4025a53f7cb5d3d6f659bdf2"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKalmanFilter.html#ac3fffc5e4025a53f7cb5d3d6f659bdf2">changeVelocity</a> ()</td></tr>
 <tr class="separator:ac3fffc5e4025a53f7cb5d3d6f659bdf2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -167,15 +167,15 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="SignalFilter_8cpp_source.html#l00067">67</a> of file <a class="el" href="SignalFilter_8cpp_source.html">SignalFilter.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   67</span>                                   {</div>
-<div class="line"><span class="lineno">   68</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">_K</a>.x(0,1);</div>
-<div class="line"><span class="lineno">   69</span>}</div>
+<p class="definition">Definition at line <a class="el" href="SignalFilter_8cpp_source.html#l00071">71</a> of file <a class="el" href="SignalFilter_8cpp_source.html">SignalFilter.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   71</span>                                   {</div>
+<div class="line"><span class="lineno">   72</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">_K</a>.x(0,1);</div>
+<div class="line"><span class="lineno">   73</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
-<a id="a103c7802ddac4fac45898b56ec947e10" name="a103c7802ddac4fac45898b56ec947e10"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a103c7802ddac4fac45898b56ec947e10">&#9670;&#160;</a></span>filteredValue()</h2>
+<a id="ac559f3e571f567c9db4fc66a6b8c78c8" name="ac559f3e571f567c9db4fc66a6b8c78c8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac559f3e571f567c9db4fc66a6b8c78c8">&#9670;&#160;</a></span>filteredValue()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -190,7 +190,13 @@ Private Attributes</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>command</em>&#160;</td>
+          <td class="paramname"><em>command</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>modelNoiseScaling_u8</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -201,34 +207,38 @@ Private Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p class="definition">Definition at line <a class="el" href="SignalFilter_8cpp_source.html#l00038">38</a> of file <a class="el" href="SignalFilter_8cpp_source.html">SignalFilter.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   38</span>                                                                  {</div>
+<div class="fragment"><div class="line"><span class="lineno">   38</span>                                                                                                {</div>
 <div class="line"><span class="lineno">   39</span>  <span class="comment">// obtain time</span></div>
 <div class="line"><span class="lineno">   40</span>  <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> currentTime = micros();</div>
 <div class="line"><span class="lineno">   41</span>  <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> elapsedTime = currentTime - <a class="code hl_variable" href="classKalmanFilter.html#aea7f932e369f80ba7bd0a5cd39c89aeb">_timeLastObservation</a>;</div>
-<div class="line"><span class="lineno">   42</span>  <span class="keywordflow">if</span> (elapsedTime &lt; 1) { elapsedTime=1; }</div>
-<div class="line"><span class="lineno">   43</span>  <a class="code hl_variable" href="classKalmanFilter.html#aea7f932e369f80ba7bd0a5cd39c89aeb">_timeLastObservation</a> = currentTime;</div>
+<div class="line"><span class="lineno">   42</span>  <span class="keywordtype">float</span> modelNoiseScaling_fl32 = modelNoiseScaling_u8;</div>
+<div class="line"><span class="lineno">   43</span>  modelNoiseScaling_fl32 /= 128.0;</div>
 <div class="line"><span class="lineno">   44</span> </div>
-<div class="line"><span class="lineno">   45</span>  <span class="comment">// update state transition and system covariance matrices</span></div>
-<div class="line"><span class="lineno">   46</span>  <span class="keywordtype">float</span> delta_t = (float)elapsedTime / 1000000.0f; <span class="comment">// convert to seconds</span></div>
-<div class="line"><span class="lineno">   47</span>  <span class="keywordtype">float</span> delta_t_pow2 = delta_t * delta_t;</div>
-<div class="line"><span class="lineno">   48</span>  <span class="keywordtype">float</span> delta_t_pow3 = delta_t_pow2 * delta_t;</div>
-<div class="line"><span class="lineno">   49</span>  <span class="keywordtype">float</span> delta_t_pow4 = delta_t_pow2 * delta_t_pow2;</div>
-<div class="line"><span class="lineno">   50</span> </div>
-<div class="line"><span class="lineno">   51</span>  <a class="code hl_variable" href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">_K</a>.F = {1.0,  delta_t, </div>
-<div class="line"><span class="lineno">   52</span>          0.0,  1.0};</div>
+<div class="line"><span class="lineno">   45</span>  <span class="keywordflow">if</span> (elapsedTime &lt; 1) { elapsedTime=1; }</div>
+<div class="line"><span class="lineno">   46</span>  <a class="code hl_variable" href="classKalmanFilter.html#aea7f932e369f80ba7bd0a5cd39c89aeb">_timeLastObservation</a> = currentTime;</div>
+<div class="line"><span class="lineno">   47</span> </div>
+<div class="line"><span class="lineno">   48</span>  <span class="comment">// update state transition and system covariance matrices</span></div>
+<div class="line"><span class="lineno">   49</span>  <span class="keywordtype">float</span> delta_t = (float)elapsedTime / 1000000.0f; <span class="comment">// convert to seconds</span></div>
+<div class="line"><span class="lineno">   50</span>  <span class="keywordtype">float</span> delta_t_pow2 = delta_t * delta_t;</div>
+<div class="line"><span class="lineno">   51</span>  <span class="keywordtype">float</span> delta_t_pow3 = delta_t_pow2 * delta_t;</div>
+<div class="line"><span class="lineno">   52</span>  <span class="keywordtype">float</span> delta_t_pow4 = delta_t_pow2 * delta_t_pow2;</div>
 <div class="line"><span class="lineno">   53</span> </div>
-<div class="line"><span class="lineno">   54</span>  <a class="code hl_variable" href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">_K</a>.B = {1.0, </div>
-<div class="line"><span class="lineno">   55</span>          0.0};</div>
+<div class="line"><span class="lineno">   54</span>  <a class="code hl_variable" href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">_K</a>.F = {1.0,  delta_t, </div>
+<div class="line"><span class="lineno">   55</span>          0.0,  1.0};</div>
 <div class="line"><span class="lineno">   56</span> </div>
-<div class="line"><span class="lineno">   57</span>  <span class="keywordtype">float</span> K_Q_11 = <a class="code hl_variable" href="PedalGeometry_8cpp.html#aec7950ddffacc3f0760bf13c00ffa875">KF_MODEL_NOISE_FORCE_ACCELERATION</a> * 0.5f * delta_t_pow3;</div>
-<div class="line"><span class="lineno">   58</span>  <a class="code hl_variable" href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">_K</a>.Q = {<a class="code hl_variable" href="PedalGeometry_8cpp.html#aec7950ddffacc3f0760bf13c00ffa875">KF_MODEL_NOISE_FORCE_ACCELERATION</a> * 0.25f * delta_t_pow4,   K_Q_11,</div>
-<div class="line"><span class="lineno">   59</span>        K_Q_11, <a class="code hl_variable" href="PedalGeometry_8cpp.html#aec7950ddffacc3f0760bf13c00ffa875">KF_MODEL_NOISE_FORCE_ACCELERATION</a> * delta_t_pow2};</div>
-<div class="line"><span class="lineno">   60</span>        </div>
-<div class="line"><span class="lineno">   61</span> </div>
-<div class="line"><span class="lineno">   62</span>  <span class="comment">// APPLY KALMAN FILTER</span></div>
-<div class="line"><span class="lineno">   63</span>  <a class="code hl_variable" href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">_K</a>.update({observation}, {command});</div>
-<div class="line"><span class="lineno">   64</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">_K</a>.x(0,0);</div>
-<div class="line"><span class="lineno">   65</span>}</div>
+<div class="line"><span class="lineno">   57</span>  <a class="code hl_variable" href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">_K</a>.B = {1.0, </div>
+<div class="line"><span class="lineno">   58</span>  </div>
+<div class="line"><span class="lineno">   59</span>          0.0};</div>
+<div class="line"><span class="lineno">   60</span> </div>
+<div class="line"><span class="lineno">   61</span>  <span class="keywordtype">float</span> K_Q_11 = modelNoiseScaling_fl32 * <a class="code hl_variable" href="PedalGeometry_8cpp.html#aec7950ddffacc3f0760bf13c00ffa875">KF_MODEL_NOISE_FORCE_ACCELERATION</a> * 0.5f * delta_t_pow3;</div>
+<div class="line"><span class="lineno">   62</span>  <a class="code hl_variable" href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">_K</a>.Q = {modelNoiseScaling_fl32 * <a class="code hl_variable" href="PedalGeometry_8cpp.html#aec7950ddffacc3f0760bf13c00ffa875">KF_MODEL_NOISE_FORCE_ACCELERATION</a> * 0.25f * delta_t_pow4,   K_Q_11,</div>
+<div class="line"><span class="lineno">   63</span>        K_Q_11, modelNoiseScaling_fl32 * <a class="code hl_variable" href="PedalGeometry_8cpp.html#aec7950ddffacc3f0760bf13c00ffa875">KF_MODEL_NOISE_FORCE_ACCELERATION</a> * delta_t_pow2};</div>
+<div class="line"><span class="lineno">   64</span>        </div>
+<div class="line"><span class="lineno">   65</span> </div>
+<div class="line"><span class="lineno">   66</span>  <span class="comment">// APPLY KALMAN FILTER</span></div>
+<div class="line"><span class="lineno">   67</span>  <a class="code hl_variable" href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">_K</a>.update({observation}, {command});</div>
+<div class="line"><span class="lineno">   68</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">_K</a>.x(0,0);</div>
+<div class="line"><span class="lineno">   69</span>}</div>
 <div class="ttc" id="aPedalGeometry_8cpp_html_aec7950ddffacc3f0760bf13c00ffa875"><div class="ttname"><a href="PedalGeometry_8cpp.html#aec7950ddffacc3f0760bf13c00ffa875">KF_MODEL_NOISE_FORCE_ACCELERATION</a></div><div class="ttdeci">static const float KF_MODEL_NOISE_FORCE_ACCELERATION</div><div class="ttdef"><b>Definition:</b> <a href="PedalGeometry_8cpp_source.html#l00008">PedalGeometry.cpp:8</a></div></div>
 </div><!-- fragment -->
 </div>
