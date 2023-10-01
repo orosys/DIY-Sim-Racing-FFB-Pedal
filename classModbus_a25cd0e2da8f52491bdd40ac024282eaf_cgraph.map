@@ -1,0 +1,6 @@
+<map id="Modbus::ReadCoilReg" name="Modbus::ReadCoilReg">
+<area shape="rect" id="node1" title=" " alt="" coords="5,31,155,56"/>
+<area shape="rect" id="node2" href="$classModbus.html#a81a2ed503e4d61409cbc9c1e264f27e8" title=" " alt="" coords="212,5,340,31"/>
+<area shape="rect" id="node3" href="$classModbus.html#aaeaf21cf9c6795dee76b775b39630cfe" title=" " alt="" coords="203,55,349,80"/>
+<area shape="rect" id="node4" href="$classModbus.html#af81965f56bff22d850f97bfc3b5b9760" title=" " alt="" coords="397,55,536,80"/>
+</map>
