@@ -1,4 +1,5 @@
 <map id="Modbus::uint16" name="Modbus::uint16">
-<area shape="rect" id="node1" title=" " alt="" coords="163,5,272,31"/>
-<area shape="rect" id="node2" href="$classModbus.html#a3842074cffd06488040019a18bfce12c" title=" " alt="" coords="5,5,115,31"/>
+<area shape="rect" id="node1" title=" " alt="" coords="195,42,304,67"/>
+<area shape="rect" id="node2" href="$classisv57communication.html#a54a21dcfaa7950e51066f49119145c8f" title=" " alt="" coords="5,5,147,45"/>
+<area shape="rect" id="node3" href="$classModbus.html#a3842074cffd06488040019a18bfce12c" title=" " alt="" coords="21,70,131,95"/>
 </map>

@@ -6,5 +6,6 @@ var searchData=
   ['maximum_5fstepper_5facceleration_3',['MAXIMUM_STEPPER_ACCELERATION',['../StepperWithLimits_8h.html#a8f5c3b1c34c1f1d9e25b686b8730125a',1,'StepperWithLimits.h']]],
   ['maximum_5fstepper_5frpm_4',['MAXIMUM_STEPPER_RPM',['../StepperWithLimits_8h.html#a4d7ceb44658af98bd95d2b3298e42259',1,'StepperWithLimits.h']]],
   ['maximum_5fstepper_5fspeed_5',['MAXIMUM_STEPPER_SPEED',['../StepperWithLimits_8h.html#aa551558e56e3703986579ff2a81de7eb',1,'StepperWithLimits.h']]],
-  ['mode_5f_6',['mode_',['../classModbus.html#a015642f22a07db845b8b97f8be2dcb19',1,'Modbus']]]
+  ['modbus_6',['modbus',['../isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1',1,'isv57communication.cpp']]],
+  ['mode_5f_7',['mode_',['../classModbus.html#a015642f22a07db845b8b97f8be2dcb19',1,'Modbus']]]
 ];
