@@ -12,12 +12,13 @@ var searchData=
   ['filteredvalue_9',['filteredValue',['../classKalmanFilter.html#ac559f3e571f567c9db4fc66a6b8c78c8',1,'KalmanFilter']]],
   ['filtervalue_10',['filterValue',['../classFirNotchFilter.html#a2b121b0a008812397f544cc866682774',1,'FirNotchFilter']]],
   ['findminmaxendstops_11',['findMinMaxEndstops',['../classStepperWithLimits.html#a2a6b1e2ed3ef28f3fae180220ea2ebe1',1,'StepperWithLimits']]],
-  ['firnotchfilter_12',['FirNotchFilter',['../classFirNotchFilter.html#ad72beadc1628527f783ebd4cf2ef7294',1,'FirNotchFilter::FirNotchFilter()'],['../classFirNotchFilter.html',1,'FirNotchFilter']]],
-  ['force_5fmax_13',['Force_Max',['../structDAP__calculationVariables__st.html#a1c2f7c9db353e05269035de94cd82aba',1,'DAP_calculationVariables_st']]],
-  ['force_5fmin_14',['Force_Min',['../structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958',1,'DAP_calculationVariables_st']]],
-  ['force_5frange_15',['Force_Range',['../structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369',1,'DAP_calculationVariables_st']]],
-  ['forcecurve_2ecpp_16',['ForceCurve.cpp',['../ForceCurve_8cpp.html',1,'']]],
-  ['forcecurve_2eh_17',['ForceCurve.h',['../ForceCurve_8h.html',1,'']]],
-  ['forcecurve_5finterpolated_18',['ForceCurve_Interpolated',['../classForceCurve__Interpolated.html',1,'']]],
-  ['forceoffset_19',['forceOffset',['../classABSOscillation.html#a10c3f1f02fd8bb776957ac1d332e1f86',1,'ABSOscillation']]]
+  ['findminmaxsensorless_12',['findMinMaxSensorless',['../classStepperWithLimits.html#a55714344e8a318bf54da2139fed63695',1,'StepperWithLimits']]],
+  ['firnotchfilter_13',['FirNotchFilter',['../classFirNotchFilter.html#ad72beadc1628527f783ebd4cf2ef7294',1,'FirNotchFilter::FirNotchFilter()'],['../classFirNotchFilter.html',1,'FirNotchFilter']]],
+  ['force_5fmax_14',['Force_Max',['../structDAP__calculationVariables__st.html#a1c2f7c9db353e05269035de94cd82aba',1,'DAP_calculationVariables_st']]],
+  ['force_5fmin_15',['Force_Min',['../structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958',1,'DAP_calculationVariables_st']]],
+  ['force_5frange_16',['Force_Range',['../structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369',1,'DAP_calculationVariables_st']]],
+  ['forcecurve_2ecpp_17',['ForceCurve.cpp',['../ForceCurve_8cpp.html',1,'']]],
+  ['forcecurve_2eh_18',['ForceCurve.h',['../ForceCurve_8h.html',1,'']]],
+  ['forcecurve_5finterpolated_19',['ForceCurve_Interpolated',['../classForceCurve__Interpolated.html',1,'']]],
+  ['forceoffset_20',['forceOffset',['../classABSOscillation.html#a10c3f1f02fd8bb776957ac1d332e1f86',1,'ABSOscillation']]]
 ];

@@ -1,4 +1,6 @@
 <map id="Modbus::RxRaw" name="Modbus::RxRaw">
-<area shape="rect" id="node1" title=" " alt="" coords="195,13,309,38"/>
-<area shape="rect" id="node2" href="$classisv57communication.html#a54a21dcfaa7950e51066f49119145c8f" title=" " alt="" coords="5,5,147,45"/>
+<area shape="rect" id="node1" title=" " alt="" coords="411,45,525,70"/>
+<area shape="rect" id="node2" href="$classisv57communication.html#a54a21dcfaa7950e51066f49119145c8f" title=" " alt="" coords="221,37,363,77"/>
+<area shape="rect" id="node3" href="$classStepperWithLimits.html#a55714344e8a318bf54da2139fed63695" title=" " alt="" coords="13,5,165,45"/>
+<area shape="rect" id="node4" href="$classStepperWithLimits.html#a8ae9c45f6a0453402fc1c3358080dc42" title=" " alt="" coords="5,69,173,109"/>
 </map>

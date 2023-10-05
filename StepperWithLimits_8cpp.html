@@ -74,6 +74,7 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#define-members">Macros</a> &#124;
 <a href="#func-members">Functions</a> &#124;
 <a href="#var-members">Variables</a>  </div>
   <div class="headertitle"><div class="title">StepperWithLimits.cpp File Reference</div></div>
@@ -86,16 +87,26 @@ Include dependency graph for StepperWithLimits.cpp:</div>
 <div class="dyncontent">
 <div class="center"><img src="StepperWithLimits_8cpp__incl.png" border="0" usemap="#aArduino_2Esp32_2Main_2StepperWithLimits_8cpp" alt=""/></div>
 <map name="aArduino_2Esp32_2Main_2StepperWithLimits_8cpp" id="aArduino_2Esp32_2Main_2StepperWithLimits_8cpp">
-<area shape="rect" title=" " alt="" coords="73,5,231,45"/>
-<area shape="rect" href="StepperWithLimits_8h.html" title=" " alt="" coords="5,93,144,119"/>
-<area shape="rect" href="RTDebugOutput_8h.html" title=" " alt="" coords="168,93,293,119"/>
-<area shape="rect" title=" " alt="" coords="7,167,143,192"/>
-<area shape="rect" title=" " alt="" coords="205,167,256,192"/>
+<area shape="rect" title=" " alt="" coords="224,5,381,45"/>
+<area shape="rect" href="StepperWithLimits_8h.html" title=" " alt="" coords="156,93,295,119"/>
+<area shape="rect" href="RTDebugOutput_8h.html" title=" " alt="" coords="319,93,444,119"/>
+<area shape="rect" title=" " alt="" coords="5,167,141,192"/>
+<area shape="rect" href="isv57communication_8h.html" title=" " alt="" coords="166,167,317,192"/>
+<area shape="rect" href="Esp32_2Main_2Modbus_8h.html" title=" " alt="" coords="202,240,281,265"/>
+<area shape="rect" title=" " alt="" coords="103,313,179,339"/>
+<area shape="rect" title=" " alt="" coords="204,313,279,339"/>
+<area shape="rect" title=" " alt="" coords="303,313,361,339"/>
+<area shape="rect" title=" " alt="" coords="356,167,407,192"/>
 </map>
 </div>
 </div>
 <p><a href="StepperWithLimits_8cpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:a63f6f0d2dd0bf73350f4182e64e70e37"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="StepperWithLimits_8cpp.html#a63f6f0d2dd0bf73350f4182e64e70e37">STEPPER_WITH_LIMITS_SENSORLESS_CURRENT_THRESHOLD_IN_PERCENT</a>&#160;&#160;&#160;20</td></tr>
+<tr class="separator:a63f6f0d2dd0bf73350f4182e64e70e37"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a88d99673b7684df95731c08c8250cbf1"><td class="memItemLeft" align="right" valign="top">FastAccelStepperEngine &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="StepperWithLimits_8cpp.html#a88d99673b7684df95731c08c8250cbf1">stepperEngine</a> ()</td></tr>
@@ -107,7 +118,26 @@ Variables</h2></td></tr>
 <tr class="separator:a8f1a62cc3e8994f85b2e62734e87f24f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a04192301159165c6b640ffcb46e7baae"><td class="memItemLeft" align="right" valign="top">static const int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="StepperWithLimits_8cpp.html#a04192301159165c6b640ffcb46e7baae">ENDSTOP_MOVEMENT</a> = <a class="el" href="StepperWithLimits_8h.html#a5e757657a6f06254eb1446089d6444a6">STEPS_PER_MOTOR_REVOLUTION</a> / 100</td></tr>
 <tr class="separator:a04192301159165c6b640ffcb46e7baae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa30177822c5d58bcb0fc48fef65094a8"><td class="memItemLeft" align="right" valign="top">static const int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="StepperWithLimits_8cpp.html#aa30177822c5d58bcb0fc48fef65094a8">ENDSTOP_MOVEMENT_SENSORLESS</a> = <a class="el" href="StepperWithLimits_8cpp.html#a04192301159165c6b640ffcb46e7baae">ENDSTOP_MOVEMENT</a> * 5</td></tr>
+<tr class="separator:aa30177822c5d58bcb0fc48fef65094a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Macro Definition Documentation</h2>
+<a id="a63f6f0d2dd0bf73350f4182e64e70e37" name="a63f6f0d2dd0bf73350f4182e64e70e37"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a63f6f0d2dd0bf73350f4182e64e70e37">&#9670;&#160;</a></span>STEPPER_WITH_LIMITS_SENSORLESS_CURRENT_THRESHOLD_IN_PERCENT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define STEPPER_WITH_LIMITS_SENSORLESS_CURRENT_THRESHOLD_IN_PERCENT&#160;&#160;&#160;20</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="StepperWithLimits_8cpp_source.html#l00005">5</a> of file <a class="el" href="StepperWithLimits_8cpp_source.html">StepperWithLimits.cpp</a>.</p>
+
+</div>
+</div>
 <h2 class="groupheader">Function Documentation</h2>
 <a id="a88d99673b7684df95731c08c8250cbf1" name="a88d99673b7684df95731c08c8250cbf1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a88d99673b7684df95731c08c8250cbf1">&#9670;&#160;</a></span>stepperEngine()</h2>
@@ -124,18 +154,18 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="StepperWithLimits_8cpp_source.html#l00008">8</a> of file <a class="el" href="StepperWithLimits_8cpp_source.html">StepperWithLimits.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">    8</span>                                        {</div>
-<div class="line"><span class="lineno">    9</span>  <span class="keyword">static</span> FastAccelStepperEngine myEngine = FastAccelStepperEngine();   <span class="comment">// this is a factory and manager for all stepper instances</span></div>
-<div class="line"><span class="lineno">   10</span> </div>
-<div class="line"><span class="lineno">   11</span>  <span class="keyword">static</span> <span class="keywordtype">bool</span> firstTime = <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">   12</span>  <span class="keywordflow">if</span> (firstTime) {</div>
-<div class="line"><span class="lineno">   13</span>     myEngine.init();</div>
-<div class="line"><span class="lineno">   14</span>     firstTime = <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">   15</span>  }</div>
-<div class="line"><span class="lineno">   16</span> </div>
-<div class="line"><span class="lineno">   17</span>  <span class="keywordflow">return</span> myEngine;</div>
-<div class="line"><span class="lineno">   18</span>}</div>
+<p class="definition">Definition at line <a class="el" href="StepperWithLimits_8cpp_source.html#l00009">9</a> of file <a class="el" href="StepperWithLimits_8cpp_source.html">StepperWithLimits.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">    9</span>                                        {</div>
+<div class="line"><span class="lineno">   10</span>  <span class="keyword">static</span> FastAccelStepperEngine myEngine = FastAccelStepperEngine();   <span class="comment">// this is a factory and manager for all stepper instances</span></div>
+<div class="line"><span class="lineno">   11</span> </div>
+<div class="line"><span class="lineno">   12</span>  <span class="keyword">static</span> <span class="keywordtype">bool</span> firstTime = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">   13</span>  <span class="keywordflow">if</span> (firstTime) {</div>
+<div class="line"><span class="lineno">   14</span>     myEngine.init();</div>
+<div class="line"><span class="lineno">   15</span>     firstTime = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   16</span>  }</div>
+<div class="line"><span class="lineno">   17</span> </div>
+<div class="line"><span class="lineno">   18</span>  <span class="keywordflow">return</span> myEngine;</div>
+<div class="line"><span class="lineno">   19</span>}</div>
 </div><!-- fragment --><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
@@ -169,7 +199,31 @@ Here is the caller graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="StepperWithLimits_8cpp_source.html#l00006">6</a> of file <a class="el" href="StepperWithLimits_8cpp_source.html">StepperWithLimits.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="StepperWithLimits_8cpp_source.html#l00007">7</a> of file <a class="el" href="StepperWithLimits_8cpp_source.html">StepperWithLimits.cpp</a>.</p>
+
+</div>
+</div>
+<a id="aa30177822c5d58bcb0fc48fef65094a8" name="aa30177822c5d58bcb0fc48fef65094a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa30177822c5d58bcb0fc48fef65094a8">&#9670;&#160;</a></span>ENDSTOP_MOVEMENT_SENSORLESS</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const int32_t ENDSTOP_MOVEMENT_SENSORLESS = <a class="el" href="StepperWithLimits_8cpp.html#a04192301159165c6b640ffcb46e7baae">ENDSTOP_MOVEMENT</a> * 5</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="StepperWithLimits_8cpp_source.html#l00008">8</a> of file <a class="el" href="StepperWithLimits_8cpp_source.html">StepperWithLimits.cpp</a>.</p>
 
 </div>
 </div>
@@ -193,7 +247,7 @@ Here is the caller graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="StepperWithLimits_8cpp_source.html#l00005">5</a> of file <a class="el" href="StepperWithLimits_8cpp_source.html">StepperWithLimits.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="StepperWithLimits_8cpp_source.html#l00006">6</a> of file <a class="el" href="StepperWithLimits_8cpp_source.html">StepperWithLimits.cpp</a>.</p>
 
 </div>
 </div>
