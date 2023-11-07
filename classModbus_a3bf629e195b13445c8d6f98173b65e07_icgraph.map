@@ -1,5 +1,6 @@
 <map id="Modbus::holdingRegisterWrite" name="Modbus::holdingRegisterWrite">
-<area shape="rect" id="node1" title=" " alt="" coords="247,45,440,70"/>
-<area shape="rect" id="node2" href="$classisv57communication.html#a6100007b3e4ae78ee59b549339bfd2a9" title=" " alt="" coords="5,5,199,45"/>
-<area shape="rect" id="node3" href="$classisv57communication.html#a360f282d8c5f4b399d3578a6974d9655" title=" " alt="" coords="16,69,188,109"/>
+<area shape="rect" id="node1" title=" " alt="" coords="533,56,727,81"/>
+<area shape="rect" id="node2" href="$classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693" title=" " alt="" coords="247,5,485,31"/>
+<area shape="rect" id="node3" href="$classisv57communication.html#a6100007b3e4ae78ee59b549339bfd2a9" title=" " alt="" coords="5,23,199,63"/>
+<area shape="rect" id="node4" href="$classisv57communication.html#a360f282d8c5f4b399d3578a6974d9655" title=" " alt="" coords="280,106,452,146"/>
 </map>

@@ -1,6 +1,8 @@
 <map id="Modbus::RxRaw" name="Modbus::RxRaw">
-<area shape="rect" id="node1" title=" " alt="" coords="411,45,525,70"/>
-<area shape="rect" id="node2" href="$classisv57communication.html#a54a21dcfaa7950e51066f49119145c8f" title=" " alt="" coords="221,37,363,77"/>
-<area shape="rect" id="node3" href="$classStepperWithLimits.html#a55714344e8a318bf54da2139fed63695" title=" " alt="" coords="13,5,165,45"/>
-<area shape="rect" id="node4" href="$classStepperWithLimits.html#a8ae9c45f6a0453402fc1c3358080dc42" title=" " alt="" coords="5,69,173,109"/>
+<area shape="rect" id="node1" title=" " alt="" coords="533,49,648,74"/>
+<area shape="rect" id="node2" href="$classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693" title=" " alt="" coords="247,17,485,42"/>
+<area shape="rect" id="node4" href="$classisv57communication.html#a54a21dcfaa7950e51066f49119145c8f" title=" " alt="" coords="295,69,437,109"/>
+<area shape="rect" id="node3" href="$classisv57communication.html#a6100007b3e4ae78ee59b549339bfd2a9" title=" " alt="" coords="5,5,199,45"/>
+<area shape="rect" id="node5" href="$classStepperWithLimits.html#a55714344e8a318bf54da2139fed63695" title=" " alt="" coords="26,69,178,109"/>
+<area shape="rect" id="node6" href="$classStepperWithLimits.html#a8ae9c45f6a0453402fc1c3358080dc42" title=" " alt="" coords="18,133,186,173"/>
 </map>
