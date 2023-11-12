@@ -141,52 +141,60 @@ $(function() {
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="classLoadCell__ADS1256.html#ae8d01b4992be881e0d0e94fa8e2ba13c">   63</a></span><span class="keywordtype">float</span> <a class="code hl_function" href="classLoadCell__ADS1256.html#ae8d01b4992be881e0d0e94fa8e2ba13c">LoadCell_ADS1256::getReadingKg</a>()<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>  ADS1256&amp; adc = <a class="code hl_function" href="LoadCell_8cpp.html#a69012c93d090a7bd675a327d08fad6a9">ADC</a>();</div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>  adc.waitDRDY();        <span class="comment">// wait for DRDY to go low before next register read</span></div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>  <span class="keywordflow">return</span> adc.readCurrentChannel() - <a class="code hl_variable" href="classLoadCell__ADS1256.html#ad0de1b953158435f846d579f284bab62">_zeroPoint</a>;</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>}</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno"><a class="line" href="classLoadCell__ADS1256.html#aa3ffc937e2e8e3699edc459c1259b3ee">   69</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classLoadCell__ADS1256.html#aa3ffc937e2e8e3699edc459c1259b3ee">LoadCell_ADS1256::setZeroPoint</a>() {</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>  Serial.println(<span class="stringliteral">&quot;ADC: Identify loadcell offset&quot;</span>);</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>  </div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>  <span class="comment">// Due to construction and gravity, the loadcell measures an initial voltage difference.</span></div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>  <span class="comment">// To compensate this difference, the difference is estimated by moving average filter.</span></div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>  <span class="keywordtype">float</span> loadcellOffset = 0.0f;</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>  <span class="keywordflow">for</span> (<span class="keywordtype">long</span> i = 0; i &lt; <a class="code hl_variable" href="LoadCell_8cpp.html#ab74da14c701adf308fd8372c61cf5c18">NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION</a>; i++) {</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    loadcellOffset += <a class="code hl_function" href="classLoadCell__ADS1256.html#ae8d01b4992be881e0d0e94fa8e2ba13c">getReadingKg</a>(); <span class="comment">// DOUT arriving here are from MUX AIN0 and </span></div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>  }</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>  loadcellOffset /= <a class="code hl_variable" href="LoadCell_8cpp.html#ab74da14c701adf308fd8372c61cf5c18">NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION</a>;</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>  Serial.print(<span class="stringliteral">&quot;Offset &quot;</span>);</div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>  Serial.println(loadcellOffset,10);</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>  <a class="code hl_variable" href="classLoadCell__ADS1256.html#ad0de1b953158435f846d579f284bab62">_zeroPoint</a> = loadcellOffset;</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>}</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="classLoadCell__ADS1256.html#a1b5950ca345eda08d54c11b3b28a5f05">   86</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classLoadCell__ADS1256.html#a1b5950ca345eda08d54c11b3b28a5f05">LoadCell_ADS1256::estimateVariance</a>() {</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>  ADS1256&amp; adc = <a class="code hl_function" href="LoadCell_8cpp.html#a69012c93d090a7bd675a327d08fad6a9">ADC</a>();</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>  </div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>  Serial.println(<span class="stringliteral">&quot;ADC: Identify loadcell variance&quot;</span>);</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>  <span class="keywordtype">float</span> varNormalizer = 1. / (float)(<a class="code hl_variable" href="LoadCell_8cpp.html#ab74da14c701adf308fd8372c61cf5c18">NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION</a> - 1);</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>  <span class="keywordtype">float</span> varEstimate = 0.0f;</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>  <span class="keywordflow">for</span> (<span class="keywordtype">long</span> i = 0; i &lt; <a class="code hl_variable" href="LoadCell_8cpp.html#ab74da14c701adf308fd8372c61cf5c18">NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION</a>; i++){</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    <span class="keywordtype">float</span> loadcellReading = <a class="code hl_function" href="classLoadCell__ADS1256.html#ae8d01b4992be881e0d0e94fa8e2ba13c">getReadingKg</a>();</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <span class="comment">//Serial.println(loadcellReading);</span></div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    varEstimate += sq(loadcellReading) * varNormalizer;</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>  }</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>  Serial.println(<span class="stringliteral">&quot;Variance est.:&quot;</span>);</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>  Serial.println(varEstimate);</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>  <span class="comment">// correct bias, assume AWGN --&gt; 3 * sigma is 99.9 %</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>  <span class="keywordflow">return</span> adc.readCurrentChannel() - ( <a class="code hl_variable" href="classLoadCell__ADS1256.html#ad0de1b953158435f846d579f284bab62">_zeroPoint</a> + 3.0 * <a class="code hl_variable" href="classLoadCell__ADS1256.html#ac79c1cca53e6cba973fddcca262fb804">_standardDeviationEstimate</a> );</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>}</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno"><a class="line" href="classLoadCell__ADS1256.html#aa3ffc937e2e8e3699edc459c1259b3ee">   71</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classLoadCell__ADS1256.html#aa3ffc937e2e8e3699edc459c1259b3ee">LoadCell_ADS1256::setZeroPoint</a>() {</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>  Serial.println(<span class="stringliteral">&quot;ADC: Identify loadcell offset&quot;</span>);</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>  </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>  <span class="comment">// Due to construction and gravity, the loadcell measures an initial voltage difference.</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>  <span class="comment">// To compensate this difference, the difference is estimated by moving average filter.</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>  <span class="keywordtype">float</span> loadcellOffset = 0.0f;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>  <span class="keywordflow">for</span> (<span class="keywordtype">long</span> i = 0; i &lt; <a class="code hl_variable" href="LoadCell_8cpp.html#ab74da14c701adf308fd8372c61cf5c18">NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION</a>; i++) {</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    loadcellOffset += <a class="code hl_function" href="classLoadCell__ADS1256.html#ae8d01b4992be881e0d0e94fa8e2ba13c">getReadingKg</a>(); <span class="comment">// DOUT arriving here are from MUX AIN0 and </span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>  }</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>  loadcellOffset /= <a class="code hl_variable" href="LoadCell_8cpp.html#ab74da14c701adf308fd8372c61cf5c18">NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION</a>;</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>  Serial.print(<span class="stringliteral">&quot;Offset &quot;</span>);</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>  Serial.println(loadcellOffset,10);</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  <a class="code hl_variable" href="classLoadCell__ADS1256.html#ad0de1b953158435f846d579f284bab62">_zeroPoint</a> = loadcellOffset;</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>}</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno"><a class="line" href="classLoadCell__ADS1256.html#a1b5950ca345eda08d54c11b3b28a5f05">   88</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classLoadCell__ADS1256.html#a1b5950ca345eda08d54c11b3b28a5f05">LoadCell_ADS1256::estimateVariance</a>() {</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>  ADS1256&amp; adc = <a class="code hl_function" href="LoadCell_8cpp.html#a69012c93d090a7bd675a327d08fad6a9">ADC</a>();</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>  </div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>  Serial.println(<span class="stringliteral">&quot;ADC: Identify loadcell variance&quot;</span>);</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>  <span class="keywordtype">float</span> varNormalizer = 1. / (float)(<a class="code hl_variable" href="LoadCell_8cpp.html#ab74da14c701adf308fd8372c61cf5c18">NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION</a> - 1);</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>  <span class="keywordtype">float</span> varEstimate = 0.0f;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>  <span class="keywordflow">for</span> (<span class="keywordtype">long</span> i = 0; i &lt; <a class="code hl_variable" href="LoadCell_8cpp.html#ab74da14c701adf308fd8372c61cf5c18">NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION</a>; i++){</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <span class="keywordtype">float</span> loadcellReading = <a class="code hl_function" href="classLoadCell__ADS1256.html#ae8d01b4992be881e0d0e94fa8e2ba13c">getReadingKg</a>();</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    <span class="comment">//Serial.println(loadcellReading);</span></div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    varEstimate += sq(loadcellReading) * varNormalizer;</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>  }</div>
 <div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>  Serial.println(<span class="stringliteral">&quot;Stddev est.:&quot;</span>);</div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>  Serial.println(sqrt(varEstimate));</div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>  <span class="comment">// make sure estimate is nonzero</span></div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>  <span class="keywordflow">if</span> (varEstimate &lt; <a class="code hl_variable" href="LoadCell_8cpp.html#acbb4f95db109149d08210b082b7aeb5b">LOADCELL_VARIANCE_MIN</a>) { </div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    varEstimate = <a class="code hl_variable" href="LoadCell_8cpp.html#acbb4f95db109149d08210b082b7aeb5b">LOADCELL_VARIANCE_MIN</a>;</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>  }</div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>  varEstimate *= 9;</div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span> </div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>  <a class="code hl_variable" href="classLoadCell__ADS1256.html#a22bb793405fa9aa10f4e0f1ec1e97aef">_varianceEstimate</a> = varEstimate;</div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>}</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>  <a class="code hl_variable" href="classLoadCell__ADS1256.html#ac79c1cca53e6cba973fddcca262fb804">_standardDeviationEstimate</a> = sqrt(varEstimate);</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span> </div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>  Serial.println(<span class="stringliteral">&quot;Variance est.:&quot;</span>);</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>  Serial.println(varEstimate);</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>  Serial.println(<span class="stringliteral">&quot;Stddev est.:&quot;</span>);</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>  Serial.println(<a class="code hl_variable" href="classLoadCell__ADS1256.html#ac79c1cca53e6cba973fddcca262fb804">_standardDeviationEstimate</a>);</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span> </div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>  <span class="comment">// make sure estimate is nonzero</span></div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>  <span class="keywordflow">if</span> (varEstimate &lt; <a class="code hl_variable" href="LoadCell_8cpp.html#acbb4f95db109149d08210b082b7aeb5b">LOADCELL_VARIANCE_MIN</a>) { </div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    varEstimate = <a class="code hl_variable" href="LoadCell_8cpp.html#acbb4f95db109149d08210b082b7aeb5b">LOADCELL_VARIANCE_MIN</a>;</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>  }</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>  varEstimate *= 9;</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span> </div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>  <a class="code hl_variable" href="classLoadCell__ADS1256.html#a22bb793405fa9aa10f4e0f1ec1e97aef">_varianceEstimate</a> = varEstimate;</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>  </div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>  </div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>}</div>
 <div class="ttc" id="aLoadCell_8cpp_html_a0024f4ab647d57021a49edd6ad14017a"><div class="ttname"><a href="LoadCell_8cpp.html#a0024f4ab647d57021a49edd6ad14017a">LOADCELL_WEIGHT_RATING_KG</a></div><div class="ttdeci">static const float LOADCELL_WEIGHT_RATING_KG</div><div class="ttdef"><b>Definition:</b> <a href="LoadCell_8cpp_source.html#l00019">LoadCell.cpp:19</a></div></div>
 <div class="ttc" id="aLoadCell_8cpp_html_a294f496385add00c00edd116069d072d"><div class="ttname"><a href="LoadCell_8cpp.html#a294f496385add00c00edd116069d072d">CONVERSION_FACTOR</a></div><div class="ttdeci">static const float CONVERSION_FACTOR</div><div class="ttdef"><b>Definition:</b> <a href="LoadCell_8cpp_source.html#l00022">LoadCell.cpp:22</a></div></div>
 <div class="ttc" id="aLoadCell_8cpp_html_a4d0d708189c629e7702d98c956ee832a"><div class="ttname"><a href="LoadCell_8cpp.html#a4d0d708189c629e7702d98c956ee832a">DEFAULT_VARIANCE_ESTIMATE</a></div><div class="ttdeci">static const float DEFAULT_VARIANCE_ESTIMATE</div><div class="ttdef"><b>Definition:</b> <a href="LoadCell_8cpp_source.html#l00013">LoadCell.cpp:13</a></div></div>
@@ -205,10 +213,11 @@ $(function() {
 <div class="ttc" id="aMain_8h_html_a795571e675fa978442745d27f0ba2b2a"><div class="ttname"><a href="Main_8h.html#a795571e675fa978442745d27f0ba2b2a">ADC_SAMPLE_RATE</a></div><div class="ttdeci">#define ADC_SAMPLE_RATE</div><div class="ttdef"><b>Definition:</b> <a href="Main_8h_source.html#l00041">Main.h:41</a></div></div>
 <div class="ttc" id="aMain_8h_html_abaeddda4b992af7165ed898ab8b2b4ac"><div class="ttname"><a href="Main_8h.html#abaeddda4b992af7165ed898ab8b2b4ac">PIN_MOSI</a></div><div class="ttdeci">#define PIN_MOSI</div><div class="ttdef"><b>Definition:</b> <a href="Main_8h_source.html#l00105">Main.h:105</a></div></div>
 <div class="ttc" id="aMain_8h_html_afa592f8fcb7a301edfe97aa121fd28ce"><div class="ttname"><a href="Main_8h.html#afa592f8fcb7a301edfe97aa121fd28ce">PIN_CS</a></div><div class="ttdeci">#define PIN_CS</div><div class="ttdef"><b>Definition:</b> <a href="Main_8h_source.html#l00106">Main.h:106</a></div></div>
-<div class="ttc" id="aclassLoadCell__ADS1256_html_a1b5950ca345eda08d54c11b3b28a5f05"><div class="ttname"><a href="classLoadCell__ADS1256.html#a1b5950ca345eda08d54c11b3b28a5f05">LoadCell_ADS1256::estimateVariance</a></div><div class="ttdeci">void estimateVariance()</div><div class="ttdef"><b>Definition:</b> <a href="LoadCell_8cpp_source.html#l00086">LoadCell.cpp:86</a></div></div>
+<div class="ttc" id="aclassLoadCell__ADS1256_html_a1b5950ca345eda08d54c11b3b28a5f05"><div class="ttname"><a href="classLoadCell__ADS1256.html#a1b5950ca345eda08d54c11b3b28a5f05">LoadCell_ADS1256::estimateVariance</a></div><div class="ttdeci">void estimateVariance()</div><div class="ttdef"><b>Definition:</b> <a href="LoadCell_8cpp_source.html#l00088">LoadCell.cpp:88</a></div></div>
 <div class="ttc" id="aclassLoadCell__ADS1256_html_a22bb793405fa9aa10f4e0f1ec1e97aef"><div class="ttname"><a href="classLoadCell__ADS1256.html#a22bb793405fa9aa10f4e0f1ec1e97aef">LoadCell_ADS1256::_varianceEstimate</a></div><div class="ttdeci">float _varianceEstimate</div><div class="ttdef"><b>Definition:</b> <a href="LoadCell_8h_source.html#l00009">LoadCell.h:9</a></div></div>
 <div class="ttc" id="aclassLoadCell__ADS1256_html_a80402d547cc2f44af37b401a412d29bd"><div class="ttname"><a href="classLoadCell__ADS1256.html#a80402d547cc2f44af37b401a412d29bd">LoadCell_ADS1256::LoadCell_ADS1256</a></div><div class="ttdeci">LoadCell_ADS1256(uint8_t channel0=0, uint8_t channel1=1)</div><div class="ttdef"><b>Definition:</b> <a href="LoadCell_8cpp_source.html#l00056">LoadCell.cpp:56</a></div></div>
-<div class="ttc" id="aclassLoadCell__ADS1256_html_aa3ffc937e2e8e3699edc459c1259b3ee"><div class="ttname"><a href="classLoadCell__ADS1256.html#aa3ffc937e2e8e3699edc459c1259b3ee">LoadCell_ADS1256::setZeroPoint</a></div><div class="ttdeci">void setZeroPoint()</div><div class="ttdef"><b>Definition:</b> <a href="LoadCell_8cpp_source.html#l00069">LoadCell.cpp:69</a></div></div>
+<div class="ttc" id="aclassLoadCell__ADS1256_html_aa3ffc937e2e8e3699edc459c1259b3ee"><div class="ttname"><a href="classLoadCell__ADS1256.html#aa3ffc937e2e8e3699edc459c1259b3ee">LoadCell_ADS1256::setZeroPoint</a></div><div class="ttdeci">void setZeroPoint()</div><div class="ttdef"><b>Definition:</b> <a href="LoadCell_8cpp_source.html#l00071">LoadCell.cpp:71</a></div></div>
+<div class="ttc" id="aclassLoadCell__ADS1256_html_ac79c1cca53e6cba973fddcca262fb804"><div class="ttname"><a href="classLoadCell__ADS1256.html#ac79c1cca53e6cba973fddcca262fb804">LoadCell_ADS1256::_standardDeviationEstimate</a></div><div class="ttdeci">float _standardDeviationEstimate</div><div class="ttdef"><b>Definition:</b> <a href="LoadCell_8h_source.html#l00010">LoadCell.h:10</a></div></div>
 <div class="ttc" id="aclassLoadCell__ADS1256_html_ad0de1b953158435f846d579f284bab62"><div class="ttname"><a href="classLoadCell__ADS1256.html#ad0de1b953158435f846d579f284bab62">LoadCell_ADS1256::_zeroPoint</a></div><div class="ttdeci">float _zeroPoint</div><div class="ttdef"><b>Definition:</b> <a href="LoadCell_8h_source.html#l00008">LoadCell.h:8</a></div></div>
 <div class="ttc" id="aclassLoadCell__ADS1256_html_ae8d01b4992be881e0d0e94fa8e2ba13c"><div class="ttname"><a href="classLoadCell__ADS1256.html#ae8d01b4992be881e0d0e94fa8e2ba13c">LoadCell_ADS1256::getReadingKg</a></div><div class="ttdeci">float getReadingKg() const</div><div class="ttdef"><b>Definition:</b> <a href="LoadCell_8cpp_source.html#l00063">LoadCell.cpp:63</a></div></div>
 </div><!-- fragment --></div><!-- contents -->

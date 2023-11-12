@@ -13,10 +13,11 @@ var searchData=
   ['_5fposmin_10',['_posMin',['../classStepperWithLimits.html#a6078d72b8812a8da677c81f861dcbfc6',1,'StepperWithLimits']]],
   ['_5fqueue_5fdata_11',['_queue_data',['../classRTDebugOutput.html#a0814e88eabbe2921559af6e594434ef0',1,'RTDebugOutput']]],
   ['_5frtoutput_12',['_rtOutput',['../classCycleTimer.html#a3973cee4f0e37253354e43a28c7ec900',1,'CycleTimer']]],
-  ['_5fstepper_13',['_stepper',['../classStepperWithLimits.html#afa1f4ac8a0b3daf8cb9140855c94db14',1,'StepperWithLimits']]],
-  ['_5ftimefirst_14',['_timeFirst',['../classCycleTimer.html#a6397e279a5cacd5ac98924de1e402aa3',1,'CycleTimer']]],
-  ['_5ftimelastobservation_15',['_timeLastObservation',['../classKalmanFilter.html#aea7f932e369f80ba7bd0a5cd39c89aeb',1,'KalmanFilter::_timeLastObservation()'],['../PedalGeometry_8cpp.html#a41707de327d3905607ecfb6172f88f0f',1,'_timeLastObservation():&#160;PedalGeometry.cpp']]],
-  ['_5ftimelasttriggermillis_16',['_timeLastTriggerMillis',['../classABSOscillation.html#a90eb5d84d511f8eee3f813ea264e9e15',1,'ABSOscillation']]],
-  ['_5fvarianceestimate_17',['_varianceEstimate',['../classLoadCell__ADS1256.html#a22bb793405fa9aa10f4e0f1ec1e97aef',1,'LoadCell_ADS1256']]],
-  ['_5fzeropoint_18',['_zeroPoint',['../classLoadCell__ADS1256.html#ad0de1b953158435f846d579f284bab62',1,'LoadCell_ADS1256']]]
+  ['_5fstandarddeviationestimate_13',['_standardDeviationEstimate',['../classLoadCell__ADS1256.html#ac79c1cca53e6cba973fddcca262fb804',1,'LoadCell_ADS1256']]],
+  ['_5fstepper_14',['_stepper',['../classStepperWithLimits.html#afa1f4ac8a0b3daf8cb9140855c94db14',1,'StepperWithLimits']]],
+  ['_5ftimefirst_15',['_timeFirst',['../classCycleTimer.html#a6397e279a5cacd5ac98924de1e402aa3',1,'CycleTimer']]],
+  ['_5ftimelastobservation_16',['_timeLastObservation',['../classKalmanFilter.html#aea7f932e369f80ba7bd0a5cd39c89aeb',1,'KalmanFilter::_timeLastObservation()'],['../PedalGeometry_8cpp.html#a41707de327d3905607ecfb6172f88f0f',1,'_timeLastObservation():&#160;PedalGeometry.cpp']]],
+  ['_5ftimelasttriggermillis_17',['_timeLastTriggerMillis',['../classABSOscillation.html#a90eb5d84d511f8eee3f813ea264e9e15',1,'ABSOscillation']]],
+  ['_5fvarianceestimate_18',['_varianceEstimate',['../classLoadCell__ADS1256.html#a22bb793405fa9aa10f4e0f1ec1e97aef',1,'LoadCell_ADS1256']]],
+  ['_5fzeropoint_19',['_zeroPoint',['../classLoadCell__ADS1256.html#ad0de1b953158435f846d579f284bab62',1,'LoadCell_ADS1256']]]
 ];
