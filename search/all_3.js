@@ -11,7 +11,7 @@ var searchData=
   ['coilwrite_8',['coilWrite',['../classModbus.html#a7dce566930b180ded13b21c3b74113c2',1,'Modbus::coilWrite(int id, int address, uint8_t value)'],['../classModbus.html#a6a976e759aa798935d2b8f23ad3ba9dd',1,'Modbus::coilWrite(int address, uint8_t value)'],['../classModbus.html#a7dce566930b180ded13b21c3b74113c2',1,'Modbus::coilWrite(int id, int address, uint8_t value)'],['../classModbus.html#a6a976e759aa798935d2b8f23ad3ba9dd',1,'Modbus::coilWrite(int address, uint8_t value)']]],
   ['controller_2ecpp_9',['Controller.cpp',['../Controller_8cpp.html',1,'']]],
   ['controller_2eh_10',['Controller.h',['../Controller_8h.html',1,'']]],
-  ['conversion_5ffactor_11',['CONVERSION_FACTOR',['../LoadCell_8cpp.html#a294f496385add00c00edd116069d072d',1,'LoadCell.cpp']]],
+  ['conversion_5ffactor_11',['CONVERSION_FACTOR',['../LoadCell_8cpp.html#a63a75c27912b5c6fd42e3682e252cbc0',1,'LoadCell.cpp']]],
   ['correctpos_12',['correctPos',['../classStepperWithLimits.html#a58e65fc92d3e4201210813479951f500',1,'StepperWithLimits']]],
   ['cubic_5fspline_5fparam_5fa_5farray_13',['cubic_spline_param_a_array',['../structpayloadPedalConfig.html#ad5f4479817c6e2cd89feac674957ed29',1,'payloadPedalConfig']]],
   ['cubic_5fspline_5fparam_5fb_5farray_14',['cubic_spline_param_b_array',['../structpayloadPedalConfig.html#a4b032c304d213693d0e4615e9cb6dac5',1,'payloadPedalConfig']]],
