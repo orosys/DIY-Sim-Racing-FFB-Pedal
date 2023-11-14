@@ -78,7 +78,7 @@ $(function() {
 <div class="contents">
 <a href="Main_8ino.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span>#define ESTIMATE_LOADCELL_VARIANCE</div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span>#define ISV_COMMUNICATION</div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span>#define PRINT_SERVO_STATES</div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span>//#define PRINT_SERVO_STATES</div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span>bool resetServoEncoder = true;</div>
@@ -997,47 +997,51 @@ $(function() {
 <div class="line"><a id="l00919" name="l00919"></a><span class="lineno">  919</span>        }</div>
 <div class="line"><a id="l00920" name="l00920"></a><span class="lineno">  920</span> </div>
 <div class="line"><a id="l00921" name="l00921"></a><span class="lineno">  921</span> </div>
-<div class="line"><a id="l00922" name="l00922"></a><span class="lineno">  922</span> </div>
-<div class="line"><a id="l00923" name="l00923"></a><span class="lineno">  923</span> </div>
-<div class="line"><a id="l00924" name="l00924"></a><span class="lineno">  924</span>        if(semaphore_resetServoPos!=NULL)</div>
-<div class="line"><a id="l00925" name="l00925"></a><span class="lineno">  925</span>          {</div>
-<div class="line"><a id="l00926" name="l00926"></a><span class="lineno">  926</span> </div>
-<div class="line"><a id="l00927" name="l00927"></a><span class="lineno">  927</span>            // Take the semaphore and just update the config file, then release the semaphore</div>
-<div class="line"><a id="l00928" name="l00928"></a><span class="lineno">  928</span>            if(xSemaphoreTake(semaphore_resetServoPos, (TickType_t)1)==pdTRUE)</div>
-<div class="line"><a id="l00929" name="l00929"></a><span class="lineno">  929</span>            {</div>
-<div class="line"><a id="l00930" name="l00930"></a><span class="lineno">  930</span>              //servo_offset_compensation_steps_i32 = servo_offset_compensation_steps_local_i32;</div>
-<div class="line"><a id="l00931" name="l00931"></a><span class="lineno">  931</span>              servo_offset_compensation_steps_i32 = -servo_offset_compensation_steps_local_i32;</div>
-<div class="line"><a id="l00932" name="l00932"></a><span class="lineno">  932</span>              xSemaphoreGive(semaphore_resetServoPos);</div>
-<div class="line"><a id="l00933" name="l00933"></a><span class="lineno">  933</span>            }</div>
-<div class="line"><a id="l00934" name="l00934"></a><span class="lineno">  934</span> </div>
-<div class="line"><a id="l00935" name="l00935"></a><span class="lineno">  935</span>          }</div>
-<div class="line"><a id="l00936" name="l00936"></a><span class="lineno">  936</span>          else</div>
-<div class="line"><a id="l00937" name="l00937"></a><span class="lineno">  937</span>          {</div>
-<div class="line"><a id="l00938" name="l00938"></a><span class="lineno">  938</span>            semaphore_resetServoPos = xSemaphoreCreateMutex();</div>
-<div class="line"><a id="l00939" name="l00939"></a><span class="lineno">  939</span>            Serial.println(&quot;semaphore_resetServoPos == 0&quot;);</div>
-<div class="line"><a id="l00940" name="l00940"></a><span class="lineno">  940</span>          }</div>
-<div class="line"><a id="l00941" name="l00941"></a><span class="lineno">  941</span> </div>
-<div class="line"><a id="l00942" name="l00942"></a><span class="lineno">  942</span> </div>
-<div class="line"><a id="l00943" name="l00943"></a><span class="lineno">  943</span> </div>
-<div class="line"><a id="l00944" name="l00944"></a><span class="lineno">  944</span>        #ifdef PRINT_SERVO_STATES</div>
-<div class="line"><a id="l00945" name="l00945"></a><span class="lineno">  945</span>          static RTDebugOutput&lt;int16_t, 4&gt; rtDebugFilter({ &quot;pos_p&quot;, &quot;pos_error_p&quot;, &quot;curr_per&quot;, &quot;offset&quot;});</div>
-<div class="line"><a id="l00946" name="l00946"></a><span class="lineno">  946</span>          rtDebugFilter.offerData({ isv57.servo_pos_given_p, isv57.servo_pos_error_p, isv57.servo_current_percent, servo_offset_compensation_steps_i32});</div>
-<div class="line"><a id="l00947" name="l00947"></a><span class="lineno">  947</span>        #endif</div>
-<div class="line"><a id="l00948" name="l00948"></a><span class="lineno">  948</span> </div>
-<div class="line"><a id="l00949" name="l00949"></a><span class="lineno">  949</span>       </div>
-<div class="line"><a id="l00950" name="l00950"></a><span class="lineno">  950</span> </div>
-<div class="line"><a id="l00951" name="l00951"></a><span class="lineno">  951</span>        </div>
-<div class="line"><a id="l00952" name="l00952"></a><span class="lineno">  952</span>    }</div>
-<div class="line"><a id="l00953" name="l00953"></a><span class="lineno">  953</span>    else</div>
-<div class="line"><a id="l00954" name="l00954"></a><span class="lineno">  954</span>    {</div>
-<div class="line"><a id="l00955" name="l00955"></a><span class="lineno">  955</span>      delay(1000);</div>
+<div class="line"><a id="l00922" name="l00922"></a><span class="lineno">  922</span>        // invert the compensation wrt the motor direction</div>
+<div class="line"><a id="l00923" name="l00923"></a><span class="lineno">  923</span>        if (MOTOR_INVERT_MOTOR_DIR)</div>
+<div class="line"><a id="l00924" name="l00924"></a><span class="lineno">  924</span>        {</div>
+<div class="line"><a id="l00925" name="l00925"></a><span class="lineno">  925</span>          servo_offset_compensation_steps_local_i32 *= -1;</div>
+<div class="line"><a id="l00926" name="l00926"></a><span class="lineno">  926</span>        }</div>
+<div class="line"><a id="l00927" name="l00927"></a><span class="lineno">  927</span> </div>
+<div class="line"><a id="l00928" name="l00928"></a><span class="lineno">  928</span> </div>
+<div class="line"><a id="l00929" name="l00929"></a><span class="lineno">  929</span>        if(semaphore_resetServoPos!=NULL)</div>
+<div class="line"><a id="l00930" name="l00930"></a><span class="lineno">  930</span>          {</div>
+<div class="line"><a id="l00931" name="l00931"></a><span class="lineno">  931</span> </div>
+<div class="line"><a id="l00932" name="l00932"></a><span class="lineno">  932</span>            // Take the semaphore and just update the config file, then release the semaphore</div>
+<div class="line"><a id="l00933" name="l00933"></a><span class="lineno">  933</span>            if(xSemaphoreTake(semaphore_resetServoPos, (TickType_t)1)==pdTRUE)</div>
+<div class="line"><a id="l00934" name="l00934"></a><span class="lineno">  934</span>            {</div>
+<div class="line"><a id="l00935" name="l00935"></a><span class="lineno">  935</span>              servo_offset_compensation_steps_i32 = servo_offset_compensation_steps_local_i32;</div>
+<div class="line"><a id="l00936" name="l00936"></a><span class="lineno">  936</span>              xSemaphoreGive(semaphore_resetServoPos);</div>
+<div class="line"><a id="l00937" name="l00937"></a><span class="lineno">  937</span>            }</div>
+<div class="line"><a id="l00938" name="l00938"></a><span class="lineno">  938</span> </div>
+<div class="line"><a id="l00939" name="l00939"></a><span class="lineno">  939</span>          }</div>
+<div class="line"><a id="l00940" name="l00940"></a><span class="lineno">  940</span>          else</div>
+<div class="line"><a id="l00941" name="l00941"></a><span class="lineno">  941</span>          {</div>
+<div class="line"><a id="l00942" name="l00942"></a><span class="lineno">  942</span>            semaphore_resetServoPos = xSemaphoreCreateMutex();</div>
+<div class="line"><a id="l00943" name="l00943"></a><span class="lineno">  943</span>            Serial.println(&quot;semaphore_resetServoPos == 0&quot;);</div>
+<div class="line"><a id="l00944" name="l00944"></a><span class="lineno">  944</span>          }</div>
+<div class="line"><a id="l00945" name="l00945"></a><span class="lineno">  945</span> </div>
+<div class="line"><a id="l00946" name="l00946"></a><span class="lineno">  946</span> </div>
+<div class="line"><a id="l00947" name="l00947"></a><span class="lineno">  947</span> </div>
+<div class="line"><a id="l00948" name="l00948"></a><span class="lineno">  948</span>        #ifdef PRINT_SERVO_STATES</div>
+<div class="line"><a id="l00949" name="l00949"></a><span class="lineno">  949</span>          static RTDebugOutput&lt;int16_t, 4&gt; rtDebugFilter({ &quot;pos_p&quot;, &quot;pos_error_p&quot;, &quot;curr_per&quot;, &quot;offset&quot;});</div>
+<div class="line"><a id="l00950" name="l00950"></a><span class="lineno">  950</span>          rtDebugFilter.offerData({ isv57.servo_pos_given_p, isv57.servo_pos_error_p, isv57.servo_current_percent, servo_offset_compensation_steps_i32});</div>
+<div class="line"><a id="l00951" name="l00951"></a><span class="lineno">  951</span>        #endif</div>
+<div class="line"><a id="l00952" name="l00952"></a><span class="lineno">  952</span> </div>
+<div class="line"><a id="l00953" name="l00953"></a><span class="lineno">  953</span>       </div>
+<div class="line"><a id="l00954" name="l00954"></a><span class="lineno">  954</span> </div>
+<div class="line"><a id="l00955" name="l00955"></a><span class="lineno">  955</span>        </div>
 <div class="line"><a id="l00956" name="l00956"></a><span class="lineno">  956</span>    }</div>
-<div class="line"><a id="l00957" name="l00957"></a><span class="lineno">  957</span> </div>
-<div class="line"><a id="l00958" name="l00958"></a><span class="lineno">  958</span> </div>
-<div class="line"><a id="l00959" name="l00959"></a><span class="lineno">  959</span>  }</div>
-<div class="line"><a id="l00960" name="l00960"></a><span class="lineno">  960</span>}</div>
+<div class="line"><a id="l00957" name="l00957"></a><span class="lineno">  957</span>    else</div>
+<div class="line"><a id="l00958" name="l00958"></a><span class="lineno">  958</span>    {</div>
+<div class="line"><a id="l00959" name="l00959"></a><span class="lineno">  959</span>      delay(1000);</div>
+<div class="line"><a id="l00960" name="l00960"></a><span class="lineno">  960</span>    }</div>
 <div class="line"><a id="l00961" name="l00961"></a><span class="lineno">  961</span> </div>
-<div class="line"><a id="l00962" name="l00962"></a><span class="lineno">  962</span>#endif</div>
+<div class="line"><a id="l00962" name="l00962"></a><span class="lineno">  962</span> </div>
+<div class="line"><a id="l00963" name="l00963"></a><span class="lineno">  963</span>  }</div>
+<div class="line"><a id="l00964" name="l00964"></a><span class="lineno">  964</span>}</div>
+<div class="line"><a id="l00965" name="l00965"></a><span class="lineno">  965</span> </div>
+<div class="line"><a id="l00966" name="l00966"></a><span class="lineno">  966</span>#endif</div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
