@@ -83,10 +83,11 @@ This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
 <div class="center"><img src="Main_8h__dep__incl.png" border="0" usemap="#aArduino_2Esp32_2Main_2Main_8hdep" alt=""/></div>
 <map name="aArduino_2Esp32_2Main_2Main_8hdep" id="aArduino_2Esp32_2Main_2Main_8hdep">
-<area shape="rect" title=" " alt="" coords="59,5,197,45"/>
+<area shape="rect" title=" " alt="" coords="153,5,292,45"/>
 <area shape="rect" href="LoadCell_8cpp.html" title=" " alt="" coords="5,181,144,221"/>
 <area shape="rect" href="LoadCell_8h.html" title=" " alt="" coords="59,93,197,133"/>
 <area shape="rect" href="StepperMovementStrategy_8h.html" title=" " alt="" coords="222,93,413,133"/>
+<area shape="rect" href="StepperWithLimits_8cpp.html" title=" " alt="" coords="437,93,595,133"/>
 </map>
 </div>
 </div>
@@ -108,6 +109,8 @@ Macros</h2></td></tr>
 <tr class="separator:a427b269acba12e18c696d5be8cb59e91"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af46044ba4504bc725cd220af5edeef5a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="Main_8h.html#af46044ba4504bc725cd220af5edeef5a">LOADCELL_SENSITIVITY_MV_V</a>&#160;&#160;&#160;2.0</td></tr>
 <tr class="separator:af46044ba4504bc725cd220af5edeef5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab3629707a27eda44e5f8ed57ee546a46"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="Main_8h.html#ab3629707a27eda44e5f8ed57ee546a46">MOTOR_INVERT_MOTOR_DIR</a>&#160;&#160;&#160;false</td></tr>
+<tr class="separator:ab3629707a27eda44e5f8ed57ee546a46"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5559cd1953e3fce83f6ecf4fc4c1e46a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="Main_8h.html#a5559cd1953e3fce83f6ecf4fc4c1e46a">PIN_DRDY</a>&#160;&#160;&#160;19</td></tr>
 <tr class="separator:a5559cd1953e3fce83f6ecf4fc4c1e46a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0010d60e4eaa7f589cd190c45dcc7d20"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="Main_8h.html#a0010d60e4eaa7f589cd190c45dcc7d20">PIN_RST</a>&#160;&#160;&#160;15</td></tr>
@@ -176,7 +179,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00116">116</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00123">123</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
 
 </div>
 </div>
@@ -240,7 +243,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00121">121</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00128">128</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
 
 </div>
 </div>
@@ -256,7 +259,23 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00120">120</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00127">127</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
+
+</div>
+</div>
+<a id="ab3629707a27eda44e5f8ed57ee546a46" name="ab3629707a27eda44e5f8ed57ee546a46"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab3629707a27eda44e5f8ed57ee546a46">&#9670;&#160;</a></span>MOTOR_INVERT_MOTOR_DIR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MOTOR_INVERT_MOTOR_DIR&#160;&#160;&#160;false</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00057">57</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
 
 </div>
 </div>
@@ -288,7 +307,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00113">113</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00120">120</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
 
 </div>
 </div>
@@ -304,7 +323,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00108">108</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00115">115</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
 
 </div>
 </div>
@@ -320,7 +339,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00111">111</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00118">118</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
 
 </div>
 </div>
@@ -336,7 +355,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00112">112</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00119">119</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
 
 </div>
 </div>
@@ -352,7 +371,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00109">109</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00116">116</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
 
 </div>
 </div>
@@ -368,7 +387,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00110">110</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00117">117</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
 
 </div>
 </div>
@@ -400,7 +419,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00124">124</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00131">131</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
 
 </div>
 </div>
@@ -416,7 +435,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00117">117</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00124">124</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
 
 </div>
 </div>
