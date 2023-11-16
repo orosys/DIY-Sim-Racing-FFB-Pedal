@@ -554,7 +554,7 @@ $(function() {
 <div class="line"><a id="l00476" name="l00476"></a><span class="lineno">  476</span>      else</div>
 <div class="line"><a id="l00477" name="l00477"></a><span class="lineno">  477</span>      {</div>
 <div class="line"><a id="l00478" name="l00478"></a><span class="lineno">  478</span>        semaphore_updateConfig = xSemaphoreCreateMutex();</div>
-<div class="line"><a id="l00479" name="l00479"></a><span class="lineno">  479</span>        Serial.println(&quot;semaphore_updateConfig == 0&quot;);</div>
+<div class="line"><a id="l00479" name="l00479"></a><span class="lineno">  479</span>        //Serial.println(&quot;semaphore_updateConfig == 0&quot;);</div>
 <div class="line"><a id="l00480" name="l00480"></a><span class="lineno">  480</span>      }</div>
 <div class="line"><a id="l00481" name="l00481"></a><span class="lineno">  481</span>    }</div>
 <div class="line"><a id="l00482" name="l00482"></a><span class="lineno">  482</span> </div>
@@ -723,7 +723,7 @@ $(function() {
 <div class="line"><a id="l00645" name="l00645"></a><span class="lineno">  645</span>    else</div>
 <div class="line"><a id="l00646" name="l00646"></a><span class="lineno">  646</span>    {</div>
 <div class="line"><a id="l00647" name="l00647"></a><span class="lineno">  647</span>      semaphore_updateJoystick = xSemaphoreCreateMutex();</div>
-<div class="line"><a id="l00648" name="l00648"></a><span class="lineno">  648</span>      Serial.println(&quot;semaphore_updateJoystick == 0&quot;);</div>
+<div class="line"><a id="l00648" name="l00648"></a><span class="lineno">  648</span>      //Serial.println(&quot;semaphore_updateJoystick == 0&quot;);</div>
 <div class="line"><a id="l00649" name="l00649"></a><span class="lineno">  649</span>    }</div>
 <div class="line"><a id="l00650" name="l00650"></a><span class="lineno">  650</span> </div>
 <div class="line"><a id="l00651" name="l00651"></a><span class="lineno">  651</span>    #ifdef PRINT_USED_STACK_SIZE</div>
@@ -876,10 +876,10 @@ $(function() {
 <div class="line"><a id="l00798" name="l00798"></a><span class="lineno">  798</span>          joystickNormalizedToInt32_local = joystickNormalizedToInt32;</div>
 <div class="line"><a id="l00799" name="l00799"></a><span class="lineno">  799</span>          xSemaphoreGive(semaphore_updateJoystick);</div>
 <div class="line"><a id="l00800" name="l00800"></a><span class="lineno">  800</span>        }</div>
-<div class="line"><a id="l00801" name="l00801"></a><span class="lineno">  801</span>        else</div>
-<div class="line"><a id="l00802" name="l00802"></a><span class="lineno">  802</span>        {</div>
-<div class="line"><a id="l00803" name="l00803"></a><span class="lineno">  803</span>          Serial.println(&quot;semaphore_updateJoystick == 0&quot;);</div>
-<div class="line"><a id="l00804" name="l00804"></a><span class="lineno">  804</span>        }</div>
+<div class="line"><a id="l00801" name="l00801"></a><span class="lineno">  801</span>        //else</div>
+<div class="line"><a id="l00802" name="l00802"></a><span class="lineno">  802</span>        //{</div>
+<div class="line"><a id="l00803" name="l00803"></a><span class="lineno">  803</span>          //Serial.println(&quot;semaphore_updateJoystick == 0&quot;);</div>
+<div class="line"><a id="l00804" name="l00804"></a><span class="lineno">  804</span>        //}</div>
 <div class="line"><a id="l00805" name="l00805"></a><span class="lineno">  805</span>      }</div>
 <div class="line"><a id="l00806" name="l00806"></a><span class="lineno">  806</span>      SetControllerOutputValue(joystickNormalizedToInt32_local);</div>
 <div class="line"><a id="l00807" name="l00807"></a><span class="lineno">  807</span>    }</div>
@@ -1018,7 +1018,7 @@ $(function() {
 <div class="line"><a id="l00940" name="l00940"></a><span class="lineno">  940</span>          else</div>
 <div class="line"><a id="l00941" name="l00941"></a><span class="lineno">  941</span>          {</div>
 <div class="line"><a id="l00942" name="l00942"></a><span class="lineno">  942</span>            semaphore_resetServoPos = xSemaphoreCreateMutex();</div>
-<div class="line"><a id="l00943" name="l00943"></a><span class="lineno">  943</span>            Serial.println(&quot;semaphore_resetServoPos == 0&quot;);</div>
+<div class="line"><a id="l00943" name="l00943"></a><span class="lineno">  943</span>            //Serial.println(&quot;semaphore_resetServoPos == 0&quot;);</div>
 <div class="line"><a id="l00944" name="l00944"></a><span class="lineno">  944</span>          }</div>
 <div class="line"><a id="l00945" name="l00945"></a><span class="lineno">  945</span> </div>
 <div class="line"><a id="l00946" name="l00946"></a><span class="lineno">  946</span> </div>
