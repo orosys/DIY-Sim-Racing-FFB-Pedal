@@ -167,17 +167,17 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Controller_8cpp_source.html#l00072">72</a> of file <a class="el" href="Controller_8cpp_source.html">Controller.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   72</span>                                                                                                     {</div>
-<div class="line"><span class="lineno">   73</span>  <span class="keywordtype">float</span> valRange = (maxVal - minVal);</div>
-<div class="line"><span class="lineno">   74</span>  <span class="keywordflow">if</span> (abs(valRange) &lt; 0.01) {</div>
-<div class="line"><span class="lineno">   75</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="Controller_8cpp.html#ac1e9ca710d3cf526d3500bd08edd4b36">JOYSTICK_MIN_VALUE</a>;   <span class="comment">// avoid div-by-zero</span></div>
-<div class="line"><span class="lineno">   76</span>  }</div>
-<div class="line"><span class="lineno">   77</span> </div>
-<div class="line"><span class="lineno">   78</span>  <span class="keywordtype">float</span> fractional = (value - minVal) / valRange;</div>
-<div class="line"><span class="lineno">   79</span>  int32_t controller = <a class="code hl_variable" href="Controller_8cpp.html#ac1e9ca710d3cf526d3500bd08edd4b36">JOYSTICK_MIN_VALUE</a> + (fractional * <a class="code hl_variable" href="Controller_8cpp.html#a7a50456faa7346a8466099e7c9003cc1">JOYSTICK_RANGE</a>);</div>
-<div class="line"><span class="lineno">   80</span>  <span class="keywordflow">return</span> constrain(controller, <a class="code hl_variable" href="Controller_8cpp.html#ac1e9ca710d3cf526d3500bd08edd4b36">JOYSTICK_MIN_VALUE</a>, (maxGameOutput/100.) * <a class="code hl_variable" href="Controller_8cpp.html#a6932f6513cabf3082fc4fb11537a4293">JOYSTICK_MAX_VALUE</a>);</div>
-<div class="line"><span class="lineno">   81</span>}</div>
+<p class="definition">Definition at line <a class="el" href="Controller_8cpp_source.html#l00082">82</a> of file <a class="el" href="Controller_8cpp_source.html">Controller.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   82</span>                                                                                                     {</div>
+<div class="line"><span class="lineno">   83</span>  <span class="keywordtype">float</span> valRange = (maxVal - minVal);</div>
+<div class="line"><span class="lineno">   84</span>  <span class="keywordflow">if</span> (abs(valRange) &lt; 0.01) {</div>
+<div class="line"><span class="lineno">   85</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="Controller_8cpp.html#ac1e9ca710d3cf526d3500bd08edd4b36">JOYSTICK_MIN_VALUE</a>;   <span class="comment">// avoid div-by-zero</span></div>
+<div class="line"><span class="lineno">   86</span>  }</div>
+<div class="line"><span class="lineno">   87</span> </div>
+<div class="line"><span class="lineno">   88</span>  <span class="keywordtype">float</span> fractional = (value - minVal) / valRange;</div>
+<div class="line"><span class="lineno">   89</span>  int32_t controller = <a class="code hl_variable" href="Controller_8cpp.html#ac1e9ca710d3cf526d3500bd08edd4b36">JOYSTICK_MIN_VALUE</a> + (fractional * <a class="code hl_variable" href="Controller_8cpp.html#a7a50456faa7346a8466099e7c9003cc1">JOYSTICK_RANGE</a>);</div>
+<div class="line"><span class="lineno">   90</span>  <span class="keywordflow">return</span> constrain(controller, <a class="code hl_variable" href="Controller_8cpp.html#ac1e9ca710d3cf526d3500bd08edd4b36">JOYSTICK_MIN_VALUE</a>, (maxGameOutput/100.) * <a class="code hl_variable" href="Controller_8cpp.html#a6932f6513cabf3082fc4fb11537a4293">JOYSTICK_MAX_VALUE</a>);</div>
+<div class="line"><span class="lineno">   91</span>}</div>
 <div class="ttc" id="aController_8cpp_html_a6932f6513cabf3082fc4fb11537a4293"><div class="ttname"><a href="Controller_8cpp.html#a6932f6513cabf3082fc4fb11537a4293">JOYSTICK_MAX_VALUE</a></div><div class="ttdeci">static const int16_t JOYSTICK_MAX_VALUE</div><div class="ttdef"><b>Definition:</b> <a href="Controller_8cpp_source.html#l00006">Controller.cpp:6</a></div></div>
 <div class="ttc" id="aController_8cpp_html_a7a50456faa7346a8466099e7c9003cc1"><div class="ttname"><a href="Controller_8cpp.html#a7a50456faa7346a8466099e7c9003cc1">JOYSTICK_RANGE</a></div><div class="ttdeci">static const int16_t JOYSTICK_RANGE</div><div class="ttdef"><b>Definition:</b> <a href="Controller_8cpp_source.html#l00007">Controller.cpp:7</a></div></div>
 <div class="ttc" id="aController_8cpp_html_ac1e9ca710d3cf526d3500bd08edd4b36"><div class="ttname"><a href="Controller_8cpp.html#ac1e9ca710d3cf526d3500bd08edd4b36">JOYSTICK_MIN_VALUE</a></div><div class="ttdeci">static const int16_t JOYSTICK_MIN_VALUE</div><div class="ttdef"><b>Definition:</b> <a href="Controller_8cpp_source.html#l00005">Controller.cpp:5</a></div></div>
