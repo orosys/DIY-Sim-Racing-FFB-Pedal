@@ -120,6 +120,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a9b99ba97ab1e2c39165bdbbc4a1cf87c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aef91cbf9e5f772215cecfc46977aa7c3"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStepperWithLimits.html#aef91cbf9e5f772215cecfc46977aa7c3">getCurrentPositionFraction</a> () const</td></tr>
 <tr class="separator:aef91cbf9e5f772215cecfc46977aa7c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a866100a58cdcdb1bddb56fc9d2092924"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStepperWithLimits.html#a866100a58cdcdb1bddb56fc9d2092924">getCurrentPositionFractionFromExternalPos</a> (int32_t extPos_i32) const</td></tr>
+<tr class="separator:a866100a58cdcdb1bddb56fc9d2092924"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a61ccdee6605b7c02cc5b71786de8644e"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStepperWithLimits.html#a61ccdee6605b7c02cc5b71786de8644e">getTargetPositionSteps</a> () const</td></tr>
 <tr class="separator:a61ccdee6605b7c02cc5b71786de8644e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2056dc79cd801ddee648385164186bf3"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStepperWithLimits.html#a2056dc79cd801ddee648385164186bf3">getLimitMin</a> () const</td></tr>
@@ -288,15 +290,15 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="StepperWithLimits_8cpp_source.html#l00270">270</a> of file <a class="el" href="StepperWithLimits_8cpp_source.html">StepperWithLimits.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  271</span>{</div>
-<div class="line"><span class="lineno">  272</span>  <span class="comment">// </span></div>
-<div class="line"><span class="lineno">  273</span>  int32_t stepOffset =(int32_t)constrain(posOffset, -10, 10);</div>
-<div class="line"><span class="lineno">  274</span> </div>
-<div class="line"><span class="lineno">  275</span>  <span class="comment">// correct pos</span></div>
-<div class="line"><span class="lineno">  276</span>  <a class="code hl_variable" href="classStepperWithLimits.html#afa1f4ac8a0b3daf8cb9140855c94db14">_stepper</a>-&gt;setCurrentPosition(<a class="code hl_variable" href="classStepperWithLimits.html#afa1f4ac8a0b3daf8cb9140855c94db14">_stepper</a>-&gt;getCurrentPosition() + stepOffset);</div>
-<div class="line"><span class="lineno">  277</span>  <span class="keywordflow">return</span> 1;</div>
-<div class="line"><span class="lineno">  278</span>}</div>
+<p class="definition">Definition at line <a class="el" href="StepperWithLimits_8cpp_source.html#l00274">274</a> of file <a class="el" href="StepperWithLimits_8cpp_source.html">StepperWithLimits.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  275</span>{</div>
+<div class="line"><span class="lineno">  276</span>  <span class="comment">// </span></div>
+<div class="line"><span class="lineno">  277</span>  int32_t stepOffset =(int32_t)constrain(posOffset, -10, 10);</div>
+<div class="line"><span class="lineno">  278</span> </div>
+<div class="line"><span class="lineno">  279</span>  <span class="comment">// correct pos</span></div>
+<div class="line"><span class="lineno">  280</span>  <a class="code hl_variable" href="classStepperWithLimits.html#afa1f4ac8a0b3daf8cb9140855c94db14">_stepper</a>-&gt;setCurrentPosition(<a class="code hl_variable" href="classStepperWithLimits.html#afa1f4ac8a0b3daf8cb9140855c94db14">_stepper</a>-&gt;getCurrentPosition() + stepOffset);</div>
+<div class="line"><span class="lineno">  281</span>  <span class="keywordflow">return</span> 1;</div>
+<div class="line"><span class="lineno">  282</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -497,7 +499,7 @@ Here is the call graph for this function:</div>
 <div class="line"><span class="lineno">  233</span>  <span class="keywordflow">return</span> double(<a class="code hl_function" href="classStepperWithLimits.html#a9b99ba97ab1e2c39165bdbbc4a1cf87c">getCurrentPositionSteps</a>()) / <a class="code hl_function" href="classStepperWithLimits.html#ac61366d2883f5cde889a75e1f9a32157">getTravelSteps</a>();</div>
 <div class="line"><span class="lineno">  234</span>}</div>
 <div class="ttc" id="aclassStepperWithLimits_html_a9b99ba97ab1e2c39165bdbbc4a1cf87c"><div class="ttname"><a href="classStepperWithLimits.html#a9b99ba97ab1e2c39165bdbbc4a1cf87c">StepperWithLimits::getCurrentPositionSteps</a></div><div class="ttdeci">int32_t getCurrentPositionSteps() const</div><div class="ttdef"><b>Definition:</b> <a href="StepperWithLimits_8cpp_source.html#l00227">StepperWithLimits.cpp:227</a></div></div>
-<div class="ttc" id="aclassStepperWithLimits_html_ac61366d2883f5cde889a75e1f9a32157"><div class="ttname"><a href="classStepperWithLimits.html#ac61366d2883f5cde889a75e1f9a32157">StepperWithLimits::getTravelSteps</a></div><div class="ttdeci">int32_t getTravelSteps() const</div><div class="ttdef"><b>Definition:</b> <a href="StepperWithLimits_8h_source.html#l00044">StepperWithLimits.h:44</a></div></div>
+<div class="ttc" id="aclassStepperWithLimits_html_ac61366d2883f5cde889a75e1f9a32157"><div class="ttname"><a href="classStepperWithLimits.html#ac61366d2883f5cde889a75e1f9a32157">StepperWithLimits::getTravelSteps</a></div><div class="ttdeci">int32_t getTravelSteps() const</div><div class="ttdef"><b>Definition:</b> <a href="StepperWithLimits_8h_source.html#l00045">StepperWithLimits.h:45</a></div></div>
 </div><!-- fragment --><div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -515,6 +517,38 @@ Here is the caller graph for this function:</div>
 <map name="aclassStepperWithLimits_aef91cbf9e5f772215cecfc46977aa7c3_icgraph" id="aclassStepperWithLimits_aef91cbf9e5f772215cecfc46977aa7c3_icgraph">
 <area shape="rect" title=" " alt="" coords="211,5,387,45"/>
 <area shape="rect" href="StepperMovementStrategy_8h.html#a930e00dcd29fd9a4153d2e96cf2f0dd3" title=" " alt="" coords="5,13,163,38"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="a866100a58cdcdb1bddb56fc9d2092924" name="a866100a58cdcdb1bddb56fc9d2092924"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a866100a58cdcdb1bddb56fc9d2092924">&#9670;&#160;</a></span>getCurrentPositionFractionFromExternalPos()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double StepperWithLimits::getCurrentPositionFractionFromExternalPos </td>
+          <td>(</td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>extPos_i32</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="StepperWithLimits_8cpp_source.html#l00236">236</a> of file <a class="el" href="StepperWithLimits_8cpp_source.html">StepperWithLimits.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  236</span>                                                                                            {</div>
+<div class="line"><span class="lineno">  237</span>  <span class="keywordflow">return</span> double(extPos_i32) / <a class="code hl_function" href="classStepperWithLimits.html#ac61366d2883f5cde889a75e1f9a32157">getTravelSteps</a>();</div>
+<div class="line"><span class="lineno">  238</span>}</div>
+</div><!-- fragment --><div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="classStepperWithLimits_a866100a58cdcdb1bddb56fc9d2092924_cgraph.png" border="0" usemap="#aclassStepperWithLimits_a866100a58cdcdb1bddb56fc9d2092924_cgraph" alt=""/></div>
+<map name="aclassStepperWithLimits_a866100a58cdcdb1bddb56fc9d2092924_cgraph" id="aclassStepperWithLimits_a866100a58cdcdb1bddb56fc9d2092924_cgraph">
+<area shape="rect" title=" " alt="" coords="5,5,181,60"/>
+<area shape="rect" href="classStepperWithLimits.html#ac61366d2883f5cde889a75e1f9a32157" title=" " alt="" coords="229,13,364,53"/>
 </map>
 </div>
 
@@ -577,8 +611,8 @@ Here is the caller graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="StepperWithLimits_8h_source.html#l00043">43</a> of file <a class="el" href="StepperWithLimits_8h_source.html">StepperWithLimits.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   43</span>{ <span class="keywordflow">return</span> <a class="code hl_variable" href="classStepperWithLimits.html#aae2033a3b9de58e9e63c1458e4ce6647">_limitMax</a>; }</div>
+<p class="definition">Definition at line <a class="el" href="StepperWithLimits_8h_source.html#l00044">44</a> of file <a class="el" href="StepperWithLimits_8h_source.html">StepperWithLimits.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   44</span>{ <span class="keywordflow">return</span> <a class="code hl_variable" href="classStepperWithLimits.html#aae2033a3b9de58e9e63c1458e4ce6647">_limitMax</a>; }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -605,8 +639,8 @@ Here is the caller graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="StepperWithLimits_8h_source.html#l00042">42</a> of file <a class="el" href="StepperWithLimits_8h_source.html">StepperWithLimits.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   42</span>{ <span class="keywordflow">return</span> <a class="code hl_variable" href="classStepperWithLimits.html#a605fe0c33b0cc7a0012b21cce230ac40">_limitMin</a>; }</div>
+<p class="definition">Definition at line <a class="el" href="StepperWithLimits_8h_source.html#l00043">43</a> of file <a class="el" href="StepperWithLimits_8h_source.html">StepperWithLimits.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   43</span>{ <span class="keywordflow">return</span> <a class="code hl_variable" href="classStepperWithLimits.html#a605fe0c33b0cc7a0012b21cce230ac40">_limitMin</a>; }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -625,10 +659,10 @@ Here is the caller graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="StepperWithLimits_8cpp_source.html#l00236">236</a> of file <a class="el" href="StepperWithLimits_8cpp_source.html">StepperWithLimits.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  236</span>                                                        {</div>
-<div class="line"><span class="lineno">  237</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classStepperWithLimits.html#afa1f4ac8a0b3daf8cb9140855c94db14">_stepper</a>-&gt;getPositionAfterCommandsCompleted();</div>
-<div class="line"><span class="lineno">  238</span>}</div>
+<p class="definition">Definition at line <a class="el" href="StepperWithLimits_8cpp_source.html#l00240">240</a> of file <a class="el" href="StepperWithLimits_8cpp_source.html">StepperWithLimits.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  240</span>                                                        {</div>
+<div class="line"><span class="lineno">  241</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classStepperWithLimits.html#afa1f4ac8a0b3daf8cb9140855c94db14">_stepper</a>-&gt;getPositionAfterCommandsCompleted();</div>
+<div class="line"><span class="lineno">  242</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -655,15 +689,16 @@ Here is the caller graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="StepperWithLimits_8h_source.html#l00044">44</a> of file <a class="el" href="StepperWithLimits_8h_source.html">StepperWithLimits.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   44</span>{ <span class="keywordflow">return</span> <a class="code hl_variable" href="classStepperWithLimits.html#a92603ced68dd11e494775d7e7248fa21">_posMax</a> - <a class="code hl_variable" href="classStepperWithLimits.html#a6078d72b8812a8da677c81f861dcbfc6">_posMin</a>; }</div>
+<p class="definition">Definition at line <a class="el" href="StepperWithLimits_8h_source.html#l00045">45</a> of file <a class="el" href="StepperWithLimits_8h_source.html">StepperWithLimits.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   45</span>{ <span class="keywordflow">return</span> <a class="code hl_variable" href="classStepperWithLimits.html#a92603ced68dd11e494775d7e7248fa21">_posMax</a> - <a class="code hl_variable" href="classStepperWithLimits.html#a6078d72b8812a8da677c81f861dcbfc6">_posMin</a>; }</div>
 </div><!-- fragment --><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
 <div class="center"><img src="classStepperWithLimits_ac61366d2883f5cde889a75e1f9a32157_icgraph.png" border="0" usemap="#aclassStepperWithLimits_ac61366d2883f5cde889a75e1f9a32157_icgraph" alt=""/></div>
 <map name="aclassStepperWithLimits_ac61366d2883f5cde889a75e1f9a32157_icgraph" id="aclassStepperWithLimits_ac61366d2883f5cde889a75e1f9a32157_icgraph">
-<area shape="rect" title=" " alt="" coords="435,5,569,45"/>
+<area shape="rect" title=" " alt="" coords="435,41,569,81"/>
 <area shape="rect" href="classStepperWithLimits.html#aef91cbf9e5f772215cecfc46977aa7c3" title=" " alt="" coords="211,5,387,45"/>
+<area shape="rect" href="classStepperWithLimits.html#a866100a58cdcdb1bddb56fc9d2092924" title=" " alt="" coords="211,70,387,125"/>
 <area shape="rect" href="StepperMovementStrategy_8h.html#a930e00dcd29fd9a4153d2e96cf2f0dd3" title=" " alt="" coords="5,13,163,38"/>
 </map>
 </div>
@@ -723,15 +758,15 @@ Here is the caller graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="StepperWithLimits_8cpp_source.html#l00262">262</a> of file <a class="el" href="StepperWithLimits_8cpp_source.html">StepperWithLimits.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  263</span>{</div>
-<div class="line"><span class="lineno">  264</span> </div>
-<div class="line"><span class="lineno">  265</span>  <span class="keywordtype">bool</span> isNotRunning = !<a class="code hl_variable" href="classStepperWithLimits.html#afa1f4ac8a0b3daf8cb9140855c94db14">_stepper</a>-&gt;isRunning();</div>
-<div class="line"><span class="lineno">  266</span>  <span class="keywordtype">bool</span> <a class="code hl_function" href="classStepperWithLimits.html#a8313b74bf1e3ed65cb8f0ecd2e12f1d3">isAtMinPos</a> = <a class="code hl_function" href="classStepperWithLimits.html#a9b99ba97ab1e2c39165bdbbc4a1cf87c">getCurrentPositionSteps</a>() == 0;</div>
-<div class="line"><span class="lineno">  267</span> </div>
-<div class="line"><span class="lineno">  268</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="classStepperWithLimits.html#a8313b74bf1e3ed65cb8f0ecd2e12f1d3">isAtMinPos</a> &amp;&amp; isNotRunning;</div>
-<div class="line"><span class="lineno">  269</span>}</div>
-<div class="ttc" id="aclassStepperWithLimits_html_a8313b74bf1e3ed65cb8f0ecd2e12f1d3"><div class="ttname"><a href="classStepperWithLimits.html#a8313b74bf1e3ed65cb8f0ecd2e12f1d3">StepperWithLimits::isAtMinPos</a></div><div class="ttdeci">bool isAtMinPos()</div><div class="ttdef"><b>Definition:</b> <a href="StepperWithLimits_8cpp_source.html#l00262">StepperWithLimits.cpp:262</a></div></div>
+<p class="definition">Definition at line <a class="el" href="StepperWithLimits_8cpp_source.html#l00266">266</a> of file <a class="el" href="StepperWithLimits_8cpp_source.html">StepperWithLimits.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  267</span>{</div>
+<div class="line"><span class="lineno">  268</span> </div>
+<div class="line"><span class="lineno">  269</span>  <span class="keywordtype">bool</span> isNotRunning = !<a class="code hl_variable" href="classStepperWithLimits.html#afa1f4ac8a0b3daf8cb9140855c94db14">_stepper</a>-&gt;isRunning();</div>
+<div class="line"><span class="lineno">  270</span>  <span class="keywordtype">bool</span> <a class="code hl_function" href="classStepperWithLimits.html#a8313b74bf1e3ed65cb8f0ecd2e12f1d3">isAtMinPos</a> = <a class="code hl_function" href="classStepperWithLimits.html#a9b99ba97ab1e2c39165bdbbc4a1cf87c">getCurrentPositionSteps</a>() == 0;</div>
+<div class="line"><span class="lineno">  271</span> </div>
+<div class="line"><span class="lineno">  272</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="classStepperWithLimits.html#a8313b74bf1e3ed65cb8f0ecd2e12f1d3">isAtMinPos</a> &amp;&amp; isNotRunning;</div>
+<div class="line"><span class="lineno">  273</span>}</div>
+<div class="ttc" id="aclassStepperWithLimits_html_a8313b74bf1e3ed65cb8f0ecd2e12f1d3"><div class="ttname"><a href="classStepperWithLimits.html#a8313b74bf1e3ed65cb8f0ecd2e12f1d3">StepperWithLimits::isAtMinPos</a></div><div class="ttdeci">bool isAtMinPos()</div><div class="ttdef"><b>Definition:</b> <a href="StepperWithLimits_8cpp_source.html#l00266">StepperWithLimits.cpp:266</a></div></div>
 </div><!-- fragment --><div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -809,20 +844,20 @@ Here is the caller graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="StepperWithLimits_8cpp_source.html#l00241">241</a> of file <a class="el" href="StepperWithLimits_8cpp_source.html">StepperWithLimits.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  242</span>{</div>
-<div class="line"><span class="lineno">  243</span>  int32_t currentStepperPos = <a class="code hl_variable" href="classStepperWithLimits.html#afa1f4ac8a0b3daf8cb9140855c94db14">_stepper</a>-&gt;getCurrentPosition();</div>
-<div class="line"><span class="lineno">  244</span>  int32_t currentStepperVel = <a class="code hl_variable" href="classStepperWithLimits.html#afa1f4ac8a0b3daf8cb9140855c94db14">_stepper</a>-&gt;getCurrentSpeedInUs();</div>
-<div class="line"><span class="lineno">  245</span>  int32_t currentStepperVel2 = <a class="code hl_variable" href="classStepperWithLimits.html#afa1f4ac8a0b3daf8cb9140855c94db14">_stepper</a>-&gt;getCurrentSpeedInMilliHz();</div>
-<div class="line"><span class="lineno">  246</span> </div>
-<div class="line"><span class="lineno">  247</span> </div>
-<div class="line"><span class="lineno">  248</span>  <span class="comment">//Serial.println(currentStepperVel);</span></div>
-<div class="line"><span class="lineno">  249</span>  </div>
-<div class="line"><span class="lineno">  250</span>  int32_t currentStepperAccel = <a class="code hl_variable" href="classStepperWithLimits.html#afa1f4ac8a0b3daf8cb9140855c94db14">_stepper</a>-&gt;getCurrentAcceleration();</div>
+<p class="definition">Definition at line <a class="el" href="StepperWithLimits_8cpp_source.html#l00245">245</a> of file <a class="el" href="StepperWithLimits_8cpp_source.html">StepperWithLimits.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  246</span>{</div>
+<div class="line"><span class="lineno">  247</span>  int32_t currentStepperPos = <a class="code hl_variable" href="classStepperWithLimits.html#afa1f4ac8a0b3daf8cb9140855c94db14">_stepper</a>-&gt;getCurrentPosition();</div>
+<div class="line"><span class="lineno">  248</span>  int32_t currentStepperVel = <a class="code hl_variable" href="classStepperWithLimits.html#afa1f4ac8a0b3daf8cb9140855c94db14">_stepper</a>-&gt;getCurrentSpeedInUs();</div>
+<div class="line"><span class="lineno">  249</span>  int32_t currentStepperVel2 = <a class="code hl_variable" href="classStepperWithLimits.html#afa1f4ac8a0b3daf8cb9140855c94db14">_stepper</a>-&gt;getCurrentSpeedInMilliHz();</div>
+<div class="line"><span class="lineno">  250</span> </div>
 <div class="line"><span class="lineno">  251</span> </div>
-<div class="line"><span class="lineno">  252</span>  <span class="keyword">static</span> <a class="code hl_class" href="classRTDebugOutput.html">RTDebugOutput&lt;int32_t, 4&gt;</a> rtDebugFilter({ <span class="stringliteral">&quot;Pos&quot;</span>, <span class="stringliteral">&quot;Vel&quot;</span>, <span class="stringliteral">&quot;Vel2&quot;</span>, <span class="stringliteral">&quot;Accel&quot;</span>});</div>
-<div class="line"><span class="lineno">  253</span>  rtDebugFilter.<a class="code hl_function" href="classRTDebugOutput.html#a5af3bb9ea5c877fe34db54b41c2f9f81">offerData</a>({ currentStepperPos, currentStepperVel, currentStepperVel2, currentStepperAccel});</div>
-<div class="line"><span class="lineno">  254</span>}</div>
+<div class="line"><span class="lineno">  252</span>  <span class="comment">//Serial.println(currentStepperVel);</span></div>
+<div class="line"><span class="lineno">  253</span>  </div>
+<div class="line"><span class="lineno">  254</span>  int32_t currentStepperAccel = <a class="code hl_variable" href="classStepperWithLimits.html#afa1f4ac8a0b3daf8cb9140855c94db14">_stepper</a>-&gt;getCurrentAcceleration();</div>
+<div class="line"><span class="lineno">  255</span> </div>
+<div class="line"><span class="lineno">  256</span>  <span class="keyword">static</span> <a class="code hl_class" href="classRTDebugOutput.html">RTDebugOutput&lt;int32_t, 4&gt;</a> rtDebugFilter({ <span class="stringliteral">&quot;Pos&quot;</span>, <span class="stringliteral">&quot;Vel&quot;</span>, <span class="stringliteral">&quot;Vel2&quot;</span>, <span class="stringliteral">&quot;Accel&quot;</span>});</div>
+<div class="line"><span class="lineno">  257</span>  rtDebugFilter.<a class="code hl_function" href="classRTDebugOutput.html#a5af3bb9ea5c877fe34db54b41c2f9f81">offerData</a>({ currentStepperPos, currentStepperVel, currentStepperVel2, currentStepperAccel});</div>
+<div class="line"><span class="lineno">  258</span>}</div>
 <div class="ttc" id="aclassRTDebugOutput_html"><div class="ttname"><a href="classRTDebugOutput.html">RTDebugOutput</a></div><div class="ttdef"><b>Definition:</b> <a href="RTDebugOutput_8h_source.html#l00007">RTDebugOutput.h:7</a></div></div>
 <div class="ttc" id="aclassRTDebugOutput_html_a5af3bb9ea5c877fe34db54b41c2f9f81"><div class="ttname"><a href="classRTDebugOutput.html#a5af3bb9ea5c877fe34db54b41c2f9f81">RTDebugOutput::offerData</a></div><div class="ttdeci">void offerData(std::array&lt; TVALUE, NVALS &gt; values)</div><div class="ttdef"><b>Definition:</b> <a href="RTDebugOutput_8h_source.html#l00020">RTDebugOutput.h:20</a></div></div>
 </div><!-- fragment --><div class="dynheader">
@@ -939,10 +974,10 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="StepperWithLimits_8cpp_source.html#l00257">257</a> of file <a class="el" href="StepperWithLimits_8cpp_source.html">StepperWithLimits.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  258</span>{</div>
-<div class="line"><span class="lineno">  259</span>  <a class="code hl_variable" href="classStepperWithLimits.html#afa1f4ac8a0b3daf8cb9140855c94db14">_stepper</a>-&gt;setSpeedInHz(speedInStepsPerSecond);            <span class="comment">// steps/s </span></div>
-<div class="line"><span class="lineno">  260</span>}</div>
+<p class="definition">Definition at line <a class="el" href="StepperWithLimits_8cpp_source.html#l00261">261</a> of file <a class="el" href="StepperWithLimits_8cpp_source.html">StepperWithLimits.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  262</span>{</div>
+<div class="line"><span class="lineno">  263</span>  <a class="code hl_variable" href="classStepperWithLimits.html#afa1f4ac8a0b3daf8cb9140855c94db14">_stepper</a>-&gt;setSpeedInHz(speedInStepsPerSecond);            <span class="comment">// steps/s </span></div>
+<div class="line"><span class="lineno">  264</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>

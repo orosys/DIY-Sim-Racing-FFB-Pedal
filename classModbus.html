@@ -1433,8 +1433,8 @@ Here is the call graph for this function:</div>
 <div class="fragment"><div class="line"><span class="lineno">   16</span>{</div>
 <div class="line"><span class="lineno">   17</span>     this-&gt;<a class="code hl_variable" href="classModbus.html#a015642f22a07db845b8b97f8be2dcb19">mode_</a> =  mode;</div>
 <div class="line"><span class="lineno">   18</span>     this-&gt;<a class="code hl_variable" href="classModbus.html#a06407fb75e61d2f36537970b3bf19b98">log</a>   =  en_log;</div>
-<div class="line"><span class="lineno">   19</span>     pinMode(<a class="code hl_variable" href="classModbus.html#a015642f22a07db845b8b97f8be2dcb19">mode_</a>,OUTPUT);</div>
-<div class="line"><span class="lineno">   20</span>     digitalWrite(<a class="code hl_variable" href="classModbus.html#a015642f22a07db845b8b97f8be2dcb19">mode_</a>, 0);  </div>
+<div class="line"><span class="lineno">   19</span>     <span class="comment">//pinMode(mode_,OUTPUT);</span></div>
+<div class="line"><span class="lineno">   20</span>     <span class="comment">//digitalWrite(mode_, 0);  </span></div>
 <div class="line"><span class="lineno">   21</span>     </div>
 <div class="line"><span class="lineno">   22</span>     <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
 <div class="line"><span class="lineno">   23</span>}</div>
@@ -2486,12 +2486,12 @@ Here is the call graph for this function:</div>
 <div class="line"><span class="lineno">  192</span>            Serial.print(<span class="stringliteral">&quot;\t&quot;</span>);</div>
 <div class="line"><span class="lineno">  193</span>     }</div>
 <div class="line"><span class="lineno">  194</span> </div>
-<div class="line"><span class="lineno">  195</span>    digitalWrite(<a class="code hl_variable" href="classModbus.html#a015642f22a07db845b8b97f8be2dcb19">mode_</a>,1);</div>
-<div class="line"><span class="lineno">  196</span>    delay(1);</div>
+<div class="line"><span class="lineno">  195</span>    <span class="comment">//digitalWrite(mode_,1);</span></div>
+<div class="line"><span class="lineno">  196</span>    <span class="comment">//delay(1);</span></div>
 <div class="line"><span class="lineno">  197</span>    this-&gt;<a class="code hl_variable" href="classModbus.html#a7fca04ebeb67cc7833f58a670bcd1a07">s</a>-&gt;write(<a class="code hl_variable" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">txout</a>,8);</div>
 <div class="line"><span class="lineno">  198</span>    this-&gt;<a class="code hl_variable" href="classModbus.html#a7fca04ebeb67cc7833f58a670bcd1a07">s</a>-&gt;flush();</div>
-<div class="line"><span class="lineno">  199</span>    digitalWrite(<a class="code hl_variable" href="classModbus.html#a015642f22a07db845b8b97f8be2dcb19">mode_</a>,0);</div>
-<div class="line"><span class="lineno">  200</span>    delay(1);</div>
+<div class="line"><span class="lineno">  199</span>    <span class="comment">//digitalWrite(mode_,0);</span></div>
+<div class="line"><span class="lineno">  200</span>    <span class="comment">//delay(1);</span></div>
 <div class="line"><span class="lineno">  201</span>    uint32_t t = millis();</div>
 <div class="line"><span class="lineno">  202</span>    <a class="code hl_variable" href="classModbus.html#ac2086593416ac4a890e10c3ec03dfa65">lenRx</a>   = 0;</div>
 <div class="line"><span class="lineno">  203</span>    <a class="code hl_variable" href="classModbus.html#a083e82dbe42da1571fb42eeed754ac84">datalen</a> = 0;</div>

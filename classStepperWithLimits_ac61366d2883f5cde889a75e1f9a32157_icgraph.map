@@ -1,5 +1,6 @@
 <map id="StepperWithLimits::getTravelSteps" name="StepperWithLimits::getTravelSteps">
-<area shape="rect" id="node1" title=" " alt="" coords="435,5,569,45"/>
+<area shape="rect" id="node1" title=" " alt="" coords="435,41,569,81"/>
 <area shape="rect" id="node2" href="$classStepperWithLimits.html#aef91cbf9e5f772215cecfc46977aa7c3" title=" " alt="" coords="211,5,387,45"/>
+<area shape="rect" id="node4" href="$classStepperWithLimits.html#a866100a58cdcdb1bddb56fc9d2092924" title=" " alt="" coords="211,70,387,125"/>
 <area shape="rect" id="node3" href="$StepperMovementStrategy_8h.html#a930e00dcd29fd9a4153d2e96cf2f0dd3" title=" " alt="" coords="5,13,163,38"/>
 </map>
