@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['payloadheader_0',['payloadHeader',['../structpayloadHeader.html',1,'']]],
-  ['payloadpedalconfig_1',['payloadPedalConfig',['../structpayloadPedalConfig.html',1,'']]]
+  ['payloadfooter_0',['payloadFooter',['../structpayloadFooter.html',1,'']]],
+  ['payloadheader_1',['payloadHeader',['../structpayloadHeader.html',1,'']]],
+  ['payloadpedalconfig_2',['payloadPedalConfig',['../structpayloadPedalConfig.html',1,'']]]
 ];

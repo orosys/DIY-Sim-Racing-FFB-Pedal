@@ -1,9 +1,9 @@
 <map id="DAP_config_st" name="DAP_config_st">
-<area shape="rect" id="node1" title=" " alt="" coords="236,343,344,368"/>
-<area shape="rect" id="node2" href="$structpayloadHeader.html" title=" " alt="" coords="343,255,451,280"/>
-<area shape="rect" id="node3" title=" " alt="" coords="206,5,267,31"/>
-<area shape="rect" id="node6" href="$structpayloadPedalConfig.html" title=" " alt="" coords="108,255,243,280"/>
-<area shape="rect" id="node4" title=" " alt="" coords="495,5,563,31"/>
-<area shape="rect" id="node5" title=" " alt="" coords="383,5,429,31"/>
-<area shape="rect" id="node7" title=" " alt="" coords="5,5,52,31"/>
+<area shape="rect" id="node1" title=" " alt="" coords="186,343,294,368"/>
+<area shape="rect" id="node2" href="$structpayloadHeader.html" title=" " alt="" coords="20,255,128,280"/>
+<area shape="rect" id="node3" title=" " alt="" coords="60,5,122,31"/>
+<area shape="rect" id="node4" href="$structpayloadPedalConfig.html" title=" " alt="" coords="173,255,308,280"/>
+<area shape="rect" id="node5" title=" " alt="" coords="252,5,298,31"/>
+<area shape="rect" id="node6" href="$structpayloadFooter.html" title=" " alt="" coords="365,255,468,280"/>
+<area shape="rect" id="node7" title=" " alt="" coords="388,5,456,31"/>
 </map>
