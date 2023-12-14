@@ -34,10 +34,12 @@ var searchData=
   ['relativeforce_5fp080_31',['relativeForce_p080',['../structpayloadPedalConfig.html#afe7a7c2dd98ad03b41acc87547693eab',1,'payloadPedalConfig']]],
   ['relativeforce_5fp100_32',['relativeForce_p100',['../structpayloadPedalConfig.html#ad903f1a21f2fc196338d8a2394b3f598',1,'payloadPedalConfig']]],
   ['requestfrom_33',['requestFrom',['../classModbus.html#aaeaf21cf9c6795dee76b775b39630cfe',1,'Modbus::requestFrom(int slaveId, int type, int address, int nb)'],['../classModbus.html#aaeaf21cf9c6795dee76b775b39630cfe',1,'Modbus::requestFrom(int slaveId, int type, int address, int nb)']]],
-  ['resettimer_34',['ResetTimer',['../classCycleTimer.html#af9e34e9ae6c3dd3d66bfbfd02fa01c3e',1,'CycleTimer']]],
-  ['rtdebugoutput_35',['RTDebugOutput',['../classRTDebugOutput.html#a0044685fc503938765ca144ab684bb41',1,'RTDebugOutput::RTDebugOutput()'],['../classRTDebugOutput.html',1,'RTDebugOutput&lt; TVALUE, NVALS, FLOAT_PRECISION &gt;']]],
-  ['rtdebugoutput_2eh_36',['RTDebugOutput.h',['../RTDebugOutput_8h.html',1,'']]],
-  ['rtdebugoutput_3c_20float_2c_201_20_3e_37',['RTDebugOutput&lt; float, 1 &gt;',['../classRTDebugOutput.html',1,'']]],
-  ['rxpin_38',['RXPIN',['../isv57communication_8h.html#aeb84a810b48ab98f8218407ede651746',1,'isv57communication.h']]],
-  ['rxraw_39',['RxRaw',['../classModbus.html#a9a0902f1e2f2f664a0a60a6fae5cd74a',1,'Modbus::RxRaw(byte *raw, uint8_t &amp;rlen)'],['../classModbus.html#a9a0902f1e2f2f664a0a60a6fae5cd74a',1,'Modbus::RxRaw(byte *raw, uint8_t &amp;rlen)']]]
+  ['resetpedalpos_5fu8_34',['resetPedalPos_u8',['../structpayloadPedalAction.html#a351bbb009b3aed974e5a4a96cb5b5722',1,'payloadPedalAction']]],
+  ['resettimer_35',['ResetTimer',['../classCycleTimer.html#af9e34e9ae6c3dd3d66bfbfd02fa01c3e',1,'CycleTimer']]],
+  ['returnpedalconfig_5fu8_36',['returnPedalConfig_u8',['../structpayloadPedalAction.html#ab0ce6cb5b95a3413fc4076048a8a2fa4',1,'payloadPedalAction']]],
+  ['rtdebugoutput_37',['RTDebugOutput',['../classRTDebugOutput.html#a0044685fc503938765ca144ab684bb41',1,'RTDebugOutput::RTDebugOutput()'],['../classRTDebugOutput.html',1,'RTDebugOutput&lt; TVALUE, NVALS, FLOAT_PRECISION &gt;']]],
+  ['rtdebugoutput_2eh_38',['RTDebugOutput.h',['../RTDebugOutput_8h.html',1,'']]],
+  ['rtdebugoutput_3c_20float_2c_201_20_3e_39',['RTDebugOutput&lt; float, 1 &gt;',['../classRTDebugOutput.html',1,'']]],
+  ['rxpin_40',['RXPIN',['../isv57communication_8h.html#aeb84a810b48ab98f8218407ede651746',1,'isv57communication.h']]],
+  ['rxraw_41',['RxRaw',['../classModbus.html#a9a0902f1e2f2f664a0a60a6fae5cd74a',1,'Modbus::RxRaw(byte *raw, uint8_t &amp;rlen)'],['../classModbus.html#a9a0902f1e2f2f664a0a60a6fae5cd74a',1,'Modbus::RxRaw(byte *raw, uint8_t &amp;rlen)']]]
 ];

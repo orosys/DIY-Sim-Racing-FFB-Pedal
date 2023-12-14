@@ -8,5 +8,7 @@ var searchData=
   ['relativeforce_5fp040_5',['relativeForce_p040',['../structpayloadPedalConfig.html#a329942d1541f55bc396552f179594ed3',1,'payloadPedalConfig']]],
   ['relativeforce_5fp060_6',['relativeForce_p060',['../structpayloadPedalConfig.html#a49695ce0fd97fd872ef6d82495d17fc3',1,'payloadPedalConfig']]],
   ['relativeforce_5fp080_7',['relativeForce_p080',['../structpayloadPedalConfig.html#afe7a7c2dd98ad03b41acc87547693eab',1,'payloadPedalConfig']]],
-  ['relativeforce_5fp100_8',['relativeForce_p100',['../structpayloadPedalConfig.html#ad903f1a21f2fc196338d8a2394b3f598',1,'payloadPedalConfig']]]
+  ['relativeforce_5fp100_8',['relativeForce_p100',['../structpayloadPedalConfig.html#ad903f1a21f2fc196338d8a2394b3f598',1,'payloadPedalConfig']]],
+  ['resetpedalpos_5fu8_9',['resetPedalPos_u8',['../structpayloadPedalAction.html#a351bbb009b3aed974e5a4a96cb5b5722',1,'payloadPedalAction']]],
+  ['returnpedalconfig_5fu8_10',['returnPedalConfig_u8',['../structpayloadPedalAction.html#ab0ce6cb5b95a3413fc4076048a8a2fa4',1,'payloadPedalAction']]]
 ];
