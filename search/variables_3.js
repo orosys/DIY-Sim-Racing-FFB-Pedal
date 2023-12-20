@@ -4,5 +4,6 @@ var searchData=
   ['dampingpull_1',['dampingPull',['../structpayloadPedalConfig.html#a07217e687ff79b033d50f86effbbc2ee',1,'payloadPedalConfig']]],
   ['datalen_2',['datalen',['../classModbus.html#a083e82dbe42da1571fb42eeed754ac84',1,'Modbus']]],
   ['datarx_3',['dataRx',['../classModbus.html#a31c08abfc547cb9f9fa1e83ef3f4f98f',1,'Modbus']]],
-  ['default_5fvariance_5festimate_4',['DEFAULT_VARIANCE_ESTIMATE',['../LoadCell_8cpp.html#a4d0d708189c629e7702d98c956ee832a',1,'LoadCell.cpp']]]
+  ['debug_5fflags_5f0_4',['debug_flags_0',['../structpayloadPedalConfig.html#a3c4574add0cd5dfef05bb8117b7e51ea',1,'payloadPedalConfig']]],
+  ['default_5fvariance_5festimate_5',['DEFAULT_VARIANCE_ESTIMATE',['../LoadCell_8cpp.html#a4d0d708189c629e7702d98c956ee832a',1,'LoadCell.cpp']]]
 ];

@@ -10,11 +10,12 @@ var searchData=
   ['dap_5fversion_5fconfig_7',['DAP_VERSION_CONFIG',['../DiyActivePedal__types_8h.html#a414793d4dad4a2e35836fcb6aaedd219',1,'DiyActivePedal_types.h']]],
   ['datalen_8',['datalen',['../classModbus.html#a083e82dbe42da1571fb42eeed754ac84',1,'Modbus']]],
   ['datarx_9',['dataRx',['../classModbus.html#a31c08abfc547cb9f9fa1e83ef3f4f98f',1,'Modbus']]],
-  ['debugoutputtask_10',['debugOutputTask',['../classRTDebugOutput.html#a212fe4fec08012e814a53fea2700742b',1,'RTDebugOutput']]],
-  ['default_5fvariance_5festimate_11',['DEFAULT_VARIANCE_ESTIMATE',['../LoadCell_8cpp.html#a4d0d708189c629e7702d98c956ee832a',1,'LoadCell.cpp']]],
-  ['dirpinstepper_12',['dirPinStepper',['../Main_8h.html#a53f5fbf8e8853ef35c2cb997eeb904c4',1,'Main.h']]],
-  ['discret_5fregister_13',['Discret_Register',['../ModbusTest_2Modbus_2src_2Modbus_8h.html#ae5db53aebdd22a7bb76a8d9bb4724e26',1,'Discret_Register():&#160;Modbus.h'],['../Esp32_2Main_2Modbus_8h.html#ae5db53aebdd22a7bb76a8d9bb4724e26',1,'Discret_Register():&#160;Modbus.h']]],
-  ['discreteinputread_14',['discreteInputRead',['../classModbus.html#ab05885857d69d74a9d1ce11d71597498',1,'Modbus::discreteInputRead(int id, int address)'],['../classModbus.html#af2932e33b5335e0c3f34c5a1e68ccb21',1,'Modbus::discreteInputRead(int address)'],['../classModbus.html#ab05885857d69d74a9d1ce11d71597498',1,'Modbus::discreteInputRead(int id, int address)'],['../classModbus.html#af2932e33b5335e0c3f34c5a1e68ccb21',1,'Modbus::discreteInputRead(int address)']]],
-  ['diyactivepedal_5ftypes_2ecpp_15',['DiyActivePedal_types.cpp',['../DiyActivePedal__types_8cpp.html',1,'']]],
-  ['diyactivepedal_5ftypes_2eh_16',['DiyActivePedal_types.h',['../DiyActivePedal__types_8h.html',1,'']]]
+  ['debug_5fflags_5f0_10',['debug_flags_0',['../structpayloadPedalConfig.html#a3c4574add0cd5dfef05bb8117b7e51ea',1,'payloadPedalConfig']]],
+  ['debugoutputtask_11',['debugOutputTask',['../classRTDebugOutput.html#a212fe4fec08012e814a53fea2700742b',1,'RTDebugOutput']]],
+  ['default_5fvariance_5festimate_12',['DEFAULT_VARIANCE_ESTIMATE',['../LoadCell_8cpp.html#a4d0d708189c629e7702d98c956ee832a',1,'LoadCell.cpp']]],
+  ['dirpinstepper_13',['dirPinStepper',['../Main_8h.html#a53f5fbf8e8853ef35c2cb997eeb904c4',1,'Main.h']]],
+  ['discret_5fregister_14',['Discret_Register',['../Esp32_2Main_2Modbus_8h.html#ae5db53aebdd22a7bb76a8d9bb4724e26',1,'Discret_Register():&#160;Modbus.h'],['../ModbusTest_2Modbus_2src_2Modbus_8h.html#ae5db53aebdd22a7bb76a8d9bb4724e26',1,'Discret_Register():&#160;Modbus.h']]],
+  ['discreteinputread_15',['discreteInputRead',['../classModbus.html#ab05885857d69d74a9d1ce11d71597498',1,'Modbus::discreteInputRead(int id, int address)'],['../classModbus.html#af2932e33b5335e0c3f34c5a1e68ccb21',1,'Modbus::discreteInputRead(int address)'],['../classModbus.html#ab05885857d69d74a9d1ce11d71597498',1,'Modbus::discreteInputRead(int id, int address)'],['../classModbus.html#af2932e33b5335e0c3f34c5a1e68ccb21',1,'Modbus::discreteInputRead(int address)']]],
+  ['diyactivepedal_5ftypes_2ecpp_16',['DiyActivePedal_types.cpp',['../DiyActivePedal__types_8cpp.html',1,'']]],
+  ['diyactivepedal_5ftypes_2eh_17',['DiyActivePedal_types.h',['../DiyActivePedal__types_8h.html',1,'']]]
 ];
