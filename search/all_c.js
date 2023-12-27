@@ -9,9 +9,10 @@ var searchData=
   ['loadcell_2eh_6',['LoadCell.h',['../LoadCell_8h.html',1,'']]],
   ['loadcell_5fads1256_7',['LoadCell_ADS1256',['../classLoadCell__ADS1256.html',1,'LoadCell_ADS1256'],['../classLoadCell__ADS1256.html#a80402d547cc2f44af37b401a412d29bd',1,'LoadCell_ADS1256::LoadCell_ADS1256()']]],
   ['loadcell_5fexcitation_5fv_8',['LOADCELL_EXCITATION_V',['../Main_8h.html#a427b269acba12e18c696d5be8cb59e91',1,'Main.h']]],
-  ['loadcell_5fsensitivity_5fmv_5fv_9',['LOADCELL_SENSITIVITY_MV_V',['../Main_8h.html#af46044ba4504bc725cd220af5edeef5a',1,'Main.h']]],
-  ['loadcell_5fvariance_5fmin_10',['LOADCELL_VARIANCE_MIN',['../LoadCell_8cpp.html#acbb4f95db109149d08210b082b7aeb5b',1,'LoadCell.cpp']]],
-  ['loadcell_5fweight_5frating_5fkg_11',['LOADCELL_WEIGHT_RATING_KG',['../Main_8h.html#ab869e8b74a0701afafb8d56087a5604b',1,'Main.h']]],
-  ['loadconfigfromeprom_12',['loadConfigFromEprom',['../structDAP__config__st.html#a49a7a21783354b61177e4ba3e08745a3',1,'DAP_config_st']]],
-  ['log_13',['log',['../classModbus.html#a06407fb75e61d2f36537970b3bf19b98',1,'Modbus']]]
+  ['loadcell_5frating_9',['loadcell_rating',['../structpayloadPedalConfig.html#ac397931ea49030321393fa85c779a9ec',1,'payloadPedalConfig']]],
+  ['loadcell_5fsensitivity_5fmv_5fv_10',['LOADCELL_SENSITIVITY_MV_V',['../Main_8h.html#af46044ba4504bc725cd220af5edeef5a',1,'Main.h']]],
+  ['loadcell_5fvariance_5fmin_11',['LOADCELL_VARIANCE_MIN',['../LoadCell_8cpp.html#acbb4f95db109149d08210b082b7aeb5b',1,'LoadCell.cpp']]],
+  ['loadcell_5fweight_5frating_5fkg_12',['LOADCELL_WEIGHT_RATING_KG',['../Main_8h.html#ab869e8b74a0701afafb8d56087a5604b',1,'Main.h']]],
+  ['loadconfigfromeprom_13',['loadConfigFromEprom',['../structDAP__config__st.html#a49a7a21783354b61177e4ba3e08745a3',1,'DAP_config_st']]],
+  ['log_14',['log',['../classModbus.html#a06407fb75e61d2f36537970b3bf19b98',1,'Modbus']]]
 ];
