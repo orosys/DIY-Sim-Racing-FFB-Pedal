@@ -39,9 +39,16 @@ var searchData=
   ['resetpedalpos_5fu8_36',['resetPedalPos_u8',['../structpayloadPedalAction.html#a351bbb009b3aed974e5a4a96cb5b5722',1,'payloadPedalAction']]],
   ['resettimer_37',['ResetTimer',['../classCycleTimer.html#af9e34e9ae6c3dd3d66bfbfd02fa01c3e',1,'CycleTimer']]],
   ['returnpedalconfig_5fu8_38',['returnPedalConfig_u8',['../structpayloadPedalAction.html#ab0ce6cb5b95a3413fc4076048a8a2fa4',1,'payloadPedalAction']]],
-  ['rtdebugoutput_39',['RTDebugOutput',['../classRTDebugOutput.html#a0044685fc503938765ca144ab684bb41',1,'RTDebugOutput::RTDebugOutput()'],['../classRTDebugOutput.html',1,'RTDebugOutput&lt; TVALUE, NVALS, FLOAT_PRECISION &gt;']]],
-  ['rtdebugoutput_2eh_40',['RTDebugOutput.h',['../RTDebugOutput_8h.html',1,'']]],
-  ['rtdebugoutput_3c_20float_2c_201_20_3e_41',['RTDebugOutput&lt; float, 1 &gt;',['../classRTDebugOutput.html',1,'']]],
-  ['rxpin_42',['RXPIN',['../isv57communication_8h.html#aeb84a810b48ab98f8218407ede651746',1,'isv57communication.h']]],
-  ['rxraw_43',['RxRaw',['../classModbus.html#a9a0902f1e2f2f664a0a60a6fae5cd74a',1,'Modbus::RxRaw(byte *raw, uint8_t &amp;rlen)'],['../classModbus.html#a9a0902f1e2f2f664a0a60a6fae5cd74a',1,'Modbus::RxRaw(byte *raw, uint8_t &amp;rlen)']]]
+  ['rls_5fgain_39',['RLS_gain',['../Dev_2StepperWithLimits_8cpp.html#a5f48d7e8f07ec999dfa3ab3e8e07779f',1,'StepperWithLimits.cpp']]],
+  ['rls_5fhas_5fbeen_5finitialized_5fb_40',['rls_has_been_initialized_b',['../Dev_2StepperWithLimits_8cpp.html#a80e470517d53d1ef76659acd55b24e7f',1,'StepperWithLimits.cpp']]],
+  ['rls_5fin_41',['RLS_in',['../Dev_2StepperWithLimits_8cpp.html#a5ac3a711d64a2a46a61f1356335c0329',1,'StepperWithLimits.cpp']]],
+  ['rls_5flambda_42',['RLS_lambda',['../Dev_2StepperWithLimits_8cpp.html#a5bb2b5f26c600bcce3ba7e437325f7c3',1,'StepperWithLimits.cpp']]],
+  ['rls_5fout_43',['RLS_out',['../Dev_2StepperWithLimits_8cpp.html#a69ae0e7fa5f57b00f00bbf1180ed60a3',1,'StepperWithLimits.cpp']]],
+  ['rls_5fp_44',['RLS_P',['../Dev_2StepperWithLimits_8cpp.html#a6e6adff9a4c9ad76c87f25c52c8bbe53',1,'StepperWithLimits.cpp']]],
+  ['rls_5ftheta_45',['RLS_theta',['../Dev_2StepperWithLimits_8cpp.html#a070e798e21d39d3d21a12156e3a91b36',1,'StepperWithLimits.cpp']]],
+  ['rtdebugoutput_46',['RTDebugOutput',['../classRTDebugOutput.html#a0044685fc503938765ca144ab684bb41',1,'RTDebugOutput::RTDebugOutput()'],['../classRTDebugOutput.html',1,'RTDebugOutput&lt; TVALUE, NVALS, FLOAT_PRECISION &gt;']]],
+  ['rtdebugoutput_2eh_47',['RTDebugOutput.h',['../RTDebugOutput_8h.html',1,'']]],
+  ['rtdebugoutput_3c_20float_2c_201_20_3e_48',['RTDebugOutput&lt; float, 1 &gt;',['../classRTDebugOutput.html',1,'']]],
+  ['rxpin_49',['RXPIN',['../isv57communication_8h.html#aeb84a810b48ab98f8218407ede651746',1,'isv57communication.h']]],
+  ['rxraw_50',['RxRaw',['../classModbus.html#a9a0902f1e2f2f664a0a60a6fae5cd74a',1,'Modbus::RxRaw(byte *raw, uint8_t &amp;rlen)'],['../classModbus.html#a9a0902f1e2f2f664a0a60a6fae5cd74a',1,'Modbus::RxRaw(byte *raw, uint8_t &amp;rlen)']]]
 ];

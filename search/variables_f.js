@@ -10,5 +10,7 @@ var searchData=
   ['relativeforce_5fp080_7',['relativeForce_p080',['../structpayloadPedalConfig.html#afe7a7c2dd98ad03b41acc87547693eab',1,'payloadPedalConfig']]],
   ['relativeforce_5fp100_8',['relativeForce_p100',['../structpayloadPedalConfig.html#ad903f1a21f2fc196338d8a2394b3f598',1,'payloadPedalConfig']]],
   ['resetpedalpos_5fu8_9',['resetPedalPos_u8',['../structpayloadPedalAction.html#a351bbb009b3aed974e5a4a96cb5b5722',1,'payloadPedalAction']]],
-  ['returnpedalconfig_5fu8_10',['returnPedalConfig_u8',['../structpayloadPedalAction.html#ab0ce6cb5b95a3413fc4076048a8a2fa4',1,'payloadPedalAction']]]
+  ['returnpedalconfig_5fu8_10',['returnPedalConfig_u8',['../structpayloadPedalAction.html#ab0ce6cb5b95a3413fc4076048a8a2fa4',1,'payloadPedalAction']]],
+  ['rls_5fhas_5fbeen_5finitialized_5fb_11',['rls_has_been_initialized_b',['../Dev_2StepperWithLimits_8cpp.html#a80e470517d53d1ef76659acd55b24e7f',1,'StepperWithLimits.cpp']]],
+  ['rls_5flambda_12',['RLS_lambda',['../Dev_2StepperWithLimits_8cpp.html#a5bb2b5f26c600bcce3ba7e437325f7c3',1,'StepperWithLimits.cpp']]]
 ];
