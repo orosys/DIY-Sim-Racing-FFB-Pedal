@@ -16,6 +16,7 @@ var searchData=
   ['rls_5fout_13',['RLS_out',['../Dev_2StepperWithLimits_8cpp.html#a69ae0e7fa5f57b00f00bbf1180ed60a3',1,'StepperWithLimits.cpp']]],
   ['rls_5fp_14',['RLS_P',['../Dev_2StepperWithLimits_8cpp.html#a6e6adff9a4c9ad76c87f25c52c8bbe53',1,'StepperWithLimits.cpp']]],
   ['rls_5ftheta_15',['RLS_theta',['../Dev_2StepperWithLimits_8cpp.html#a070e798e21d39d3d21a12156e3a91b36',1,'StepperWithLimits.cpp']]],
-  ['rtdebugoutput_16',['RTDebugOutput',['../classRTDebugOutput.html#a0044685fc503938765ca144ab684bb41',1,'RTDebugOutput']]],
-  ['rxraw_17',['RxRaw',['../classModbus.html#a9a0902f1e2f2f664a0a60a6fae5cd74a',1,'Modbus::RxRaw(byte *raw, uint8_t &amp;rlen)'],['../classModbus.html#a9a0902f1e2f2f664a0a60a6fae5cd74a',1,'Modbus::RxRaw(byte *raw, uint8_t &amp;rlen)']]]
+  ['rpmoscillation_16',['RPMOscillation',['../classRPMOscillation.html#a6f1e334727aaabc5e00ef7a8f3c7d01f',1,'RPMOscillation']]],
+  ['rtdebugoutput_17',['RTDebugOutput',['../classRTDebugOutput.html#a0044685fc503938765ca144ab684bb41',1,'RTDebugOutput']]],
+  ['rxraw_18',['RxRaw',['../classModbus.html#a9a0902f1e2f2f664a0a60a6fae5cd74a',1,'Modbus::RxRaw(byte *raw, uint8_t &amp;rlen)'],['../classModbus.html#a9a0902f1e2f2f664a0a60a6fae5cd74a',1,'Modbus::RxRaw(byte *raw, uint8_t &amp;rlen)']]]
 ];

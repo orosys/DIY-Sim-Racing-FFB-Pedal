@@ -20,5 +20,5 @@ var searchData=
   ['forcecurve_2ecpp_17',['ForceCurve.cpp',['../ForceCurve_8cpp.html',1,'']]],
   ['forcecurve_2eh_18',['ForceCurve.h',['../ForceCurve_8h.html',1,'']]],
   ['forcecurve_5finterpolated_19',['ForceCurve_Interpolated',['../classForceCurve__Interpolated.html',1,'']]],
-  ['forceoffset_20',['forceOffset',['../classABSOscillation.html#a10c3f1f02fd8bb776957ac1d332e1f86',1,'ABSOscillation']]]
+  ['forceoffset_20',['forceOffset',['../classABSOscillation.html#a974d43e73227304313cb24470c127136',1,'ABSOscillation::forceOffset()'],['../classRPMOscillation.html#a315f58156f1eb027b96a36a8e187f9e1',1,'RPMOscillation::forceOffset()']]]
 ];

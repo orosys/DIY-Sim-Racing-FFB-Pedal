@@ -75,7 +75,7 @@ $(function() {
 <li>_absTimeMillis&#160;:&#160;<a class="el" href="classABSOscillation.html#aa6eea960735be3b0cbd11511b54fc243">ABSOscillation</a></li>
 <li>_cycleCount&#160;:&#160;<a class="el" href="classCycleTimer.html#a1a84fb6d54e411225b327f29b576a441">CycleTimer</a></li>
 <li>_K&#160;:&#160;<a class="el" href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">KalmanFilter</a></li>
-<li>_lastCallTimeMillis&#160;:&#160;<a class="el" href="classABSOscillation.html#af6eebba0836388860ae30ce8d1655975">ABSOscillation</a></li>
+<li>_lastCallTimeMillis&#160;:&#160;<a class="el" href="classABSOscillation.html#af6eebba0836388860ae30ce8d1655975">ABSOscillation</a>, <a class="el" href="classRPMOscillation.html#aa4ab00bfa92d40cb0beb4b3944a047bb">RPMOscillation</a></li>
 <li>_limitMax&#160;:&#160;<a class="el" href="classStepperWithLimits.html#aae2033a3b9de58e9e63c1458e4ce6647">StepperWithLimits</a></li>
 <li>_limitMin&#160;:&#160;<a class="el" href="classStepperWithLimits.html#a605fe0c33b0cc7a0012b21cce230ac40">StepperWithLimits</a></li>
 <li>_outNames&#160;:&#160;<a class="el" href="classRTDebugOutput.html#abfbbadf39c2acaff32e11c28edaae7da">RTDebugOutput&lt; TVALUE, NVALS, FLOAT_PRECISION &gt;</a></li>
@@ -84,12 +84,13 @@ $(function() {
 <li>_posMax&#160;:&#160;<a class="el" href="classStepperWithLimits.html#a92603ced68dd11e494775d7e7248fa21">StepperWithLimits</a></li>
 <li>_posMin&#160;:&#160;<a class="el" href="classStepperWithLimits.html#a6078d72b8812a8da677c81f861dcbfc6">StepperWithLimits</a></li>
 <li>_queue_data&#160;:&#160;<a class="el" href="classRTDebugOutput.html#a0814e88eabbe2921559af6e594434ef0">RTDebugOutput&lt; TVALUE, NVALS, FLOAT_PRECISION &gt;</a></li>
+<li>_RPMTimeMillis&#160;:&#160;<a class="el" href="classRPMOscillation.html#a7786f2b14d758d771fc94d2b3b41993b">RPMOscillation</a></li>
 <li>_rtOutput&#160;:&#160;<a class="el" href="classCycleTimer.html#a3973cee4f0e37253354e43a28c7ec900">CycleTimer</a></li>
 <li>_standardDeviationEstimate&#160;:&#160;<a class="el" href="classLoadCell__ADS1256.html#ac79c1cca53e6cba973fddcca262fb804">LoadCell_ADS1256</a></li>
 <li>_stepper&#160;:&#160;<a class="el" href="classStepperWithLimits.html#afa1f4ac8a0b3daf8cb9140855c94db14">StepperWithLimits</a></li>
 <li>_timeFirst&#160;:&#160;<a class="el" href="classCycleTimer.html#a6397e279a5cacd5ac98924de1e402aa3">CycleTimer</a></li>
 <li>_timeLastObservation&#160;:&#160;<a class="el" href="classKalmanFilter.html#aea7f932e369f80ba7bd0a5cd39c89aeb">KalmanFilter</a></li>
-<li>_timeLastTriggerMillis&#160;:&#160;<a class="el" href="classABSOscillation.html#a90eb5d84d511f8eee3f813ea264e9e15">ABSOscillation</a></li>
+<li>_timeLastTriggerMillis&#160;:&#160;<a class="el" href="classABSOscillation.html#a90eb5d84d511f8eee3f813ea264e9e15">ABSOscillation</a>, <a class="el" href="classRPMOscillation.html#aa9841d95a2f516a3ac1c6e291130c3bc">RPMOscillation</a></li>
 <li>_varianceEstimate&#160;:&#160;<a class="el" href="classLoadCell__ADS1256.html#a22bb793405fa9aa10f4e0f1ec1e97aef">LoadCell_ADS1256</a></li>
 <li>_zeroPoint&#160;:&#160;<a class="el" href="classLoadCell__ADS1256.html#ad0de1b953158435f846d579f284bab62">LoadCell_ADS1256</a></li>
 </ul>
@@ -187,6 +188,15 @@ $(function() {
 <li>relativeForce_p100&#160;:&#160;<a class="el" href="structpayloadPedalConfig.html#ad903f1a21f2fc196338d8a2394b3f598">payloadPedalConfig</a></li>
 <li>resetPedalPos_u8&#160;:&#160;<a class="el" href="structpayloadPedalAction.html#a351bbb009b3aed974e5a4a96cb5b5722">payloadPedalAction</a></li>
 <li>returnPedalConfig_u8&#160;:&#160;<a class="el" href="structpayloadPedalAction.html#ab0ce6cb5b95a3413fc4076048a8a2fa4">payloadPedalAction</a></li>
+<li>RPM_AMP&#160;:&#160;<a class="el" href="structDAP__calculationVariables__st.html#a355875d1b0cd1024cbea5ee3cb0978db">DAP_calculationVariables_st</a>, <a class="el" href="structpayloadPedalConfig.html#adb0589433aae9a9b8bb2f33b5579ade7">payloadPedalConfig</a></li>
+<li>RPM_debug&#160;:&#160;<a class="el" href="classRPMOscillation.html#a57786f48268b449ff5509564fbd2f115">RPMOscillation</a></li>
+<li>RPM_debug_MAX_freq&#160;:&#160;<a class="el" href="classRPMOscillation.html#a1bbf4eaf3fc0862384df2cfdaa72703d">RPMOscillation</a></li>
+<li>RPM_debug_MIN_freq&#160;:&#160;<a class="el" href="classRPMOscillation.html#a6caf136306471d4ab05a6eca8973d912">RPMOscillation</a></li>
+<li>RPM_max_freq&#160;:&#160;<a class="el" href="structDAP__calculationVariables__st.html#ac1451d24473df986b17644c8e516aa57">DAP_calculationVariables_st</a>, <a class="el" href="structpayloadPedalConfig.html#a111720d24edcd7b8bb7f68c5257e68df">payloadPedalConfig</a></li>
+<li>RPM_min_freq&#160;:&#160;<a class="el" href="structDAP__calculationVariables__st.html#a7b53d2a8bda4fd1a8ac0eec833524e19">DAP_calculationVariables_st</a>, <a class="el" href="structpayloadPedalConfig.html#a5e0accbc7d7f113a2ff92afb98c3a282">payloadPedalConfig</a></li>
+<li>RPM_u8&#160;:&#160;<a class="el" href="structpayloadPedalAction.html#ac139e5011931276ea3e7689a5d7ae1d6">payloadPedalAction</a></li>
+<li>rpm_value&#160;:&#160;<a class="el" href="structDAP__calculationVariables__st.html#ac405804fbcc682edb548e85e945db915">DAP_calculationVariables_st</a></li>
+<li>RPM_value&#160;:&#160;<a class="el" href="classRPMOscillation.html#a67336e19d3aba005123fdd5a6a67e495">RPMOscillation</a></li>
 </ul>
 
 
@@ -214,6 +224,7 @@ $(function() {
 
 <h3><a id="index_t" name="index_t"></a>- t -</h3><ul>
 <li>timeout_&#160;:&#160;<a class="el" href="classModbus.html#a056e4ff932368557dc37c2201cac38a8">Modbus</a></li>
+<li>travelAsJoystickOutput_u8&#160;:&#160;<a class="el" href="structpayloadPedalConfig.html#a7cf2a2c86a9c6be11414fc45c12ae8b7">payloadPedalConfig</a></li>
 <li>triggerAbs_u8&#160;:&#160;<a class="el" href="structpayloadPedalAction.html#a400d5f2c957e910c0bc7739e4259b2e8">payloadPedalAction</a></li>
 <li>txout&#160;:&#160;<a class="el" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">Modbus</a></li>
 </ul>
