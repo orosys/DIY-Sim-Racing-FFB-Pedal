@@ -143,7 +143,7 @@ Public Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00129">129</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00134">134</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="aaa4ca8eca60fbcad1a98bd4933826d5b" name="aaa4ca8eca60fbcad1a98bd4933826d5b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aaa4ca8eca60fbcad1a98bd4933826d5b">&#9670;&#160;</a></span>updateEndstops()</h2>
@@ -171,24 +171,24 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8cpp_source.html#l00140">140</a> of file <a class="el" href="DiyActivePedal__types_8cpp_source.html">DiyActivePedal_types.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  140</span>                                                                                       {</div>
-<div class="line"><span class="lineno">  141</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a9bda32edb851a2e07e8556ef7c99b748">stepperPosMinEndstop</a> = newMinEndstop;</div>
-<div class="line"><span class="lineno">  142</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#af4131fe5c1f6a4c0fa8a5862425a29c4">stepperPosMaxEndstop</a> = newMaxEndstop;</div>
-<div class="line"><span class="lineno">  143</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#ae1689d58d514d4e1f7ce97a9b2f1b5e5">stepperPosEndstopRange</a> = <a class="code hl_variable" href="structDAP__calculationVariables__st.html#af4131fe5c1f6a4c0fa8a5862425a29c4">stepperPosMaxEndstop</a> - <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a9bda32edb851a2e07e8556ef7c99b748">stepperPosMinEndstop</a>;</div>
-<div class="line"><span class="lineno">  144</span> </div>
-<div class="line"><span class="lineno">  145</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#aa158b70f0328e458133519d9acbbf267">stepperPosMin</a> = <a class="code hl_variable" href="structDAP__calculationVariables__st.html#ae1689d58d514d4e1f7ce97a9b2f1b5e5">stepperPosEndstopRange</a> * <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a733c8364832bcea61680f03ace0e1ca2">startPosRel</a>;</div>
-<div class="line"><span class="lineno">  146</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#acec2fd87af191ca72ecea92b5450274e">stepperPosMax</a> = <a class="code hl_variable" href="structDAP__calculationVariables__st.html#ae1689d58d514d4e1f7ce97a9b2f1b5e5">stepperPosEndstopRange</a> * <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a3697fc233852956cb2e2e8b30a3d951e">endPosRel</a>;</div>
-<div class="line"><span class="lineno">  147</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a2c040a32eafad876f06e2153c4601d8a">stepperPosRange</a> = <a class="code hl_variable" href="structDAP__calculationVariables__st.html#acec2fd87af191ca72ecea92b5450274e">stepperPosMax</a> - <a class="code hl_variable" href="structDAP__calculationVariables__st.html#aa158b70f0328e458133519d9acbbf267">stepperPosMin</a>;</div>
-<div class="line"><span class="lineno">  148</span>}</div>
-<div class="ttc" id="astructDAP__calculationVariables__st_html_a2c040a32eafad876f06e2153c4601d8a"><div class="ttname"><a href="structDAP__calculationVariables__st.html#a2c040a32eafad876f06e2153c4601d8a">DAP_calculationVariables_st::stepperPosRange</a></div><div class="ttdeci">float stepperPosRange</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00144">DiyActivePedal_types.h:144</a></div></div>
-<div class="ttc" id="astructDAP__calculationVariables__st_html_a3697fc233852956cb2e2e8b30a3d951e"><div class="ttname"><a href="structDAP__calculationVariables__st.html#a3697fc233852956cb2e2e8b30a3d951e">DAP_calculationVariables_st::endPosRel</a></div><div class="ttdeci">float endPosRel</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00146">DiyActivePedal_types.h:146</a></div></div>
-<div class="ttc" id="astructDAP__calculationVariables__st_html_a733c8364832bcea61680f03ace0e1ca2"><div class="ttname"><a href="structDAP__calculationVariables__st.html#a733c8364832bcea61680f03ace0e1ca2">DAP_calculationVariables_st::startPosRel</a></div><div class="ttdeci">float startPosRel</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00145">DiyActivePedal_types.h:145</a></div></div>
-<div class="ttc" id="astructDAP__calculationVariables__st_html_a9bda32edb851a2e07e8556ef7c99b748"><div class="ttname"><a href="structDAP__calculationVariables__st.html#a9bda32edb851a2e07e8556ef7c99b748">DAP_calculationVariables_st::stepperPosMinEndstop</a></div><div class="ttdeci">long stepperPosMinEndstop</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00136">DiyActivePedal_types.h:136</a></div></div>
-<div class="ttc" id="astructDAP__calculationVariables__st_html_aa158b70f0328e458133519d9acbbf267"><div class="ttname"><a href="structDAP__calculationVariables__st.html#aa158b70f0328e458133519d9acbbf267">DAP_calculationVariables_st::stepperPosMin</a></div><div class="ttdeci">long stepperPosMin</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00142">DiyActivePedal_types.h:142</a></div></div>
-<div class="ttc" id="astructDAP__calculationVariables__st_html_acec2fd87af191ca72ecea92b5450274e"><div class="ttname"><a href="structDAP__calculationVariables__st.html#acec2fd87af191ca72ecea92b5450274e">DAP_calculationVariables_st::stepperPosMax</a></div><div class="ttdeci">long stepperPosMax</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00143">DiyActivePedal_types.h:143</a></div></div>
-<div class="ttc" id="astructDAP__calculationVariables__st_html_ae1689d58d514d4e1f7ce97a9b2f1b5e5"><div class="ttname"><a href="structDAP__calculationVariables__st.html#ae1689d58d514d4e1f7ce97a9b2f1b5e5">DAP_calculationVariables_st::stepperPosEndstopRange</a></div><div class="ttdeci">long stepperPosEndstopRange</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00138">DiyActivePedal_types.h:138</a></div></div>
-<div class="ttc" id="astructDAP__calculationVariables__st_html_af4131fe5c1f6a4c0fa8a5862425a29c4"><div class="ttname"><a href="structDAP__calculationVariables__st.html#af4131fe5c1f6a4c0fa8a5862425a29c4">DAP_calculationVariables_st::stepperPosMaxEndstop</a></div><div class="ttdeci">long stepperPosMaxEndstop</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00137">DiyActivePedal_types.h:137</a></div></div>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8cpp_source.html#l00143">143</a> of file <a class="el" href="DiyActivePedal__types_8cpp_source.html">DiyActivePedal_types.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  143</span>                                                                                       {</div>
+<div class="line"><span class="lineno">  144</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a9bda32edb851a2e07e8556ef7c99b748">stepperPosMinEndstop</a> = newMinEndstop;</div>
+<div class="line"><span class="lineno">  145</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#af4131fe5c1f6a4c0fa8a5862425a29c4">stepperPosMaxEndstop</a> = newMaxEndstop;</div>
+<div class="line"><span class="lineno">  146</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#ae1689d58d514d4e1f7ce97a9b2f1b5e5">stepperPosEndstopRange</a> = <a class="code hl_variable" href="structDAP__calculationVariables__st.html#af4131fe5c1f6a4c0fa8a5862425a29c4">stepperPosMaxEndstop</a> - <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a9bda32edb851a2e07e8556ef7c99b748">stepperPosMinEndstop</a>;</div>
+<div class="line"><span class="lineno">  147</span> </div>
+<div class="line"><span class="lineno">  148</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#aa158b70f0328e458133519d9acbbf267">stepperPosMin</a> = <a class="code hl_variable" href="structDAP__calculationVariables__st.html#ae1689d58d514d4e1f7ce97a9b2f1b5e5">stepperPosEndstopRange</a> * <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a733c8364832bcea61680f03ace0e1ca2">startPosRel</a>;</div>
+<div class="line"><span class="lineno">  149</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#acec2fd87af191ca72ecea92b5450274e">stepperPosMax</a> = <a class="code hl_variable" href="structDAP__calculationVariables__st.html#ae1689d58d514d4e1f7ce97a9b2f1b5e5">stepperPosEndstopRange</a> * <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a3697fc233852956cb2e2e8b30a3d951e">endPosRel</a>;</div>
+<div class="line"><span class="lineno">  150</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a2c040a32eafad876f06e2153c4601d8a">stepperPosRange</a> = <a class="code hl_variable" href="structDAP__calculationVariables__st.html#acec2fd87af191ca72ecea92b5450274e">stepperPosMax</a> - <a class="code hl_variable" href="structDAP__calculationVariables__st.html#aa158b70f0328e458133519d9acbbf267">stepperPosMin</a>;</div>
+<div class="line"><span class="lineno">  151</span>}</div>
+<div class="ttc" id="astructDAP__calculationVariables__st_html_a2c040a32eafad876f06e2153c4601d8a"><div class="ttname"><a href="structDAP__calculationVariables__st.html#a2c040a32eafad876f06e2153c4601d8a">DAP_calculationVariables_st::stepperPosRange</a></div><div class="ttdeci">float stepperPosRange</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00149">DiyActivePedal_types.h:149</a></div></div>
+<div class="ttc" id="astructDAP__calculationVariables__st_html_a3697fc233852956cb2e2e8b30a3d951e"><div class="ttname"><a href="structDAP__calculationVariables__st.html#a3697fc233852956cb2e2e8b30a3d951e">DAP_calculationVariables_st::endPosRel</a></div><div class="ttdeci">float endPosRel</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00151">DiyActivePedal_types.h:151</a></div></div>
+<div class="ttc" id="astructDAP__calculationVariables__st_html_a733c8364832bcea61680f03ace0e1ca2"><div class="ttname"><a href="structDAP__calculationVariables__st.html#a733c8364832bcea61680f03ace0e1ca2">DAP_calculationVariables_st::startPosRel</a></div><div class="ttdeci">float startPosRel</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00150">DiyActivePedal_types.h:150</a></div></div>
+<div class="ttc" id="astructDAP__calculationVariables__st_html_a9bda32edb851a2e07e8556ef7c99b748"><div class="ttname"><a href="structDAP__calculationVariables__st.html#a9bda32edb851a2e07e8556ef7c99b748">DAP_calculationVariables_st::stepperPosMinEndstop</a></div><div class="ttdeci">long stepperPosMinEndstop</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00141">DiyActivePedal_types.h:141</a></div></div>
+<div class="ttc" id="astructDAP__calculationVariables__st_html_aa158b70f0328e458133519d9acbbf267"><div class="ttname"><a href="structDAP__calculationVariables__st.html#aa158b70f0328e458133519d9acbbf267">DAP_calculationVariables_st::stepperPosMin</a></div><div class="ttdeci">long stepperPosMin</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00147">DiyActivePedal_types.h:147</a></div></div>
+<div class="ttc" id="astructDAP__calculationVariables__st_html_acec2fd87af191ca72ecea92b5450274e"><div class="ttname"><a href="structDAP__calculationVariables__st.html#acec2fd87af191ca72ecea92b5450274e">DAP_calculationVariables_st::stepperPosMax</a></div><div class="ttdeci">long stepperPosMax</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00148">DiyActivePedal_types.h:148</a></div></div>
+<div class="ttc" id="astructDAP__calculationVariables__st_html_ae1689d58d514d4e1f7ce97a9b2f1b5e5"><div class="ttname"><a href="structDAP__calculationVariables__st.html#ae1689d58d514d4e1f7ce97a9b2f1b5e5">DAP_calculationVariables_st::stepperPosEndstopRange</a></div><div class="ttdeci">long stepperPosEndstopRange</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00143">DiyActivePedal_types.h:143</a></div></div>
+<div class="ttc" id="astructDAP__calculationVariables__st_html_af4131fe5c1f6a4c0fa8a5862425a29c4"><div class="ttname"><a href="structDAP__calculationVariables__st.html#af4131fe5c1f6a4c0fa8a5862425a29c4">DAP_calculationVariables_st::stepperPosMaxEndstop</a></div><div class="ttdeci">long stepperPosMaxEndstop</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00142">DiyActivePedal_types.h:142</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -208,47 +208,47 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8cpp_source.html#l00117">117</a> of file <a class="el" href="DiyActivePedal__types_8cpp_source.html">DiyActivePedal_types.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  117</span>                                                                           {</div>
-<div class="line"><span class="lineno">  118</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a733c8364832bcea61680f03ace0e1ca2">startPosRel</a> = ((float)config_st.<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#aa35f308f84be04c330b59bcd4d748082">pedalStartPosition</a>) / 100.0f;</div>
-<div class="line"><span class="lineno">  119</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a3697fc233852956cb2e2e8b30a3d951e">endPosRel</a> = ((float)config_st.<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#af935cfbfa281dfb41afabfd0ab86ced8">pedalEndPosition</a>) / 100.0f;</div>
-<div class="line"><span class="lineno">  120</span> </div>
-<div class="line"><span class="lineno">  121</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a4cbded04f157027db28405ea8f4682e3">absFrequency</a> = 2 * PI * ((float)config_st.<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#aec2c61c9cc0b4be0bbd8b5ff8afe25ba">absFrequency</a>);</div>
-<div class="line"><span class="lineno">  122</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#afa16e912a05a805e99dfd5b3af809172">absAmplitude</a> = ((float)config_st.<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#a5339c7f9ee9690a61be859bce6064026">absAmplitude</a>) / 20.0f; <span class="comment">// in kg</span></div>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8cpp_source.html#l00120">120</a> of file <a class="el" href="DiyActivePedal__types_8cpp_source.html">DiyActivePedal_types.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  120</span>                                                                           {</div>
+<div class="line"><span class="lineno">  121</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a733c8364832bcea61680f03ace0e1ca2">startPosRel</a> = ((float)config_st.<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#aa35f308f84be04c330b59bcd4d748082">pedalStartPosition</a>) / 100.0f;</div>
+<div class="line"><span class="lineno">  122</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a3697fc233852956cb2e2e8b30a3d951e">endPosRel</a> = ((float)config_st.<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#af935cfbfa281dfb41afabfd0ab86ced8">pedalEndPosition</a>) / 100.0f;</div>
 <div class="line"><span class="lineno">  123</span> </div>
-<div class="line"><span class="lineno">  124</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#ad3a2a888891fc41562e62e078910da1e">dampingPress</a> = ((float)config_st.<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#a16a037b0447378dbd3c004311f65fff4">dampingPress</a>) / 400.0f;</div>
-<div class="line"><span class="lineno">  125</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#ac1451d24473df986b17644c8e516aa57">RPM_max_freq</a> = ((float)config_st.<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#a111720d24edcd7b8bb7f68c5257e68df">RPM_max_freq</a>);</div>
-<div class="line"><span class="lineno">  126</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a7b53d2a8bda4fd1a8ac0eec833524e19">RPM_min_freq</a> = ((float)config_st.<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#a5e0accbc7d7f113a2ff92afb98c3a282">RPM_min_freq</a>);</div>
-<div class="line"><span class="lineno">  127</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a355875d1b0cd1024cbea5ee3cb0978db">RPM_AMP</a> = ((float)config_st.<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#adb0589433aae9a9b8bb2f33b5579ade7">RPM_AMP</a>) / 100.0f;</div>
-<div class="line"><span class="lineno">  128</span>  <span class="comment">/*</span></div>
-<div class="line"><span class="lineno">  129</span><span class="comment">  RPM_max_freq = 40;</span></div>
-<div class="line"><span class="lineno">  130</span><span class="comment">  RPM_min_freq = 10;*/</span></div>
-<div class="line"><span class="lineno">  131</span>  <span class="comment">//RPM_AMP = 0.05;</span></div>
-<div class="line"><span class="lineno">  132</span>  </div>
-<div class="line"><span class="lineno">  133</span>  <span class="comment">// update force variables</span></div>
-<div class="line"><span class="lineno">  134</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958">Force_Min</a> = ((float)config_st.<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#a747973ae1229a7186da3fd940cd340eb">preloadForce</a>);</div>
-<div class="line"><span class="lineno">  135</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a1c2f7c9db353e05269035de94cd82aba">Force_Max</a> = ((float)config_st.<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#a120e64b1a3b8acf8c4ce5b786a71ebd5">maxForce</a>); </div>
-<div class="line"><span class="lineno">  136</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">Force_Range</a> = <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a1c2f7c9db353e05269035de94cd82aba">Force_Max</a> - <a class="code hl_variable" href="structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958">Force_Min</a>;</div>
-<div class="line"><span class="lineno">  137</span>  </div>
-<div class="line"><span class="lineno">  138</span>}</div>
-<div class="ttc" id="astructDAP__calculationVariables__st_html_a1c2f7c9db353e05269035de94cd82aba"><div class="ttname"><a href="structDAP__calculationVariables__st.html#a1c2f7c9db353e05269035de94cd82aba">DAP_calculationVariables_st::Force_Max</a></div><div class="ttdeci">float Force_Max</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00134">DiyActivePedal_types.h:134</a></div></div>
-<div class="ttc" id="astructDAP__calculationVariables__st_html_a355875d1b0cd1024cbea5ee3cb0978db"><div class="ttname"><a href="structDAP__calculationVariables__st.html#a355875d1b0cd1024cbea5ee3cb0978db">DAP_calculationVariables_st::RPM_AMP</a></div><div class="ttdeci">float RPM_AMP</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00141">DiyActivePedal_types.h:141</a></div></div>
-<div class="ttc" id="astructDAP__calculationVariables__st_html_a4cbded04f157027db28405ea8f4682e3"><div class="ttname"><a href="structDAP__calculationVariables__st.html#a4cbded04f157027db28405ea8f4682e3">DAP_calculationVariables_st::absFrequency</a></div><div class="ttdeci">float absFrequency</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00147">DiyActivePedal_types.h:147</a></div></div>
-<div class="ttc" id="astructDAP__calculationVariables__st_html_a7b53d2a8bda4fd1a8ac0eec833524e19"><div class="ttname"><a href="structDAP__calculationVariables__st.html#a7b53d2a8bda4fd1a8ac0eec833524e19">DAP_calculationVariables_st::RPM_min_freq</a></div><div class="ttdeci">float RPM_min_freq</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00140">DiyActivePedal_types.h:140</a></div></div>
-<div class="ttc" id="astructDAP__calculationVariables__st_html_abf26ec0fd8150996a4622cd6850ba369"><div class="ttname"><a href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">DAP_calculationVariables_st::Force_Range</a></div><div class="ttdeci">float Force_Range</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00135">DiyActivePedal_types.h:135</a></div></div>
-<div class="ttc" id="astructDAP__calculationVariables__st_html_ac1451d24473df986b17644c8e516aa57"><div class="ttname"><a href="structDAP__calculationVariables__st.html#ac1451d24473df986b17644c8e516aa57">DAP_calculationVariables_st::RPM_max_freq</a></div><div class="ttdeci">float RPM_max_freq</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00139">DiyActivePedal_types.h:139</a></div></div>
-<div class="ttc" id="astructDAP__calculationVariables__st_html_ad3a2a888891fc41562e62e078910da1e"><div class="ttname"><a href="structDAP__calculationVariables__st.html#ad3a2a888891fc41562e62e078910da1e">DAP_calculationVariables_st::dampingPress</a></div><div class="ttdeci">float dampingPress</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00151">DiyActivePedal_types.h:151</a></div></div>
-<div class="ttc" id="astructDAP__calculationVariables__st_html_af556ab515de584075f7fe94b94d4d958"><div class="ttname"><a href="structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958">DAP_calculationVariables_st::Force_Min</a></div><div class="ttdeci">float Force_Min</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00133">DiyActivePedal_types.h:133</a></div></div>
-<div class="ttc" id="astructDAP__calculationVariables__st_html_afa16e912a05a805e99dfd5b3af809172"><div class="ttname"><a href="structDAP__calculationVariables__st.html#afa16e912a05a805e99dfd5b3af809172">DAP_calculationVariables_st::absAmplitude</a></div><div class="ttdeci">float absAmplitude</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00148">DiyActivePedal_types.h:148</a></div></div>
-<div class="ttc" id="astructDAP__config__st_html_a1ec5a3656ddbc7b2705ec005d24e34bb"><div class="ttname"><a href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">DAP_config_st::payLoadPedalConfig_</a></div><div class="ttdeci">payloadPedalConfig payLoadPedalConfig_</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00118">DiyActivePedal_types.h:118</a></div></div>
-<div class="ttc" id="astructpayloadPedalConfig_html_a111720d24edcd7b8bb7f68c5257e68df"><div class="ttname"><a href="structpayloadPedalConfig.html#a111720d24edcd7b8bb7f68c5257e68df">payloadPedalConfig::RPM_max_freq</a></div><div class="ttdeci">uint8_t RPM_max_freq</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00071">DiyActivePedal_types.h:71</a></div></div>
+<div class="line"><span class="lineno">  124</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a4cbded04f157027db28405ea8f4682e3">absFrequency</a> = ((float)config_st.<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#aec2c61c9cc0b4be0bbd8b5ff8afe25ba">absFrequency</a>);</div>
+<div class="line"><span class="lineno">  125</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#afa16e912a05a805e99dfd5b3af809172">absAmplitude</a> = ((float)config_st.<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#a5339c7f9ee9690a61be859bce6064026">absAmplitude</a>) / 20.0f; <span class="comment">// in kg</span></div>
+<div class="line"><span class="lineno">  126</span> </div>
+<div class="line"><span class="lineno">  127</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#ad3a2a888891fc41562e62e078910da1e">dampingPress</a> = ((float)config_st.<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#a16a037b0447378dbd3c004311f65fff4">dampingPress</a>) / 400.0f;</div>
+<div class="line"><span class="lineno">  128</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#ac1451d24473df986b17644c8e516aa57">RPM_max_freq</a> = ((float)config_st.<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#a111720d24edcd7b8bb7f68c5257e68df">RPM_max_freq</a>);</div>
+<div class="line"><span class="lineno">  129</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a7b53d2a8bda4fd1a8ac0eec833524e19">RPM_min_freq</a> = ((float)config_st.<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#a5e0accbc7d7f113a2ff92afb98c3a282">RPM_min_freq</a>);</div>
+<div class="line"><span class="lineno">  130</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a355875d1b0cd1024cbea5ee3cb0978db">RPM_AMP</a> = ((float)config_st.<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#adb0589433aae9a9b8bb2f33b5579ade7">RPM_AMP</a>) / 100.0f;</div>
+<div class="line"><span class="lineno">  131</span>  <span class="comment">/*</span></div>
+<div class="line"><span class="lineno">  132</span><span class="comment">  RPM_max_freq = 40;</span></div>
+<div class="line"><span class="lineno">  133</span><span class="comment">  RPM_min_freq = 10;*/</span></div>
+<div class="line"><span class="lineno">  134</span>  <span class="comment">//RPM_AMP = 0.05;</span></div>
+<div class="line"><span class="lineno">  135</span>  </div>
+<div class="line"><span class="lineno">  136</span>  <span class="comment">// update force variables</span></div>
+<div class="line"><span class="lineno">  137</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958">Force_Min</a> = ((float)config_st.<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#a747973ae1229a7186da3fd940cd340eb">preloadForce</a>);</div>
+<div class="line"><span class="lineno">  138</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a1c2f7c9db353e05269035de94cd82aba">Force_Max</a> = ((float)config_st.<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#a120e64b1a3b8acf8c4ce5b786a71ebd5">maxForce</a>); </div>
+<div class="line"><span class="lineno">  139</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">Force_Range</a> = <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a1c2f7c9db353e05269035de94cd82aba">Force_Max</a> - <a class="code hl_variable" href="structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958">Force_Min</a>;</div>
+<div class="line"><span class="lineno">  140</span>  </div>
+<div class="line"><span class="lineno">  141</span>}</div>
+<div class="ttc" id="astructDAP__calculationVariables__st_html_a1c2f7c9db353e05269035de94cd82aba"><div class="ttname"><a href="structDAP__calculationVariables__st.html#a1c2f7c9db353e05269035de94cd82aba">DAP_calculationVariables_st::Force_Max</a></div><div class="ttdeci">float Force_Max</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00139">DiyActivePedal_types.h:139</a></div></div>
+<div class="ttc" id="astructDAP__calculationVariables__st_html_a355875d1b0cd1024cbea5ee3cb0978db"><div class="ttname"><a href="structDAP__calculationVariables__st.html#a355875d1b0cd1024cbea5ee3cb0978db">DAP_calculationVariables_st::RPM_AMP</a></div><div class="ttdeci">float RPM_AMP</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00146">DiyActivePedal_types.h:146</a></div></div>
+<div class="ttc" id="astructDAP__calculationVariables__st_html_a4cbded04f157027db28405ea8f4682e3"><div class="ttname"><a href="structDAP__calculationVariables__st.html#a4cbded04f157027db28405ea8f4682e3">DAP_calculationVariables_st::absFrequency</a></div><div class="ttdeci">float absFrequency</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00152">DiyActivePedal_types.h:152</a></div></div>
+<div class="ttc" id="astructDAP__calculationVariables__st_html_a7b53d2a8bda4fd1a8ac0eec833524e19"><div class="ttname"><a href="structDAP__calculationVariables__st.html#a7b53d2a8bda4fd1a8ac0eec833524e19">DAP_calculationVariables_st::RPM_min_freq</a></div><div class="ttdeci">float RPM_min_freq</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00145">DiyActivePedal_types.h:145</a></div></div>
+<div class="ttc" id="astructDAP__calculationVariables__st_html_abf26ec0fd8150996a4622cd6850ba369"><div class="ttname"><a href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">DAP_calculationVariables_st::Force_Range</a></div><div class="ttdeci">float Force_Range</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00140">DiyActivePedal_types.h:140</a></div></div>
+<div class="ttc" id="astructDAP__calculationVariables__st_html_ac1451d24473df986b17644c8e516aa57"><div class="ttname"><a href="structDAP__calculationVariables__st.html#ac1451d24473df986b17644c8e516aa57">DAP_calculationVariables_st::RPM_max_freq</a></div><div class="ttdeci">float RPM_max_freq</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00144">DiyActivePedal_types.h:144</a></div></div>
+<div class="ttc" id="astructDAP__calculationVariables__st_html_ad3a2a888891fc41562e62e078910da1e"><div class="ttname"><a href="structDAP__calculationVariables__st.html#ad3a2a888891fc41562e62e078910da1e">DAP_calculationVariables_st::dampingPress</a></div><div class="ttdeci">float dampingPress</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00156">DiyActivePedal_types.h:156</a></div></div>
+<div class="ttc" id="astructDAP__calculationVariables__st_html_af556ab515de584075f7fe94b94d4d958"><div class="ttname"><a href="structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958">DAP_calculationVariables_st::Force_Min</a></div><div class="ttdeci">float Force_Min</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00138">DiyActivePedal_types.h:138</a></div></div>
+<div class="ttc" id="astructDAP__calculationVariables__st_html_afa16e912a05a805e99dfd5b3af809172"><div class="ttname"><a href="structDAP__calculationVariables__st.html#afa16e912a05a805e99dfd5b3af809172">DAP_calculationVariables_st::absAmplitude</a></div><div class="ttdeci">float absAmplitude</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00153">DiyActivePedal_types.h:153</a></div></div>
+<div class="ttc" id="astructDAP__config__st_html_a1ec5a3656ddbc7b2705ec005d24e34bb"><div class="ttname"><a href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">DAP_config_st::payLoadPedalConfig_</a></div><div class="ttdeci">payloadPedalConfig payLoadPedalConfig_</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00123">DiyActivePedal_types.h:123</a></div></div>
+<div class="ttc" id="astructpayloadPedalConfig_html_a111720d24edcd7b8bb7f68c5257e68df"><div class="ttname"><a href="structpayloadPedalConfig.html#a111720d24edcd7b8bb7f68c5257e68df">payloadPedalConfig::RPM_max_freq</a></div><div class="ttdeci">uint8_t RPM_max_freq</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00072">DiyActivePedal_types.h:72</a></div></div>
 <div class="ttc" id="astructpayloadPedalConfig_html_a120e64b1a3b8acf8c4ce5b786a71ebd5"><div class="ttname"><a href="structpayloadPedalConfig.html#a120e64b1a3b8acf8c4ce5b786a71ebd5">payloadPedalConfig::maxForce</a></div><div class="ttdeci">uint8_t maxForce</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00040">DiyActivePedal_types.h:40</a></div></div>
 <div class="ttc" id="astructpayloadPedalConfig_html_a16a037b0447378dbd3c004311f65fff4"><div class="ttname"><a href="structpayloadPedalConfig.html#a16a037b0447378dbd3c004311f65fff4">payloadPedalConfig::dampingPress</a></div><div class="ttdeci">uint8_t dampingPress</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00053">DiyActivePedal_types.h:53</a></div></div>
 <div class="ttc" id="astructpayloadPedalConfig_html_a5339c7f9ee9690a61be859bce6064026"><div class="ttname"><a href="structpayloadPedalConfig.html#a5339c7f9ee9690a61be859bce6064026">payloadPedalConfig::absAmplitude</a></div><div class="ttdeci">uint8_t absAmplitude</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00058">DiyActivePedal_types.h:58</a></div></div>
-<div class="ttc" id="astructpayloadPedalConfig_html_a5e0accbc7d7f113a2ff92afb98c3a282"><div class="ttname"><a href="structpayloadPedalConfig.html#a5e0accbc7d7f113a2ff92afb98c3a282">payloadPedalConfig::RPM_min_freq</a></div><div class="ttdeci">uint8_t RPM_min_freq</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00072">DiyActivePedal_types.h:72</a></div></div>
+<div class="ttc" id="astructpayloadPedalConfig_html_a5e0accbc7d7f113a2ff92afb98c3a282"><div class="ttname"><a href="structpayloadPedalConfig.html#a5e0accbc7d7f113a2ff92afb98c3a282">payloadPedalConfig::RPM_min_freq</a></div><div class="ttdeci">uint8_t RPM_min_freq</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00073">DiyActivePedal_types.h:73</a></div></div>
 <div class="ttc" id="astructpayloadPedalConfig_html_a747973ae1229a7186da3fd940cd340eb"><div class="ttname"><a href="structpayloadPedalConfig.html#a747973ae1229a7186da3fd940cd340eb">payloadPedalConfig::preloadForce</a></div><div class="ttdeci">uint8_t preloadForce</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00041">DiyActivePedal_types.h:41</a></div></div>
 <div class="ttc" id="astructpayloadPedalConfig_html_aa35f308f84be04c330b59bcd4d748082"><div class="ttname"><a href="structpayloadPedalConfig.html#aa35f308f84be04c330b59bcd4d748082">payloadPedalConfig::pedalStartPosition</a></div><div class="ttdeci">uint8_t pedalStartPosition</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00036">DiyActivePedal_types.h:36</a></div></div>
-<div class="ttc" id="astructpayloadPedalConfig_html_adb0589433aae9a9b8bb2f33b5579ade7"><div class="ttname"><a href="structpayloadPedalConfig.html#adb0589433aae9a9b8bb2f33b5579ade7">payloadPedalConfig::RPM_AMP</a></div><div class="ttdeci">uint8_t RPM_AMP</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00073">DiyActivePedal_types.h:73</a></div></div>
+<div class="ttc" id="astructpayloadPedalConfig_html_adb0589433aae9a9b8bb2f33b5579ade7"><div class="ttname"><a href="structpayloadPedalConfig.html#adb0589433aae9a9b8bb2f33b5579ade7">payloadPedalConfig::RPM_AMP</a></div><div class="ttdeci">uint8_t RPM_AMP</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00074">DiyActivePedal_types.h:74</a></div></div>
 <div class="ttc" id="astructpayloadPedalConfig_html_aec2c61c9cc0b4be0bbd8b5ff8afe25ba"><div class="ttname"><a href="structpayloadPedalConfig.html#aec2c61c9cc0b4be0bbd8b5ff8afe25ba">payloadPedalConfig::absFrequency</a></div><div class="ttdeci">uint8_t absFrequency</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00057">DiyActivePedal_types.h:57</a></div></div>
 <div class="ttc" id="astructpayloadPedalConfig_html_af935cfbfa281dfb41afabfd0ab86ced8"><div class="ttname"><a href="structpayloadPedalConfig.html#af935cfbfa281dfb41afabfd0ab86ced8">payloadPedalConfig::pedalEndPosition</a></div><div class="ttdeci">uint8_t pedalEndPosition</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00037">DiyActivePedal_types.h:37</a></div></div>
 </div><!-- fragment -->
@@ -269,13 +269,13 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8cpp_source.html#l00150">150</a> of file <a class="el" href="DiyActivePedal__types_8cpp_source.html">DiyActivePedal_types.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  150</span>                                                  {</div>
-<div class="line"><span class="lineno">  151</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a499e47c1d44d6d8e2d960f6f9299cc61">springStiffnesss</a> = <a class="code hl_variable" href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">Force_Range</a> / <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a2c040a32eafad876f06e2153c4601d8a">stepperPosRange</a>;</div>
-<div class="line"><span class="lineno">  152</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#aa9381fe56d036b19f709ef6865231215">springStiffnesssInv</a> = 1.0 / <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a499e47c1d44d6d8e2d960f6f9299cc61">springStiffnesss</a>;</div>
-<div class="line"><span class="lineno">  153</span>}</div>
-<div class="ttc" id="astructDAP__calculationVariables__st_html_a499e47c1d44d6d8e2d960f6f9299cc61"><div class="ttname"><a href="structDAP__calculationVariables__st.html#a499e47c1d44d6d8e2d960f6f9299cc61">DAP_calculationVariables_st::springStiffnesss</a></div><div class="ttdeci">float springStiffnesss</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00131">DiyActivePedal_types.h:131</a></div></div>
-<div class="ttc" id="astructDAP__calculationVariables__st_html_aa9381fe56d036b19f709ef6865231215"><div class="ttname"><a href="structDAP__calculationVariables__st.html#aa9381fe56d036b19f709ef6865231215">DAP_calculationVariables_st::springStiffnesssInv</a></div><div class="ttdeci">float springStiffnesssInv</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00132">DiyActivePedal_types.h:132</a></div></div>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8cpp_source.html#l00153">153</a> of file <a class="el" href="DiyActivePedal__types_8cpp_source.html">DiyActivePedal_types.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  153</span>                                                  {</div>
+<div class="line"><span class="lineno">  154</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a499e47c1d44d6d8e2d960f6f9299cc61">springStiffnesss</a> = <a class="code hl_variable" href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">Force_Range</a> / <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a2c040a32eafad876f06e2153c4601d8a">stepperPosRange</a>;</div>
+<div class="line"><span class="lineno">  155</span>  <a class="code hl_variable" href="structDAP__calculationVariables__st.html#aa9381fe56d036b19f709ef6865231215">springStiffnesssInv</a> = 1.0 / <a class="code hl_variable" href="structDAP__calculationVariables__st.html#a499e47c1d44d6d8e2d960f6f9299cc61">springStiffnesss</a>;</div>
+<div class="line"><span class="lineno">  156</span>}</div>
+<div class="ttc" id="astructDAP__calculationVariables__st_html_a499e47c1d44d6d8e2d960f6f9299cc61"><div class="ttname"><a href="structDAP__calculationVariables__st.html#a499e47c1d44d6d8e2d960f6f9299cc61">DAP_calculationVariables_st::springStiffnesss</a></div><div class="ttdeci">float springStiffnesss</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00136">DiyActivePedal_types.h:136</a></div></div>
+<div class="ttc" id="astructDAP__calculationVariables__st_html_aa9381fe56d036b19f709ef6865231215"><div class="ttname"><a href="structDAP__calculationVariables__st.html#aa9381fe56d036b19f709ef6865231215">DAP_calculationVariables_st::springStiffnesssInv</a></div><div class="ttdeci">float springStiffnesssInv</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00137">DiyActivePedal_types.h:137</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -292,7 +292,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00148">148</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00153">153</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
 
 </div>
 </div>
@@ -308,7 +308,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00147">147</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00152">152</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
 
 </div>
 </div>
@@ -324,7 +324,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00151">151</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00156">156</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
 
 </div>
 </div>
@@ -340,7 +340,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00146">146</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00151">151</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
 
 </div>
 </div>
@@ -356,7 +356,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00134">134</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00139">139</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
 
 </div>
 </div>
@@ -372,7 +372,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00133">133</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00138">138</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
 
 </div>
 </div>
@@ -388,7 +388,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00135">135</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00140">140</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
 
 </div>
 </div>
@@ -404,7 +404,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00141">141</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00146">146</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
 
 </div>
 </div>
@@ -420,7 +420,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00139">139</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00144">144</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
 
 </div>
 </div>
@@ -436,7 +436,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00140">140</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00145">145</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
 
 </div>
 </div>
@@ -452,7 +452,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00149">149</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00154">154</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
 
 </div>
 </div>
@@ -468,7 +468,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00131">131</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00136">136</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
 
 </div>
 </div>
@@ -484,7 +484,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00132">132</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00137">137</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
 
 </div>
 </div>
@@ -500,7 +500,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00145">145</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00150">150</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
 
 </div>
 </div>
@@ -516,7 +516,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00138">138</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00143">143</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
 
 </div>
 </div>
@@ -532,7 +532,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00143">143</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00148">148</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
 
 </div>
 </div>
@@ -548,7 +548,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00137">137</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00142">142</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
 
 </div>
 </div>
@@ -564,7 +564,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00142">142</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00147">147</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
 
 </div>
 </div>
@@ -580,7 +580,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00136">136</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00141">141</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
 
 </div>
 </div>
@@ -596,7 +596,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00144">144</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiyActivePedal__types_8h_source.html#l00149">149</a> of file <a class="el" href="DiyActivePedal__types_8h_source.html">DiyActivePedal_types.h</a>.</p>
 
 </div>
 </div>

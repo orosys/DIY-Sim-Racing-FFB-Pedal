@@ -94,8 +94,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a10dd3eeb0d68823257960067335bb4d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8cd568c5a1ff3400ffe61e1097ed22d1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classABSOscillation.html#a8cd568c5a1ff3400ffe61e1097ed22d1">trigger</a> ()</td></tr>
 <tr class="separator:a8cd568c5a1ff3400ffe61e1097ed22d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a974d43e73227304313cb24470c127136"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classABSOscillation.html#a974d43e73227304313cb24470c127136">forceOffset</a> (<a class="el" href="structDAP__calculationVariables__st.html">DAP_calculationVariables_st</a> *calcVars_st)</td></tr>
-<tr class="separator:a974d43e73227304313cb24470c127136"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b775b41b91aa7eeaef6f602f9ac50ba"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classABSOscillation.html#a2b775b41b91aa7eeaef6f602f9ac50ba">forceOffset</a> (<a class="el" href="structDAP__calculationVariables__st.html">DAP_calculationVariables_st</a> *calcVars_st, uint8_t absPattern)</td></tr>
+<tr class="separator:a2b775b41b91aa7eeaef6f602f9ac50ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
@@ -141,8 +141,8 @@ Private Attributes</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a974d43e73227304313cb24470c127136" name="a974d43e73227304313cb24470c127136"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a974d43e73227304313cb24470c127136">&#9670;&#160;</a></span>forceOffset()</h2>
+<a id="a2b775b41b91aa7eeaef6f602f9ac50ba" name="a2b775b41b91aa7eeaef6f602f9ac50ba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b775b41b91aa7eeaef6f602f9ac50ba">&#9670;&#160;</a></span>forceOffset()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -154,8 +154,18 @@ Private Attributes</h2></td></tr>
           <td class="memname">float ABSOscillation::forceOffset </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structDAP__calculationVariables__st.html">DAP_calculationVariables_st</a> *&#160;</td>
-          <td class="paramname"><em>calcVars_st</em></td><td>)</td>
+          <td class="paramname"><em>calcVars_st</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>absPattern</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -166,7 +176,7 @@ Private Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00026">26</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   26</span>                                                              {</div>
+<div class="fragment"><div class="line"><span class="lineno">   26</span>                                                                                  {</div>
 <div class="line"><span class="lineno">   27</span> </div>
 <div class="line"><span class="lineno">   28</span> </div>
 <div class="line"><span class="lineno">   29</span>    <span class="keywordtype">long</span> timeNowMillis = millis();</div>
@@ -182,20 +192,38 @@ Private Attributes</h2></td></tr>
 <div class="line"><span class="lineno">   39</span>    {</div>
 <div class="line"><span class="lineno">   40</span>      <a class="code hl_variable" href="classABSOscillation.html#aa6eea960735be3b0cbd11511b54fc243">_absTimeMillis</a> += timeNowMillis - <a class="code hl_variable" href="classABSOscillation.html#af6eebba0836388860ae30ce8d1655975">_lastCallTimeMillis</a>;</div>
 <div class="line"><span class="lineno">   41</span>      <span class="keywordtype">float</span> absTimeSeconds = <a class="code hl_variable" href="classABSOscillation.html#aa6eea960735be3b0cbd11511b54fc243">_absTimeMillis</a> / 1000.0f;</div>
-<div class="line"><span class="lineno">   42</span>      absForceOffset = calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#afa16e912a05a805e99dfd5b3af809172">absAmplitude</a> * sin(calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#a4cbded04f157027db28405ea8f4682e3">absFrequency</a> * absTimeSeconds);</div>
-<div class="line"><span class="lineno">   43</span>    }</div>
-<div class="line"><span class="lineno">   44</span> </div>
-<div class="line"><span class="lineno">   45</span>    <a class="code hl_variable" href="classABSOscillation.html#af6eebba0836388860ae30ce8d1655975">_lastCallTimeMillis</a> = timeNowMillis;</div>
-<div class="line"><span class="lineno">   46</span> </div>
-<div class="line"><span class="lineno">   47</span>    <span class="keywordflow">return</span> absForceOffset;</div>
-<div class="line"><span class="lineno">   48</span>    </div>
-<div class="line"><span class="lineno">   49</span> </div>
-<div class="line"><span class="lineno">   50</span>  }</div>
+<div class="line"><span class="lineno">   42</span> </div>
+<div class="line"><span class="lineno">   43</span>      <span class="keywordflow">switch</span> (absPattern) {</div>
+<div class="line"><span class="lineno">   44</span>        <span class="keywordflow">case</span> 0:</div>
+<div class="line"><span class="lineno">   45</span>          <span class="comment">// sine wave pattern</span></div>
+<div class="line"><span class="lineno">   46</span>          absForceOffset = calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#afa16e912a05a805e99dfd5b3af809172">absAmplitude</a> * sin(2 * PI * calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#a4cbded04f157027db28405ea8f4682e3">absFrequency</a> * absTimeSeconds);</div>
+<div class="line"><span class="lineno">   47</span>          <span class="keywordflow">break</span>;</div>
+<div class="line"><span class="lineno">   48</span>        <span class="keywordflow">case</span> 1:</div>
+<div class="line"><span class="lineno">   49</span>          <span class="comment">// sawtooth pattern</span></div>
+<div class="line"><span class="lineno">   50</span>          <span class="keywordflow">if</span> (calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#a4cbded04f157027db28405ea8f4682e3">absFrequency</a> &gt; 0)</div>
+<div class="line"><span class="lineno">   51</span>          {</div>
+<div class="line"><span class="lineno">   52</span>            absForceOffset = calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#afa16e912a05a805e99dfd5b3af809172">absAmplitude</a> * fmod(absTimeSeconds, 1.0 / (<span class="keywordtype">float</span>)calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#a4cbded04f157027db28405ea8f4682e3">absFrequency</a>) * (float)calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#a4cbded04f157027db28405ea8f4682e3">absFrequency</a>;</div>
+<div class="line"><span class="lineno">   53</span>          }</div>
+<div class="line"><span class="lineno">   54</span>          <span class="keywordflow">break</span>;</div>
+<div class="line"><span class="lineno">   55</span>        <span class="keywordflow">default</span>:</div>
+<div class="line"><span class="lineno">   56</span>          <span class="keywordflow">break</span>;</div>
+<div class="line"><span class="lineno">   57</span>      }</div>
+<div class="line"><span class="lineno">   58</span>      </div>
+<div class="line"><span class="lineno">   59</span> </div>
+<div class="line"><span class="lineno">   60</span>      </div>
+<div class="line"><span class="lineno">   61</span>    }</div>
+<div class="line"><span class="lineno">   62</span> </div>
+<div class="line"><span class="lineno">   63</span>    <a class="code hl_variable" href="classABSOscillation.html#af6eebba0836388860ae30ce8d1655975">_lastCallTimeMillis</a> = timeNowMillis;</div>
+<div class="line"><span class="lineno">   64</span> </div>
+<div class="line"><span class="lineno">   65</span>    <span class="keywordflow">return</span> absForceOffset;</div>
+<div class="line"><span class="lineno">   66</span>    </div>
+<div class="line"><span class="lineno">   67</span> </div>
+<div class="line"><span class="lineno">   68</span>  }</div>
 <div class="ttc" id="aABSOscillation_8h_html_a61ab862323b75936acb10c28e7079bb2"><div class="ttname"><a href="ABSOscillation_8h.html#a61ab862323b75936acb10c28e7079bb2">ABS_ACTIVE_TIME_PER_TRIGGER_MILLIS</a></div><div class="ttdeci">static const long ABS_ACTIVE_TIME_PER_TRIGGER_MILLIS</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00006">ABSOscillation.h:6</a></div></div>
 <div class="ttc" id="aclassABSOscillation_html_aa6eea960735be3b0cbd11511b54fc243"><div class="ttname"><a href="classABSOscillation.html#aa6eea960735be3b0cbd11511b54fc243">ABSOscillation::_absTimeMillis</a></div><div class="ttdeci">long _absTimeMillis</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00013">ABSOscillation.h:13</a></div></div>
 <div class="ttc" id="aclassABSOscillation_html_af6eebba0836388860ae30ce8d1655975"><div class="ttname"><a href="classABSOscillation.html#af6eebba0836388860ae30ce8d1655975">ABSOscillation::_lastCallTimeMillis</a></div><div class="ttdeci">long _lastCallTimeMillis</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00014">ABSOscillation.h:14</a></div></div>
-<div class="ttc" id="astructDAP__calculationVariables__st_html_a4cbded04f157027db28405ea8f4682e3"><div class="ttname"><a href="structDAP__calculationVariables__st.html#a4cbded04f157027db28405ea8f4682e3">DAP_calculationVariables_st::absFrequency</a></div><div class="ttdeci">float absFrequency</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00147">DiyActivePedal_types.h:147</a></div></div>
-<div class="ttc" id="astructDAP__calculationVariables__st_html_afa16e912a05a805e99dfd5b3af809172"><div class="ttname"><a href="structDAP__calculationVariables__st.html#afa16e912a05a805e99dfd5b3af809172">DAP_calculationVariables_st::absAmplitude</a></div><div class="ttdeci">float absAmplitude</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00148">DiyActivePedal_types.h:148</a></div></div>
+<div class="ttc" id="astructDAP__calculationVariables__st_html_a4cbded04f157027db28405ea8f4682e3"><div class="ttname"><a href="structDAP__calculationVariables__st.html#a4cbded04f157027db28405ea8f4682e3">DAP_calculationVariables_st::absFrequency</a></div><div class="ttdeci">float absFrequency</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00152">DiyActivePedal_types.h:152</a></div></div>
+<div class="ttc" id="astructDAP__calculationVariables__st_html_afa16e912a05a805e99dfd5b3af809172"><div class="ttname"><a href="structDAP__calculationVariables__st.html#afa16e912a05a805e99dfd5b3af809172">DAP_calculationVariables_st::absAmplitude</a></div><div class="ttdeci">float absAmplitude</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00153">DiyActivePedal_types.h:153</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
