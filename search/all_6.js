@@ -20,5 +20,5 @@ var searchData=
   ['forcecurve_2ecpp_17',['ForceCurve.cpp',['../ForceCurve_8cpp.html',1,'']]],
   ['forcecurve_2eh_18',['ForceCurve.h',['../ForceCurve_8h.html',1,'']]],
   ['forcecurve_5finterpolated_19',['ForceCurve_Interpolated',['../classForceCurve__Interpolated.html',1,'']]],
-  ['forceoffset_20',['forceOffset',['../classABSOscillation.html#a2b775b41b91aa7eeaef6f602f9ac50ba',1,'ABSOscillation::forceOffset()'],['../classRPMOscillation.html#a759693f862c90a9e31e79c2db41b7b24',1,'RPMOscillation::forceOffset()']]]
+  ['forceoffset_20',['forceOffset',['../classRPMOscillation.html#a759693f862c90a9e31e79c2db41b7b24',1,'RPMOscillation::forceOffset()'],['../classBitePointOscillation.html#a9cf084ccbdec027fbf5eba50b4a97e8c',1,'BitePointOscillation::forceOffset()'],['../classABSOscillation.html#ac1eef365a7288a4364c8e4ed57d2acdb',1,'ABSOscillation::forceOffset()']]]
 ];

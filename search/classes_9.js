@@ -1,6 +1,8 @@
 var searchData=
 [
-  ['rpmoscillation_0',['RPMOscillation',['../classRPMOscillation.html',1,'']]],
-  ['rtdebugoutput_1',['RTDebugOutput',['../classRTDebugOutput.html',1,'']]],
-  ['rtdebugoutput_3c_20float_2c_201_20_3e_2',['RTDebugOutput&lt; float, 1 &gt;',['../classRTDebugOutput.html',1,'']]]
+  ['payloadfooter_0',['payloadFooter',['../structpayloadFooter.html',1,'']]],
+  ['payloadheader_1',['payloadHeader',['../structpayloadHeader.html',1,'']]],
+  ['payloadpedalaction_2',['payloadPedalAction',['../structpayloadPedalAction.html',1,'']]],
+  ['payloadpedalconfig_3',['payloadPedalConfig',['../structpayloadPedalConfig.html',1,'']]],
+  ['payloadpedalstate_4',['payloadPedalState',['../structpayloadPedalState.html',1,'']]]
 ];

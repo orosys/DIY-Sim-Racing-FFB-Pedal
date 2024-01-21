@@ -1,8 +1,9 @@
 var searchData=
 [
-  ['checksum_0',['checkSum',['../structpayloadFooter.html#a62e9885abf27e6904726d8c450613361',1,'payloadFooter']]],
-  ['control_5fstrategy_5fb_1',['control_strategy_b',['../structpayloadPedalConfig.html#a514b5c74dcded8b65d7ca3f49c80d479',1,'payloadPedalConfig']]],
-  ['control_5fstrategy_5fu8_2',['control_strategy_u8',['../StepperMovementStrategy_8h.html#ac01c47e6d9a3c7c4c05e97e6cc3aba3b',1,'StepperMovementStrategy.h']]],
-  ['cubic_5fspline_5fparam_5fa_5farray_3',['cubic_spline_param_a_array',['../structpayloadPedalConfig.html#ad5f4479817c6e2cd89feac674957ed29',1,'payloadPedalConfig']]],
-  ['cubic_5fspline_5fparam_5fb_5farray_4',['cubic_spline_param_b_array',['../structpayloadPedalConfig.html#a4b032c304d213693d0e4615e9cb6dac5',1,'payloadPedalConfig']]]
+  ['bitepoint_5fforce_5foffset_0',['BitePoint_Force_offset',['../classBitePointOscillation.html#a464b3f3423bfe7edfb05f50ed7ebacc5',1,'BitePointOscillation']]],
+  ['bp_5factive_5ftime_5fper_5ftrigger_5fmillis_1',['BP_ACTIVE_TIME_PER_TRIGGER_MILLIS',['../ABSOscillation_8h.html#aeb502589d4d0b618977876ae08841a30',1,'ABSOscillation.h']]],
+  ['bp_5famp_2',['BP_amp',['../structpayloadPedalConfig.html#a15ede2076ef565a0e70ce7f136483b0f',1,'payloadPedalConfig::BP_amp()'],['../structDAP__calculationVariables__st.html#a03ea67a30941af9b493237603844628c',1,'DAP_calculationVariables_st::BP_amp()']]],
+  ['bp_5ffreq_3',['BP_freq',['../structpayloadPedalConfig.html#ac2e6cba699a6d77407e726f26ff0aafb',1,'payloadPedalConfig::BP_freq()'],['../structDAP__calculationVariables__st.html#af7c8127035779283cc13cd6f11fc1ba4',1,'DAP_calculationVariables_st::BP_freq()']]],
+  ['bp_5ftrigger_4',['BP_trigger',['../structpayloadPedalConfig.html#a06167b94b7fd1f85aaa171144b4723af',1,'payloadPedalConfig']]],
+  ['bp_5ftrigger_5fvalue_5',['BP_trigger_value',['../structpayloadPedalConfig.html#a2c16dc4dcf074ac1eac4462ed32473a4',1,'payloadPedalConfig::BP_trigger_value()'],['../structDAP__calculationVariables__st.html#a778a52b7ee9d41fbb8cf5d5b2a768f79',1,'DAP_calculationVariables_st::BP_trigger_value()']]]
 ];

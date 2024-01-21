@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['cycletimer_0',['CycleTimer',['../classCycleTimer.html',1,'']]]
+  ['bitepointoscillation_0',['BitePointOscillation',['../classBitePointOscillation.html',1,'']]]
 ];

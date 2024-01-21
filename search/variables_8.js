@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['joystick_5fmax_5fvalue_0',['JOYSTICK_MAX_VALUE',['../Controller_8cpp.html#a6932f6513cabf3082fc4fb11537a4293',1,'Controller.cpp']]],
-  ['joystick_5fmin_5fvalue_1',['JOYSTICK_MIN_VALUE',['../Controller_8cpp.html#ac1e9ca710d3cf526d3500bd08edd4b36',1,'Controller.cpp']]],
-  ['joystick_5frange_2',['JOYSTICK_RANGE',['../Controller_8cpp.html#a7a50456faa7346a8466099e7c9003cc1',1,'Controller.cpp']]]
+  ['input_0',['Input',['../StepperMovementStrategy_8h.html#a651f98f57843e7ac1d346db755aefb98',1,'StepperMovementStrategy.h']]],
+  ['invertloadcellreading_5fu8_1',['invertLoadcellReading_u8',['../structpayloadPedalConfig.html#accd4bfd09294d31d56aec67e75a404ac',1,'payloadPedalConfig']]]
 ];

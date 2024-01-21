@@ -1,6 +1,9 @@
 var searchData=
 [
-  ['endposrel_0',['endPosRel',['../structDAP__calculationVariables__st.html#a3697fc233852956cb2e2e8b30a3d951e',1,'DAP_calculationVariables_st']]],
-  ['endstop_5fmovement_1',['ENDSTOP_MOVEMENT',['../Dev_2StepperWithLimits_8cpp.html#a04192301159165c6b640ffcb46e7baae',1,'ENDSTOP_MOVEMENT():&#160;StepperWithLimits.cpp'],['../Main_2StepperWithLimits_8cpp.html#a04192301159165c6b640ffcb46e7baae',1,'ENDSTOP_MOVEMENT():&#160;StepperWithLimits.cpp']]],
-  ['endstop_5fmovement_5fsensorless_2',['ENDSTOP_MOVEMENT_SENSORLESS',['../Dev_2StepperWithLimits_8cpp.html#aa30177822c5d58bcb0fc48fef65094a8',1,'ENDSTOP_MOVEMENT_SENSORLESS():&#160;StepperWithLimits.cpp'],['../Main_2StepperWithLimits_8cpp.html#aa30177822c5d58bcb0fc48fef65094a8',1,'ENDSTOP_MOVEMENT_SENSORLESS():&#160;StepperWithLimits.cpp']]]
+  ['dampingpress_0',['dampingPress',['../structpayloadPedalConfig.html#a16a037b0447378dbd3c004311f65fff4',1,'payloadPedalConfig::dampingPress()'],['../structDAP__calculationVariables__st.html#ad3a2a888891fc41562e62e078910da1e',1,'DAP_calculationVariables_st::dampingPress()']]],
+  ['dampingpull_1',['dampingPull',['../structpayloadPedalConfig.html#a07217e687ff79b033d50f86effbbc2ee',1,'payloadPedalConfig']]],
+  ['datalen_2',['datalen',['../classModbus.html#a083e82dbe42da1571fb42eeed754ac84',1,'Modbus']]],
+  ['datarx_3',['dataRx',['../classModbus.html#a31c08abfc547cb9f9fa1e83ef3f4f98f',1,'Modbus']]],
+  ['debug_5fflags_5f0_4',['debug_flags_0',['../structpayloadPedalConfig.html#a3c4574add0cd5dfef05bb8117b7e51ea',1,'payloadPedalConfig']]],
+  ['default_5fvariance_5festimate_5',['DEFAULT_VARIANCE_ESTIMATE',['../LoadCell_8cpp.html#a4d0d708189c629e7702d98c956ee832a',1,'LoadCell.cpp']]]
 ];

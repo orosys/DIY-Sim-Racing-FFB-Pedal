@@ -1,9 +1,8 @@
 var searchData=
 [
-  ['dampingpress_0',['dampingPress',['../structpayloadPedalConfig.html#a16a037b0447378dbd3c004311f65fff4',1,'payloadPedalConfig::dampingPress()'],['../structDAP__calculationVariables__st.html#ad3a2a888891fc41562e62e078910da1e',1,'DAP_calculationVariables_st::dampingPress()']]],
-  ['dampingpull_1',['dampingPull',['../structpayloadPedalConfig.html#a07217e687ff79b033d50f86effbbc2ee',1,'payloadPedalConfig']]],
-  ['datalen_2',['datalen',['../classModbus.html#a083e82dbe42da1571fb42eeed754ac84',1,'Modbus']]],
-  ['datarx_3',['dataRx',['../classModbus.html#a31c08abfc547cb9f9fa1e83ef3f4f98f',1,'Modbus']]],
-  ['debug_5fflags_5f0_4',['debug_flags_0',['../structpayloadPedalConfig.html#a3c4574add0cd5dfef05bb8117b7e51ea',1,'payloadPedalConfig']]],
-  ['default_5fvariance_5festimate_5',['DEFAULT_VARIANCE_ESTIMATE',['../LoadCell_8cpp.html#a4d0d708189c629e7702d98c956ee832a',1,'LoadCell.cpp']]]
+  ['checksum_0',['checkSum',['../structpayloadFooter.html#a62e9885abf27e6904726d8c450613361',1,'payloadFooter']]],
+  ['control_5fstrategy_5fb_1',['control_strategy_b',['../structpayloadPedalConfig.html#a514b5c74dcded8b65d7ca3f49c80d479',1,'payloadPedalConfig']]],
+  ['control_5fstrategy_5fu8_2',['control_strategy_u8',['../StepperMovementStrategy_8h.html#ac01c47e6d9a3c7c4c05e97e6cc3aba3b',1,'StepperMovementStrategy.h']]],
+  ['cubic_5fspline_5fparam_5fa_5farray_3',['cubic_spline_param_a_array',['../structpayloadPedalConfig.html#ad5f4479817c6e2cd89feac674957ed29',1,'payloadPedalConfig']]],
+  ['cubic_5fspline_5fparam_5fb_5farray_4',['cubic_spline_param_b_array',['../structpayloadPedalConfig.html#a4b032c304d213693d0e4615e9cb6dac5',1,'payloadPedalConfig']]]
 ];
