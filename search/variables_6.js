@@ -10,6 +10,8 @@ var searchData=
   ['filter1_7',['filter1',['../SignalFilterFirNotch_8cpp.html#a86036f8f9e4c6ee19cbc0feef0a1a7cd',1,'SignalFilterFirNotch.cpp']]],
   ['filter2_8',['filter2',['../SignalFilterFirNotch_8cpp.html#ab0ca733054a8aead6d0df3b954f6de48',1,'SignalFilterFirNotch.cpp']]],
   ['force_5fmax_9',['Force_Max',['../structDAP__calculationVariables__st.html#a1c2f7c9db353e05269035de94cd82aba',1,'DAP_calculationVariables_st']]],
-  ['force_5fmin_10',['Force_Min',['../structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958',1,'DAP_calculationVariables_st']]],
-  ['force_5frange_11',['Force_Range',['../structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369',1,'DAP_calculationVariables_st']]]
+  ['force_5fmax_5fdefault_10',['Force_Max_default',['../structDAP__calculationVariables__st.html#a68ab42aafe033128642234776bb44b3c',1,'DAP_calculationVariables_st']]],
+  ['force_5fmin_11',['Force_Min',['../structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958',1,'DAP_calculationVariables_st']]],
+  ['force_5frange_12',['Force_Range',['../structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369',1,'DAP_calculationVariables_st']]],
+  ['forcevel_5fest_5fi16_13',['forceVel_est_i16',['../structpayloadPedalState__Extended.html#a25042fa49aeefcf6a6fcfe84731d08d7',1,'payloadPedalState_Extended']]]
 ];

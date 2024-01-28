@@ -1,8 +1,0 @@
-<map id="DAP_state_st" name="DAP_state_st">
-<area shape="rect" id="node1" title=" " alt="" coords="148,211,251,236"/>
-<area shape="rect" id="node2" href="$structpayloadHeader.html" title=" " alt="" coords="5,123,113,148"/>
-<area shape="rect" id="node3" title=" " alt="" coords="29,5,90,31"/>
-<area shape="rect" id="node4" href="$structpayloadPedalState.html" title=" " alt="" coords="138,123,269,148"/>
-<area shape="rect" id="node5" title=" " alt="" coords="241,5,309,31"/>
-<area shape="rect" id="node6" href="$structpayloadFooter.html" title=" " alt="" coords="297,123,400,148"/>
-</map>

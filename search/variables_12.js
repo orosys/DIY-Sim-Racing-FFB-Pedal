@@ -1,8 +1,27 @@
 var searchData=
 [
-  ['timeout_5f_0',['timeout_',['../classModbus.html#a056e4ff932368557dc37c2201cac38a8',1,'Modbus']]],
-  ['travel_5fper_5frotation_5fin_5fmm_1',['TRAVEL_PER_ROTATION_IN_MM',['../PedalGeometry_8h.html#a6393674b6c2a8915f78b5bca3a6651cf',1,'PedalGeometry.h']]],
-  ['travelasjoystickoutput_5fu8_2',['travelAsJoystickOutput_u8',['../structpayloadPedalConfig.html#a7cf2a2c86a9c6be11414fc45c12ae8b7',1,'payloadPedalConfig']]],
-  ['triggerabs_5fu8_3',['triggerAbs_u8',['../structpayloadPedalAction.html#a400d5f2c957e910c0bc7739e4259b2e8',1,'payloadPedalAction']]],
-  ['txout_4',['txout',['../classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe',1,'Modbus']]]
+  ['s_0',['s',['../classModbus.html#a7fca04ebeb67cc7833f58a670bcd1a07',1,'Modbus']]],
+  ['servo_5fcurrent_5fpercent_1',['servo_current_percent',['../classisv57communication.html#a6d792deda1836627e79534cb710eab7f',1,'isv57communication']]],
+  ['servo_5fpos_5ferror_5fp_2',['servo_pos_error_p',['../classisv57communication.html#af8750dbe090aae2067580c1052348c68',1,'isv57communication']]],
+  ['servo_5fpos_5fgiven_5fp_3',['servo_pos_given_p',['../classisv57communication.html#ae9d47dd3608a96c6ae9fbda4dc6d1a12',1,'isv57communication']]],
+  ['servo_5fvoltage_5f0p1v_4',['servo_voltage_0p1V',['../structpayloadPedalState__Extended.html#a17d0deb62931bd4ae893906084a619b7',1,'payloadPedalState_Extended::servo_voltage_0p1V()'],['../classisv57communication.html#a81b1ee411eabf081b46866e4fbc7bd07',1,'isv57communication::servo_voltage_0p1V()']]],
+  ['servoposition_5fi16_5',['servoPosition_i16',['../structpayloadPedalState__Extended.html#a03f1358b755de51be74f20cbae0e1c64',1,'payloadPedalState_Extended']]],
+  ['servopositiontarget_5fi16_6',['servoPositionTarget_i16',['../structpayloadPedalState__Extended.html#afef9e6044476b134d2e460ea677b70db',1,'payloadPedalState_Extended']]],
+  ['setpoint_7',['Setpoint',['../StepperMovementStrategy_8h.html#a08c9249c57b274375c6fe56a2dac7ac1',1,'StepperMovementStrategy.h']]],
+  ['simulate_5fabs_5ftrigger_8',['Simulate_ABS_trigger',['../structpayloadPedalConfig.html#af8d06842de53639b573f590cafe77bd2',1,'payloadPedalConfig']]],
+  ['simulate_5fabs_5fvalue_9',['Simulate_ABS_value',['../structpayloadPedalConfig.html#a3a561216573cd0540c6f1ce53dc20b00',1,'payloadPedalConfig']]],
+  ['slaveid_10',['SlaveID',['../classModbus.html#aeaab9217de4e9e811802692edf8d8e77',1,'Modbus']]],
+  ['spindlepitch_5fmmperrev_5fu8_11',['spindlePitch_mmPerRev_u8',['../structpayloadPedalConfig.html#a24f9f67fafadfd632d7b691b12b96421',1,'payloadPedalConfig']]],
+  ['springstiffnesss_12',['springStiffnesss',['../structDAP__calculationVariables__st.html#a499e47c1d44d6d8e2d960f6f9299cc61',1,'DAP_calculationVariables_st']]],
+  ['springstiffnesssinv_13',['springStiffnesssInv',['../structDAP__calculationVariables__st.html#aa9381fe56d036b19f709ef6865231215',1,'DAP_calculationVariables_st']]],
+  ['startposrel_14',['startPosRel',['../structDAP__calculationVariables__st.html#a733c8364832bcea61680f03ace0e1ca2',1,'DAP_calculationVariables_st']]],
+  ['startsystemidentification_5fu8_15',['startSystemIdentification_u8',['../structpayloadPedalAction.html#aef68fc3e64626f76b9dd3074aba9d1e3',1,'payloadPedalAction']]],
+  ['stepperposendstoprange_16',['stepperPosEndstopRange',['../structDAP__calculationVariables__st.html#ae1689d58d514d4e1f7ce97a9b2f1b5e5',1,'DAP_calculationVariables_st']]],
+  ['stepperposmax_17',['stepperPosMax',['../structDAP__calculationVariables__st.html#acec2fd87af191ca72ecea92b5450274e',1,'DAP_calculationVariables_st']]],
+  ['stepperposmaxendstop_18',['stepperPosMaxEndstop',['../structDAP__calculationVariables__st.html#af4131fe5c1f6a4c0fa8a5862425a29c4',1,'DAP_calculationVariables_st']]],
+  ['stepperposmin_19',['stepperPosMin',['../structDAP__calculationVariables__st.html#aa158b70f0328e458133519d9acbbf267',1,'DAP_calculationVariables_st']]],
+  ['stepperposminendstop_20',['stepperPosMinEndstop',['../structDAP__calculationVariables__st.html#a9bda32edb851a2e07e8556ef7c99b748',1,'DAP_calculationVariables_st']]],
+  ['stepperposrange_21',['stepperPosRange',['../structDAP__calculationVariables__st.html#a2c040a32eafad876f06e2153c4601d8a',1,'DAP_calculationVariables_st']]],
+  ['steps_5fper_5fmotor_5frevolution_22',['STEPS_PER_MOTOR_REVOLUTION',['../StepperWithLimits_8h.html#a5e757657a6f06254eb1446089d6444a6',1,'StepperWithLimits.h']]],
+  ['storetoeeprom_23',['storeToEeprom',['../structpayloadHeader.html#a41c859516affd2409457f3e0d97cd4c4',1,'payloadHeader']]]
 ];

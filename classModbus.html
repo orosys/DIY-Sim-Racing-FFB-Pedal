@@ -537,9 +537,9 @@ Here is the caller graph for this function:</div>
 <div class="line"><span class="lineno">  146</span> </div>
 <div class="line"><span class="lineno">  147</span>  <span class="keywordflow">return</span> retValue_b;</div>
 <div class="line"><span class="lineno">  148</span>}</div>
-<div class="ttc" id="aclassModbus_html_a2c2dd3e6add982e290737dcc66c516d5"><div class="ttname"><a href="classModbus.html#a2c2dd3e6add982e290737dcc66c516d5">Modbus::uint16</a></div><div class="ttdeci">uint16_t uint16(int add)</div><div class="ttdef"><b>Definition:</b> <a href="Esp32_2Main_2Modbus_8cpp_source.html#l00392">Modbus.cpp:392</a></div></div>
+<div class="ttc" id="aclassModbus_html_a2c2dd3e6add982e290737dcc66c516d5"><div class="ttname"><a href="classModbus.html#a2c2dd3e6add982e290737dcc66c516d5">Modbus::uint16</a></div><div class="ttdeci">uint16_t uint16(int add)</div><div class="ttdef"><b>Definition:</b> <a href="Esp32_2Main_2Modbus_8cpp_source.html#l00401">Modbus.cpp:401</a></div></div>
 <div class="ttc" id="aclassModbus_html_a3bf629e195b13445c8d6f98173b65e07"><div class="ttname"><a href="classModbus.html#a3bf629e195b13445c8d6f98173b65e07">Modbus::holdingRegisterWrite</a></div><div class="ttdeci">int holdingRegisterWrite(int address, uint16_t value)</div></div>
-<div class="ttc" id="aclassModbus_html_a9a0902f1e2f2f664a0a60a6fae5cd74a"><div class="ttname"><a href="classModbus.html#a9a0902f1e2f2f664a0a60a6fae5cd74a">Modbus::RxRaw</a></div><div class="ttdeci">void RxRaw(byte *raw, uint8_t &amp;rlen)</div><div class="ttdef"><b>Definition:</b> <a href="Esp32_2Main_2Modbus_8cpp_source.html#l00413">Modbus.cpp:413</a></div></div>
+<div class="ttc" id="aclassModbus_html_a9a0902f1e2f2f664a0a60a6fae5cd74a"><div class="ttname"><a href="classModbus.html#a9a0902f1e2f2f664a0a60a6fae5cd74a">Modbus::RxRaw</a></div><div class="ttdeci">void RxRaw(byte *raw, uint8_t &amp;rlen)</div><div class="ttdef"><b>Definition:</b> <a href="Esp32_2Main_2Modbus_8cpp_source.html#l00422">Modbus.cpp:422</a></div></div>
 <div class="ttc" id="aclassModbus_html_aaeaf21cf9c6795dee76b775b39630cfe"><div class="ttname"><a href="classModbus.html#aaeaf21cf9c6795dee76b775b39630cfe">Modbus::requestFrom</a></div><div class="ttdeci">int requestFrom(int slaveId, int type, int address, int nb)</div><div class="ttdef"><b>Definition:</b> <a href="Esp32_2Main_2Modbus_8cpp_source.html#l00204">Modbus.cpp:204</a></div></div>
 </div><!-- fragment --><div class="dynheader">
 Here is the call graph for this function:</div>
@@ -592,27 +592,27 @@ Here is the caller graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00449">449</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  450</span>{</div>
-<div class="line"><span class="lineno">  451</span>  <span class="keywordtype">int</span> nominal = 0xA001;</div>
-<div class="line"><span class="lineno">  452</span>  <span class="keywordtype">int</span> crc = 0xFFFF;</div>
-<div class="line"><span class="lineno">  453</span>  <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> pos,i;</div>
-<div class="line"><span class="lineno">  454</span> </div>
-<div class="line"><span class="lineno">  455</span>  <span class="keywordflow">for</span> ( pos = 0; pos &lt; len; pos++) {</div>
-<div class="line"><span class="lineno">  456</span>    crc ^= (<span class="keywordtype">unsigned</span> int)buf[pos];          <span class="comment">// XOR byte into least sig. byte of crc</span></div>
-<div class="line"><span class="lineno">  457</span> </div>
-<div class="line"><span class="lineno">  458</span>    <span class="keywordflow">for</span> (i = 8; i != 0; i--) {        <span class="comment">// Loop over each bit</span></div>
-<div class="line"><span class="lineno">  459</span>      <span class="keywordflow">if</span> ((crc &amp; 0x0001) != 0) {      <span class="comment">// If the LSB is set</span></div>
-<div class="line"><span class="lineno">  460</span>        crc &gt;&gt;= 1;                    <span class="comment">// Shift right and XOR 0xA001</span></div>
-<div class="line"><span class="lineno">  461</span>        crc ^= nominal;</div>
-<div class="line"><span class="lineno">  462</span>      }</div>
-<div class="line"><span class="lineno">  463</span>      <span class="keywordflow">else</span>                            <span class="comment">// Else LSB is not set</span></div>
-<div class="line"><span class="lineno">  464</span>        crc &gt;&gt;= 1;                    <span class="comment">// Just shift right</span></div>
-<div class="line"><span class="lineno">  465</span>    }</div>
-<div class="line"><span class="lineno">  466</span>  }</div>
-<div class="line"><span class="lineno">  467</span>  <span class="comment">// Note, this number has low and high bytes swapped, so use it accordingly (or swap bytes)</span></div>
-<div class="line"><span class="lineno">  468</span>  <span class="keywordflow">return</span> crc;  </div>
-<div class="line"><span class="lineno">  469</span>}</div>
+<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00458">458</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  459</span>{</div>
+<div class="line"><span class="lineno">  460</span>  <span class="keywordtype">int</span> nominal = 0xA001;</div>
+<div class="line"><span class="lineno">  461</span>  <span class="keywordtype">int</span> crc = 0xFFFF;</div>
+<div class="line"><span class="lineno">  462</span>  <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> pos,i;</div>
+<div class="line"><span class="lineno">  463</span> </div>
+<div class="line"><span class="lineno">  464</span>  <span class="keywordflow">for</span> ( pos = 0; pos &lt; len; pos++) {</div>
+<div class="line"><span class="lineno">  465</span>    crc ^= (<span class="keywordtype">unsigned</span> int)buf[pos];          <span class="comment">// XOR byte into least sig. byte of crc</span></div>
+<div class="line"><span class="lineno">  466</span> </div>
+<div class="line"><span class="lineno">  467</span>    <span class="keywordflow">for</span> (i = 8; i != 0; i--) {        <span class="comment">// Loop over each bit</span></div>
+<div class="line"><span class="lineno">  468</span>      <span class="keywordflow">if</span> ((crc &amp; 0x0001) != 0) {      <span class="comment">// If the LSB is set</span></div>
+<div class="line"><span class="lineno">  469</span>        crc &gt;&gt;= 1;                    <span class="comment">// Shift right and XOR 0xA001</span></div>
+<div class="line"><span class="lineno">  470</span>        crc ^= nominal;</div>
+<div class="line"><span class="lineno">  471</span>      }</div>
+<div class="line"><span class="lineno">  472</span>      <span class="keywordflow">else</span>                            <span class="comment">// Else LSB is not set</span></div>
+<div class="line"><span class="lineno">  473</span>        crc &gt;&gt;= 1;                    <span class="comment">// Just shift right</span></div>
+<div class="line"><span class="lineno">  474</span>    }</div>
+<div class="line"><span class="lineno">  475</span>  }</div>
+<div class="line"><span class="lineno">  476</span>  <span class="comment">// Note, this number has low and high bytes swapped, so use it accordingly (or swap bytes)</span></div>
+<div class="line"><span class="lineno">  477</span>  <span class="keywordflow">return</span> crc;  </div>
+<div class="line"><span class="lineno">  478</span>}</div>
 </div><!-- fragment --><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
@@ -1328,39 +1328,39 @@ Here is the caller graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00473">473</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  474</span>{</div>
-<div class="line"><span class="lineno">  475</span>    <span class="keywordtype">int</span> crc ;</div>
-<div class="line"><span class="lineno">  476</span>    </div>
-<div class="line"><span class="lineno">  477</span>    <span class="comment">// form signal</span></div>
-<div class="line"><span class="lineno">  478</span>    <a class="code hl_variable" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">txout</a>[0] = id;</div>
-<div class="line"><span class="lineno">  479</span>    <a class="code hl_variable" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">txout</a>[1] = <a class="code hl_define" href="ModbusTest_2Modbus_2src_2Modbus_8h.html#a111e7ea50fab718b04928f3b5471b9cd">Write_Holding_Register</a>;</div>
-<div class="line"><span class="lineno">  480</span>    <a class="code hl_variable" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">txout</a>[2] = address &gt;&gt; 8;</div>
-<div class="line"><span class="lineno">  481</span>    <a class="code hl_variable" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">txout</a>[3] = address;</div>
-<div class="line"><span class="lineno">  482</span>    <a class="code hl_variable" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">txout</a>[4] = value &gt;&gt; 8;</div>
-<div class="line"><span class="lineno">  483</span>    <a class="code hl_variable" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">txout</a>[5] = value;</div>
-<div class="line"><span class="lineno">  484</span>    crc = this-&gt;<a class="code hl_function" href="classModbus.html#af81965f56bff22d850f97bfc3b5b9760">CheckCRC</a>(<a class="code hl_variable" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">txout</a>,6);</div>
-<div class="line"><span class="lineno">  485</span>    <a class="code hl_variable" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">txout</a>[6] = crc ;</div>
-<div class="line"><span class="lineno">  486</span>    <a class="code hl_variable" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">txout</a>[7] = crc &gt;&gt; 8;</div>
-<div class="line"><span class="lineno">  487</span>    </div>
-<div class="line"><span class="lineno">  488</span>    <span class="comment">// send signal</span></div>
-<div class="line"><span class="lineno">  489</span>    digitalWrite(<a class="code hl_variable" href="classModbus.html#a015642f22a07db845b8b97f8be2dcb19">mode_</a>,1);</div>
-<div class="line"><span class="lineno">  490</span>    delay(1);</div>
-<div class="line"><span class="lineno">  491</span>    this-&gt;<a class="code hl_variable" href="classModbus.html#a7fca04ebeb67cc7833f58a670bcd1a07">s</a>-&gt;write(<a class="code hl_variable" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">txout</a>,8);</div>
-<div class="line"><span class="lineno">  492</span>    this-&gt;<a class="code hl_variable" href="classModbus.html#a7fca04ebeb67cc7833f58a670bcd1a07">s</a>-&gt;flush();</div>
-<div class="line"><span class="lineno">  493</span>    digitalWrite(<a class="code hl_variable" href="classModbus.html#a015642f22a07db845b8b97f8be2dcb19">mode_</a>,0);</div>
-<div class="line"><span class="lineno">  494</span>    delay(1);</div>
-<div class="line"><span class="lineno">  495</span>    </div>
+<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00482">482</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  483</span>{</div>
+<div class="line"><span class="lineno">  484</span>    <span class="keywordtype">int</span> crc ;</div>
+<div class="line"><span class="lineno">  485</span>    </div>
+<div class="line"><span class="lineno">  486</span>    <span class="comment">// form signal</span></div>
+<div class="line"><span class="lineno">  487</span>    <a class="code hl_variable" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">txout</a>[0] = id;</div>
+<div class="line"><span class="lineno">  488</span>    <a class="code hl_variable" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">txout</a>[1] = <a class="code hl_define" href="ModbusTest_2Modbus_2src_2Modbus_8h.html#a111e7ea50fab718b04928f3b5471b9cd">Write_Holding_Register</a>;</div>
+<div class="line"><span class="lineno">  489</span>    <a class="code hl_variable" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">txout</a>[2] = address &gt;&gt; 8;</div>
+<div class="line"><span class="lineno">  490</span>    <a class="code hl_variable" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">txout</a>[3] = address;</div>
+<div class="line"><span class="lineno">  491</span>    <a class="code hl_variable" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">txout</a>[4] = value &gt;&gt; 8;</div>
+<div class="line"><span class="lineno">  492</span>    <a class="code hl_variable" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">txout</a>[5] = value;</div>
+<div class="line"><span class="lineno">  493</span>    crc = this-&gt;<a class="code hl_function" href="classModbus.html#af81965f56bff22d850f97bfc3b5b9760">CheckCRC</a>(<a class="code hl_variable" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">txout</a>,6);</div>
+<div class="line"><span class="lineno">  494</span>    <a class="code hl_variable" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">txout</a>[6] = crc ;</div>
+<div class="line"><span class="lineno">  495</span>    <a class="code hl_variable" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">txout</a>[7] = crc &gt;&gt; 8;</div>
 <div class="line"><span class="lineno">  496</span>    </div>
-<div class="line"><span class="lineno">  497</span>    <span class="keywordflow">return</span> 1;</div>
-<div class="line"><span class="lineno">  498</span>    </div>
-<div class="line"><span class="lineno">  499</span>    </div>
-<div class="line"><span class="lineno">  500</span>    </div>
-<div class="line"><span class="lineno">  501</span>    </div>
-<div class="line"><span class="lineno">  502</span>}</div>
+<div class="line"><span class="lineno">  497</span>    <span class="comment">// send signal</span></div>
+<div class="line"><span class="lineno">  498</span>    digitalWrite(<a class="code hl_variable" href="classModbus.html#a015642f22a07db845b8b97f8be2dcb19">mode_</a>,1);</div>
+<div class="line"><span class="lineno">  499</span>    delay(1);</div>
+<div class="line"><span class="lineno">  500</span>    this-&gt;<a class="code hl_variable" href="classModbus.html#a7fca04ebeb67cc7833f58a670bcd1a07">s</a>-&gt;write(<a class="code hl_variable" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">txout</a>,8);</div>
+<div class="line"><span class="lineno">  501</span>    this-&gt;<a class="code hl_variable" href="classModbus.html#a7fca04ebeb67cc7833f58a670bcd1a07">s</a>-&gt;flush();</div>
+<div class="line"><span class="lineno">  502</span>    digitalWrite(<a class="code hl_variable" href="classModbus.html#a015642f22a07db845b8b97f8be2dcb19">mode_</a>,0);</div>
+<div class="line"><span class="lineno">  503</span>    delay(1);</div>
+<div class="line"><span class="lineno">  504</span>    </div>
+<div class="line"><span class="lineno">  505</span>    </div>
+<div class="line"><span class="lineno">  506</span>    <span class="keywordflow">return</span> 1;</div>
+<div class="line"><span class="lineno">  507</span>    </div>
+<div class="line"><span class="lineno">  508</span>    </div>
+<div class="line"><span class="lineno">  509</span>    </div>
+<div class="line"><span class="lineno">  510</span>    </div>
+<div class="line"><span class="lineno">  511</span>}</div>
 <div class="ttc" id="aModbusTest_2Modbus_2src_2Modbus_8h_html_a111e7ea50fab718b04928f3b5471b9cd"><div class="ttname"><a href="ModbusTest_2Modbus_2src_2Modbus_8h.html#a111e7ea50fab718b04928f3b5471b9cd">Write_Holding_Register</a></div><div class="ttdeci">#define Write_Holding_Register</div><div class="ttdef"><b>Definition:</b> <a href="ModbusTest_2Modbus_2src_2Modbus_8h_source.html#l00031">Modbus.h:31</a></div></div>
 <div class="ttc" id="aclassModbus_html_aa85bf15b814872bb2a7fb1644bcdf8fe"><div class="ttname"><a href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">Modbus::txout</a></div><div class="ttdeci">byte txout[9]</div><div class="ttdef"><b>Definition:</b> <a href="Esp32_2Main_2Modbus_8h_source.html#l00026">Modbus.h:26</a></div></div>
-<div class="ttc" id="aclassModbus_html_af81965f56bff22d850f97bfc3b5b9760"><div class="ttname"><a href="classModbus.html#af81965f56bff22d850f97bfc3b5b9760">Modbus::CheckCRC</a></div><div class="ttdeci">int CheckCRC(byte *buf, int len)</div><div class="ttdef"><b>Definition:</b> <a href="Esp32_2Main_2Modbus_8cpp_source.html#l00449">Modbus.cpp:449</a></div></div>
+<div class="ttc" id="aclassModbus_html_af81965f56bff22d850f97bfc3b5b9760"><div class="ttname"><a href="classModbus.html#af81965f56bff22d850f97bfc3b5b9760">Modbus::CheckCRC</a></div><div class="ttdeci">int CheckCRC(byte *buf, int len)</div><div class="ttdef"><b>Definition:</b> <a href="Esp32_2Main_2Modbus_8cpp_source.html#l00458">Modbus.cpp:458</a></div></div>
 </div><!-- fragment --><div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -1656,11 +1656,11 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00312">312</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  313</span>{</div>
-<div class="line"><span class="lineno">  314</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="classModbus.html#af76c8386360b5bb2d13049d764e1e5c9">ReadCoilReg</a>(1,  add, 1);</div>
-<div class="line"><span class="lineno">  315</span>}</div>
-<div class="ttc" id="aclassModbus_html_af76c8386360b5bb2d13049d764e1e5c9"><div class="ttname"><a href="classModbus.html#af76c8386360b5bb2d13049d764e1e5c9">Modbus::ReadCoilReg</a></div><div class="ttdeci">int ReadCoilReg(int add)</div><div class="ttdef"><b>Definition:</b> <a href="Esp32_2Main_2Modbus_8cpp_source.html#l00312">Modbus.cpp:312</a></div></div>
+<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00321">321</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  322</span>{</div>
+<div class="line"><span class="lineno">  323</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="classModbus.html#af76c8386360b5bb2d13049d764e1e5c9">ReadCoilReg</a>(1,  add, 1);</div>
+<div class="line"><span class="lineno">  324</span>}</div>
+<div class="ttc" id="aclassModbus_html_af76c8386360b5bb2d13049d764e1e5c9"><div class="ttname"><a href="classModbus.html#af76c8386360b5bb2d13049d764e1e5c9">Modbus::ReadCoilReg</a></div><div class="ttdeci">int ReadCoilReg(int add)</div><div class="ttdef"><b>Definition:</b> <a href="Esp32_2Main_2Modbus_8cpp_source.html#l00321">Modbus.cpp:321</a></div></div>
 </div><!-- fragment --><div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -1724,11 +1724,11 @@ Here is the caller graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00317">317</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  318</span>{</div>
-<div class="line"><span class="lineno">  319</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="classModbus.html#af76c8386360b5bb2d13049d764e1e5c9">ReadCoilReg</a>( <a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, add, 1);</div>
-<div class="line"><span class="lineno">  320</span>}</div>
-<div class="ttc" id="aisv57communication_8h_html_ad226b4fd3a1f1af2e8ef7a841f998f0d"><div class="ttname"><a href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a></div><div class="ttdeci">#define slaveId</div><div class="ttdef"><b>Definition:</b> <a href="isv57communication_8h_source.html#l00045">isv57communication.h:45</a></div></div>
+<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00326">326</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  327</span>{</div>
+<div class="line"><span class="lineno">  328</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="classModbus.html#af76c8386360b5bb2d13049d764e1e5c9">ReadCoilReg</a>( <a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, add, 1);</div>
+<div class="line"><span class="lineno">  329</span>}</div>
+<div class="ttc" id="aisv57communication_8h_html_ad226b4fd3a1f1af2e8ef7a841f998f0d"><div class="ttname"><a href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a></div><div class="ttdeci">#define slaveId</div><div class="ttdef"><b>Definition:</b> <a href="isv57communication_8h_source.html#l00046">isv57communication.h:46</a></div></div>
 </div><!-- fragment --><div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -1801,17 +1801,17 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00322">322</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  323</span>{</div>
-<div class="line"><span class="lineno">  324</span>   <span class="keywordflow">if</span>(<a class="code hl_function" href="classModbus.html#aaeaf21cf9c6795dee76b775b39630cfe">requestFrom</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>,<a class="code hl_define" href="ModbusTest_2Modbus_2src_2Modbus_8h.html#a48ff54924867e7de6a1d881761b29cbc">Coil_Register</a>,add,nbit))</div>
-<div class="line"><span class="lineno">  325</span>   {</div>
-<div class="line"><span class="lineno">  326</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="classModbus.html#a81a2ed503e4d61409cbc9c1e264f27e8">byteRead</a>(0);</div>
-<div class="line"><span class="lineno">  327</span>   }<span class="keywordflow">else</span></div>
-<div class="line"><span class="lineno">  328</span>   {</div>
-<div class="line"><span class="lineno">  329</span>    <span class="keywordflow">return</span> -1;</div>
-<div class="line"><span class="lineno">  330</span>   }</div>
-<div class="line"><span class="lineno">  331</span> </div>
-<div class="line"><span class="lineno">  332</span>}</div>
+<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00331">331</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  332</span>{</div>
+<div class="line"><span class="lineno">  333</span>   <span class="keywordflow">if</span>(<a class="code hl_function" href="classModbus.html#aaeaf21cf9c6795dee76b775b39630cfe">requestFrom</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>,<a class="code hl_define" href="ModbusTest_2Modbus_2src_2Modbus_8h.html#a48ff54924867e7de6a1d881761b29cbc">Coil_Register</a>,add,nbit))</div>
+<div class="line"><span class="lineno">  334</span>   {</div>
+<div class="line"><span class="lineno">  335</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="classModbus.html#a81a2ed503e4d61409cbc9c1e264f27e8">byteRead</a>(0);</div>
+<div class="line"><span class="lineno">  336</span>   }<span class="keywordflow">else</span></div>
+<div class="line"><span class="lineno">  337</span>   {</div>
+<div class="line"><span class="lineno">  338</span>    <span class="keywordflow">return</span> -1;</div>
+<div class="line"><span class="lineno">  339</span>   }</div>
+<div class="line"><span class="lineno">  340</span> </div>
+<div class="line"><span class="lineno">  341</span>}</div>
 </div><!-- fragment --><div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -1876,11 +1876,11 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00334">334</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  335</span>{</div>
-<div class="line"><span class="lineno">  336</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="classModbus.html#a151248fc385f735b82dbe50f9e3ef86c">ReadDiscretReg</a>(1,add,1);</div>
-<div class="line"><span class="lineno">  337</span>}</div>
-<div class="ttc" id="aclassModbus_html_a151248fc385f735b82dbe50f9e3ef86c"><div class="ttname"><a href="classModbus.html#a151248fc385f735b82dbe50f9e3ef86c">Modbus::ReadDiscretReg</a></div><div class="ttdeci">int ReadDiscretReg(int add)</div><div class="ttdef"><b>Definition:</b> <a href="Esp32_2Main_2Modbus_8cpp_source.html#l00334">Modbus.cpp:334</a></div></div>
+<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00343">343</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  344</span>{</div>
+<div class="line"><span class="lineno">  345</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="classModbus.html#a151248fc385f735b82dbe50f9e3ef86c">ReadDiscretReg</a>(1,add,1);</div>
+<div class="line"><span class="lineno">  346</span>}</div>
+<div class="ttc" id="aclassModbus_html_a151248fc385f735b82dbe50f9e3ef86c"><div class="ttname"><a href="classModbus.html#a151248fc385f735b82dbe50f9e3ef86c">Modbus::ReadDiscretReg</a></div><div class="ttdeci">int ReadDiscretReg(int add)</div><div class="ttdef"><b>Definition:</b> <a href="Esp32_2Main_2Modbus_8cpp_source.html#l00343">Modbus.cpp:343</a></div></div>
 </div><!-- fragment --><div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -1944,10 +1944,10 @@ Here is the caller graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00339">339</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  340</span>{</div>
-<div class="line"><span class="lineno">  341</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="classModbus.html#a151248fc385f735b82dbe50f9e3ef86c">ReadDiscretReg</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>,add,1);</div>
-<div class="line"><span class="lineno">  342</span>}</div>
+<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00348">348</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  349</span>{</div>
+<div class="line"><span class="lineno">  350</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="classModbus.html#a151248fc385f735b82dbe50f9e3ef86c">ReadDiscretReg</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>,add,1);</div>
+<div class="line"><span class="lineno">  351</span>}</div>
 </div><!-- fragment --><div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -2020,15 +2020,15 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00344">344</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  345</span>{</div>
-<div class="line"><span class="lineno">  346</span>    <span class="keywordflow">if</span>(<a class="code hl_function" href="classModbus.html#aaeaf21cf9c6795dee76b775b39630cfe">requestFrom</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>,<a class="code hl_define" href="ModbusTest_2Modbus_2src_2Modbus_8h.html#ae5db53aebdd22a7bb76a8d9bb4724e26">Discret_Register</a>,add,nbit)) {</div>
-<div class="line"><span class="lineno">  347</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="classModbus.html#a81a2ed503e4d61409cbc9c1e264f27e8">byteRead</a>(0);</div>
-<div class="line"><span class="lineno">  348</span>   }</div>
-<div class="line"><span class="lineno">  349</span>   <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  350</span>    <span class="keywordflow">return</span> -1;</div>
-<div class="line"><span class="lineno">  351</span>   }</div>
-<div class="line"><span class="lineno">  352</span>}</div>
+<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00353">353</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  354</span>{</div>
+<div class="line"><span class="lineno">  355</span>    <span class="keywordflow">if</span>(<a class="code hl_function" href="classModbus.html#aaeaf21cf9c6795dee76b775b39630cfe">requestFrom</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>,<a class="code hl_define" href="ModbusTest_2Modbus_2src_2Modbus_8h.html#ae5db53aebdd22a7bb76a8d9bb4724e26">Discret_Register</a>,add,nbit)) {</div>
+<div class="line"><span class="lineno">  356</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="classModbus.html#a81a2ed503e4d61409cbc9c1e264f27e8">byteRead</a>(0);</div>
+<div class="line"><span class="lineno">  357</span>   }</div>
+<div class="line"><span class="lineno">  358</span>   <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  359</span>    <span class="keywordflow">return</span> -1;</div>
+<div class="line"><span class="lineno">  360</span>   }</div>
+<div class="line"><span class="lineno">  361</span>}</div>
 </div><!-- fragment --><div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -2093,10 +2093,10 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00354">354</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  355</span>{</div>
-<div class="line"><span class="lineno">  356</span>    <span class="keywordflow">return</span> 0;</div>
-<div class="line"><span class="lineno">  357</span>}</div>
+<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00363">363</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  364</span>{</div>
+<div class="line"><span class="lineno">  365</span>    <span class="keywordflow">return</span> 0;</div>
+<div class="line"><span class="lineno">  366</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -2144,10 +2144,10 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00359">359</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  360</span>{</div>
-<div class="line"><span class="lineno">  361</span>    <span class="keywordflow">return</span> 0;</div>
-<div class="line"><span class="lineno">  362</span>}</div>
+<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00368">368</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  369</span>{</div>
+<div class="line"><span class="lineno">  370</span>    <span class="keywordflow">return</span> 0;</div>
+<div class="line"><span class="lineno">  371</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -2211,10 +2211,10 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00364">364</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  365</span>{</div>
-<div class="line"><span class="lineno">  366</span>    <span class="keywordflow">return</span> 0;</div>
-<div class="line"><span class="lineno">  367</span>}</div>
+<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00373">373</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  374</span>{</div>
+<div class="line"><span class="lineno">  375</span>    <span class="keywordflow">return</span> 0;</div>
+<div class="line"><span class="lineno">  376</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -2268,10 +2268,10 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00369">369</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  370</span>{</div>
-<div class="line"><span class="lineno">  371</span>    <span class="keywordflow">return</span> 0;</div>
-<div class="line"><span class="lineno">  372</span>}</div>
+<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00378">378</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  379</span>{</div>
+<div class="line"><span class="lineno">  380</span>    <span class="keywordflow">return</span> 0;</div>
+<div class="line"><span class="lineno">  381</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -2319,10 +2319,10 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00374">374</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  375</span>{</div>
-<div class="line"><span class="lineno">  376</span>    <span class="keywordflow">return</span> 0;</div>
-<div class="line"><span class="lineno">  377</span>}</div>
+<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00383">383</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  384</span>{</div>
+<div class="line"><span class="lineno">  385</span>    <span class="keywordflow">return</span> 0;</div>
+<div class="line"><span class="lineno">  386</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -2386,10 +2386,10 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00379">379</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  380</span>{</div>
-<div class="line"><span class="lineno">  381</span>    <span class="keywordflow">return</span> 0;</div>
-<div class="line"><span class="lineno">  382</span>}</div>
+<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00388">388</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  389</span>{</div>
+<div class="line"><span class="lineno">  390</span>    <span class="keywordflow">return</span> 0;</div>
+<div class="line"><span class="lineno">  391</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -2599,54 +2599,63 @@ Here is the caller graph for this function:</div>
 <div class="line"><span class="lineno">  254</span>          }</div>
 <div class="line"><span class="lineno">  255</span>        }</div>
 <div class="line"><span class="lineno">  256</span>        <span class="keywordflow">else</span> <span class="keywordflow">if</span>(found == 1){</div>
-<div class="line"><span class="lineno">  257</span>        <span class="comment">// Serial.print(&quot;Len: &quot;);</span></div>
-<div class="line"><span class="lineno">  258</span>        <span class="comment">//  Serial.println(rx,DEC);</span></div>
-<div class="line"><span class="lineno">  259</span>         <a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>[0] = <a class="code hl_variable" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">txout</a>[0];</div>
-<div class="line"><span class="lineno">  260</span>         <a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>[1] = <a class="code hl_variable" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">txout</a>[1];</div>
-<div class="line"><span class="lineno">  261</span>         <a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>[2] = rx;</div>
-<div class="line"><span class="lineno">  262</span>         <a class="code hl_variable" href="classModbus.html#ac2086593416ac4a890e10c3ec03dfa65">lenRx</a> = 3;</div>
-<div class="line"><span class="lineno">  263</span>         found = 2;</div>
-<div class="line"><span class="lineno">  264</span>        } </div>
-<div class="line"><span class="lineno">  265</span>        <span class="keywordflow">else</span> <span class="keywordflow">if</span>(found == 2)</div>
-<div class="line"><span class="lineno">  266</span>        {</div>
-<div class="line"><span class="lineno">  267</span>         this-&gt;<a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>[<a class="code hl_variable" href="classModbus.html#ac2086593416ac4a890e10c3ec03dfa65">lenRx</a>++] =  rx;</div>
-<div class="line"><span class="lineno">  268</span>         <span class="keywordflow">if</span>(<a class="code hl_variable" href="classModbus.html#ac2086593416ac4a890e10c3ec03dfa65">lenRx</a> &gt;= <a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>[2] + 5) { <span class="keywordflow">break</span>; }</div>
-<div class="line"><span class="lineno">  269</span>        }</div>
-<div class="line"><span class="lineno">  270</span>        </div>
-<div class="line"><span class="lineno">  271</span>       }</div>
-<div class="line"><span class="lineno">  272</span>        </div>
-<div class="line"><span class="lineno">  273</span> </div>
-<div class="line"><span class="lineno">  274</span>    }</div>
+<div class="line"><span class="lineno">  257</span>          </div>
+<div class="line"><span class="lineno">  258</span>         <a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>[0] = <a class="code hl_variable" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">txout</a>[0]; <span class="comment">// Slave ID</span></div>
+<div class="line"><span class="lineno">  259</span>         <a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>[1] = <a class="code hl_variable" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">txout</a>[1]; <span class="comment">// Function code</span></div>
+<div class="line"><span class="lineno">  260</span>         <a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>[2] = rx; <span class="comment">// Bytes count to follow + 2 Byte CRC</span></div>
+<div class="line"><span class="lineno">  261</span>         <a class="code hl_variable" href="classModbus.html#ac2086593416ac4a890e10c3ec03dfa65">lenRx</a> = 3;</div>
+<div class="line"><span class="lineno">  262</span>         found = 2;</div>
+<div class="line"><span class="lineno">  263</span>        } </div>
+<div class="line"><span class="lineno">  264</span>        <span class="keywordflow">else</span> <span class="keywordflow">if</span>(found == 2)</div>
+<div class="line"><span class="lineno">  265</span>        {</div>
+<div class="line"><span class="lineno">  266</span>         this-&gt;<a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>[<a class="code hl_variable" href="classModbus.html#ac2086593416ac4a890e10c3ec03dfa65">lenRx</a>++] =  rx;</div>
+<div class="line"><span class="lineno">  267</span> </div>
+<div class="line"><span class="lineno">  268</span>         <span class="comment">// the receive message looks like this</span></div>
+<div class="line"><span class="lineno">  269</span>         <span class="comment">// Byte 1: SalveId e.g. 0x3F</span></div>
+<div class="line"><span class="lineno">  270</span>         <span class="comment">// Byte 2: Function code e.g. 0x03</span></div>
+<div class="line"><span class="lineno">  271</span>         <span class="comment">// Byte 3: Bytes to read e.g. m=8 to read 4 consecutive registers</span></div>
+<div class="line"><span class="lineno">  272</span>         <span class="comment">// Byte 4-(N-2): Register values</span></div>
+<div class="line"><span class="lineno">  273</span>         <span class="comment">// Byte N-1: CRC MSB</span></div>
+<div class="line"><span class="lineno">  274</span>         <span class="comment">// Byte N: CRC LSB</span></div>
 <div class="line"><span class="lineno">  275</span> </div>
-<div class="line"><span class="lineno">  276</span>    <span class="keywordflow">if</span>(<a class="code hl_variable" href="classModbus.html#a06407fb75e61d2f36537970b3bf19b98">log</a>){</div>
-<div class="line"><span class="lineno">  277</span>        Serial.print(<span class="stringliteral">&quot;RX: &quot;</span>);</div>
-<div class="line"><span class="lineno">  278</span>        <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i =0; i &lt; <a class="code hl_variable" href="classModbus.html#ac2086593416ac4a890e10c3ec03dfa65">lenRx</a>; i++)</div>
-<div class="line"><span class="lineno">  279</span>            {</div>
-<div class="line"><span class="lineno">  280</span>             Serial.printf(<span class="stringliteral">&quot;%02X &quot;</span>,<a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>[i] );</div>
-<div class="line"><span class="lineno">  281</span>            }</div>
-<div class="line"><span class="lineno">  282</span>            Serial.println();</div>
-<div class="line"><span class="lineno">  283</span>     }</div>
+<div class="line"><span class="lineno">  276</span>         <span class="comment">// The total message length is thus N = 5+m</span></div>
+<div class="line"><span class="lineno">  277</span>         <span class="keywordflow">if</span>(<a class="code hl_variable" href="classModbus.html#ac2086593416ac4a890e10c3ec03dfa65">lenRx</a> &gt;= <a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>[2] + 5) { <span class="keywordflow">break</span>; }</div>
+<div class="line"><span class="lineno">  278</span>        }</div>
+<div class="line"><span class="lineno">  279</span>        </div>
+<div class="line"><span class="lineno">  280</span>       }</div>
+<div class="line"><span class="lineno">  281</span>        </div>
+<div class="line"><span class="lineno">  282</span> </div>
+<div class="line"><span class="lineno">  283</span>    }</div>
 <div class="line"><span class="lineno">  284</span> </div>
-<div class="line"><span class="lineno">  285</span>    <span class="keywordflow">if</span>(<a class="code hl_variable" href="classModbus.html#ac2086593416ac4a890e10c3ec03dfa65">lenRx</a> &gt; 2){</div>
-<div class="line"><span class="lineno">  286</span>        <span class="keywordtype">int</span> crc1 = <a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>[<a class="code hl_variable" href="classModbus.html#ac2086593416ac4a890e10c3ec03dfa65">lenRx</a> - 1] &lt;&lt;8 | <a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>[<a class="code hl_variable" href="classModbus.html#ac2086593416ac4a890e10c3ec03dfa65">lenRx</a> - 2];</div>
-<div class="line"><span class="lineno">  287</span>        <span class="keywordtype">int</span> crc2 = <a class="code hl_function" href="classModbus.html#af81965f56bff22d850f97bfc3b5b9760">CheckCRC</a>(<a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>, <a class="code hl_variable" href="classModbus.html#ac2086593416ac4a890e10c3ec03dfa65">lenRx</a> - 2);</div>
-<div class="line"><span class="lineno">  288</span>        <span class="comment">//Serial.printf(&quot;CRC1: %04X CRC2: %04X\n&quot;,crc1, crc2);</span></div>
-<div class="line"><span class="lineno">  289</span> </div>
-<div class="line"><span class="lineno">  290</span>         <span class="keywordflow">if</span>(crc1 == crc2)</div>
-<div class="line"><span class="lineno">  291</span>          {</div>
-<div class="line"><span class="lineno">  292</span>        </div>
-<div class="line"><span class="lineno">  293</span>            <a class="code hl_variable" href="classModbus.html#a083e82dbe42da1571fb42eeed754ac84">datalen</a> = <a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>[2];</div>
-<div class="line"><span class="lineno">  294</span> </div>
-<div class="line"><span class="lineno">  295</span>        <span class="comment">//  for(int i = 0; i &lt; datalen;i++){</span></div>
-<div class="line"><span class="lineno">  296</span>        <span class="comment">//     dataRx[i] = rawRx[i+3];</span></div>
-<div class="line"><span class="lineno">  297</span>        <span class="comment">//   }</span></div>
-<div class="line"><span class="lineno">  298</span>           <span class="keywordflow">return</span> <a class="code hl_variable" href="classModbus.html#a083e82dbe42da1571fb42eeed754ac84">datalen</a>;</div>
-<div class="line"><span class="lineno">  299</span>          }</div>
-<div class="line"><span class="lineno">  300</span>         <span class="keywordflow">else</span>{ <span class="keywordflow">return</span> -1; }</div>
-<div class="line"><span class="lineno">  301</span>    }<span class="keywordflow">else</span>{</div>
-<div class="line"><span class="lineno">  302</span>        <span class="keywordflow">return</span> -1;</div>
-<div class="line"><span class="lineno">  303</span>    }</div>
-<div class="line"><span class="lineno">  304</span>}</div>
+<div class="line"><span class="lineno">  285</span>    <span class="keywordflow">if</span>(<a class="code hl_variable" href="classModbus.html#a06407fb75e61d2f36537970b3bf19b98">log</a>){</div>
+<div class="line"><span class="lineno">  286</span>        Serial.print(<span class="stringliteral">&quot;RX: &quot;</span>);</div>
+<div class="line"><span class="lineno">  287</span>        <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i =0; i &lt; <a class="code hl_variable" href="classModbus.html#ac2086593416ac4a890e10c3ec03dfa65">lenRx</a>; i++)</div>
+<div class="line"><span class="lineno">  288</span>            {</div>
+<div class="line"><span class="lineno">  289</span>             Serial.printf(<span class="stringliteral">&quot;%02X &quot;</span>,<a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>[i] );</div>
+<div class="line"><span class="lineno">  290</span>            }</div>
+<div class="line"><span class="lineno">  291</span>            Serial.println();</div>
+<div class="line"><span class="lineno">  292</span>     }</div>
+<div class="line"><span class="lineno">  293</span> </div>
+<div class="line"><span class="lineno">  294</span>    <span class="keywordflow">if</span>(<a class="code hl_variable" href="classModbus.html#ac2086593416ac4a890e10c3ec03dfa65">lenRx</a> &gt; 2){</div>
+<div class="line"><span class="lineno">  295</span>        <span class="keywordtype">int</span> crc1 = <a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>[<a class="code hl_variable" href="classModbus.html#ac2086593416ac4a890e10c3ec03dfa65">lenRx</a> - 1] &lt;&lt;8 | <a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>[<a class="code hl_variable" href="classModbus.html#ac2086593416ac4a890e10c3ec03dfa65">lenRx</a> - 2];</div>
+<div class="line"><span class="lineno">  296</span>        <span class="keywordtype">int</span> crc2 = <a class="code hl_function" href="classModbus.html#af81965f56bff22d850f97bfc3b5b9760">CheckCRC</a>(<a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>, <a class="code hl_variable" href="classModbus.html#ac2086593416ac4a890e10c3ec03dfa65">lenRx</a> - 2);</div>
+<div class="line"><span class="lineno">  297</span>        <span class="comment">//Serial.printf(&quot;CRC1: %04X CRC2: %04X\n&quot;,crc1, crc2);</span></div>
+<div class="line"><span class="lineno">  298</span> </div>
+<div class="line"><span class="lineno">  299</span>         <span class="keywordflow">if</span>(crc1 == crc2)</div>
+<div class="line"><span class="lineno">  300</span>          {</div>
+<div class="line"><span class="lineno">  301</span>        </div>
+<div class="line"><span class="lineno">  302</span>            <a class="code hl_variable" href="classModbus.html#a083e82dbe42da1571fb42eeed754ac84">datalen</a> = <a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>[2];</div>
+<div class="line"><span class="lineno">  303</span> </div>
+<div class="line"><span class="lineno">  304</span>        <span class="comment">//  for(int i = 0; i &lt; datalen;i++){</span></div>
+<div class="line"><span class="lineno">  305</span>        <span class="comment">//     dataRx[i] = rawRx[i+3];</span></div>
+<div class="line"><span class="lineno">  306</span>        <span class="comment">//   }</span></div>
+<div class="line"><span class="lineno">  307</span>           <span class="keywordflow">return</span> <a class="code hl_variable" href="classModbus.html#a083e82dbe42da1571fb42eeed754ac84">datalen</a>;</div>
+<div class="line"><span class="lineno">  308</span>          }</div>
+<div class="line"><span class="lineno">  309</span>         <span class="keywordflow">else</span>{ <span class="keywordflow">return</span> -1; }</div>
+<div class="line"><span class="lineno">  310</span>    }<span class="keywordflow">else</span>{</div>
+<div class="line"><span class="lineno">  311</span>        <span class="keywordflow">return</span> -1;</div>
+<div class="line"><span class="lineno">  312</span>    }</div>
+<div class="line"><span class="lineno">  313</span>}</div>
 <div class="ttc" id="aclassModbus_html_a056e4ff932368557dc37c2201cac38a8"><div class="ttname"><a href="classModbus.html#a056e4ff932368557dc37c2201cac38a8">Modbus::timeout_</a></div><div class="ttdeci">uint32_t timeout_</div><div class="ttdef"><b>Definition:</b> <a href="Esp32_2Main_2Modbus_8h_source.html#l00019">Modbus.h:19</a></div></div>
 <div class="ttc" id="aclassModbus_html_a083e82dbe42da1571fb42eeed754ac84"><div class="ttname"><a href="classModbus.html#a083e82dbe42da1571fb42eeed754ac84">Modbus::datalen</a></div><div class="ttdeci">int datalen</div><div class="ttdef"><b>Definition:</b> <a href="Esp32_2Main_2Modbus_8h_source.html#l00024">Modbus.h:24</a></div></div>
 <div class="ttc" id="aclassModbus_html_ac2086593416ac4a890e10c3ec03dfa65"><div class="ttname"><a href="classModbus.html#ac2086593416ac4a890e10c3ec03dfa65">Modbus::lenRx</a></div><div class="ttdeci">int lenRx</div><div class="ttdef"><b>Definition:</b> <a href="Esp32_2Main_2Modbus_8h_source.html#l00022">Modbus.h:22</a></div></div>
@@ -2750,22 +2759,22 @@ Here is the caller graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00413">413</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  414</span>{</div>
-<div class="line"><span class="lineno">  415</span>   </div>
-<div class="line"><span class="lineno">  416</span>   </div>
-<div class="line"><span class="lineno">  417</span>   <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i =0; i &lt; <a class="code hl_variable" href="classModbus.html#ac2086593416ac4a890e10c3ec03dfa65">lenRx</a>; i++)</div>
-<div class="line"><span class="lineno">  418</span>    {</div>
-<div class="line"><span class="lineno">  419</span>      raw[i] = <a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>[i];</div>
-<div class="line"><span class="lineno">  420</span>      <span class="comment">//  if(rawRx[i] &lt; 16)</span></div>
-<div class="line"><span class="lineno">  421</span>      <span class="comment">//    {</span></div>
-<div class="line"><span class="lineno">  422</span>      <span class="comment">//      Serial.print(&quot;0&quot;);</span></div>
-<div class="line"><span class="lineno">  423</span>      <span class="comment">//     }</span></div>
-<div class="line"><span class="lineno">  424</span>      <span class="comment">//     Serial.print(rawRx[i],HEX);</span></div>
-<div class="line"><span class="lineno">  425</span>    }</div>
-<div class="line"><span class="lineno">  426</span>     rlen = this-&gt;<a class="code hl_variable" href="classModbus.html#ac2086593416ac4a890e10c3ec03dfa65">lenRx</a>;</div>
-<div class="line"><span class="lineno">  427</span>    <span class="comment">//  Serial.println(rlen);</span></div>
-<div class="line"><span class="lineno">  428</span>}</div>
+<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00422">422</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  423</span>{</div>
+<div class="line"><span class="lineno">  424</span>   </div>
+<div class="line"><span class="lineno">  425</span>   </div>
+<div class="line"><span class="lineno">  426</span>   <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i =0; i &lt; <a class="code hl_variable" href="classModbus.html#ac2086593416ac4a890e10c3ec03dfa65">lenRx</a>; i++)</div>
+<div class="line"><span class="lineno">  427</span>    {</div>
+<div class="line"><span class="lineno">  428</span>      raw[i] = <a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>[i];</div>
+<div class="line"><span class="lineno">  429</span>      <span class="comment">//  if(rawRx[i] &lt; 16)</span></div>
+<div class="line"><span class="lineno">  430</span>      <span class="comment">//    {</span></div>
+<div class="line"><span class="lineno">  431</span>      <span class="comment">//      Serial.print(&quot;0&quot;);</span></div>
+<div class="line"><span class="lineno">  432</span>      <span class="comment">//     }</span></div>
+<div class="line"><span class="lineno">  433</span>      <span class="comment">//     Serial.print(rawRx[i],HEX);</span></div>
+<div class="line"><span class="lineno">  434</span>    }</div>
+<div class="line"><span class="lineno">  435</span>     rlen = this-&gt;<a class="code hl_variable" href="classModbus.html#ac2086593416ac4a890e10c3ec03dfa65">lenRx</a>;</div>
+<div class="line"><span class="lineno">  436</span>    <span class="comment">//  Serial.println(rlen);</span></div>
+<div class="line"><span class="lineno">  437</span>}</div>
 </div><!-- fragment --><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
@@ -2879,22 +2888,22 @@ Here is the caller graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00431">431</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  432</span>{</div>
-<div class="line"><span class="lineno">  433</span>   </div>
-<div class="line"><span class="lineno">  434</span>   </div>
-<div class="line"><span class="lineno">  435</span>   <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i =0; i &lt; 8; i++)</div>
-<div class="line"><span class="lineno">  436</span>    {</div>
-<div class="line"><span class="lineno">  437</span>      raw[i] = <a class="code hl_variable" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">txout</a>[i];</div>
-<div class="line"><span class="lineno">  438</span>      <span class="comment">//  if(rawRx[i] &lt; 16)</span></div>
-<div class="line"><span class="lineno">  439</span>      <span class="comment">//    {</span></div>
-<div class="line"><span class="lineno">  440</span>      <span class="comment">//      Serial.print(&quot;0&quot;);</span></div>
-<div class="line"><span class="lineno">  441</span>      <span class="comment">//     }</span></div>
-<div class="line"><span class="lineno">  442</span>      <span class="comment">//     Serial.print(rawRx[i],HEX);</span></div>
-<div class="line"><span class="lineno">  443</span>    }</div>
-<div class="line"><span class="lineno">  444</span>     rlen = 8;</div>
-<div class="line"><span class="lineno">  445</span>    <span class="comment">//  Serial.println(rlen);</span></div>
-<div class="line"><span class="lineno">  446</span>}</div>
+<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00440">440</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  441</span>{</div>
+<div class="line"><span class="lineno">  442</span>   </div>
+<div class="line"><span class="lineno">  443</span>   </div>
+<div class="line"><span class="lineno">  444</span>   <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i =0; i &lt; 8; i++)</div>
+<div class="line"><span class="lineno">  445</span>    {</div>
+<div class="line"><span class="lineno">  446</span>      raw[i] = <a class="code hl_variable" href="classModbus.html#aa85bf15b814872bb2a7fb1644bcdf8fe">txout</a>[i];</div>
+<div class="line"><span class="lineno">  447</span>      <span class="comment">//  if(rawRx[i] &lt; 16)</span></div>
+<div class="line"><span class="lineno">  448</span>      <span class="comment">//    {</span></div>
+<div class="line"><span class="lineno">  449</span>      <span class="comment">//      Serial.print(&quot;0&quot;);</span></div>
+<div class="line"><span class="lineno">  450</span>      <span class="comment">//     }</span></div>
+<div class="line"><span class="lineno">  451</span>      <span class="comment">//     Serial.print(rawRx[i],HEX);</span></div>
+<div class="line"><span class="lineno">  452</span>    }</div>
+<div class="line"><span class="lineno">  453</span>     rlen = 8;</div>
+<div class="line"><span class="lineno">  454</span>    <span class="comment">//  Serial.println(rlen);</span></div>
+<div class="line"><span class="lineno">  455</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -2942,12 +2951,12 @@ Here is the caller graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00392">392</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  393</span>{</div>
-<div class="line"><span class="lineno">  394</span>    <span class="keywordtype">int</span> add_ = (add)*2 + 3;</div>
-<div class="line"><span class="lineno">  395</span> </div>
-<div class="line"><span class="lineno">  396</span>    <span class="keywordflow">return</span> (<a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>[add_] &lt;&lt; 8 | <a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>[add_+1]);</div>
-<div class="line"><span class="lineno">  397</span>}</div>
+<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00401">401</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  402</span>{</div>
+<div class="line"><span class="lineno">  403</span>    <span class="keywordtype">int</span> add_ = (add)*2 + 3;</div>
+<div class="line"><span class="lineno">  404</span> </div>
+<div class="line"><span class="lineno">  405</span>    <span class="keywordflow">return</span> (<a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>[add_] &lt;&lt; 8 | <a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>[add_+1]);</div>
+<div class="line"><span class="lineno">  406</span>}</div>
 </div><!-- fragment --><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
@@ -3011,19 +3020,19 @@ Here is the caller graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00399">399</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  400</span>{</div>
-<div class="line"><span class="lineno">  401</span>    uint32_t val ;</div>
-<div class="line"><span class="lineno">  402</span>    <span class="keywordflow">if</span> (byteHL)</div>
-<div class="line"><span class="lineno">  403</span>    {</div>
-<div class="line"><span class="lineno">  404</span>      val = <a class="code hl_function" href="classModbus.html#a2c2dd3e6add982e290737dcc66c516d5">uint16</a>(add) &lt;&lt; 16 | <a class="code hl_function" href="classModbus.html#a2c2dd3e6add982e290737dcc66c516d5">uint16</a>(add+1);</div>
-<div class="line"><span class="lineno">  405</span>    }</div>
-<div class="line"><span class="lineno">  406</span>    <span class="keywordflow">else</span></div>
-<div class="line"><span class="lineno">  407</span>    {</div>
-<div class="line"><span class="lineno">  408</span>      val = <a class="code hl_function" href="classModbus.html#a2c2dd3e6add982e290737dcc66c516d5">uint16</a>(add+1)&lt;&lt; 16 | <a class="code hl_function" href="classModbus.html#a2c2dd3e6add982e290737dcc66c516d5">uint16</a>(add);</div>
-<div class="line"><span class="lineno">  409</span>    }</div>
-<div class="line"><span class="lineno">  410</span>    <span class="keywordflow">return</span> val;</div>
-<div class="line"><span class="lineno">  411</span>}</div>
+<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00408">408</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  409</span>{</div>
+<div class="line"><span class="lineno">  410</span>    uint32_t val ;</div>
+<div class="line"><span class="lineno">  411</span>    <span class="keywordflow">if</span> (byteHL)</div>
+<div class="line"><span class="lineno">  412</span>    {</div>
+<div class="line"><span class="lineno">  413</span>      val = <a class="code hl_function" href="classModbus.html#a2c2dd3e6add982e290737dcc66c516d5">uint16</a>(add) &lt;&lt; 16 | <a class="code hl_function" href="classModbus.html#a2c2dd3e6add982e290737dcc66c516d5">uint16</a>(add+1);</div>
+<div class="line"><span class="lineno">  414</span>    }</div>
+<div class="line"><span class="lineno">  415</span>    <span class="keywordflow">else</span></div>
+<div class="line"><span class="lineno">  416</span>    {</div>
+<div class="line"><span class="lineno">  417</span>      val = <a class="code hl_function" href="classModbus.html#a2c2dd3e6add982e290737dcc66c516d5">uint16</a>(add+1)&lt;&lt; 16 | <a class="code hl_function" href="classModbus.html#a2c2dd3e6add982e290737dcc66c516d5">uint16</a>(add);</div>
+<div class="line"><span class="lineno">  418</span>    }</div>
+<div class="line"><span class="lineno">  419</span>    <span class="keywordflow">return</span> val;</div>
+<div class="line"><span class="lineno">  420</span>}</div>
 </div><!-- fragment --><div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -3080,10 +3089,10 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00384">384</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  385</span>{</div>
-<div class="line"><span class="lineno">  386</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>[add*2+3];</div>
-<div class="line"><span class="lineno">  387</span>}</div>
+<p class="definition">Definition at line <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html#l00393">393</a> of file <a class="el" href="Esp32_2Main_2Modbus_8cpp_source.html">Modbus.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  394</span>{</div>
+<div class="line"><span class="lineno">  395</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="classModbus.html#a3af2584344d4f27764588c3659a1a94c">rawRx</a>[add*2+3];</div>
+<div class="line"><span class="lineno">  396</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>

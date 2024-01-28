@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['input_0',['Input',['../StepperMovementStrategy_8h.html#a651f98f57843e7ac1d346db755aefb98',1,'StepperMovementStrategy.h']]],
-  ['invertloadcellreading_5fu8_1',['invertLoadcellReading_u8',['../structpayloadPedalConfig.html#accd4bfd09294d31d56aec67e75a404ac',1,'payloadPedalConfig']]]
+  ['horpos_5fab_0',['horPos_AB',['../structpayloadPedalConfig.html#a2dc083cd69417413e30375acc87f1a81',1,'payloadPedalConfig']]]
 ];

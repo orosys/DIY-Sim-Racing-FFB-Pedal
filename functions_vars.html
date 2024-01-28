@@ -75,7 +75,7 @@ $(function() {
 <li>_absTimeMillis&#160;:&#160;<a class="el" href="classABSOscillation.html#aa6eea960735be3b0cbd11511b54fc243">ABSOscillation</a></li>
 <li>_BiteTimeMillis&#160;:&#160;<a class="el" href="classBitePointOscillation.html#ac7c1889887e15dec1001a8b45ec2a859">BitePointOscillation</a></li>
 <li>_cycleCount&#160;:&#160;<a class="el" href="classCycleTimer.html#a1a84fb6d54e411225b327f29b576a441">CycleTimer</a></li>
-<li>_K&#160;:&#160;<a class="el" href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">KalmanFilter</a></li>
+<li>_K&#160;:&#160;<a class="el" href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">KalmanFilter</a>, <a class="el" href="classKalmanFilter__2nd__order.html#ac6aff47603e3c0e064a53344b79b0f44">KalmanFilter_2nd_order</a></li>
 <li>_lastCallTimeMillis&#160;:&#160;<a class="el" href="classABSOscillation.html#af6eebba0836388860ae30ce8d1655975">ABSOscillation</a>, <a class="el" href="classBitePointOscillation.html#a9fdedfadaa3c129f58c21827b11d4458">BitePointOscillation</a>, <a class="el" href="classRPMOscillation.html#aa4ab00bfa92d40cb0beb4b3944a047bb">RPMOscillation</a></li>
 <li>_limitMax&#160;:&#160;<a class="el" href="classStepperWithLimits.html#aae2033a3b9de58e9e63c1458e4ce6647">StepperWithLimits</a></li>
 <li>_limitMin&#160;:&#160;<a class="el" href="classStepperWithLimits.html#a605fe0c33b0cc7a0012b21cce230ac40">StepperWithLimits</a></li>
@@ -90,7 +90,7 @@ $(function() {
 <li>_standardDeviationEstimate&#160;:&#160;<a class="el" href="classLoadCell__ADS1256.html#ac79c1cca53e6cba973fddcca262fb804">LoadCell_ADS1256</a></li>
 <li>_stepper&#160;:&#160;<a class="el" href="classStepperWithLimits.html#afa1f4ac8a0b3daf8cb9140855c94db14">StepperWithLimits</a></li>
 <li>_timeFirst&#160;:&#160;<a class="el" href="classCycleTimer.html#a6397e279a5cacd5ac98924de1e402aa3">CycleTimer</a></li>
-<li>_timeLastObservation&#160;:&#160;<a class="el" href="classKalmanFilter.html#aea7f932e369f80ba7bd0a5cd39c89aeb">KalmanFilter</a></li>
+<li>_timeLastObservation&#160;:&#160;<a class="el" href="classKalmanFilter.html#aea7f932e369f80ba7bd0a5cd39c89aeb">KalmanFilter</a>, <a class="el" href="classKalmanFilter__2nd__order.html#a65ddbde1e9a14dc019984814461c98cc">KalmanFilter_2nd_order</a></li>
 <li>_timeLastTriggerMillis&#160;:&#160;<a class="el" href="classABSOscillation.html#a90eb5d84d511f8eee3f813ea264e9e15">ABSOscillation</a>, <a class="el" href="classBitePointOscillation.html#a70e2b7981ab7424aa1f5394f484175bc">BitePointOscillation</a>, <a class="el" href="classRPMOscillation.html#aa9841d95a2f516a3ac1c6e291130c3bc">RPMOscillation</a></li>
 <li>_varianceEstimate&#160;:&#160;<a class="el" href="classLoadCell__ADS1256.html#a22bb793405fa9aa10f4e0f1ec1e97aef">LoadCell_ADS1256</a></li>
 <li>_zeroPoint&#160;:&#160;<a class="el" href="classLoadCell__ADS1256.html#ad0de1b953158435f846d579f284bab62">LoadCell_ADS1256</a></li>
@@ -126,6 +126,7 @@ $(function() {
 <li>dampingPress&#160;:&#160;<a class="el" href="structDAP__calculationVariables__st.html#ad3a2a888891fc41562e62e078910da1e">DAP_calculationVariables_st</a>, <a class="el" href="structpayloadPedalConfig.html#a16a037b0447378dbd3c004311f65fff4">payloadPedalConfig</a></li>
 <li>dampingPull&#160;:&#160;<a class="el" href="structpayloadPedalConfig.html#a07217e687ff79b033d50f86effbbc2ee">payloadPedalConfig</a></li>
 <li>datalen&#160;:&#160;<a class="el" href="classModbus.html#a083e82dbe42da1571fb42eeed754ac84">Modbus</a></li>
+<li>dataPointsCount&#160;:&#160;<a class="el" href="classMovingAverageFilter.html#a1e157723539f80e5b59e329f63dbcacf">MovingAverageFilter</a></li>
 <li>dataRx&#160;:&#160;<a class="el" href="classModbus.html#a31c08abfc547cb9f9fa1e83ef3f4f98f">Modbus</a></li>
 <li>debug_flags_0&#160;:&#160;<a class="el" href="structpayloadPedalConfig.html#a3c4574add0cd5dfef05bb8117b7e51ea">payloadPedalConfig</a></li>
 </ul>
@@ -141,8 +142,19 @@ $(function() {
 <li>f_n&#160;:&#160;<a class="el" href="classFirNotchFilter.html#a54d16431c9956fe6d402f0c390cab9b8">FirNotchFilter</a></li>
 <li>f_s&#160;:&#160;<a class="el" href="classFirNotchFilter.html#a256948cc9b146d42f5bd1f4aa5064d40">FirNotchFilter</a></li>
 <li>Force_Max&#160;:&#160;<a class="el" href="structDAP__calculationVariables__st.html#a1c2f7c9db353e05269035de94cd82aba">DAP_calculationVariables_st</a></li>
+<li>Force_Max_default&#160;:&#160;<a class="el" href="structDAP__calculationVariables__st.html#a68ab42aafe033128642234776bb44b3c">DAP_calculationVariables_st</a></li>
 <li>Force_Min&#160;:&#160;<a class="el" href="structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958">DAP_calculationVariables_st</a></li>
 <li>Force_Range&#160;:&#160;<a class="el" href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">DAP_calculationVariables_st</a></li>
+<li>forceVel_est_i16&#160;:&#160;<a class="el" href="structpayloadPedalState__Extended.html#a25042fa49aeefcf6a6fcfe84731d08d7">payloadPedalState_Extended</a></li>
+</ul>
+
+
+<h3><a id="index_g" name="index_g"></a>- g -</h3><ul>
+<li>G_force&#160;:&#160;<a class="el" href="classG__force__effect.html#a211f525911b05c5905f3fac720c443d0">G_force_effect</a></li>
+<li>G_force_raw&#160;:&#160;<a class="el" href="classG__force__effect.html#a866d94b1f8e4268b1fb5b42bfd9409a8">G_force_effect</a></li>
+<li>G_multi&#160;:&#160;<a class="el" href="structpayloadPedalConfig.html#af6e7230173eae39582aa20a4f1191e4d">payloadPedalConfig</a></li>
+<li>G_value&#160;:&#160;<a class="el" href="classG__force__effect.html#a9a0a2d81421ec5ace01d75ad0b0ae721">G_force_effect</a>, <a class="el" href="structpayloadPedalAction.html#a47eba75f258fdc2c5c23b36614fa1d95">payloadPedalAction</a></li>
+<li>G_window&#160;:&#160;<a class="el" href="structpayloadPedalConfig.html#ad2ceb70f8041d22ecf723a68c3221ea8">payloadPedalConfig</a></li>
 </ul>
 
 
@@ -152,16 +164,18 @@ $(function() {
 
 
 <h3><a id="index_i" name="index_i"></a>- i -</h3><ul>
+<li>i&#160;:&#160;<a class="el" href="classMovingAverageFilter.html#ac3c9064235cc1067f5571e34519c718f">MovingAverageFilter</a></li>
 <li>invertLoadcellReading_u8&#160;:&#160;<a class="el" href="structpayloadPedalConfig.html#accd4bfd09294d31d56aec67e75a404ac">payloadPedalConfig</a></li>
 </ul>
 
 
 <h3><a id="index_j" name="index_j"></a>- j -</h3><ul>
-<li>joystickOutput_u16&#160;:&#160;<a class="el" href="structpayloadPedalState.html#a732495d7bf7a8505ffe080c23277f375">payloadPedalState</a></li>
+<li>joystickOutput_u16&#160;:&#160;<a class="el" href="structpayloadPedalState__Basic.html#aa5e0dd882e9ecd78f46ab408b3558f18">payloadPedalState_Basic</a></li>
 </ul>
 
 
 <h3><a id="index_k" name="index_k"></a>- k -</h3><ul>
+<li>k&#160;:&#160;<a class="el" href="classMovingAverageFilter.html#a82f23589732914f1ca9f2d5723c91ab0">MovingAverageFilter</a></li>
 <li>kf_modelNoise&#160;:&#160;<a class="el" href="structpayloadPedalConfig.html#a2195af7ec0890b96f828b3da7ddafcf4">payloadPedalConfig</a></li>
 </ul>
 
@@ -180,24 +194,35 @@ $(function() {
 <li>maxForce&#160;:&#160;<a class="el" href="structpayloadPedalConfig.html#a120e64b1a3b8acf8c4ce5b786a71ebd5">payloadPedalConfig</a></li>
 <li>maxGameOutput&#160;:&#160;<a class="el" href="structpayloadPedalConfig.html#a4ae635b78159a7a32c8700efc5115ee9">payloadPedalConfig</a></li>
 <li>mode_&#160;:&#160;<a class="el" href="classModbus.html#a015642f22a07db845b8b97f8be2dcb19">Modbus</a></li>
+<li>MPC_0th_order_gain&#160;:&#160;<a class="el" href="structpayloadPedalConfig.html#af00affb8dd0c3832b29a6c305007229c">payloadPedalConfig</a></li>
+<li>MPC_1st_order_gain&#160;:&#160;<a class="el" href="structpayloadPedalConfig.html#a646ff316067ef79f1c196fef6bb72651">payloadPedalConfig</a></li>
+<li>MPC_2nd_order_gain&#160;:&#160;<a class="el" href="structpayloadPedalConfig.html#adf6e2e65020bda5458ad84d874bfbcab">payloadPedalConfig</a></li>
+</ul>
+
+
+<h3><a id="index_o" name="index_o"></a>- o -</h3><ul>
+<li>out&#160;:&#160;<a class="el" href="classMovingAverageFilter.html#a2dc08683d38f654c016051424a0bcdf1">MovingAverageFilter</a></li>
 </ul>
 
 
 <h3><a id="index_p" name="index_p"></a>- p -</h3><ul>
-<li>payloadFooter_&#160;:&#160;<a class="el" href="structDAP__actions__st.html#a792ecc67d0f2c1c4f2daff3e075dc671">DAP_actions_st</a>, <a class="el" href="structDAP__config__st.html#a34700b0b7711b820ef7728c9afd325ff">DAP_config_st</a>, <a class="el" href="structDAP__state__st.html#a31af9ca36f72c64a3578199c4bbd0bda">DAP_state_st</a></li>
-<li>payLoadHeader_&#160;:&#160;<a class="el" href="structDAP__actions__st.html#a947a694f989a5a2d8a119340212e12bb">DAP_actions_st</a>, <a class="el" href="structDAP__config__st.html#a4c1867d915d2985a594ba7a1e9ef8c9f">DAP_config_st</a>, <a class="el" href="structDAP__state__st.html#acadeae93137d5b8fe0cdcbb2a765bc7d">DAP_state_st</a></li>
+<li>payloadFooter_&#160;:&#160;<a class="el" href="structDAP__actions__st.html#a792ecc67d0f2c1c4f2daff3e075dc671">DAP_actions_st</a>, <a class="el" href="structDAP__config__st.html#a34700b0b7711b820ef7728c9afd325ff">DAP_config_st</a>, <a class="el" href="structDAP__state__basic__st.html#a7e6a8a271f2d2193c05e010a962544be">DAP_state_basic_st</a>, <a class="el" href="structDAP__state__extended__st.html#ab1124a2af0f07fd5be40cd213fc38bc0">DAP_state_extended_st</a></li>
+<li>payLoadHeader_&#160;:&#160;<a class="el" href="structDAP__actions__st.html#a947a694f989a5a2d8a119340212e12bb">DAP_actions_st</a>, <a class="el" href="structDAP__config__st.html#a4c1867d915d2985a594ba7a1e9ef8c9f">DAP_config_st</a>, <a class="el" href="structDAP__state__basic__st.html#a84d31871d945e96a61d7330fb77c4bfe">DAP_state_basic_st</a>, <a class="el" href="structDAP__state__extended__st.html#add700e9777cf7f79284150f82a3ca8be">DAP_state_extended_st</a></li>
 <li>payloadPedalAction_&#160;:&#160;<a class="el" href="structDAP__actions__st.html#a953e29e5e61fd9f2804b30e4bc581643">DAP_actions_st</a></li>
 <li>payLoadPedalConfig_&#160;:&#160;<a class="el" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">DAP_config_st</a></li>
-<li>payloadPedalState_&#160;:&#160;<a class="el" href="structDAP__state__st.html#ad588b87057b0fd1f8dd3f009716ff095">DAP_state_st</a></li>
+<li>payloadPedalState_Basic_&#160;:&#160;<a class="el" href="structDAP__state__basic__st.html#acd00f906fa9b474401200ee65fe252de">DAP_state_basic_st</a></li>
+<li>payloadPedalState_Extended_&#160;:&#160;<a class="el" href="structDAP__state__extended__st.html#a6657e46e29aa7f53defc5e3b5a4f61a4">DAP_state_extended_st</a></li>
 <li>payloadType&#160;:&#160;<a class="el" href="structpayloadHeader.html#a71e88dbd84c69490551743d5710eed3b">payloadHeader</a></li>
 <li>pedalEndPosition&#160;:&#160;<a class="el" href="structpayloadPedalConfig.html#af935cfbfa281dfb41afabfd0ab86ced8">payloadPedalConfig</a></li>
-<li>pedalForce_u16&#160;:&#160;<a class="el" href="structpayloadPedalState.html#a0afd2acf4286be42cfb301b51f6e3009">payloadPedalState</a></li>
-<li>pedalPosition_u16&#160;:&#160;<a class="el" href="structpayloadPedalState.html#a84237ff456b99c54ec502460b4c4befd">payloadPedalState</a></li>
+<li>pedalForce_filtered_u16&#160;:&#160;<a class="el" href="structpayloadPedalState__Extended.html#a1d0bf7bfadab5cf9fef0cfd80f7c77f1">payloadPedalState_Extended</a></li>
+<li>pedalForce_raw_u16&#160;:&#160;<a class="el" href="structpayloadPedalState__Extended.html#a43ed7eb6787b2481e292fd3144139ef2">payloadPedalState_Extended</a></li>
+<li>pedalForce_u16&#160;:&#160;<a class="el" href="structpayloadPedalState__Basic.html#a94bf07d5d520f6b5764fbffb932be265">payloadPedalState_Basic</a></li>
+<li>pedalPosition_u16&#160;:&#160;<a class="el" href="structpayloadPedalState__Basic.html#abb03fcf66bdd1278d25b09538f9bbc65">payloadPedalState_Basic</a></li>
 <li>pedalStartPosition&#160;:&#160;<a class="el" href="structpayloadPedalConfig.html#aa35f308f84be04c330b59bcd4d748082">payloadPedalConfig</a></li>
 <li>PID_d_gain&#160;:&#160;<a class="el" href="structpayloadPedalConfig.html#ad18927d606b6f756d32ff1ee500b8468">payloadPedalConfig</a></li>
-<li>PID_feedforward_gain&#160;:&#160;<a class="el" href="structpayloadPedalConfig.html#a2e06683b9877417a201310b393ca3a61">payloadPedalConfig</a></li>
 <li>PID_i_gain&#160;:&#160;<a class="el" href="structpayloadPedalConfig.html#a747c38aae6133b6cdea1921867be0a1e">payloadPedalConfig</a></li>
 <li>PID_p_gain&#160;:&#160;<a class="el" href="structpayloadPedalConfig.html#a73eda7d15ccb63e6558a0549428049f9">payloadPedalConfig</a></li>
+<li>PID_velocity_feedforward_gain&#160;:&#160;<a class="el" href="structpayloadPedalConfig.html#a7b12d1ad634a99552afb19617aa8f8f7">payloadPedalConfig</a></li>
 <li>preloadForce&#160;:&#160;<a class="el" href="structpayloadPedalConfig.html#a747973ae1229a7186da3fd940cd340eb">payloadPedalConfig</a></li>
 </ul>
 
@@ -229,9 +254,13 @@ $(function() {
 <li>servo_current_percent&#160;:&#160;<a class="el" href="classisv57communication.html#a6d792deda1836627e79534cb710eab7f">isv57communication</a></li>
 <li>servo_pos_error_p&#160;:&#160;<a class="el" href="classisv57communication.html#af8750dbe090aae2067580c1052348c68">isv57communication</a></li>
 <li>servo_pos_given_p&#160;:&#160;<a class="el" href="classisv57communication.html#ae9d47dd3608a96c6ae9fbda4dc6d1a12">isv57communication</a></li>
+<li>servo_voltage_0p1V&#160;:&#160;<a class="el" href="classisv57communication.html#a81b1ee411eabf081b46866e4fbc7bd07">isv57communication</a>, <a class="el" href="structpayloadPedalState__Extended.html#a17d0deb62931bd4ae893906084a619b7">payloadPedalState_Extended</a></li>
+<li>servoPosition_i16&#160;:&#160;<a class="el" href="structpayloadPedalState__Extended.html#a03f1358b755de51be74f20cbae0e1c64">payloadPedalState_Extended</a></li>
+<li>servoPositionTarget_i16&#160;:&#160;<a class="el" href="structpayloadPedalState__Extended.html#afef9e6044476b134d2e460ea677b70db">payloadPedalState_Extended</a></li>
 <li>Simulate_ABS_trigger&#160;:&#160;<a class="el" href="structpayloadPedalConfig.html#af8d06842de53639b573f590cafe77bd2">payloadPedalConfig</a></li>
 <li>Simulate_ABS_value&#160;:&#160;<a class="el" href="structpayloadPedalConfig.html#a3a561216573cd0540c6f1ce53dc20b00">payloadPedalConfig</a></li>
 <li>SlaveID&#160;:&#160;<a class="el" href="classModbus.html#aeaab9217de4e9e811802692edf8d8e77">Modbus</a></li>
+<li>spindlePitch_mmPerRev_u8&#160;:&#160;<a class="el" href="structpayloadPedalConfig.html#a24f9f67fafadfd632d7b691b12b96421">payloadPedalConfig</a></li>
 <li>springStiffnesss&#160;:&#160;<a class="el" href="structDAP__calculationVariables__st.html#a499e47c1d44d6d8e2d960f6f9299cc61">DAP_calculationVariables_st</a></li>
 <li>springStiffnesssInv&#160;:&#160;<a class="el" href="structDAP__calculationVariables__st.html#aa9381fe56d036b19f709ef6865231215">DAP_calculationVariables_st</a></li>
 <li>startPosRel&#160;:&#160;<a class="el" href="structDAP__calculationVariables__st.html#a733c8364832bcea61680f03ace0e1ca2">DAP_calculationVariables_st</a></li>
@@ -247,6 +276,7 @@ $(function() {
 
 
 <h3><a id="index_t" name="index_t"></a>- t -</h3><ul>
+<li>timeInMs_u32&#160;:&#160;<a class="el" href="structpayloadPedalState__Extended.html#a83526584b6dc817543964d9a1994c778">payloadPedalState_Extended</a></li>
 <li>timeout_&#160;:&#160;<a class="el" href="classModbus.html#a056e4ff932368557dc37c2201cac38a8">Modbus</a></li>
 <li>travelAsJoystickOutput_u8&#160;:&#160;<a class="el" href="structpayloadPedalConfig.html#a7cf2a2c86a9c6be11414fc45c12ae8b7">payloadPedalConfig</a></li>
 <li>triggerAbs_u8&#160;:&#160;<a class="el" href="structpayloadPedalAction.html#a400d5f2c957e910c0bc7739e4259b2e8">payloadPedalAction</a></li>
@@ -255,6 +285,7 @@ $(function() {
 
 
 <h3><a id="index_v" name="index_v"></a>- v -</h3><ul>
+<li>values&#160;:&#160;<a class="el" href="classMovingAverageFilter.html#a348266d6aa4e54c653409a5df60a534f">MovingAverageFilter</a></li>
 <li>verPos_AB&#160;:&#160;<a class="el" href="structpayloadPedalConfig.html#a9e809540a486a46e2bd84ba2e3315c67">payloadPedalConfig</a></li>
 <li>version&#160;:&#160;<a class="el" href="structpayloadHeader.html#a799248824f33f49f45695795884b43dc">payloadHeader</a></li>
 </ul>

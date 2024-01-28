@@ -1,13 +1,20 @@
 var searchData=
 [
-  ['getcurrentpositionfraction_0',['getCurrentPositionFraction',['../classStepperWithLimits.html#aef91cbf9e5f772215cecfc46977aa7c3',1,'StepperWithLimits']]],
-  ['getcurrentpositionfractionfromexternalpos_1',['getCurrentPositionFractionFromExternalPos',['../classStepperWithLimits.html#a866100a58cdcdb1bddb56fc9d2092924',1,'StepperWithLimits']]],
-  ['getcurrentpositionsteps_2',['getCurrentPositionSteps',['../classStepperWithLimits.html#a9b99ba97ab1e2c39165bdbbc4a1cf87c',1,'StepperWithLimits']]],
-  ['getlimitmax_3',['getLimitMax',['../classStepperWithLimits.html#afe9c5f23735aa95e3f599a85b4515397',1,'StepperWithLimits']]],
-  ['getlimitmin_4',['getLimitMin',['../classStepperWithLimits.html#a2056dc79cd801ddee648385164186bf3',1,'StepperWithLimits']]],
-  ['getreadingkg_5',['getReadingKg',['../classLoadCell__ADS1256.html#ae8d01b4992be881e0d0e94fa8e2ba13c',1,'LoadCell_ADS1256']]],
-  ['gettargetpositionsteps_6',['getTargetPositionSteps',['../classStepperWithLimits.html#a61ccdee6605b7c02cc5b71786de8644e',1,'StepperWithLimits']]],
-  ['gettravelsteps_7',['getTravelSteps',['../classStepperWithLimits.html#ac61366d2883f5cde889a75e1f9a32157',1,'StepperWithLimits']]],
-  ['getvarianceestimate_8',['getVarianceEstimate',['../classLoadCell__ADS1256.html#ac2d723b129c6fc3a90095c10d5ac32bb',1,'LoadCell_ADS1256']]],
-  ['getzeropos_9',['getZeroPos',['../classisv57communication.html#a88a5628cfab51ca2e60932c2276d6a2f',1,'isv57communication']]]
+  ['g_5fforce_0',['G_force',['../classG__force__effect.html#a211f525911b05c5905f3fac720c443d0',1,'G_force_effect']]],
+  ['g_5fforce_5feffect_1',['G_force_effect',['../classG__force__effect.html',1,'']]],
+  ['g_5fforce_5fraw_2',['G_force_raw',['../classG__force__effect.html#a866d94b1f8e4268b1fb5b42bfd9409a8',1,'G_force_effect']]],
+  ['g_5fmulti_3',['G_multi',['../structpayloadPedalConfig.html#af6e7230173eae39582aa20a4f1191e4d',1,'payloadPedalConfig']]],
+  ['g_5fvalue_4',['G_value',['../classG__force__effect.html#a9a0a2d81421ec5ace01d75ad0b0ae721',1,'G_force_effect::G_value()'],['../structpayloadPedalAction.html#a47eba75f258fdc2c5c23b36614fa1d95',1,'payloadPedalAction::G_value()']]],
+  ['g_5fwindow_5',['G_window',['../structpayloadPedalConfig.html#ad2ceb70f8041d22ecf723a68c3221ea8',1,'payloadPedalConfig']]],
+  ['getcurrentposition_6',['getCurrentPosition',['../classStepperWithLimits.html#a9387288097ea2cb4dbf120d8df003177',1,'StepperWithLimits']]],
+  ['getcurrentpositionfraction_7',['getCurrentPositionFraction',['../classStepperWithLimits.html#aef91cbf9e5f772215cecfc46977aa7c3',1,'StepperWithLimits']]],
+  ['getcurrentpositionfractionfromexternalpos_8',['getCurrentPositionFractionFromExternalPos',['../classStepperWithLimits.html#a866100a58cdcdb1bddb56fc9d2092924',1,'StepperWithLimits']]],
+  ['getcurrentpositionfrommin_9',['getCurrentPositionFromMin',['../classStepperWithLimits.html#a6e837fe28ef4ee22e787b5b6d6bfc716',1,'StepperWithLimits']]],
+  ['getlimitmax_10',['getLimitMax',['../classStepperWithLimits.html#afe9c5f23735aa95e3f599a85b4515397',1,'StepperWithLimits']]],
+  ['getlimitmin_11',['getLimitMin',['../classStepperWithLimits.html#a2056dc79cd801ddee648385164186bf3',1,'StepperWithLimits']]],
+  ['getreadingkg_12',['getReadingKg',['../classLoadCell__ADS1256.html#ae8d01b4992be881e0d0e94fa8e2ba13c',1,'LoadCell_ADS1256']]],
+  ['gettargetpositionsteps_13',['getTargetPositionSteps',['../classStepperWithLimits.html#a61ccdee6605b7c02cc5b71786de8644e',1,'StepperWithLimits']]],
+  ['gettravelsteps_14',['getTravelSteps',['../classStepperWithLimits.html#ac61366d2883f5cde889a75e1f9a32157',1,'StepperWithLimits']]],
+  ['getvarianceestimate_15',['getVarianceEstimate',['../classLoadCell__ADS1256.html#ac2d723b129c6fc3a90095c10d5ac32bb',1,'LoadCell_ADS1256']]],
+  ['getzeropos_16',['getZeroPos',['../classisv57communication.html#a88a5628cfab51ca2e60932c2276d6a2f',1,'isv57communication']]]
 ];

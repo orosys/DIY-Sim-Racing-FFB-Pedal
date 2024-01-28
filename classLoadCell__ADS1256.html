@@ -206,7 +206,7 @@ Here is the call graph for this function:</div>
 <div class="line"><span class="lineno">  121</span>  <span class="keywordflow">if</span> (varEstimate &lt; <a class="code hl_variable" href="LoadCell_8cpp.html#acbb4f95db109149d08210b082b7aeb5b">LOADCELL_VARIANCE_MIN</a>) { </div>
 <div class="line"><span class="lineno">  122</span>    varEstimate = <a class="code hl_variable" href="LoadCell_8cpp.html#acbb4f95db109149d08210b082b7aeb5b">LOADCELL_VARIANCE_MIN</a>;</div>
 <div class="line"><span class="lineno">  123</span>  }</div>
-<div class="line"><span class="lineno">  124</span>  varEstimate *= 9;</div>
+<div class="line"><span class="lineno">  124</span>  varEstimate *= 9; <span class="comment">// The variance is 1*sigma --&gt; to make it 3*sigma, we have to multiply by 3*3</span></div>
 <div class="line"><span class="lineno">  125</span> </div>
 <div class="line"><span class="lineno">  126</span>  <a class="code hl_variable" href="classLoadCell__ADS1256.html#a22bb793405fa9aa10f4e0f1ec1e97aef">_varianceEstimate</a> = varEstimate;</div>
 <div class="line"><span class="lineno">  127</span> </div>

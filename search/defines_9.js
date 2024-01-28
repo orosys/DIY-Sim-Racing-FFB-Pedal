@@ -16,5 +16,6 @@ var searchData=
   ['reg_5fadd_5fvelocity_5ffeedback_5fno_5ffilt_5frpm_13',['reg_add_velocity_feedback_no_filt_rpm',['../isv57communication_8h.html#a73104581acbff0f8c2ba5b4052f77323',1,'isv57communication.h']]],
   ['reg_5fadd_5fvelocity_5ffeedback_5frpm_14',['reg_add_velocity_feedback_rpm',['../isv57communication_8h.html#a30db2df52171c29cee8553aaf6ecf9a0',1,'isv57communication.h']]],
   ['reg_5fadd_5fvelocity_5fgiven_5frpm_15',['reg_add_velocity_given_rpm',['../isv57communication_8h.html#a57c65a0efb1b7e3424a4bf9378825ba2',1,'isv57communication.h']]],
-  ['rxpin_16',['RXPIN',['../isv57communication_8h.html#aeb84a810b48ab98f8218407ede651746',1,'isv57communication.h']]]
+  ['reg_5fadd_5fvoltage_5f0p1v_16',['reg_add_voltage_0p1V',['../isv57communication_8h.html#afe01e8e4375ce485ea7558be8b4b702f',1,'isv57communication.h']]],
+  ['rxpin_17',['RXPIN',['../isv57communication_8h.html#aeb84a810b48ab98f8218407ede651746',1,'isv57communication.h']]]
 ];

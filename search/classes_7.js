@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['loadcell_5fads1256_0',['LoadCell_ADS1256',['../classLoadCell__ADS1256.html',1,'']]]
+  ['kalmanfilter_0',['KalmanFilter',['../classKalmanFilter.html',1,'']]],
+  ['kalmanfilter_5f2nd_5forder_1',['KalmanFilter_2nd_order',['../classKalmanFilter__2nd__order.html',1,'']]]
 ];

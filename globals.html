@@ -103,7 +103,8 @@ $(function() {
 <li>DAP_MICROSECONDS_PER_SECOND&#160;:&#160;<a class="el" href="Main_8h.html#a6140c25b43ae14d3468b86ac6bc92c79">Main.h</a></li>
 <li>DAP_PAYLOAD_TYPE_ACTION&#160;:&#160;<a class="el" href="DiyActivePedal__types_8h.html#a016dedf57ddc953b7c38b1260265526a">DiyActivePedal_types.h</a></li>
 <li>DAP_PAYLOAD_TYPE_CONFIG&#160;:&#160;<a class="el" href="DiyActivePedal__types_8h.html#a70628ab1b5541830a738e1df7d4dab76">DiyActivePedal_types.h</a></li>
-<li>DAP_PAYLOAD_TYPE_STATE&#160;:&#160;<a class="el" href="DiyActivePedal__types_8h.html#a273d20f665a91681d89b5c8c0da9e668">DiyActivePedal_types.h</a></li>
+<li>DAP_PAYLOAD_TYPE_STATE_BASIC&#160;:&#160;<a class="el" href="DiyActivePedal__types_8h.html#a0f86a66de511ef2d55f681db7fa4d5f3">DiyActivePedal_types.h</a></li>
+<li>DAP_PAYLOAD_TYPE_STATE_EXTENDED&#160;:&#160;<a class="el" href="DiyActivePedal__types_8h.html#acae8606a99e80262cac00f9660669df9">DiyActivePedal_types.h</a></li>
 <li>DAP_VERSION_CONFIG&#160;:&#160;<a class="el" href="DiyActivePedal__types_8h.html#a414793d4dad4a2e35836fcb6aaedd219">DiyActivePedal_types.h</a></li>
 <li>DEFAULT_VARIANCE_ESTIMATE&#160;:&#160;<a class="el" href="LoadCell_8cpp.html#a4d0d708189c629e7702d98c956ee832a">LoadCell.cpp</a></li>
 <li>dirPinStepper&#160;:&#160;<a class="el" href="Main_8h.html#a53f5fbf8e8853ef35c2cb997eeb904c4">Main.h</a></li>
@@ -149,7 +150,7 @@ $(function() {
 <h3><a id="index_k" name="index_k"></a>- k -</h3><ul>
 <li>K_pedal_geometry&#160;:&#160;<a class="el" href="PedalGeometry_8cpp.html#a728f32f5fca814f3a30d730ed7c7a9d6">PedalGeometry.cpp</a></li>
 <li>Kd&#160;:&#160;<a class="el" href="StepperMovementStrategy_8h.html#ab9e6bbb0361dc98bc2f5399d014c6c01">StepperMovementStrategy.h</a></li>
-<li>KF_MODEL_NOISE_FORCE_ACCELERATION&#160;:&#160;<a class="el" href="PedalGeometry_8cpp.html#aec7950ddffacc3f0760bf13c00ffa875">PedalGeometry.cpp</a>, <a class="el" href="SignalFilter_8cpp.html#aec7950ddffacc3f0760bf13c00ffa875">SignalFilter.cpp</a></li>
+<li>KF_MODEL_NOISE_FORCE_ACCELERATION&#160;:&#160;<a class="el" href="PedalGeometry_8cpp.html#aec7950ddffacc3f0760bf13c00ffa875">PedalGeometry.cpp</a>, <a class="el" href="SignalFilter_8cpp.html#aec7950ddffacc3f0760bf13c00ffa875">SignalFilter.cpp</a>, <a class="el" href="SignalFilter__2nd__order_8cpp.html#aec7950ddffacc3f0760bf13c00ffa875">SignalFilter_2nd_order.cpp</a></li>
 <li>Ki&#160;:&#160;<a class="el" href="StepperMovementStrategy_8h.html#aad5977a9e83736178f3b724a1d228652">StepperMovementStrategy.h</a></li>
 <li>Kp&#160;:&#160;<a class="el" href="StepperMovementStrategy_8h.html#afd070d90e3f8bb3e9bb9c6dff310503b">StepperMovementStrategy.h</a></li>
 </ul>
@@ -166,27 +167,34 @@ $(function() {
 
 <h3><a id="index_m" name="index_m"></a>- m -</h3><ul>
 <li>MAX_CYCLES&#160;:&#160;<a class="el" href="CycleTimer_8h.html#afe5d4021405adb70aa4a916d05632c05">CycleTimer.h</a></li>
+<li>MAX_DATA_POINTS&#160;:&#160;<a class="el" href="ABSOscillation_8h.html#a1c0a61ecb2e23d904616be132b1f4467">ABSOscillation.h</a></li>
+<li>MAX_NUMBER_OF_NEWTON_STEPS&#160;:&#160;<a class="el" href="StepperMovementStrategy_8h.html#aae08e582c5666c00da8bd6b792a7356b">StepperMovementStrategy.h</a></li>
 <li>MAXIMUM_STEPPER_ACCELERATION&#160;:&#160;<a class="el" href="StepperWithLimits_8h.html#a8f5c3b1c34c1f1d9e25b686b8730125a">StepperWithLimits.h</a></li>
 <li>MAXIMUM_STEPPER_RPM&#160;:&#160;<a class="el" href="StepperWithLimits_8h.html#a4d7ceb44658af98bd95d2b3298e42259">StepperWithLimits.h</a></li>
 <li>MAXIMUM_STEPPER_SPEED&#160;:&#160;<a class="el" href="StepperWithLimits_8h.html#aa551558e56e3703986579ff2a81de7eb">StepperWithLimits.h</a></li>
 <li>maxPin&#160;:&#160;<a class="el" href="Main_8h.html#ab9b1d60946874151aac1f46ff5b414ab">Main.h</a></li>
 <li>measureStepResponse()&#160;:&#160;<a class="el" href="StepperMovementStrategy_8h.html#a930e00dcd29fd9a4153d2e96cf2f0dd3">StepperMovementStrategy.h</a></li>
-<li>MIN_POS_MAX_ENDSTOP&#160;:&#160;<a class="el" href="Dev_2StepperWithLimits_8cpp.html#a9e8f78bc0710966135d0dc094412c5a6">StepperWithLimits.cpp</a></li>
+<li>MIN_POS_MAX_ENDSTOP&#160;:&#160;<a class="el" href="Main_2StepperWithLimits_8cpp.html#a9e8f78bc0710966135d0dc094412c5a6">StepperWithLimits.cpp</a></li>
 <li>minPin&#160;:&#160;<a class="el" href="Main_8h.html#af348d8b54fa194da3f964a119e49798e">Main.h</a></li>
 <li>modbus&#160;:&#160;<a class="el" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">isv57communication.cpp</a></li>
 <li>MODE&#160;:&#160;<a class="el" href="isv57communication_8h.html#ab8c52c1b4c021ed3e6b6b677bd2ac019">isv57communication.h</a></li>
 <li>MOTOR_INVERT_MOTOR_DIR&#160;:&#160;<a class="el" href="Main_8h.html#ab3629707a27eda44e5f8ed57ee546a46">Main.h</a></li>
+<li>MoveByForceTargetingStrategy()&#160;:&#160;<a class="el" href="StepperMovementStrategy_8h.html#a50087aaa118acc3d81e2b45c6f8cd0d0">StepperMovementStrategy.h</a></li>
 <li>MoveByInterpolatedStrategy()&#160;:&#160;<a class="el" href="StepperMovementStrategy_8h.html#aa379e5029872844e6bd9d12478134eba">StepperMovementStrategy.h</a></li>
-<li>MoveByPidStrategy()&#160;:&#160;<a class="el" href="StepperMovementStrategy_8h.html#a88f8ffc5bd073eed6c45dda7dc8528e9">StepperMovementStrategy.h</a></li>
+<li>MoveByPidStrategy()&#160;:&#160;<a class="el" href="StepperMovementStrategy_8h.html#a7d67bdd19f65aa58ac7cfb356dd727a8">StepperMovementStrategy.h</a></li>
+<li>movingAverageFilter()&#160;:&#160;<a class="el" href="ABSOscillation_8h.html#a9a7d78118751acefb03ad534f4d2fbf5">ABSOscillation.h</a></li>
 <li>mpcBasedMove()&#160;:&#160;<a class="el" href="StepperMovementStrategy_8h.html#a97b4fb21147fbe5fab1d571f341b61f9">StepperMovementStrategy.h</a></li>
 </ul>
 
 
 <h3><a id="index_n" name="index_n"></a>- n -</h3><ul>
 <li>Ncom&#160;:&#160;<a class="el" href="SignalFilter_8h.html#a594ce6dca642e14280b639604463a214">SignalFilter.h</a></li>
+<li>Ncom_2nd_order&#160;:&#160;<a class="el" href="SignalFilter__2nd__order_8h.html#ae3937c033365eac3e745cd280ea12fe0">SignalFilter_2nd_order.h</a></li>
 <li>Nobs&#160;:&#160;<a class="el" href="SignalFilter_8h.html#a98429e6ba45bc837fe6b2bcd6209d17b">SignalFilter.h</a></li>
+<li>Nobs_2nd_order&#160;:&#160;<a class="el" href="SignalFilter__2nd__order_8h.html#a67b0511644a0d6237bb04cfba8297728">SignalFilter_2nd_order.h</a></li>
 <li>NormalizeControllerOutputValue()&#160;:&#160;<a class="el" href="Controller_8cpp.html#aa4e62cce7d5e694c4e6cb9a92f46b5de">Controller.cpp</a>, <a class="el" href="Controller_8h.html#aa4e62cce7d5e694c4e6cb9a92f46b5de">Controller.h</a></li>
 <li>Nstate&#160;:&#160;<a class="el" href="SignalFilter_8h.html#a4671c3fff0ac7336deeed8cb0bfc2bfd">SignalFilter.h</a></li>
+<li>Nstate_2nd_order&#160;:&#160;<a class="el" href="SignalFilter__2nd__order_8h.html#aa8fdab1abbfda10bec2791aa0f0196c1">SignalFilter_2nd_order.h</a></li>
 <li>NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION&#160;:&#160;<a class="el" href="LoadCell_8cpp.html#ab74da14c701adf308fd8372c61cf5c18">LoadCell.cpp</a></li>
 <li>NUMBER_OF_SPLINE_SEGMENTS&#160;:&#160;<a class="el" href="ForceCurve_8h.html#a7425b8a4fbf64316c05ed1b26e2e4d95">ForceCurve.h</a></li>
 </ul>
@@ -203,6 +211,7 @@ $(function() {
 <li>PCB_VERSION&#160;:&#160;<a class="el" href="Main_8h.html#ad5f38987e480bc89ad7d9de6743f6f9c">Main.h</a></li>
 <li>pedalInclineAngleAccel()&#160;:&#160;<a class="el" href="PedalGeometry_8cpp.html#a6f4fc386c6a96acec1c56fe8a7afff88">PedalGeometry.cpp</a>, <a class="el" href="PedalGeometry_8h.html#a6f4fc386c6a96acec1c56fe8a7afff88">PedalGeometry.h</a></li>
 <li>pedalInclineAngleDeg()&#160;:&#160;<a class="el" href="PedalGeometry_8cpp.html#a9532b447e8a1244ef53492384fb38bcf">PedalGeometry.cpp</a>, <a class="el" href="PedalGeometry_8h.html#a9532b447e8a1244ef53492384fb38bcf">PedalGeometry.h</a></li>
+<li>PID_OUTPUT_LIMIT_FL32&#160;:&#160;<a class="el" href="StepperMovementStrategy_8h.html#a1b46b5dbb939e42eff50b99cef6dc98d">StepperMovementStrategy.h</a></li>
 <li>pidWasInitialized&#160;:&#160;<a class="el" href="StepperMovementStrategy_8h.html#a378de9cfb2041f4a60cabf4d77e79e6e">StepperMovementStrategy.h</a></li>
 <li>PIN_CS&#160;:&#160;<a class="el" href="Main_8h.html#afa592f8fcb7a301edfe97aa121fd28ce">Main.h</a></li>
 <li>PIN_DRDY&#160;:&#160;<a class="el" href="Main_8h.html#a5559cd1953e3fce83f6ecf4fc4c1e46a">Main.h</a></li>
@@ -238,6 +247,7 @@ $(function() {
 <li>reg_add_velocity_feedback_no_filt_rpm&#160;:&#160;<a class="el" href="isv57communication_8h.html#a73104581acbff0f8c2ba5b4052f77323">isv57communication.h</a></li>
 <li>reg_add_velocity_feedback_rpm&#160;:&#160;<a class="el" href="isv57communication_8h.html#a30db2df52171c29cee8553aaf6ecf9a0">isv57communication.h</a></li>
 <li>reg_add_velocity_given_rpm&#160;:&#160;<a class="el" href="isv57communication_8h.html#a57c65a0efb1b7e3424a4bf9378825ba2">isv57communication.h</a></li>
+<li>reg_add_voltage_0p1V&#160;:&#160;<a class="el" href="isv57communication_8h.html#afe01e8e4375ce485ea7558be8b4b702f">isv57communication.h</a></li>
 <li>RLS_gain()&#160;:&#160;<a class="el" href="Dev_2StepperWithLimits_8cpp.html#a5f48d7e8f07ec999dfa3ab3e8e07779f">StepperWithLimits.cpp</a></li>
 <li>rls_has_been_initialized_b&#160;:&#160;<a class="el" href="Dev_2StepperWithLimits_8cpp.html#a80e470517d53d1ef76659acd55b24e7f">StepperWithLimits.cpp</a></li>
 <li>RLS_in()&#160;:&#160;<a class="el" href="Dev_2StepperWithLimits_8cpp.html#a5ac3a711d64a2a46a61f1356335c0329">StepperWithLimits.cpp</a></li>

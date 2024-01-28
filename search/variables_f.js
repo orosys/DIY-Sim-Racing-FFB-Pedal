@@ -1,19 +1,7 @@
 var searchData=
 [
-  ['payloadfooter_5f_0',['payloadFooter_',['../structDAP__state__st.html#a31af9ca36f72c64a3578199c4bbd0bda',1,'DAP_state_st::payloadFooter_()'],['../structDAP__config__st.html#a34700b0b7711b820ef7728c9afd325ff',1,'DAP_config_st::payloadFooter_()'],['../structDAP__actions__st.html#a792ecc67d0f2c1c4f2daff3e075dc671',1,'DAP_actions_st::payloadFooter_()']]],
-  ['payloadheader_5f_1',['payLoadHeader_',['../structDAP__actions__st.html#a947a694f989a5a2d8a119340212e12bb',1,'DAP_actions_st::payLoadHeader_()'],['../structDAP__state__st.html#acadeae93137d5b8fe0cdcbb2a765bc7d',1,'DAP_state_st::payLoadHeader_()'],['../structDAP__config__st.html#a4c1867d915d2985a594ba7a1e9ef8c9f',1,'DAP_config_st::payLoadHeader_()']]],
-  ['payloadpedalaction_5f_2',['payloadPedalAction_',['../structDAP__actions__st.html#a953e29e5e61fd9f2804b30e4bc581643',1,'DAP_actions_st']]],
-  ['payloadpedalconfig_5f_3',['payLoadPedalConfig_',['../structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb',1,'DAP_config_st']]],
-  ['payloadpedalstate_5f_4',['payloadPedalState_',['../structDAP__state__st.html#ad588b87057b0fd1f8dd3f009716ff095',1,'DAP_state_st']]],
-  ['payloadtype_5',['payloadType',['../structpayloadHeader.html#a71e88dbd84c69490551743d5710eed3b',1,'payloadHeader']]],
-  ['pedalendposition_6',['pedalEndPosition',['../structpayloadPedalConfig.html#af935cfbfa281dfb41afabfd0ab86ced8',1,'payloadPedalConfig']]],
-  ['pedalforce_5fu16_7',['pedalForce_u16',['../structpayloadPedalState.html#a0afd2acf4286be42cfb301b51f6e3009',1,'payloadPedalState']]],
-  ['pedalposition_5fu16_8',['pedalPosition_u16',['../structpayloadPedalState.html#a84237ff456b99c54ec502460b4c4befd',1,'payloadPedalState']]],
-  ['pedalstartposition_9',['pedalStartPosition',['../structpayloadPedalConfig.html#aa35f308f84be04c330b59bcd4d748082',1,'payloadPedalConfig']]],
-  ['pid_5fd_5fgain_10',['PID_d_gain',['../structpayloadPedalConfig.html#ad18927d606b6f756d32ff1ee500b8468',1,'payloadPedalConfig']]],
-  ['pid_5ffeedforward_5fgain_11',['PID_feedforward_gain',['../structpayloadPedalConfig.html#a2e06683b9877417a201310b393ca3a61',1,'payloadPedalConfig']]],
-  ['pid_5fi_5fgain_12',['PID_i_gain',['../structpayloadPedalConfig.html#a747c38aae6133b6cdea1921867be0a1e',1,'payloadPedalConfig']]],
-  ['pid_5fp_5fgain_13',['PID_p_gain',['../structpayloadPedalConfig.html#a73eda7d15ccb63e6558a0549428049f9',1,'payloadPedalConfig']]],
-  ['pidwasinitialized_14',['pidWasInitialized',['../StepperMovementStrategy_8h.html#a378de9cfb2041f4a60cabf4d77e79e6e',1,'StepperMovementStrategy.h']]],
-  ['preloadforce_15',['preloadForce',['../structpayloadPedalConfig.html#a747973ae1229a7186da3fd940cd340eb',1,'payloadPedalConfig']]]
+  ['oldinput_5ffl32_0',['oldInput_fl32',['../Dev_2StepperWithLimits_8cpp.html#a28dc3c399a19c7bbeb4928643594151a',1,'StepperWithLimits.cpp']]],
+  ['oldpos_5ffl32_1',['oldPos_fl32',['../Dev_2StepperWithLimits_8cpp.html#a76ec465db4fbdd83ca958e9040a979b4',1,'StepperWithLimits.cpp']]],
+  ['out_2',['out',['../classMovingAverageFilter.html#a2dc08683d38f654c016051424a0bcdf1',1,'MovingAverageFilter']]],
+  ['output_3',['Output',['../StepperMovementStrategy_8h.html#acda7a5c6dbdb658e7ce3704bc39e7eb6',1,'StepperMovementStrategy.h']]]
 ];
