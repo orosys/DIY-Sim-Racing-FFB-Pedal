@@ -1,10 +1,11 @@
 <map id="DAP_state_extended_st" name="DAP_state_extended_st">
-<area shape="rect" id="node1" title=" " alt="" coords="110,240,273,265"/>
-<area shape="rect" id="node2" href="$structpayloadHeader.html" title=" " alt="" coords="5,152,113,177"/>
-<area shape="rect" id="node3" title=" " alt="" coords="29,5,90,31"/>
-<area shape="rect" id="node4" href="$structpayloadPedalState__Extended.html" title=" " alt="" coords="300,152,491,177"/>
-<area shape="rect" id="node5" title=" " alt="" coords="557,5,604,31"/>
-<area shape="rect" id="node6" title=" " alt="" coords="197,5,265,31"/>
-<area shape="rect" id="node8" href="$structpayloadFooter.html" title=" " alt="" coords="139,152,241,177"/>
-<area shape="rect" id="node7" title=" " alt="" coords="401,5,462,31"/>
+<area shape="rect" id="node1" title=" " alt="" coords="191,255,353,280"/>
+<area shape="rect" id="node2" href="$structpayloadHeader.html" title=" " alt="" coords="14,167,122,192"/>
+<area shape="rect" id="node3" title=" " alt="" coords="5,5,67,31"/>
+<area shape="rect" id="node4" href="$structpayloadPedalState__Extended.html" title=" " alt="" coords="177,167,367,192"/>
+<area shape="rect" id="node5" title=" " alt="" coords="133,5,179,31"/>
+<area shape="rect" id="node6" title=" " alt="" coords="249,5,295,31"/>
+<area shape="rect" id="node7" title=" " alt="" coords="392,5,453,31"/>
+<area shape="rect" id="node8" href="$structpayloadFooter.html" title=" " alt="" coords="506,167,609,192"/>
+<area shape="rect" id="node9" title=" " alt="" coords="549,5,617,31"/>
 </map>

@@ -1,8 +1,9 @@
 <map id="Arduino/Esp32/Main/Main.h" name="Arduino/Esp32/Main/Main.h">
-<area shape="rect" id="node1" title=" " alt="" coords="263,5,402,45"/>
+<area shape="rect" id="node1" title=" " alt="" coords="358,5,497,45"/>
 <area shape="rect" id="node2" href="$Dev_2StepperWithLimits_8cpp.html" title=" " alt="" coords="5,93,188,133"/>
 <area shape="rect" id="node3" href="$LoadCell_8cpp.html" title=" " alt="" coords="210,181,349,221"/>
 <area shape="rect" id="node4" href="$LoadCell_8h.html" title=" " alt="" coords="263,93,402,133"/>
 <area shape="rect" id="node5" href="$StepperMovementStrategy_8h.html" title=" " alt="" coords="427,93,617,133"/>
 <area shape="rect" id="node6" href="$Main_2StepperWithLimits_8cpp.html" title=" " alt="" coords="642,93,799,133"/>
+<area shape="rect" id="node7" href="$isv57communication_8cpp.html" title=" " alt="" coords="824,93,993,133"/>
 </map>

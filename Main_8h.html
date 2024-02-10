@@ -83,12 +83,13 @@ This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
 <div class="center"><img src="Main_8h__dep__incl.png" border="0" usemap="#aArduino_2Esp32_2Main_2Main_8hdep" alt=""/></div>
 <map name="aArduino_2Esp32_2Main_2Main_8hdep" id="aArduino_2Esp32_2Main_2Main_8hdep">
-<area shape="rect" title=" " alt="" coords="263,5,402,45"/>
+<area shape="rect" title=" " alt="" coords="358,5,497,45"/>
 <area shape="rect" href="Dev_2StepperWithLimits_8cpp.html" title=" " alt="" coords="5,93,188,133"/>
 <area shape="rect" href="LoadCell_8cpp.html" title=" " alt="" coords="210,181,349,221"/>
 <area shape="rect" href="LoadCell_8h.html" title=" " alt="" coords="263,93,402,133"/>
 <area shape="rect" href="StepperMovementStrategy_8h.html" title=" " alt="" coords="427,93,617,133"/>
 <area shape="rect" href="Main_2StepperWithLimits_8cpp.html" title=" " alt="" coords="642,93,799,133"/>
+<area shape="rect" href="isv57communication_8cpp.html" title=" " alt="" coords="824,93,993,133"/>
 </map>
 </div>
 </div>
@@ -110,8 +111,6 @@ Macros</h2></td></tr>
 <tr class="separator:a427b269acba12e18c696d5be8cb59e91"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af46044ba4504bc725cd220af5edeef5a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="Main_8h.html#af46044ba4504bc725cd220af5edeef5a">LOADCELL_SENSITIVITY_MV_V</a>&#160;&#160;&#160;2.0</td></tr>
 <tr class="separator:af46044ba4504bc725cd220af5edeef5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab3629707a27eda44e5f8ed57ee546a46"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="Main_8h.html#ab3629707a27eda44e5f8ed57ee546a46">MOTOR_INVERT_MOTOR_DIR</a>&#160;&#160;&#160;false</td></tr>
-<tr class="separator:ab3629707a27eda44e5f8ed57ee546a46"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5559cd1953e3fce83f6ecf4fc4c1e46a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="Main_8h.html#a5559cd1953e3fce83f6ecf4fc4c1e46a">PIN_DRDY</a>&#160;&#160;&#160;19</td></tr>
 <tr class="separator:a5559cd1953e3fce83f6ecf4fc4c1e46a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0010d60e4eaa7f589cd190c45dcc7d20"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="Main_8h.html#a0010d60e4eaa7f589cd190c45dcc7d20">PIN_RST</a>&#160;&#160;&#160;15</td></tr>
@@ -136,6 +135,10 @@ Macros</h2></td></tr>
 <tr class="separator:ab9b1d60946874151aac1f46ff5b414ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1f1af256d94506c5dfa26a51ab56069a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="Main_8h.html#a1f1af256d94506c5dfa26a51ab56069a">SENSORLESS_HOMING</a>&#160;&#160;&#160;true</td></tr>
 <tr class="separator:a1f1af256d94506c5dfa26a51ab56069a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe7a1194ca3ce62a3b9cc53375c5f457"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="Main_8h.html#afe7a1194ca3ce62a3b9cc53375c5f457">ISV57_TXPIN</a>&#160;&#160;&#160;27</td></tr>
+<tr class="separator:afe7a1194ca3ce62a3b9cc53375c5f457"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a962c519682177cf611484db2d1c8116b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="Main_8h.html#a962c519682177cf611484db2d1c8116b">ISV57_RXPIN</a>&#160;&#160;&#160;26</td></tr>
+<tr class="separator:a962c519682177cf611484db2d1c8116b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a28a319b70cd882477c5007ce11b89fb4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="Main_8h.html#a28a319b70cd882477c5007ce11b89fb4">Using_analog_output</a></td></tr>
 <tr class="separator:a28a319b70cd882477c5007ce11b89fb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -201,6 +204,38 @@ Macros</h2></td></tr>
 </div><div class="memdoc">
 
 <p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00123">123</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
+
+</div>
+</div>
+<a id="a962c519682177cf611484db2d1c8116b" name="a962c519682177cf611484db2d1c8116b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a962c519682177cf611484db2d1c8116b">&#9670;&#160;</a></span>ISV57_RXPIN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ISV57_RXPIN&#160;&#160;&#160;26</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00135">135</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
+
+</div>
+</div>
+<a id="afe7a1194ca3ce62a3b9cc53375c5f457" name="afe7a1194ca3ce62a3b9cc53375c5f457"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afe7a1194ca3ce62a3b9cc53375c5f457">&#9670;&#160;</a></span>ISV57_TXPIN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ISV57_TXPIN&#160;&#160;&#160;27</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00134">134</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
 
 </div>
 </div>
@@ -281,22 +316,6 @@ Macros</h2></td></tr>
 </div><div class="memdoc">
 
 <p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00129">129</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
-
-</div>
-</div>
-<a id="ab3629707a27eda44e5f8ed57ee546a46" name="ab3629707a27eda44e5f8ed57ee546a46"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab3629707a27eda44e5f8ed57ee546a46">&#9670;&#160;</a></span>MOTOR_INVERT_MOTOR_DIR</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define MOTOR_INVERT_MOTOR_DIR&#160;&#160;&#160;false</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00057">57</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
 
 </div>
 </div>
@@ -472,7 +491,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00135">135</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Main_8h_source.html#l00137">137</a> of file <a class="el" href="Main_8h_source.html">Main.h</a>.</p>
 
 </div>
 </div>

@@ -115,7 +115,7 @@ Private Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00213">213</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00214">214</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a2845e489c746ffaeb9113e3f87bad8e1" name="a2845e489c746ffaeb9113e3f87bad8e1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2845e489c746ffaeb9113e3f87bad8e1">&#9670;&#160;</a></span>MovingAverageFilter()</h2>
@@ -133,24 +133,24 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00230">230</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  231</span>{</div>
-<div class="line"><span class="lineno">  232</span>  <a class="code hl_variable" href="classMovingAverageFilter.html#a82f23589732914f1ca9f2d5723c91ab0">k</a> = 0; <span class="comment">//initialize so that we start to write at index 0</span></div>
-<div class="line"><span class="lineno">  233</span>  <span class="keywordflow">if</span> (newDataPointsCount &lt; <a class="code hl_define" href="ABSOscillation_8h.html#a1c0a61ecb2e23d904616be132b1f4467">MAX_DATA_POINTS</a>)</div>
-<div class="line"><span class="lineno">  234</span>    <a class="code hl_variable" href="classMovingAverageFilter.html#a1e157723539f80e5b59e329f63dbcacf">dataPointsCount</a> = newDataPointsCount;</div>
-<div class="line"><span class="lineno">  235</span>  <span class="keywordflow">else</span></div>
-<div class="line"><span class="lineno">  236</span>    <a class="code hl_variable" href="classMovingAverageFilter.html#a1e157723539f80e5b59e329f63dbcacf">dataPointsCount</a> = <a class="code hl_define" href="ABSOscillation_8h.html#a1c0a61ecb2e23d904616be132b1f4467">MAX_DATA_POINTS</a>;</div>
-<div class="line"><span class="lineno">  237</span> </div>
-<div class="line"><span class="lineno">  238</span>  <span class="keywordflow">for</span> (<a class="code hl_variable" href="classMovingAverageFilter.html#ac3c9064235cc1067f5571e34519c718f">i</a> = 0; <a class="code hl_variable" href="classMovingAverageFilter.html#ac3c9064235cc1067f5571e34519c718f">i</a> &lt; <a class="code hl_variable" href="classMovingAverageFilter.html#a1e157723539f80e5b59e329f63dbcacf">dataPointsCount</a>; <a class="code hl_variable" href="classMovingAverageFilter.html#ac3c9064235cc1067f5571e34519c718f">i</a>++)</div>
-<div class="line"><span class="lineno">  239</span>  {</div>
-<div class="line"><span class="lineno">  240</span>    <a class="code hl_variable" href="classMovingAverageFilter.html#a348266d6aa4e54c653409a5df60a534f">values</a>[<a class="code hl_variable" href="classMovingAverageFilter.html#ac3c9064235cc1067f5571e34519c718f">i</a>] = 0; <span class="comment">// fill the array with 0&#39;s</span></div>
-<div class="line"><span class="lineno">  241</span>  }</div>
-<div class="line"><span class="lineno">  242</span>}</div>
-<div class="ttc" id="aABSOscillation_8h_html_a1c0a61ecb2e23d904616be132b1f4467"><div class="ttname"><a href="ABSOscillation_8h.html#a1c0a61ecb2e23d904616be132b1f4467">MAX_DATA_POINTS</a></div><div class="ttdeci">#define MAX_DATA_POINTS</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00212">ABSOscillation.h:212</a></div></div>
-<div class="ttc" id="aclassMovingAverageFilter_html_a1e157723539f80e5b59e329f63dbcacf"><div class="ttname"><a href="classMovingAverageFilter.html#a1e157723539f80e5b59e329f63dbcacf">MovingAverageFilter::dataPointsCount</a></div><div class="ttdeci">int dataPointsCount</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00218">ABSOscillation.h:218</a></div></div>
-<div class="ttc" id="aclassMovingAverageFilter_html_a348266d6aa4e54c653409a5df60a534f"><div class="ttname"><a href="classMovingAverageFilter.html#a348266d6aa4e54c653409a5df60a534f">MovingAverageFilter::values</a></div><div class="ttdeci">float values[MAX_DATA_POINTS]</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00223">ABSOscillation.h:223</a></div></div>
-<div class="ttc" id="aclassMovingAverageFilter_html_a82f23589732914f1ca9f2d5723c91ab0"><div class="ttname"><a href="classMovingAverageFilter.html#a82f23589732914f1ca9f2d5723c91ab0">MovingAverageFilter::k</a></div><div class="ttdeci">int k</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00224">ABSOscillation.h:224</a></div></div>
-<div class="ttc" id="aclassMovingAverageFilter_html_ac3c9064235cc1067f5571e34519c718f"><div class="ttname"><a href="classMovingAverageFilter.html#ac3c9064235cc1067f5571e34519c718f">MovingAverageFilter::i</a></div><div class="ttdeci">int i</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00227">ABSOscillation.h:227</a></div></div>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00231">231</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  232</span>{</div>
+<div class="line"><span class="lineno">  233</span>  <a class="code hl_variable" href="classMovingAverageFilter.html#a82f23589732914f1ca9f2d5723c91ab0">k</a> = 0; <span class="comment">//initialize so that we start to write at index 0</span></div>
+<div class="line"><span class="lineno">  234</span>  <span class="keywordflow">if</span> (newDataPointsCount &lt; <a class="code hl_define" href="ABSOscillation_8h.html#a1c0a61ecb2e23d904616be132b1f4467">MAX_DATA_POINTS</a>)</div>
+<div class="line"><span class="lineno">  235</span>    <a class="code hl_variable" href="classMovingAverageFilter.html#a1e157723539f80e5b59e329f63dbcacf">dataPointsCount</a> = newDataPointsCount;</div>
+<div class="line"><span class="lineno">  236</span>  <span class="keywordflow">else</span></div>
+<div class="line"><span class="lineno">  237</span>    <a class="code hl_variable" href="classMovingAverageFilter.html#a1e157723539f80e5b59e329f63dbcacf">dataPointsCount</a> = <a class="code hl_define" href="ABSOscillation_8h.html#a1c0a61ecb2e23d904616be132b1f4467">MAX_DATA_POINTS</a>;</div>
+<div class="line"><span class="lineno">  238</span> </div>
+<div class="line"><span class="lineno">  239</span>  <span class="keywordflow">for</span> (<a class="code hl_variable" href="classMovingAverageFilter.html#ac3c9064235cc1067f5571e34519c718f">i</a> = 0; <a class="code hl_variable" href="classMovingAverageFilter.html#ac3c9064235cc1067f5571e34519c718f">i</a> &lt; <a class="code hl_variable" href="classMovingAverageFilter.html#a1e157723539f80e5b59e329f63dbcacf">dataPointsCount</a>; <a class="code hl_variable" href="classMovingAverageFilter.html#ac3c9064235cc1067f5571e34519c718f">i</a>++)</div>
+<div class="line"><span class="lineno">  240</span>  {</div>
+<div class="line"><span class="lineno">  241</span>    <a class="code hl_variable" href="classMovingAverageFilter.html#a348266d6aa4e54c653409a5df60a534f">values</a>[<a class="code hl_variable" href="classMovingAverageFilter.html#ac3c9064235cc1067f5571e34519c718f">i</a>] = 0; <span class="comment">// fill the array with 0&#39;s</span></div>
+<div class="line"><span class="lineno">  242</span>  }</div>
+<div class="line"><span class="lineno">  243</span>}</div>
+<div class="ttc" id="aABSOscillation_8h_html_a1c0a61ecb2e23d904616be132b1f4467"><div class="ttname"><a href="ABSOscillation_8h.html#a1c0a61ecb2e23d904616be132b1f4467">MAX_DATA_POINTS</a></div><div class="ttdeci">#define MAX_DATA_POINTS</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00213">ABSOscillation.h:213</a></div></div>
+<div class="ttc" id="aclassMovingAverageFilter_html_a1e157723539f80e5b59e329f63dbcacf"><div class="ttname"><a href="classMovingAverageFilter.html#a1e157723539f80e5b59e329f63dbcacf">MovingAverageFilter::dataPointsCount</a></div><div class="ttdeci">int dataPointsCount</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00219">ABSOscillation.h:219</a></div></div>
+<div class="ttc" id="aclassMovingAverageFilter_html_a348266d6aa4e54c653409a5df60a534f"><div class="ttname"><a href="classMovingAverageFilter.html#a348266d6aa4e54c653409a5df60a534f">MovingAverageFilter::values</a></div><div class="ttdeci">float values[MAX_DATA_POINTS]</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00224">ABSOscillation.h:224</a></div></div>
+<div class="ttc" id="aclassMovingAverageFilter_html_a82f23589732914f1ca9f2d5723c91ab0"><div class="ttname"><a href="classMovingAverageFilter.html#a82f23589732914f1ca9f2d5723c91ab0">MovingAverageFilter::k</a></div><div class="ttdeci">int k</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00225">ABSOscillation.h:225</a></div></div>
+<div class="ttc" id="aclassMovingAverageFilter_html_ac3c9064235cc1067f5571e34519c718f"><div class="ttname"><a href="classMovingAverageFilter.html#ac3c9064235cc1067f5571e34519c718f">MovingAverageFilter::i</a></div><div class="ttdeci">int i</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00228">ABSOscillation.h:228</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -171,21 +171,21 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00244">244</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  245</span>{</div>
-<div class="line"><span class="lineno">  246</span>  <a class="code hl_variable" href="classMovingAverageFilter.html#a2dc08683d38f654c016051424a0bcdf1">out</a> = 0;</div>
-<div class="line"><span class="lineno">  247</span> </div>
-<div class="line"><span class="lineno">  248</span>  <a class="code hl_variable" href="classMovingAverageFilter.html#a348266d6aa4e54c653409a5df60a534f">values</a>[<a class="code hl_variable" href="classMovingAverageFilter.html#a82f23589732914f1ca9f2d5723c91ab0">k</a>] = in;</div>
-<div class="line"><span class="lineno">  249</span>  <a class="code hl_variable" href="classMovingAverageFilter.html#a82f23589732914f1ca9f2d5723c91ab0">k</a> = (<a class="code hl_variable" href="classMovingAverageFilter.html#a82f23589732914f1ca9f2d5723c91ab0">k</a> + 1) % <a class="code hl_variable" href="classMovingAverageFilter.html#a1e157723539f80e5b59e329f63dbcacf">dataPointsCount</a>;</div>
-<div class="line"><span class="lineno">  250</span> </div>
-<div class="line"><span class="lineno">  251</span>  <span class="keywordflow">for</span> (<a class="code hl_variable" href="classMovingAverageFilter.html#ac3c9064235cc1067f5571e34519c718f">i</a> = 0; <a class="code hl_variable" href="classMovingAverageFilter.html#ac3c9064235cc1067f5571e34519c718f">i</a> &lt; <a class="code hl_variable" href="classMovingAverageFilter.html#a1e157723539f80e5b59e329f63dbcacf">dataPointsCount</a>; <a class="code hl_variable" href="classMovingAverageFilter.html#ac3c9064235cc1067f5571e34519c718f">i</a>++)</div>
-<div class="line"><span class="lineno">  252</span>  {</div>
-<div class="line"><span class="lineno">  253</span>    <a class="code hl_variable" href="classMovingAverageFilter.html#a2dc08683d38f654c016051424a0bcdf1">out</a> += <a class="code hl_variable" href="classMovingAverageFilter.html#a348266d6aa4e54c653409a5df60a534f">values</a>[<a class="code hl_variable" href="classMovingAverageFilter.html#ac3c9064235cc1067f5571e34519c718f">i</a>];</div>
-<div class="line"><span class="lineno">  254</span>  }</div>
-<div class="line"><span class="lineno">  255</span> </div>
-<div class="line"><span class="lineno">  256</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classMovingAverageFilter.html#a2dc08683d38f654c016051424a0bcdf1">out</a> / <a class="code hl_variable" href="classMovingAverageFilter.html#a1e157723539f80e5b59e329f63dbcacf">dataPointsCount</a>;</div>
-<div class="line"><span class="lineno">  257</span>}</div>
-<div class="ttc" id="aclassMovingAverageFilter_html_a2dc08683d38f654c016051424a0bcdf1"><div class="ttname"><a href="classMovingAverageFilter.html#a2dc08683d38f654c016051424a0bcdf1">MovingAverageFilter::out</a></div><div class="ttdeci">float out</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00226">ABSOscillation.h:226</a></div></div>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00245">245</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  246</span>{</div>
+<div class="line"><span class="lineno">  247</span>  <a class="code hl_variable" href="classMovingAverageFilter.html#a2dc08683d38f654c016051424a0bcdf1">out</a> = 0;</div>
+<div class="line"><span class="lineno">  248</span> </div>
+<div class="line"><span class="lineno">  249</span>  <a class="code hl_variable" href="classMovingAverageFilter.html#a348266d6aa4e54c653409a5df60a534f">values</a>[<a class="code hl_variable" href="classMovingAverageFilter.html#a82f23589732914f1ca9f2d5723c91ab0">k</a>] = in;</div>
+<div class="line"><span class="lineno">  250</span>  <a class="code hl_variable" href="classMovingAverageFilter.html#a82f23589732914f1ca9f2d5723c91ab0">k</a> = (<a class="code hl_variable" href="classMovingAverageFilter.html#a82f23589732914f1ca9f2d5723c91ab0">k</a> + 1) % <a class="code hl_variable" href="classMovingAverageFilter.html#a1e157723539f80e5b59e329f63dbcacf">dataPointsCount</a>;</div>
+<div class="line"><span class="lineno">  251</span> </div>
+<div class="line"><span class="lineno">  252</span>  <span class="keywordflow">for</span> (<a class="code hl_variable" href="classMovingAverageFilter.html#ac3c9064235cc1067f5571e34519c718f">i</a> = 0; <a class="code hl_variable" href="classMovingAverageFilter.html#ac3c9064235cc1067f5571e34519c718f">i</a> &lt; <a class="code hl_variable" href="classMovingAverageFilter.html#a1e157723539f80e5b59e329f63dbcacf">dataPointsCount</a>; <a class="code hl_variable" href="classMovingAverageFilter.html#ac3c9064235cc1067f5571e34519c718f">i</a>++)</div>
+<div class="line"><span class="lineno">  253</span>  {</div>
+<div class="line"><span class="lineno">  254</span>    <a class="code hl_variable" href="classMovingAverageFilter.html#a2dc08683d38f654c016051424a0bcdf1">out</a> += <a class="code hl_variable" href="classMovingAverageFilter.html#a348266d6aa4e54c653409a5df60a534f">values</a>[<a class="code hl_variable" href="classMovingAverageFilter.html#ac3c9064235cc1067f5571e34519c718f">i</a>];</div>
+<div class="line"><span class="lineno">  255</span>  }</div>
+<div class="line"><span class="lineno">  256</span> </div>
+<div class="line"><span class="lineno">  257</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classMovingAverageFilter.html#a2dc08683d38f654c016051424a0bcdf1">out</a> / <a class="code hl_variable" href="classMovingAverageFilter.html#a1e157723539f80e5b59e329f63dbcacf">dataPointsCount</a>;</div>
+<div class="line"><span class="lineno">  258</span>}</div>
+<div class="ttc" id="aclassMovingAverageFilter_html_a2dc08683d38f654c016051424a0bcdf1"><div class="ttname"><a href="classMovingAverageFilter.html#a2dc08683d38f654c016051424a0bcdf1">MovingAverageFilter::out</a></div><div class="ttdeci">float out</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00227">ABSOscillation.h:227</a></div></div>
 </div><!-- fragment --><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
@@ -211,7 +211,7 @@ Here is the caller graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00218">218</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00219">219</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
 
 </div>
 </div>
@@ -235,7 +235,7 @@ Here is the caller graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00227">227</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00228">228</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
 
 </div>
 </div>
@@ -259,7 +259,7 @@ Here is the caller graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00224">224</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00225">225</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
 
 </div>
 </div>
@@ -283,7 +283,7 @@ Here is the caller graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00226">226</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00227">227</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
 
 </div>
 </div>
@@ -307,7 +307,7 @@ Here is the caller graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00223">223</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00224">224</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
 
 </div>
 </div>

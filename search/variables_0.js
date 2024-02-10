@@ -4,7 +4,7 @@ var searchData=
   ['_5fbitetimemillis_1',['_BiteTimeMillis',['../classBitePointOscillation.html#ac7c1889887e15dec1001a8b45ec2a859',1,'BitePointOscillation']]],
   ['_5fcyclecount_2',['_cycleCount',['../classCycleTimer.html#a1a84fb6d54e411225b327f29b576a441',1,'CycleTimer']]],
   ['_5fk_3',['_K',['../classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857',1,'KalmanFilter::_K()'],['../classKalmanFilter__2nd__order.html#ac6aff47603e3c0e064a53344b79b0f44',1,'KalmanFilter_2nd_order::_K()']]],
-  ['_5flastcalltimemillis_4',['_lastCallTimeMillis',['../classABSOscillation.html#af6eebba0836388860ae30ce8d1655975',1,'ABSOscillation::_lastCallTimeMillis()'],['../classRPMOscillation.html#aa4ab00bfa92d40cb0beb4b3944a047bb',1,'RPMOscillation::_lastCallTimeMillis()'],['../classBitePointOscillation.html#a9fdedfadaa3c129f58c21827b11d4458',1,'BitePointOscillation::_lastCallTimeMillis()']]],
+  ['_5flastcalltimemillis_4',['_lastCallTimeMillis',['../classABSOscillation.html#af6eebba0836388860ae30ce8d1655975',1,'ABSOscillation::_lastCallTimeMillis()'],['../classRPMOscillation.html#aa4ab00bfa92d40cb0beb4b3944a047bb',1,'RPMOscillation::_lastCallTimeMillis()'],['../classBitePointOscillation.html#a9fdedfadaa3c129f58c21827b11d4458',1,'BitePointOscillation::_lastCallTimeMillis()'],['../classWSOscillation.html#ac767c617b9beef8c062959ce23e478ca',1,'WSOscillation::_lastCallTimeMillis()']]],
   ['_5flimitmax_5',['_limitMax',['../classStepperWithLimits.html#aae2033a3b9de58e9e63c1458e4ce6647',1,'StepperWithLimits']]],
   ['_5flimitmin_6',['_limitMin',['../classStepperWithLimits.html#a605fe0c33b0cc7a0012b21cce230ac40',1,'StepperWithLimits']]],
   ['_5foutnames_7',['_outNames',['../classRTDebugOutput.html#abfbbadf39c2acaff32e11c28edaae7da',1,'RTDebugOutput']]],
@@ -19,7 +19,8 @@ var searchData=
   ['_5fstepper_16',['_stepper',['../classStepperWithLimits.html#afa1f4ac8a0b3daf8cb9140855c94db14',1,'StepperWithLimits']]],
   ['_5ftimefirst_17',['_timeFirst',['../classCycleTimer.html#a6397e279a5cacd5ac98924de1e402aa3',1,'CycleTimer']]],
   ['_5ftimelastobservation_18',['_timeLastObservation',['../classKalmanFilter.html#aea7f932e369f80ba7bd0a5cd39c89aeb',1,'KalmanFilter::_timeLastObservation()'],['../classKalmanFilter__2nd__order.html#a65ddbde1e9a14dc019984814461c98cc',1,'KalmanFilter_2nd_order::_timeLastObservation()'],['../PedalGeometry_8cpp.html#a41707de327d3905607ecfb6172f88f0f',1,'_timeLastObservation():&#160;PedalGeometry.cpp']]],
-  ['_5ftimelasttriggermillis_19',['_timeLastTriggerMillis',['../classABSOscillation.html#a90eb5d84d511f8eee3f813ea264e9e15',1,'ABSOscillation::_timeLastTriggerMillis()'],['../classRPMOscillation.html#aa9841d95a2f516a3ac1c6e291130c3bc',1,'RPMOscillation::_timeLastTriggerMillis()'],['../classBitePointOscillation.html#a70e2b7981ab7424aa1f5394f484175bc',1,'BitePointOscillation::_timeLastTriggerMillis()']]],
+  ['_5ftimelasttriggermillis_19',['_timeLastTriggerMillis',['../classABSOscillation.html#a90eb5d84d511f8eee3f813ea264e9e15',1,'ABSOscillation::_timeLastTriggerMillis()'],['../classRPMOscillation.html#aa9841d95a2f516a3ac1c6e291130c3bc',1,'RPMOscillation::_timeLastTriggerMillis()'],['../classBitePointOscillation.html#a70e2b7981ab7424aa1f5394f484175bc',1,'BitePointOscillation::_timeLastTriggerMillis()'],['../classWSOscillation.html#a91e05b15c5b03b18c00fe89c597d754d',1,'WSOscillation::_timeLastTriggerMillis()']]],
   ['_5fvarianceestimate_20',['_varianceEstimate',['../classLoadCell__ADS1256.html#a22bb793405fa9aa10f4e0f1ec1e97aef',1,'LoadCell_ADS1256']]],
-  ['_5fzeropoint_21',['_zeroPoint',['../classLoadCell__ADS1256.html#ad0de1b953158435f846d579f284bab62',1,'LoadCell_ADS1256']]]
+  ['_5fwstimemillis_21',['_WSTimeMillis',['../classWSOscillation.html#af739c20d9a620ebb2e470fd1da58ec6a',1,'WSOscillation']]],
+  ['_5fzeropoint_22',['_zeroPoint',['../classLoadCell__ADS1256.html#ad0de1b953158435f846d579f284bab62',1,'LoadCell_ADS1256']]]
 ];

@@ -13,5 +13,5 @@ var searchData=
   ['force_5fmax_5fdefault_10',['Force_Max_default',['../structDAP__calculationVariables__st.html#a68ab42aafe033128642234776bb44b3c',1,'DAP_calculationVariables_st']]],
   ['force_5fmin_11',['Force_Min',['../structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958',1,'DAP_calculationVariables_st']]],
   ['force_5frange_12',['Force_Range',['../structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369',1,'DAP_calculationVariables_st']]],
-  ['forcevel_5fest_5fi16_13',['forceVel_est_i16',['../structpayloadPedalState__Extended.html#a25042fa49aeefcf6a6fcfe84731d08d7',1,'payloadPedalState_Extended']]]
+  ['forcevel_5fest_5ffl32_13',['forceVel_est_fl32',['../structpayloadPedalState__Extended.html#ab7a7eca1b28677ec33563a1ae0e5fee5',1,'payloadPedalState_Extended']]]
 ];

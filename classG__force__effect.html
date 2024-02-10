@@ -104,7 +104,7 @@ Public Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00261">261</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00262">262</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="ab06f2487bb19fd32b82cb127737ed1ac" name="ab06f2487bb19fd32b82cb127737ed1ac"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab06f2487bb19fd32b82cb127737ed1ac">&#9670;&#160;</a></span>forceOffset()</h2>
@@ -140,33 +140,33 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00269">269</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  270</span>  {</div>
-<div class="line"><span class="lineno">  271</span>    uint32_t Force_Range;</div>
-<div class="line"><span class="lineno">  272</span>    <span class="keywordtype">float</span> G_multiplier=((float)G_multi)/100;</div>
-<div class="line"><span class="lineno">  273</span>    Force_Range=calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">Force_Range</a>;</div>
-<div class="line"><span class="lineno">  274</span>    <span class="keywordflow">if</span>(<a class="code hl_variable" href="classG__force__effect.html#a9a0a2d81421ec5ace01d75ad0b0ae721">G_value</a>==-128)</div>
-<div class="line"><span class="lineno">  275</span>    {</div>
-<div class="line"><span class="lineno">  276</span>      <a class="code hl_variable" href="classG__force__effect.html#a866d94b1f8e4268b1fb5b42bfd9409a8">G_force_raw</a>=0;</div>
-<div class="line"><span class="lineno">  277</span> </div>
-<div class="line"><span class="lineno">  278</span>    }</div>
-<div class="line"><span class="lineno">  279</span>    <span class="keywordflow">else</span></div>
-<div class="line"><span class="lineno">  280</span>    {</div>
-<div class="line"><span class="lineno">  281</span>      <a class="code hl_variable" href="classG__force__effect.html#a866d94b1f8e4268b1fb5b42bfd9409a8">G_force_raw</a>=10*(<a class="code hl_variable" href="classG__force__effect.html#a9a0a2d81421ec5ace01d75ad0b0ae721">G_value</a>)*G_multiplier/9.8;</div>
-<div class="line"><span class="lineno">  282</span>      <span class="comment">//G_force_raw=constrain(G_force_raw,-1*Force_Range*0.25,Force_Range*0.25);</span></div>
-<div class="line"><span class="lineno">  283</span>    }</div>
-<div class="line"><span class="lineno">  284</span> </div>
-<div class="line"><span class="lineno">  285</span>    <span class="comment">//apply filter</span></div>
-<div class="line"><span class="lineno">  286</span>    <a class="code hl_variable" href="classG__force__effect.html#a211f525911b05c5905f3fac720c443d0">G_force</a>=<a class="code hl_function" href="ABSOscillation_8h.html#a9a7d78118751acefb03ad534f4d2fbf5">movingAverageFilter</a>.<a class="code hl_function" href="classMovingAverageFilter.html#af050822d0acb5a8d32559beb1af0519d">process</a>(<a class="code hl_variable" href="classG__force__effect.html#a866d94b1f8e4268b1fb5b42bfd9409a8">G_force_raw</a>);</div>
-<div class="line"><span class="lineno">  287</span>    <span class="comment">//G_force=G_force_raw;</span></div>
-<div class="line"><span class="lineno">  288</span>    </div>
-<div class="line"><span class="lineno">  289</span>  }</div>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00270">270</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  271</span>  {</div>
+<div class="line"><span class="lineno">  272</span>    uint32_t Force_Range;</div>
+<div class="line"><span class="lineno">  273</span>    <span class="keywordtype">float</span> G_multiplier=((float)G_multi)/100;</div>
+<div class="line"><span class="lineno">  274</span>    Force_Range=calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">Force_Range</a>;</div>
+<div class="line"><span class="lineno">  275</span>    <span class="keywordflow">if</span>(<a class="code hl_variable" href="classG__force__effect.html#a9a0a2d81421ec5ace01d75ad0b0ae721">G_value</a>==-128)</div>
+<div class="line"><span class="lineno">  276</span>    {</div>
+<div class="line"><span class="lineno">  277</span>      <a class="code hl_variable" href="classG__force__effect.html#a866d94b1f8e4268b1fb5b42bfd9409a8">G_force_raw</a>=0;</div>
+<div class="line"><span class="lineno">  278</span> </div>
+<div class="line"><span class="lineno">  279</span>    }</div>
+<div class="line"><span class="lineno">  280</span>    <span class="keywordflow">else</span></div>
+<div class="line"><span class="lineno">  281</span>    {</div>
+<div class="line"><span class="lineno">  282</span>      <a class="code hl_variable" href="classG__force__effect.html#a866d94b1f8e4268b1fb5b42bfd9409a8">G_force_raw</a>=10*(<a class="code hl_variable" href="classG__force__effect.html#a9a0a2d81421ec5ace01d75ad0b0ae721">G_value</a>)*G_multiplier/9.8;</div>
+<div class="line"><span class="lineno">  283</span>      <span class="comment">//G_force_raw=constrain(G_force_raw,-1*Force_Range*0.25,Force_Range*0.25);</span></div>
+<div class="line"><span class="lineno">  284</span>    }</div>
+<div class="line"><span class="lineno">  285</span> </div>
+<div class="line"><span class="lineno">  286</span>    <span class="comment">//apply filter</span></div>
+<div class="line"><span class="lineno">  287</span>    <a class="code hl_variable" href="classG__force__effect.html#a211f525911b05c5905f3fac720c443d0">G_force</a>=<a class="code hl_function" href="ABSOscillation_8h.html#a9a7d78118751acefb03ad534f4d2fbf5">movingAverageFilter</a>.<a class="code hl_function" href="classMovingAverageFilter.html#af050822d0acb5a8d32559beb1af0519d">process</a>(<a class="code hl_variable" href="classG__force__effect.html#a866d94b1f8e4268b1fb5b42bfd9409a8">G_force_raw</a>);</div>
+<div class="line"><span class="lineno">  288</span>    <span class="comment">//G_force=G_force_raw;</span></div>
+<div class="line"><span class="lineno">  289</span>    </div>
+<div class="line"><span class="lineno">  290</span>  }</div>
 <div class="ttc" id="aABSOscillation_8h_html_a9a7d78118751acefb03ad534f4d2fbf5"><div class="ttname"><a href="ABSOscillation_8h.html#a9a7d78118751acefb03ad534f4d2fbf5">movingAverageFilter</a></div><div class="ttdeci">MovingAverageFilter movingAverageFilter(100)</div></div>
-<div class="ttc" id="aclassG__force__effect_html_a211f525911b05c5905f3fac720c443d0"><div class="ttname"><a href="classG__force__effect.html#a211f525911b05c5905f3fac720c443d0">G_force_effect::G_force</a></div><div class="ttdeci">float G_force</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00266">ABSOscillation.h:266</a></div></div>
-<div class="ttc" id="aclassG__force__effect_html_a866d94b1f8e4268b1fb5b42bfd9409a8"><div class="ttname"><a href="classG__force__effect.html#a866d94b1f8e4268b1fb5b42bfd9409a8">G_force_effect::G_force_raw</a></div><div class="ttdeci">float G_force_raw</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00265">ABSOscillation.h:265</a></div></div>
-<div class="ttc" id="aclassG__force__effect_html_a9a0a2d81421ec5ace01d75ad0b0ae721"><div class="ttname"><a href="classG__force__effect.html#a9a0a2d81421ec5ace01d75ad0b0ae721">G_force_effect::G_value</a></div><div class="ttdeci">float G_value</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00264">ABSOscillation.h:264</a></div></div>
-<div class="ttc" id="aclassMovingAverageFilter_html_af050822d0acb5a8d32559beb1af0519d"><div class="ttname"><a href="classMovingAverageFilter.html#af050822d0acb5a8d32559beb1af0519d">MovingAverageFilter::process</a></div><div class="ttdeci">float process(float in)</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00244">ABSOscillation.h:244</a></div></div>
-<div class="ttc" id="astructDAP__calculationVariables__st_html_abf26ec0fd8150996a4622cd6850ba369"><div class="ttname"><a href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">DAP_calculationVariables_st::Force_Range</a></div><div class="ttdeci">float Force_Range</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00194">DiyActivePedal_types.h:194</a></div></div>
+<div class="ttc" id="aclassG__force__effect_html_a211f525911b05c5905f3fac720c443d0"><div class="ttname"><a href="classG__force__effect.html#a211f525911b05c5905f3fac720c443d0">G_force_effect::G_force</a></div><div class="ttdeci">float G_force</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00267">ABSOscillation.h:267</a></div></div>
+<div class="ttc" id="aclassG__force__effect_html_a866d94b1f8e4268b1fb5b42bfd9409a8"><div class="ttname"><a href="classG__force__effect.html#a866d94b1f8e4268b1fb5b42bfd9409a8">G_force_effect::G_force_raw</a></div><div class="ttdeci">float G_force_raw</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00266">ABSOscillation.h:266</a></div></div>
+<div class="ttc" id="aclassG__force__effect_html_a9a0a2d81421ec5ace01d75ad0b0ae721"><div class="ttname"><a href="classG__force__effect.html#a9a0a2d81421ec5ace01d75ad0b0ae721">G_force_effect::G_value</a></div><div class="ttdeci">float G_value</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00265">ABSOscillation.h:265</a></div></div>
+<div class="ttc" id="aclassMovingAverageFilter_html_af050822d0acb5a8d32559beb1af0519d"><div class="ttname"><a href="classMovingAverageFilter.html#af050822d0acb5a8d32559beb1af0519d">MovingAverageFilter::process</a></div><div class="ttdeci">float process(float in)</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00245">ABSOscillation.h:245</a></div></div>
+<div class="ttc" id="astructDAP__calculationVariables__st_html_abf26ec0fd8150996a4622cd6850ba369"><div class="ttname"><a href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">DAP_calculationVariables_st::Force_Range</a></div><div class="ttdeci">float Force_Range</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00202">DiyActivePedal_types.h:202</a></div></div>
 </div><!-- fragment --><div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -193,7 +193,7 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00266">266</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00267">267</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
 
 </div>
 </div>
@@ -209,7 +209,7 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00265">265</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00266">266</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
 
 </div>
 </div>
@@ -225,7 +225,7 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00264">264</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00265">265</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
 
 </div>
 </div>

@@ -118,7 +118,7 @@ Private Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00097">97</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00098">98</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a6f1e334727aaabc5e00ef7a8f3c7d01f" name="a6f1e334727aaabc5e00ef7a8f3c7d01f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6f1e334727aaabc5e00ef7a8f3c7d01f">&#9670;&#160;</a></span>RPMOscillation()</h2>
@@ -143,10 +143,10 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00105">105</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  106</span>    : <a class="code hl_variable" href="classRPMOscillation.html#aa9841d95a2f516a3ac1c6e291130c3bc">_timeLastTriggerMillis</a>(0)</div>
-<div class="line"><span class="lineno">  107</span>  {}</div>
-<div class="ttc" id="aclassRPMOscillation_html_aa9841d95a2f516a3ac1c6e291130c3bc"><div class="ttname"><a href="classRPMOscillation.html#aa9841d95a2f516a3ac1c6e291130c3bc">RPMOscillation::_timeLastTriggerMillis</a></div><div class="ttdeci">long _timeLastTriggerMillis</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00099">ABSOscillation.h:99</a></div></div>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00106">106</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  107</span>    : <a class="code hl_variable" href="classRPMOscillation.html#aa9841d95a2f516a3ac1c6e291130c3bc">_timeLastTriggerMillis</a>(0)</div>
+<div class="line"><span class="lineno">  108</span>  {}</div>
+<div class="ttc" id="aclassRPMOscillation_html_aa9841d95a2f516a3ac1c6e291130c3bc"><div class="ttname"><a href="classRPMOscillation.html#aa9841d95a2f516a3ac1c6e291130c3bc">RPMOscillation::_timeLastTriggerMillis</a></div><div class="ttdeci">long _timeLastTriggerMillis</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00100">ABSOscillation.h:100</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -175,59 +175,59 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00115">115</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  115</span>                                                             {</div>
-<div class="line"><span class="lineno">  116</span> </div>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00116">116</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  116</span>                                                             {</div>
 <div class="line"><span class="lineno">  117</span> </div>
-<div class="line"><span class="lineno">  118</span>    <span class="keywordtype">long</span> timeNowMillis = millis();</div>
-<div class="line"><span class="lineno">  119</span>    <span class="keywordtype">float</span> timeSinceTrigger = (timeNowMillis - <a class="code hl_variable" href="classRPMOscillation.html#aa9841d95a2f516a3ac1c6e291130c3bc">_timeLastTriggerMillis</a>);</div>
-<div class="line"><span class="lineno">  120</span>    <span class="keywordtype">float</span> RPMForceOffset = 0;</div>
-<div class="line"><span class="lineno">  121</span>    <span class="keywordtype">float</span> RPM_max_freq = calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#ac1451d24473df986b17644c8e516aa57">RPM_max_freq</a>;</div>
-<div class="line"><span class="lineno">  122</span>    <span class="keywordtype">float</span> RPM_min_freq = calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#a7b53d2a8bda4fd1a8ac0eec833524e19">RPM_min_freq</a>;</div>
-<div class="line"><span class="lineno">  123</span>    <span class="comment">//float RPM_max =10;</span></div>
-<div class="line"><span class="lineno">  124</span>    <span class="keywordtype">float</span> RPM_amp = calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#a355875d1b0cd1024cbea5ee3cb0978db">RPM_AMP</a>;</div>
-<div class="line"><span class="lineno">  125</span>    <span class="keywordflow">if</span>(<a class="code hl_variable" href="classRPMOscillation.html#a67336e19d3aba005123fdd5a6a67e495">RPM_value</a>==0)</div>
-<div class="line"><span class="lineno">  126</span>    {</div>
-<div class="line"><span class="lineno">  127</span>      RPM_min_freq=0;</div>
-<div class="line"><span class="lineno">  128</span>    }</div>
-<div class="line"><span class="lineno">  129</span> </div>
+<div class="line"><span class="lineno">  118</span> </div>
+<div class="line"><span class="lineno">  119</span>    <span class="keywordtype">long</span> timeNowMillis = millis();</div>
+<div class="line"><span class="lineno">  120</span>    <span class="keywordtype">float</span> timeSinceTrigger = (timeNowMillis - <a class="code hl_variable" href="classRPMOscillation.html#aa9841d95a2f516a3ac1c6e291130c3bc">_timeLastTriggerMillis</a>);</div>
+<div class="line"><span class="lineno">  121</span>    <span class="keywordtype">float</span> RPMForceOffset = 0;</div>
+<div class="line"><span class="lineno">  122</span>    <span class="keywordtype">float</span> RPM_max_freq = calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#ac1451d24473df986b17644c8e516aa57">RPM_max_freq</a>;</div>
+<div class="line"><span class="lineno">  123</span>    <span class="keywordtype">float</span> RPM_min_freq = calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#a7b53d2a8bda4fd1a8ac0eec833524e19">RPM_min_freq</a>;</div>
+<div class="line"><span class="lineno">  124</span>    <span class="comment">//float RPM_max =10;</span></div>
+<div class="line"><span class="lineno">  125</span>    <span class="keywordtype">float</span> RPM_amp = calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#a355875d1b0cd1024cbea5ee3cb0978db">RPM_AMP</a>;</div>
+<div class="line"><span class="lineno">  126</span>    <span class="keywordflow">if</span>(<a class="code hl_variable" href="classRPMOscillation.html#a67336e19d3aba005123fdd5a6a67e495">RPM_value</a>==0)</div>
+<div class="line"><span class="lineno">  127</span>    {</div>
+<div class="line"><span class="lineno">  128</span>      RPM_min_freq=0;</div>
+<div class="line"><span class="lineno">  129</span>    }</div>
 <div class="line"><span class="lineno">  130</span> </div>
-<div class="line"><span class="lineno">  131</span>    <span class="keywordtype">float</span> RPM_freq=constrain(<a class="code hl_variable" href="classRPMOscillation.html#a67336e19d3aba005123fdd5a6a67e495">RPM_value</a>*(RPM_max_freq-RPM_min_freq)/100, RPM_min_freq, RPM_max_freq);</div>
-<div class="line"><span class="lineno">  132</span>    </div>
-<div class="line"><span class="lineno">  133</span> </div>
+<div class="line"><span class="lineno">  131</span> </div>
+<div class="line"><span class="lineno">  132</span>    <span class="keywordtype">float</span> RPM_freq=constrain(<a class="code hl_variable" href="classRPMOscillation.html#a67336e19d3aba005123fdd5a6a67e495">RPM_value</a>*(RPM_max_freq-RPM_min_freq)/100, RPM_min_freq, RPM_max_freq);</div>
+<div class="line"><span class="lineno">  133</span>    </div>
 <div class="line"><span class="lineno">  134</span> </div>
-<div class="line"><span class="lineno">  135</span>    <span class="keywordflow">if</span> (timeSinceTrigger &gt; <a class="code hl_variable" href="ABSOscillation_8h.html#ad7c9250452e5f64d4698b354a60d4b1c">RPM_ACTIVE_TIME_PER_TRIGGER_MILLIS</a>)</div>
-<div class="line"><span class="lineno">  136</span>    {</div>
-<div class="line"><span class="lineno">  137</span>      <a class="code hl_variable" href="classRPMOscillation.html#a7786f2b14d758d771fc94d2b3b41993b">_RPMTimeMillis</a> = 0;</div>
-<div class="line"><span class="lineno">  138</span>      RPMForceOffset = <a class="code hl_variable" href="ABSOscillation_8h.html#a51b81e676226d85cde1f82b03fa39937">RPM_VALUE_LAST</a>;</div>
-<div class="line"><span class="lineno">  139</span>    }</div>
-<div class="line"><span class="lineno">  140</span>    <span class="keywordflow">else</span></div>
-<div class="line"><span class="lineno">  141</span>    {</div>
-<div class="line"><span class="lineno">  142</span>      <a class="code hl_variable" href="classRPMOscillation.html#a7786f2b14d758d771fc94d2b3b41993b">_RPMTimeMillis</a> += timeNowMillis - <a class="code hl_variable" href="classRPMOscillation.html#aa4ab00bfa92d40cb0beb4b3944a047bb">_lastCallTimeMillis</a>;</div>
-<div class="line"><span class="lineno">  143</span>      <span class="keywordtype">float</span> RPMTimeSeconds = <a class="code hl_variable" href="classRPMOscillation.html#a7786f2b14d758d771fc94d2b3b41993b">_RPMTimeMillis</a> / 1000.0f;</div>
-<div class="line"><span class="lineno">  144</span> </div>
-<div class="line"><span class="lineno">  145</span>      <span class="comment">//RPMForceOffset = calcVars_st-&gt;absAmplitude * sin(calcVars_st-&gt;absFrequency * RPMTimeSeconds);</span></div>
-<div class="line"><span class="lineno">  146</span>      RPMForceOffset = RPM_amp * sin( 2*PI* RPM_freq* RPMTimeSeconds);</div>
-<div class="line"><span class="lineno">  147</span>    }</div>
-<div class="line"><span class="lineno">  148</span> </div>
-<div class="line"><span class="lineno">  149</span>    <a class="code hl_variable" href="classRPMOscillation.html#aa4ab00bfa92d40cb0beb4b3944a047bb">_lastCallTimeMillis</a> = timeNowMillis;</div>
-<div class="line"><span class="lineno">  150</span>    <a class="code hl_variable" href="ABSOscillation_8h.html#a51b81e676226d85cde1f82b03fa39937">RPM_VALUE_LAST</a>=RPMForceOffset;</div>
-<div class="line"><span class="lineno">  151</span>    <a class="code hl_variable" href="classRPMOscillation.html#a94f84db951e52457a999f86870e4892b">RPM_position_offset</a> = calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#a2c040a32eafad876f06e2153c4601d8a">stepperPosRange</a>*(RPMForceOffset/calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">Force_Range</a>);</div>
-<div class="line"><span class="lineno">  152</span>    <span class="comment">//return RPMForceOffset;</span></div>
-<div class="line"><span class="lineno">  153</span>    </div>
-<div class="line"><span class="lineno">  154</span> </div>
-<div class="line"><span class="lineno">  155</span>  }</div>
-<div class="ttc" id="aABSOscillation_8h_html_a51b81e676226d85cde1f82b03fa39937"><div class="ttname"><a href="ABSOscillation_8h.html#a51b81e676226d85cde1f82b03fa39937">RPM_VALUE_LAST</a></div><div class="ttdeci">static int RPM_VALUE_LAST</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00009">ABSOscillation.h:9</a></div></div>
+<div class="line"><span class="lineno">  135</span> </div>
+<div class="line"><span class="lineno">  136</span>    <span class="keywordflow">if</span> (timeSinceTrigger &gt; <a class="code hl_variable" href="ABSOscillation_8h.html#ad7c9250452e5f64d4698b354a60d4b1c">RPM_ACTIVE_TIME_PER_TRIGGER_MILLIS</a>)</div>
+<div class="line"><span class="lineno">  137</span>    {</div>
+<div class="line"><span class="lineno">  138</span>      <a class="code hl_variable" href="classRPMOscillation.html#a7786f2b14d758d771fc94d2b3b41993b">_RPMTimeMillis</a> = 0;</div>
+<div class="line"><span class="lineno">  139</span>      RPMForceOffset = <a class="code hl_variable" href="ABSOscillation_8h.html#a51b81e676226d85cde1f82b03fa39937">RPM_VALUE_LAST</a>;</div>
+<div class="line"><span class="lineno">  140</span>    }</div>
+<div class="line"><span class="lineno">  141</span>    <span class="keywordflow">else</span></div>
+<div class="line"><span class="lineno">  142</span>    {</div>
+<div class="line"><span class="lineno">  143</span>      <a class="code hl_variable" href="classRPMOscillation.html#a7786f2b14d758d771fc94d2b3b41993b">_RPMTimeMillis</a> += timeNowMillis - <a class="code hl_variable" href="classRPMOscillation.html#aa4ab00bfa92d40cb0beb4b3944a047bb">_lastCallTimeMillis</a>;</div>
+<div class="line"><span class="lineno">  144</span>      <span class="keywordtype">float</span> RPMTimeSeconds = <a class="code hl_variable" href="classRPMOscillation.html#a7786f2b14d758d771fc94d2b3b41993b">_RPMTimeMillis</a> / 1000.0f;</div>
+<div class="line"><span class="lineno">  145</span> </div>
+<div class="line"><span class="lineno">  146</span>      <span class="comment">//RPMForceOffset = calcVars_st-&gt;absAmplitude * sin(calcVars_st-&gt;absFrequency * RPMTimeSeconds);</span></div>
+<div class="line"><span class="lineno">  147</span>      RPMForceOffset = RPM_amp * sin( 2*PI* RPM_freq* RPMTimeSeconds);</div>
+<div class="line"><span class="lineno">  148</span>    }</div>
+<div class="line"><span class="lineno">  149</span> </div>
+<div class="line"><span class="lineno">  150</span>    <a class="code hl_variable" href="classRPMOscillation.html#aa4ab00bfa92d40cb0beb4b3944a047bb">_lastCallTimeMillis</a> = timeNowMillis;</div>
+<div class="line"><span class="lineno">  151</span>    <a class="code hl_variable" href="ABSOscillation_8h.html#a51b81e676226d85cde1f82b03fa39937">RPM_VALUE_LAST</a>=RPMForceOffset;</div>
+<div class="line"><span class="lineno">  152</span>    <a class="code hl_variable" href="classRPMOscillation.html#a94f84db951e52457a999f86870e4892b">RPM_position_offset</a> = calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#a2c040a32eafad876f06e2153c4601d8a">stepperPosRange</a>*(RPMForceOffset/calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">Force_Range</a>);</div>
+<div class="line"><span class="lineno">  153</span>    <span class="comment">//return RPMForceOffset;</span></div>
+<div class="line"><span class="lineno">  154</span>    </div>
+<div class="line"><span class="lineno">  155</span> </div>
+<div class="line"><span class="lineno">  156</span>  }</div>
+<div class="ttc" id="aABSOscillation_8h_html_a51b81e676226d85cde1f82b03fa39937"><div class="ttname"><a href="ABSOscillation_8h.html#a51b81e676226d85cde1f82b03fa39937">RPM_VALUE_LAST</a></div><div class="ttdeci">static int RPM_VALUE_LAST</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00010">ABSOscillation.h:10</a></div></div>
 <div class="ttc" id="aABSOscillation_8h_html_ad7c9250452e5f64d4698b354a60d4b1c"><div class="ttname"><a href="ABSOscillation_8h.html#ad7c9250452e5f64d4698b354a60d4b1c">RPM_ACTIVE_TIME_PER_TRIGGER_MILLIS</a></div><div class="ttdeci">static const long RPM_ACTIVE_TIME_PER_TRIGGER_MILLIS</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00007">ABSOscillation.h:7</a></div></div>
-<div class="ttc" id="aclassRPMOscillation_html_a67336e19d3aba005123fdd5a6a67e495"><div class="ttname"><a href="classRPMOscillation.html#a67336e19d3aba005123fdd5a6a67e495">RPMOscillation::RPM_value</a></div><div class="ttdeci">float RPM_value</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00108">ABSOscillation.h:108</a></div></div>
-<div class="ttc" id="aclassRPMOscillation_html_a7786f2b14d758d771fc94d2b3b41993b"><div class="ttname"><a href="classRPMOscillation.html#a7786f2b14d758d771fc94d2b3b41993b">RPMOscillation::_RPMTimeMillis</a></div><div class="ttdeci">long _RPMTimeMillis</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00100">ABSOscillation.h:100</a></div></div>
-<div class="ttc" id="aclassRPMOscillation_html_a94f84db951e52457a999f86870e4892b"><div class="ttname"><a href="classRPMOscillation.html#a94f84db951e52457a999f86870e4892b">RPMOscillation::RPM_position_offset</a></div><div class="ttdeci">int32_t RPM_position_offset</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00109">ABSOscillation.h:109</a></div></div>
-<div class="ttc" id="aclassRPMOscillation_html_aa4ab00bfa92d40cb0beb4b3944a047bb"><div class="ttname"><a href="classRPMOscillation.html#aa4ab00bfa92d40cb0beb4b3944a047bb">RPMOscillation::_lastCallTimeMillis</a></div><div class="ttdeci">long _lastCallTimeMillis</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00101">ABSOscillation.h:101</a></div></div>
-<div class="ttc" id="astructDAP__calculationVariables__st_html_a2c040a32eafad876f06e2153c4601d8a"><div class="ttname"><a href="structDAP__calculationVariables__st.html#a2c040a32eafad876f06e2153c4601d8a">DAP_calculationVariables_st::stepperPosRange</a></div><div class="ttdeci">float stepperPosRange</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00203">DiyActivePedal_types.h:203</a></div></div>
-<div class="ttc" id="astructDAP__calculationVariables__st_html_a355875d1b0cd1024cbea5ee3cb0978db"><div class="ttname"><a href="structDAP__calculationVariables__st.html#a355875d1b0cd1024cbea5ee3cb0978db">DAP_calculationVariables_st::RPM_AMP</a></div><div class="ttdeci">float RPM_AMP</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00200">DiyActivePedal_types.h:200</a></div></div>
-<div class="ttc" id="astructDAP__calculationVariables__st_html_a7b53d2a8bda4fd1a8ac0eec833524e19"><div class="ttname"><a href="structDAP__calculationVariables__st.html#a7b53d2a8bda4fd1a8ac0eec833524e19">DAP_calculationVariables_st::RPM_min_freq</a></div><div class="ttdeci">float RPM_min_freq</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00199">DiyActivePedal_types.h:199</a></div></div>
-<div class="ttc" id="astructDAP__calculationVariables__st_html_abf26ec0fd8150996a4622cd6850ba369"><div class="ttname"><a href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">DAP_calculationVariables_st::Force_Range</a></div><div class="ttdeci">float Force_Range</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00194">DiyActivePedal_types.h:194</a></div></div>
-<div class="ttc" id="astructDAP__calculationVariables__st_html_ac1451d24473df986b17644c8e516aa57"><div class="ttname"><a href="structDAP__calculationVariables__st.html#ac1451d24473df986b17644c8e516aa57">DAP_calculationVariables_st::RPM_max_freq</a></div><div class="ttdeci">float RPM_max_freq</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00198">DiyActivePedal_types.h:198</a></div></div>
+<div class="ttc" id="aclassRPMOscillation_html_a67336e19d3aba005123fdd5a6a67e495"><div class="ttname"><a href="classRPMOscillation.html#a67336e19d3aba005123fdd5a6a67e495">RPMOscillation::RPM_value</a></div><div class="ttdeci">float RPM_value</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00109">ABSOscillation.h:109</a></div></div>
+<div class="ttc" id="aclassRPMOscillation_html_a7786f2b14d758d771fc94d2b3b41993b"><div class="ttname"><a href="classRPMOscillation.html#a7786f2b14d758d771fc94d2b3b41993b">RPMOscillation::_RPMTimeMillis</a></div><div class="ttdeci">long _RPMTimeMillis</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00101">ABSOscillation.h:101</a></div></div>
+<div class="ttc" id="aclassRPMOscillation_html_a94f84db951e52457a999f86870e4892b"><div class="ttname"><a href="classRPMOscillation.html#a94f84db951e52457a999f86870e4892b">RPMOscillation::RPM_position_offset</a></div><div class="ttdeci">int32_t RPM_position_offset</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00110">ABSOscillation.h:110</a></div></div>
+<div class="ttc" id="aclassRPMOscillation_html_aa4ab00bfa92d40cb0beb4b3944a047bb"><div class="ttname"><a href="classRPMOscillation.html#aa4ab00bfa92d40cb0beb4b3944a047bb">RPMOscillation::_lastCallTimeMillis</a></div><div class="ttdeci">long _lastCallTimeMillis</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00102">ABSOscillation.h:102</a></div></div>
+<div class="ttc" id="astructDAP__calculationVariables__st_html_a2c040a32eafad876f06e2153c4601d8a"><div class="ttname"><a href="structDAP__calculationVariables__st.html#a2c040a32eafad876f06e2153c4601d8a">DAP_calculationVariables_st::stepperPosRange</a></div><div class="ttdeci">float stepperPosRange</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00211">DiyActivePedal_types.h:211</a></div></div>
+<div class="ttc" id="astructDAP__calculationVariables__st_html_a355875d1b0cd1024cbea5ee3cb0978db"><div class="ttname"><a href="structDAP__calculationVariables__st.html#a355875d1b0cd1024cbea5ee3cb0978db">DAP_calculationVariables_st::RPM_AMP</a></div><div class="ttdeci">float RPM_AMP</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00208">DiyActivePedal_types.h:208</a></div></div>
+<div class="ttc" id="astructDAP__calculationVariables__st_html_a7b53d2a8bda4fd1a8ac0eec833524e19"><div class="ttname"><a href="structDAP__calculationVariables__st.html#a7b53d2a8bda4fd1a8ac0eec833524e19">DAP_calculationVariables_st::RPM_min_freq</a></div><div class="ttdeci">float RPM_min_freq</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00207">DiyActivePedal_types.h:207</a></div></div>
+<div class="ttc" id="astructDAP__calculationVariables__st_html_abf26ec0fd8150996a4622cd6850ba369"><div class="ttname"><a href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">DAP_calculationVariables_st::Force_Range</a></div><div class="ttdeci">float Force_Range</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00202">DiyActivePedal_types.h:202</a></div></div>
+<div class="ttc" id="astructDAP__calculationVariables__st_html_ac1451d24473df986b17644c8e516aa57"><div class="ttname"><a href="structDAP__calculationVariables__st.html#ac1451d24473df986b17644c8e516aa57">DAP_calculationVariables_st::RPM_max_freq</a></div><div class="ttdeci">float RPM_max_freq</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00206">DiyActivePedal_types.h:206</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -254,10 +254,10 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00111">111</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  111</span>                 {</div>
-<div class="line"><span class="lineno">  112</span>    <a class="code hl_variable" href="classRPMOscillation.html#aa9841d95a2f516a3ac1c6e291130c3bc">_timeLastTriggerMillis</a> = millis();</div>
-<div class="line"><span class="lineno">  113</span>  }</div>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00112">112</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  112</span>                 {</div>
+<div class="line"><span class="lineno">  113</span>    <a class="code hl_variable" href="classRPMOscillation.html#aa9841d95a2f516a3ac1c6e291130c3bc">_timeLastTriggerMillis</a> = millis();</div>
+<div class="line"><span class="lineno">  114</span>  }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -282,7 +282,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00101">101</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00102">102</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
 
 </div>
 </div>
@@ -306,7 +306,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00100">100</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00101">101</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
 
 </div>
 </div>
@@ -330,7 +330,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00099">99</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00100">100</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
 
 </div>
 </div>
@@ -346,7 +346,7 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00109">109</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00110">110</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
 
 </div>
 </div>
@@ -362,7 +362,7 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00108">108</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00109">109</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
 
 </div>
 </div>

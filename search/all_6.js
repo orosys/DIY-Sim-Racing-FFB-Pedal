@@ -21,6 +21,6 @@ var searchData=
   ['forcecurve_2ecpp_18',['ForceCurve.cpp',['../ForceCurve_8cpp.html',1,'']]],
   ['forcecurve_2eh_19',['ForceCurve.h',['../ForceCurve_8h.html',1,'']]],
   ['forcecurve_5finterpolated_20',['ForceCurve_Interpolated',['../classForceCurve__Interpolated.html',1,'']]],
-  ['forceoffset_21',['forceOffset',['../classRPMOscillation.html#a759693f862c90a9e31e79c2db41b7b24',1,'RPMOscillation::forceOffset()'],['../classBitePointOscillation.html#a9cf084ccbdec027fbf5eba50b4a97e8c',1,'BitePointOscillation::forceOffset()'],['../classG__force__effect.html#ab06f2487bb19fd32b82cb127737ed1ac',1,'G_force_effect::forceOffset()'],['../classABSOscillation.html#ac1eef365a7288a4364c8e4ed57d2acdb',1,'ABSOscillation::forceOffset()']]],
-  ['forcevel_5fest_5fi16_22',['forceVel_est_i16',['../structpayloadPedalState__Extended.html#a25042fa49aeefcf6a6fcfe84731d08d7',1,'payloadPedalState_Extended']]]
+  ['forceoffset_21',['forceOffset',['../classRPMOscillation.html#a759693f862c90a9e31e79c2db41b7b24',1,'RPMOscillation::forceOffset()'],['../classBitePointOscillation.html#a9cf084ccbdec027fbf5eba50b4a97e8c',1,'BitePointOscillation::forceOffset()'],['../classG__force__effect.html#ab06f2487bb19fd32b82cb127737ed1ac',1,'G_force_effect::forceOffset()'],['../classWSOscillation.html#ae637376187efb4284ecaa62a628aebed',1,'WSOscillation::forceOffset()'],['../classABSOscillation.html#ac1eef365a7288a4364c8e4ed57d2acdb',1,'ABSOscillation::forceOffset()']]],
+  ['forcevel_5fest_5ffl32_22',['forceVel_est_fl32',['../structpayloadPedalState__Extended.html#ab7a7eca1b28677ec33563a1ae0e5fee5',1,'payloadPedalState_Extended']]]
 ];
