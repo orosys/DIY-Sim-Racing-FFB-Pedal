@@ -84,7 +84,7 @@ Collaboration diagram for isv57communication:</div>
 <div class="dyncontent">
 <div class="center"><img src="classisv57communication__coll__graph.png" border="0" usemap="#aisv57communication_coll__map" alt="Collaboration graph"/></div>
 <map name="aisv57communication_coll__map" id="aisv57communication_coll__map">
-<area shape="rect" title=" " alt="" coords="125,167,267,192"/>
+<area shape="rect" title=" " alt="" coords="125,181,267,207"/>
 <area shape="rect" title=" " alt="" coords="5,5,67,31"/>
 <area shape="rect" title=" " alt="" coords="173,5,219,31"/>
 <area shape="rect" title=" " alt="" coords="244,5,305,31"/>
@@ -105,6 +105,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a54a21dcfaa7950e51066f49119145c8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4e0eb76442de6fc6c1f72a70d0faa535"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classisv57communication.html#a4e0eb76442de6fc6c1f72a70d0faa535">checkCommunication</a> ()</td></tr>
 <tr class="separator:a4e0eb76442de6fc6c1f72a70d0faa535"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a40c56572e99c9ac714401086c79c4fa9"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classisv57communication.html#a40c56572e99c9ac714401086c79c4fa9">findServosSlaveId</a> ()</td></tr>
+<tr class="separator:a40c56572e99c9ac714401086c79c4fa9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a40ce4026b788aacfcc714c1a66a94bb7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classisv57communication.html#a40ce4026b788aacfcc714c1a66a94bb7">setZeroPos</a> ()</td></tr>
 <tr class="separator:a40ce4026b788aacfcc714c1a66a94bb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a88a5628cfab51ca2e60932c2276d6a2f"><td class="memItemLeft" align="right" valign="top">int16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classisv57communication.html#a88a5628cfab51ca2e60932c2276d6a2f">getZeroPos</a> ()</td></tr>
@@ -114,6 +116,8 @@ Public Member Functions</h2></td></tr>
 Public Attributes</h2></td></tr>
 <tr class="memitem:ace686e947c2a8283eda60055a8085c27"><td class="memItemLeft" align="right" valign="top">int16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classisv57communication.html#ace686e947c2a8283eda60055a8085c27">regArray</a> [4]</td></tr>
 <tr class="separator:ace686e947c2a8283eda60055a8085c27"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a320e97e54f76a164ace3617b609996"><td class="memItemLeft" align="right" valign="top">int16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a> = 63</td></tr>
+<tr class="separator:a7a320e97e54f76a164ace3617b609996"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae9d47dd3608a96c6ae9fbda4dc6d1a12"><td class="memItemLeft" align="right" valign="top">int16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classisv57communication.html#ae9d47dd3608a96c6ae9fbda4dc6d1a12">servo_pos_given_p</a> = 0</td></tr>
 <tr class="separator:ae9d47dd3608a96c6ae9fbda4dc6d1a12"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af8750dbe090aae2067580c1052348c68"><td class="memItemLeft" align="right" valign="top">int16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classisv57communication.html#af8750dbe090aae2067580c1052348c68">servo_pos_error_p</a> = 0</td></tr>
@@ -134,7 +138,7 @@ Private Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p class="definition">Definition at line <a class="el" href="isv57communication_8h_source.html#l00048">48</a> of file <a class="el" href="isv57communication_8h_source.html">isv57communication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="isv57communication_8h_source.html#l00046">46</a> of file <a class="el" href="isv57communication_8h_source.html">isv57communication.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a6222f7b5a91e7303bad861fadb83c062" name="a6222f7b5a91e7303bad861fadb83c062"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6222f7b5a91e7303bad861fadb83c062">&#9670;&#160;</a></span>isv57communication()</h2>
@@ -156,8 +160,8 @@ Private Attributes</h2></td></tr>
 <div class="line"><span class="lineno">   10</span>  Serial1.begin(38400, SERIAL_8N1, <a class="code hl_define" href="Main_8h.html#a962c519682177cf611484db2d1c8116b">ISV57_RXPIN</a>, <a class="code hl_define" href="Main_8h.html#afe7a1194ca3ce62a3b9cc53375c5f457">ISV57_TXPIN</a>, <span class="keyword">true</span>); <span class="comment">// Modbus serial</span></div>
 <div class="line"><span class="lineno">   11</span>  <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#ab5ae8154462d067b122d4cd2461f7643">init</a>(<a class="code hl_define" href="isv57communication_8h.html#ab8c52c1b4c021ed3e6b6b677bd2ac019">MODE</a>);</div>
 <div class="line"><span class="lineno">   12</span>}</div>
-<div class="ttc" id="aMain_8h_html_a962c519682177cf611484db2d1c8116b"><div class="ttname"><a href="Main_8h.html#a962c519682177cf611484db2d1c8116b">ISV57_RXPIN</a></div><div class="ttdeci">#define ISV57_RXPIN</div><div class="ttdef"><b>Definition:</b> <a href="Main_8h_source.html#l00135">Main.h:135</a></div></div>
-<div class="ttc" id="aMain_8h_html_afe7a1194ca3ce62a3b9cc53375c5f457"><div class="ttname"><a href="Main_8h.html#afe7a1194ca3ce62a3b9cc53375c5f457">ISV57_TXPIN</a></div><div class="ttdeci">#define ISV57_TXPIN</div><div class="ttdef"><b>Definition:</b> <a href="Main_8h_source.html#l00134">Main.h:134</a></div></div>
+<div class="ttc" id="aMain_8h_html_a962c519682177cf611484db2d1c8116b"><div class="ttname"><a href="Main_8h.html#a962c519682177cf611484db2d1c8116b">ISV57_RXPIN</a></div><div class="ttdeci">#define ISV57_RXPIN</div><div class="ttdef"><b>Definition:</b> <a href="Main_8h_source.html#l00136">Main.h:136</a></div></div>
+<div class="ttc" id="aMain_8h_html_afe7a1194ca3ce62a3b9cc53375c5f457"><div class="ttname"><a href="Main_8h.html#afe7a1194ca3ce62a3b9cc53375c5f457">ISV57_TXPIN</a></div><div class="ttdeci">#define ISV57_TXPIN</div><div class="ttdef"><b>Definition:</b> <a href="Main_8h_source.html#l00135">Main.h:135</a></div></div>
 <div class="ttc" id="aclassModbus_html_ab5ae8154462d067b122d4cd2461f7643"><div class="ttname"><a href="classModbus.html#ab5ae8154462d067b122d4cd2461f7643">Modbus::init</a></div><div class="ttdeci">bool init(int mode, bool en_log=false)</div><div class="ttdef"><b>Definition:</b> <a href="Esp32_2Main_2Modbus_8cpp_source.html#l00015">Modbus.cpp:15</a></div></div>
 <div class="ttc" id="aisv57communication_8cpp_html_af8d71033de025cb83c2bf0a5696553f1"><div class="ttname"><a href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a></div><div class="ttdeci">Modbus modbus(Serial1)</div></div>
 <div class="ttc" id="aisv57communication_8h_html_ab8c52c1b4c021ed3e6b6b677bd2ac019"><div class="ttname"><a href="isv57communication_8h.html#ab8c52c1b4c021ed3e6b6b677bd2ac019">MODE</a></div><div class="ttdeci">#define MODE</div><div class="ttdef"><b>Definition:</b> <a href="isv57communication_8h_source.html#l00009">isv57communication.h:9</a></div></div>
@@ -189,21 +193,21 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="isv57communication_8cpp_source.html#l00120">120</a> of file <a class="el" href="isv57communication_8cpp_source.html">isv57communication.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  121</span>{</div>
-<div class="line"><span class="lineno">  122</span>  <span class="keywordflow">if</span>(<a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aaeaf21cf9c6795dee76b775b39630cfe">requestFrom</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, 0x03, 0x0000, 2) &gt; 0)</div>
-<div class="line"><span class="lineno">  123</span>  {</div>
-<div class="line"><span class="lineno">  124</span>    <span class="comment">//Serial.println(&quot;Lifeline check: true&quot;);</span></div>
-<div class="line"><span class="lineno">  125</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  126</span>  }</div>
-<div class="line"><span class="lineno">  127</span>  <span class="keywordflow">else</span></div>
-<div class="line"><span class="lineno">  128</span>  {</div>
-<div class="line"><span class="lineno">  129</span>    <span class="comment">//Serial.println(&quot;Lifeline check: false&quot;);</span></div>
-<div class="line"><span class="lineno">  130</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  131</span>  }</div>
-<div class="line"><span class="lineno">  132</span>}</div>
+<p class="definition">Definition at line <a class="el" href="isv57communication_8cpp_source.html#l00139">139</a> of file <a class="el" href="isv57communication_8cpp_source.html">isv57communication.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  140</span>{</div>
+<div class="line"><span class="lineno">  141</span>  <span class="keywordflow">if</span>(<a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aaeaf21cf9c6795dee76b775b39630cfe">requestFrom</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, 0x03, 0x0000, 2) &gt; 0)</div>
+<div class="line"><span class="lineno">  142</span>  {</div>
+<div class="line"><span class="lineno">  143</span>    <span class="comment">//Serial.println(&quot;Lifeline check: true&quot;);</span></div>
+<div class="line"><span class="lineno">  144</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  145</span>  }</div>
+<div class="line"><span class="lineno">  146</span>  <span class="keywordflow">else</span></div>
+<div class="line"><span class="lineno">  147</span>  {</div>
+<div class="line"><span class="lineno">  148</span>    <span class="comment">//Serial.println(&quot;Lifeline check: false&quot;);</span></div>
+<div class="line"><span class="lineno">  149</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  150</span>  }</div>
+<div class="line"><span class="lineno">  151</span>}</div>
 <div class="ttc" id="aclassModbus_html_aaeaf21cf9c6795dee76b775b39630cfe"><div class="ttname"><a href="classModbus.html#aaeaf21cf9c6795dee76b775b39630cfe">Modbus::requestFrom</a></div><div class="ttdeci">int requestFrom(int slaveId, int type, int address, int nb)</div><div class="ttdef"><b>Definition:</b> <a href="Esp32_2Main_2Modbus_8cpp_source.html#l00204">Modbus.cpp:204</a></div></div>
-<div class="ttc" id="aisv57communication_8h_html_ad226b4fd3a1f1af2e8ef7a841f998f0d"><div class="ttname"><a href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a></div><div class="ttdeci">#define slaveId</div><div class="ttdef"><b>Definition:</b> <a href="isv57communication_8h_source.html#l00045">isv57communication.h:45</a></div></div>
+<div class="ttc" id="aclassisv57communication_html_a7a320e97e54f76a164ace3617b609996"><div class="ttname"><a href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">isv57communication::slaveId</a></div><div class="ttdeci">int16_t slaveId</div><div class="ttdef"><b>Definition:</b> <a href="isv57communication_8h_source.html#l00063">isv57communication.h:63</a></div></div>
 </div><!-- fragment --><div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -212,6 +216,51 @@ Here is the call graph for this function:</div>
 <area shape="rect" title=" " alt="" coords="5,5,159,45"/>
 <area shape="rect" href="classModbus.html#aaeaf21cf9c6795dee76b775b39630cfe" title=" " alt="" coords="207,13,353,38"/>
 <area shape="rect" href="classModbus.html#af81965f56bff22d850f97bfc3b5b9760" title=" " alt="" coords="401,13,540,38"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="a40c56572e99c9ac714401086c79c4fa9" name="a40c56572e99c9ac714401086c79c4fa9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a40c56572e99c9ac714401086c79c4fa9">&#9670;&#160;</a></span>findServosSlaveId()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool isv57communication::findServosSlaveId </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="isv57communication_8cpp_source.html#l00118">118</a> of file <a class="el" href="isv57communication_8cpp_source.html">isv57communication.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  119</span>{</div>
+<div class="line"><span class="lineno">  120</span>  <span class="keywordtype">bool</span> slaveIdFound = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  121</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> slaveIdTest = 0; slaveIdTest&lt;256; slaveIdTest++)</div>
+<div class="line"><span class="lineno">  122</span>  {</div>
+<div class="line"><span class="lineno">  123</span>      <span class="keywordflow">if</span>(<a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aaeaf21cf9c6795dee76b775b39630cfe">requestFrom</a>(slaveIdTest, 0x03, 0x0000, 2) &gt; 0)</div>
+<div class="line"><span class="lineno">  124</span>      {</div>
+<div class="line"><span class="lineno">  125</span>        <a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a> = slaveIdTest;</div>
+<div class="line"><span class="lineno">  126</span>        slaveIdFound = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  127</span>        Serial.print(<span class="stringliteral">&quot;Found servo slave ID:&quot;</span>);</div>
+<div class="line"><span class="lineno">  128</span>        Serial.print(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>);</div>
+<div class="line"><span class="lineno">  129</span>        Serial.print(<span class="stringliteral">&quot;\r\n&quot;</span>);</div>
+<div class="line"><span class="lineno">  130</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><span class="lineno">  131</span>      }</div>
+<div class="line"><span class="lineno">  132</span>  }</div>
+<div class="line"><span class="lineno">  133</span>  <span class="keywordflow">return</span> slaveIdFound;</div>
+<div class="line"><span class="lineno">  134</span>}</div>
+</div><!-- fragment --><div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="classisv57communication_a40c56572e99c9ac714401086c79c4fa9_cgraph.png" border="0" usemap="#aclassisv57communication_a40c56572e99c9ac714401086c79c4fa9_cgraph" alt=""/></div>
+<map name="aclassisv57communication_a40c56572e99c9ac714401086c79c4fa9_cgraph" id="aclassisv57communication_a40c56572e99c9ac714401086c79c4fa9_cgraph">
+<area shape="rect" title=" " alt="" coords="5,5,147,45"/>
+<area shape="rect" href="classModbus.html#aaeaf21cf9c6795dee76b775b39630cfe" title=" " alt="" coords="195,13,341,38"/>
+<area shape="rect" href="classModbus.html#af81965f56bff22d850f97bfc3b5b9760" title=" " alt="" coords="389,13,528,38"/>
 </map>
 </div>
 
@@ -232,11 +281,11 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="isv57communication_8cpp_source.html#l00141">141</a> of file <a class="el" href="isv57communication_8cpp_source.html">isv57communication.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  142</span>{</div>
-<div class="line"><span class="lineno">  143</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classisv57communication.html#ae3f663a45228097c3545019943debeef">zeroPos</a>;</div>
-<div class="line"><span class="lineno">  144</span>}</div>
-<div class="ttc" id="aclassisv57communication_html_ae3f663a45228097c3545019943debeef"><div class="ttname"><a href="classisv57communication.html#ae3f663a45228097c3545019943debeef">isv57communication::zeroPos</a></div><div class="ttdeci">int16_t zeroPos</div><div class="ttdef"><b>Definition:</b> <a href="isv57communication_8h_source.html#l00071">isv57communication.h:71</a></div></div>
+<p class="definition">Definition at line <a class="el" href="isv57communication_8cpp_source.html#l00160">160</a> of file <a class="el" href="isv57communication_8cpp_source.html">isv57communication.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  161</span>{</div>
+<div class="line"><span class="lineno">  162</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classisv57communication.html#ae3f663a45228097c3545019943debeef">zeroPos</a>;</div>
+<div class="line"><span class="lineno">  163</span>}</div>
+<div class="ttc" id="aclassisv57communication_html_ae3f663a45228097c3545019943debeef"><div class="ttname"><a href="classisv57communication.html#ae3f663a45228097c3545019943debeef">isv57communication::zeroPos</a></div><div class="ttdeci">int16_t zeroPos</div><div class="ttdef"><b>Definition:</b> <a href="isv57communication_8h_source.html#l00074">isv57communication.h:74</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -259,7 +308,7 @@ Here is the call graph for this function:</div>
 <div class="fragment"><div class="line"><span class="lineno">   37</span>                                                {</div>
 <div class="line"><span class="lineno">   38</span>  <span class="keywordflow">for</span> (uint16_t reg_sub_add_u16 = 0;  reg_sub_add_u16 &lt; <a class="code hl_define" href="isv57communication_8h.html#a1866d23715ac03a0a526b27778976b0f">pr_6_00</a>; reg_sub_add_u16++)</div>
 <div class="line"><span class="lineno">   39</span>  {</div>
-<div class="line"><span class="lineno">   40</span>    <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#a65ab4ebea348f5068edec818b8bfdf93">readParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a> + reg_sub_add_u16);</div>
+<div class="line"><span class="lineno">   40</span>    <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#a65ab4ebea348f5068edec818b8bfdf93">readParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a> + reg_sub_add_u16);</div>
 <div class="line"><span class="lineno">   41</span>  }</div>
 <div class="line"><span class="lineno">   42</span>}</div>
 <div class="ttc" id="aclassModbus_html_a65ab4ebea348f5068edec818b8bfdf93"><div class="ttname"><a href="classModbus.html#a65ab4ebea348f5068edec818b8bfdf93">Modbus::readParameter</a></div><div class="ttdeci">void readParameter(uint16_t slaveId_local_u16, uint16_t parameterAdress)</div><div class="ttdef"><b>Definition:</b> <a href="Esp32_2Main_2Modbus_8cpp_source.html#l00076">Modbus.cpp:76</a></div></div>
@@ -296,59 +345,59 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="isv57communication_8cpp_source.html#l00148">148</a> of file <a class="el" href="isv57communication_8cpp_source.html">isv57communication.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  148</span>                                         {</div>
-<div class="line"><span class="lineno">  149</span> </div>
-<div class="line"><span class="lineno">  150</span>  <span class="comment">// read the four registers simultaneously</span></div>
-<div class="line"><span class="lineno">  151</span>  int8_t numberOfRegistersToRead_u8 = 4;</div>
-<div class="line"><span class="lineno">  152</span>  <span class="keywordtype">int</span> bytesReceived_i = <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aaeaf21cf9c6795dee76b775b39630cfe">requestFrom</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, 0x03, <a class="code hl_define" href="isv57communication_8h.html#a71f6251fd4ee90e83456c92355cace03">ref_cyclic_read_0</a>, numberOfRegistersToRead_u8);</div>
-<div class="line"><span class="lineno">  153</span>  <span class="keywordflow">if</span>(bytesReceived_i == (numberOfRegistersToRead_u8*2))</div>
-<div class="line"><span class="lineno">  154</span>  {</div>
-<div class="line"><span class="lineno">  155</span>    <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#a9a0902f1e2f2f664a0a60a6fae5cd74a">RxRaw</a>(<a class="code hl_variable" href="classisv57communication.html#ac2cb5805b796b975f0058aff070bb4e0">raw</a>,  <a class="code hl_variable" href="classisv57communication.html#ad34c17565b18c28c9c07b0794040abdf">len</a>);</div>
-<div class="line"><span class="lineno">  156</span>    <span class="keywordflow">for</span> (uint8_t regIdx = 0; regIdx &lt; numberOfRegistersToRead_u8; regIdx++)</div>
-<div class="line"><span class="lineno">  157</span>    { </div>
-<div class="line"><span class="lineno">  158</span>      <a class="code hl_variable" href="classisv57communication.html#ace686e947c2a8283eda60055a8085c27">regArray</a>[regIdx] = <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#a2c2dd3e6add982e290737dcc66c516d5">uint16</a>(regIdx);</div>
-<div class="line"><span class="lineno">  159</span>    }</div>
-<div class="line"><span class="lineno">  160</span> </div>
-<div class="line"><span class="lineno">  161</span>    <span class="comment">// write to public variables</span></div>
-<div class="line"><span class="lineno">  162</span>    <a class="code hl_variable" href="classisv57communication.html#ae9d47dd3608a96c6ae9fbda4dc6d1a12">servo_pos_given_p</a> = <a class="code hl_variable" href="classisv57communication.html#ace686e947c2a8283eda60055a8085c27">regArray</a>[0];</div>
-<div class="line"><span class="lineno">  163</span>    <a class="code hl_variable" href="classisv57communication.html#a6d792deda1836627e79534cb710eab7f">servo_current_percent</a> = <a class="code hl_variable" href="classisv57communication.html#ace686e947c2a8283eda60055a8085c27">regArray</a>[1];</div>
-<div class="line"><span class="lineno">  164</span>    <a class="code hl_variable" href="classisv57communication.html#af8750dbe090aae2067580c1052348c68">servo_pos_error_p</a> = <a class="code hl_variable" href="classisv57communication.html#ace686e947c2a8283eda60055a8085c27">regArray</a>[2];</div>
-<div class="line"><span class="lineno">  165</span>    <a class="code hl_variable" href="classisv57communication.html#a81b1ee411eabf081b46866e4fbc7bd07">servo_voltage_0p1V</a> = <a class="code hl_variable" href="classisv57communication.html#ace686e947c2a8283eda60055a8085c27">regArray</a>[3];</div>
-<div class="line"><span class="lineno">  166</span>  }</div>
-<div class="line"><span class="lineno">  167</span>  <span class="comment">//Serial.print(&quot;Bytes :&quot;);</span></div>
-<div class="line"><span class="lineno">  168</span>  <span class="comment">//Serial.println(bytesReceived_i);</span></div>
-<div class="line"><span class="lineno">  169</span>  </div>
-<div class="line"><span class="lineno">  170</span>  </div>
-<div class="line"><span class="lineno">  171</span>  </div>
-<div class="line"><span class="lineno">  172</span>  <span class="comment">// print registers</span></div>
-<div class="line"><span class="lineno">  173</span>  <span class="keywordflow">if</span> (0)</div>
-<div class="line"><span class="lineno">  174</span>  {</div>
-<div class="line"><span class="lineno">  175</span>    Serial.print(<span class="stringliteral">&quot;Pos_given:&quot;</span>);</div>
-<div class="line"><span class="lineno">  176</span>    Serial.print(<a class="code hl_variable" href="classisv57communication.html#ae9d47dd3608a96c6ae9fbda4dc6d1a12">servo_pos_given_p</a>);</div>
-<div class="line"><span class="lineno">  177</span> </div>
-<div class="line"><span class="lineno">  178</span>    Serial.print(<span class="stringliteral">&quot;,Pos_error:&quot;</span>);</div>
-<div class="line"><span class="lineno">  179</span>    Serial.print(<a class="code hl_variable" href="classisv57communication.html#af8750dbe090aae2067580c1052348c68">servo_pos_error_p</a>);</div>
-<div class="line"><span class="lineno">  180</span> </div>
-<div class="line"><span class="lineno">  181</span>    Serial.print(<span class="stringliteral">&quot;,Cur_given:&quot;</span>);</div>
-<div class="line"><span class="lineno">  182</span>    Serial.print(<a class="code hl_variable" href="classisv57communication.html#a6d792deda1836627e79534cb710eab7f">servo_current_percent</a>);</div>
-<div class="line"><span class="lineno">  183</span> </div>
-<div class="line"><span class="lineno">  184</span>    Serial.print(<span class="stringliteral">&quot;,Voltage:&quot;</span>);</div>
-<div class="line"><span class="lineno">  185</span>    Serial.print(<a class="code hl_variable" href="classisv57communication.html#a81b1ee411eabf081b46866e4fbc7bd07">servo_voltage_0p1V</a>);</div>
-<div class="line"><span class="lineno">  186</span> </div>
-<div class="line"><span class="lineno">  187</span>    Serial.println(<span class="stringliteral">&quot; &quot;</span>); </div>
-<div class="line"><span class="lineno">  188</span>  }</div>
+<p class="definition">Definition at line <a class="el" href="isv57communication_8cpp_source.html#l00167">167</a> of file <a class="el" href="isv57communication_8cpp_source.html">isv57communication.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  167</span>                                         {</div>
+<div class="line"><span class="lineno">  168</span> </div>
+<div class="line"><span class="lineno">  169</span>  <span class="comment">// read the four registers simultaneously</span></div>
+<div class="line"><span class="lineno">  170</span>  int8_t numberOfRegistersToRead_u8 = 4;</div>
+<div class="line"><span class="lineno">  171</span>  <span class="keywordtype">int</span> bytesReceived_i = <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aaeaf21cf9c6795dee76b775b39630cfe">requestFrom</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, 0x03, <a class="code hl_define" href="isv57communication_8h.html#a71f6251fd4ee90e83456c92355cace03">ref_cyclic_read_0</a>, numberOfRegistersToRead_u8);</div>
+<div class="line"><span class="lineno">  172</span>  <span class="keywordflow">if</span>(bytesReceived_i == (numberOfRegistersToRead_u8*2))</div>
+<div class="line"><span class="lineno">  173</span>  {</div>
+<div class="line"><span class="lineno">  174</span>    <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#a9a0902f1e2f2f664a0a60a6fae5cd74a">RxRaw</a>(<a class="code hl_variable" href="classisv57communication.html#ac2cb5805b796b975f0058aff070bb4e0">raw</a>,  <a class="code hl_variable" href="classisv57communication.html#ad34c17565b18c28c9c07b0794040abdf">len</a>);</div>
+<div class="line"><span class="lineno">  175</span>    <span class="keywordflow">for</span> (uint8_t regIdx = 0; regIdx &lt; numberOfRegistersToRead_u8; regIdx++)</div>
+<div class="line"><span class="lineno">  176</span>    { </div>
+<div class="line"><span class="lineno">  177</span>      <a class="code hl_variable" href="classisv57communication.html#ace686e947c2a8283eda60055a8085c27">regArray</a>[regIdx] = <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#a2c2dd3e6add982e290737dcc66c516d5">uint16</a>(regIdx);</div>
+<div class="line"><span class="lineno">  178</span>    }</div>
+<div class="line"><span class="lineno">  179</span> </div>
+<div class="line"><span class="lineno">  180</span>    <span class="comment">// write to public variables</span></div>
+<div class="line"><span class="lineno">  181</span>    <a class="code hl_variable" href="classisv57communication.html#ae9d47dd3608a96c6ae9fbda4dc6d1a12">servo_pos_given_p</a> = <a class="code hl_variable" href="classisv57communication.html#ace686e947c2a8283eda60055a8085c27">regArray</a>[0];</div>
+<div class="line"><span class="lineno">  182</span>    <a class="code hl_variable" href="classisv57communication.html#a6d792deda1836627e79534cb710eab7f">servo_current_percent</a> = <a class="code hl_variable" href="classisv57communication.html#ace686e947c2a8283eda60055a8085c27">regArray</a>[1];</div>
+<div class="line"><span class="lineno">  183</span>    <a class="code hl_variable" href="classisv57communication.html#af8750dbe090aae2067580c1052348c68">servo_pos_error_p</a> = <a class="code hl_variable" href="classisv57communication.html#ace686e947c2a8283eda60055a8085c27">regArray</a>[2];</div>
+<div class="line"><span class="lineno">  184</span>    <a class="code hl_variable" href="classisv57communication.html#a81b1ee411eabf081b46866e4fbc7bd07">servo_voltage_0p1V</a> = <a class="code hl_variable" href="classisv57communication.html#ace686e947c2a8283eda60055a8085c27">regArray</a>[3];</div>
+<div class="line"><span class="lineno">  185</span>  }</div>
+<div class="line"><span class="lineno">  186</span>  <span class="comment">//Serial.print(&quot;Bytes :&quot;);</span></div>
+<div class="line"><span class="lineno">  187</span>  <span class="comment">//Serial.println(bytesReceived_i);</span></div>
+<div class="line"><span class="lineno">  188</span>  </div>
 <div class="line"><span class="lineno">  189</span>  </div>
-<div class="line"><span class="lineno">  190</span>}</div>
+<div class="line"><span class="lineno">  190</span>  </div>
+<div class="line"><span class="lineno">  191</span>  <span class="comment">// print registers</span></div>
+<div class="line"><span class="lineno">  192</span>  <span class="keywordflow">if</span> (0)</div>
+<div class="line"><span class="lineno">  193</span>  {</div>
+<div class="line"><span class="lineno">  194</span>    Serial.print(<span class="stringliteral">&quot;Pos_given:&quot;</span>);</div>
+<div class="line"><span class="lineno">  195</span>    Serial.print(<a class="code hl_variable" href="classisv57communication.html#ae9d47dd3608a96c6ae9fbda4dc6d1a12">servo_pos_given_p</a>);</div>
+<div class="line"><span class="lineno">  196</span> </div>
+<div class="line"><span class="lineno">  197</span>    Serial.print(<span class="stringliteral">&quot;,Pos_error:&quot;</span>);</div>
+<div class="line"><span class="lineno">  198</span>    Serial.print(<a class="code hl_variable" href="classisv57communication.html#af8750dbe090aae2067580c1052348c68">servo_pos_error_p</a>);</div>
+<div class="line"><span class="lineno">  199</span> </div>
+<div class="line"><span class="lineno">  200</span>    Serial.print(<span class="stringliteral">&quot;,Cur_given:&quot;</span>);</div>
+<div class="line"><span class="lineno">  201</span>    Serial.print(<a class="code hl_variable" href="classisv57communication.html#a6d792deda1836627e79534cb710eab7f">servo_current_percent</a>);</div>
+<div class="line"><span class="lineno">  202</span> </div>
+<div class="line"><span class="lineno">  203</span>    Serial.print(<span class="stringliteral">&quot;,Voltage:&quot;</span>);</div>
+<div class="line"><span class="lineno">  204</span>    Serial.print(<a class="code hl_variable" href="classisv57communication.html#a81b1ee411eabf081b46866e4fbc7bd07">servo_voltage_0p1V</a>);</div>
+<div class="line"><span class="lineno">  205</span> </div>
+<div class="line"><span class="lineno">  206</span>    Serial.println(<span class="stringliteral">&quot; &quot;</span>); </div>
+<div class="line"><span class="lineno">  207</span>  }</div>
+<div class="line"><span class="lineno">  208</span>  </div>
+<div class="line"><span class="lineno">  209</span>}</div>
 <div class="ttc" id="aclassModbus_html_a2c2dd3e6add982e290737dcc66c516d5"><div class="ttname"><a href="classModbus.html#a2c2dd3e6add982e290737dcc66c516d5">Modbus::uint16</a></div><div class="ttdeci">uint16_t uint16(int add)</div><div class="ttdef"><b>Definition:</b> <a href="Esp32_2Main_2Modbus_8cpp_source.html#l00413">Modbus.cpp:413</a></div></div>
 <div class="ttc" id="aclassModbus_html_a9a0902f1e2f2f664a0a60a6fae5cd74a"><div class="ttname"><a href="classModbus.html#a9a0902f1e2f2f664a0a60a6fae5cd74a">Modbus::RxRaw</a></div><div class="ttdeci">void RxRaw(byte *raw, uint8_t &amp;rlen)</div><div class="ttdef"><b>Definition:</b> <a href="Esp32_2Main_2Modbus_8cpp_source.html#l00434">Modbus.cpp:434</a></div></div>
-<div class="ttc" id="aclassisv57communication_html_a6d792deda1836627e79534cb710eab7f"><div class="ttname"><a href="classisv57communication.html#a6d792deda1836627e79534cb710eab7f">isv57communication::servo_current_percent</a></div><div class="ttdeci">int16_t servo_current_percent</div><div class="ttdef"><b>Definition:</b> <a href="isv57communication_8h_source.html#l00064">isv57communication.h:64</a></div></div>
-<div class="ttc" id="aclassisv57communication_html_a81b1ee411eabf081b46866e4fbc7bd07"><div class="ttname"><a href="classisv57communication.html#a81b1ee411eabf081b46866e4fbc7bd07">isv57communication::servo_voltage_0p1V</a></div><div class="ttdeci">int16_t servo_voltage_0p1V</div><div class="ttdef"><b>Definition:</b> <a href="isv57communication_8h_source.html#l00065">isv57communication.h:65</a></div></div>
-<div class="ttc" id="aclassisv57communication_html_ac2cb5805b796b975f0058aff070bb4e0"><div class="ttname"><a href="classisv57communication.html#ac2cb5805b796b975f0058aff070bb4e0">isv57communication::raw</a></div><div class="ttdeci">byte raw[200]</div><div class="ttdef"><b>Definition:</b> <a href="isv57communication_8h_source.html#l00069">isv57communication.h:69</a></div></div>
-<div class="ttc" id="aclassisv57communication_html_ace686e947c2a8283eda60055a8085c27"><div class="ttname"><a href="classisv57communication.html#ace686e947c2a8283eda60055a8085c27">isv57communication::regArray</a></div><div class="ttdeci">int16_t regArray[4]</div><div class="ttdef"><b>Definition:</b> <a href="isv57communication_8h_source.html#l00060">isv57communication.h:60</a></div></div>
-<div class="ttc" id="aclassisv57communication_html_ad34c17565b18c28c9c07b0794040abdf"><div class="ttname"><a href="classisv57communication.html#ad34c17565b18c28c9c07b0794040abdf">isv57communication::len</a></div><div class="ttdeci">uint8_t len</div><div class="ttdef"><b>Definition:</b> <a href="isv57communication_8h_source.html#l00070">isv57communication.h:70</a></div></div>
-<div class="ttc" id="aclassisv57communication_html_ae9d47dd3608a96c6ae9fbda4dc6d1a12"><div class="ttname"><a href="classisv57communication.html#ae9d47dd3608a96c6ae9fbda4dc6d1a12">isv57communication::servo_pos_given_p</a></div><div class="ttdeci">int16_t servo_pos_given_p</div><div class="ttdef"><b>Definition:</b> <a href="isv57communication_8h_source.html#l00062">isv57communication.h:62</a></div></div>
-<div class="ttc" id="aclassisv57communication_html_af8750dbe090aae2067580c1052348c68"><div class="ttname"><a href="classisv57communication.html#af8750dbe090aae2067580c1052348c68">isv57communication::servo_pos_error_p</a></div><div class="ttdeci">int16_t servo_pos_error_p</div><div class="ttdef"><b>Definition:</b> <a href="isv57communication_8h_source.html#l00063">isv57communication.h:63</a></div></div>
+<div class="ttc" id="aclassisv57communication_html_a6d792deda1836627e79534cb710eab7f"><div class="ttname"><a href="classisv57communication.html#a6d792deda1836627e79534cb710eab7f">isv57communication::servo_current_percent</a></div><div class="ttdeci">int16_t servo_current_percent</div><div class="ttdef"><b>Definition:</b> <a href="isv57communication_8h_source.html#l00067">isv57communication.h:67</a></div></div>
+<div class="ttc" id="aclassisv57communication_html_a81b1ee411eabf081b46866e4fbc7bd07"><div class="ttname"><a href="classisv57communication.html#a81b1ee411eabf081b46866e4fbc7bd07">isv57communication::servo_voltage_0p1V</a></div><div class="ttdeci">int16_t servo_voltage_0p1V</div><div class="ttdef"><b>Definition:</b> <a href="isv57communication_8h_source.html#l00068">isv57communication.h:68</a></div></div>
+<div class="ttc" id="aclassisv57communication_html_ac2cb5805b796b975f0058aff070bb4e0"><div class="ttname"><a href="classisv57communication.html#ac2cb5805b796b975f0058aff070bb4e0">isv57communication::raw</a></div><div class="ttdeci">byte raw[200]</div><div class="ttdef"><b>Definition:</b> <a href="isv57communication_8h_source.html#l00072">isv57communication.h:72</a></div></div>
+<div class="ttc" id="aclassisv57communication_html_ace686e947c2a8283eda60055a8085c27"><div class="ttname"><a href="classisv57communication.html#ace686e947c2a8283eda60055a8085c27">isv57communication::regArray</a></div><div class="ttdeci">int16_t regArray[4]</div><div class="ttdef"><b>Definition:</b> <a href="isv57communication_8h_source.html#l00061">isv57communication.h:61</a></div></div>
+<div class="ttc" id="aclassisv57communication_html_ad34c17565b18c28c9c07b0794040abdf"><div class="ttname"><a href="classisv57communication.html#ad34c17565b18c28c9c07b0794040abdf">isv57communication::len</a></div><div class="ttdeci">uint8_t len</div><div class="ttdef"><b>Definition:</b> <a href="isv57communication_8h_source.html#l00073">isv57communication.h:73</a></div></div>
+<div class="ttc" id="aclassisv57communication_html_ae9d47dd3608a96c6ae9fbda4dc6d1a12"><div class="ttname"><a href="classisv57communication.html#ae9d47dd3608a96c6ae9fbda4dc6d1a12">isv57communication::servo_pos_given_p</a></div><div class="ttdeci">int16_t servo_pos_given_p</div><div class="ttdef"><b>Definition:</b> <a href="isv57communication_8h_source.html#l00065">isv57communication.h:65</a></div></div>
+<div class="ttc" id="aclassisv57communication_html_af8750dbe090aae2067580c1052348c68"><div class="ttname"><a href="classisv57communication.html#af8750dbe090aae2067580c1052348c68">isv57communication::servo_pos_error_p</a></div><div class="ttdeci">int16_t servo_pos_error_p</div><div class="ttdef"><b>Definition:</b> <a href="isv57communication_8h_source.html#l00066">isv57communication.h:66</a></div></div>
 <div class="ttc" id="aisv57communication_8h_html_a71f6251fd4ee90e83456c92355cace03"><div class="ttname"><a href="isv57communication_8h.html#a71f6251fd4ee90e83456c92355cace03">ref_cyclic_read_0</a></div><div class="ttdeci">#define ref_cyclic_read_0</div><div class="ttdef"><b>Definition:</b> <a href="isv57communication_8h_source.html#l00030">isv57communication.h:30</a></div></div>
 </div><!-- fragment --><div class="dynheader">
 Here is the call graph for this function:</div>
@@ -397,35 +446,35 @@ Here is the caller graph for this function:</div>
 <div class="line"><span class="lineno">   48</span> </div>
 <div class="line"><span class="lineno">   49</span> </div>
 <div class="line"><span class="lineno">   50</span>  <span class="comment">// Pr0 register</span></div>
-<div class="line"><span class="lineno">   51</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a>+1, 0); <span class="comment">// control mode </span></div>
-<div class="line"><span class="lineno">   52</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a>+2, 0); <span class="comment">// deactivate auto gain</span></div>
-<div class="line"><span class="lineno">   53</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a>+3, 10); <span class="comment">// machine stiffness</span></div>
-<div class="line"><span class="lineno">   54</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a>+4, 80); <span class="comment">// ratio of inertia</span></div>
-<div class="line"><span class="lineno">   55</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a>+8, 1600); <span class="comment">// microsteps</span></div>
-<div class="line"><span class="lineno">   56</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a>+9, 1); <span class="comment">// 1st numerator </span></div>
-<div class="line"><span class="lineno">   57</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a>+10, 1); <span class="comment">// &amp; denominator</span></div>
-<div class="line"><span class="lineno">   58</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a>+13, 300); <span class="comment">// 1st torque limit</span></div>
-<div class="line"><span class="lineno">   59</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a>+14, 500); <span class="comment">// position deviation setup</span></div>
-<div class="line"><span class="lineno">   60</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a>+16, 50); <span class="comment">// regenerative braking resitor</span></div>
-<div class="line"><span class="lineno">   61</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a>+17, 50);</div>
-<div class="line"><span class="lineno">   62</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a>+18, 0); <span class="comment">// vibration suppression</span></div>
-<div class="line"><span class="lineno">   63</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a>+19, 0);</div>
+<div class="line"><span class="lineno">   51</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a>+1, 0); <span class="comment">// control mode </span></div>
+<div class="line"><span class="lineno">   52</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a>+2, 0); <span class="comment">// deactivate auto gain</span></div>
+<div class="line"><span class="lineno">   53</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a>+3, 10); <span class="comment">// machine stiffness</span></div>
+<div class="line"><span class="lineno">   54</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a>+4, 80); <span class="comment">// ratio of inertia</span></div>
+<div class="line"><span class="lineno">   55</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a>+8, 1600); <span class="comment">// microsteps</span></div>
+<div class="line"><span class="lineno">   56</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a>+9, 1); <span class="comment">// 1st numerator </span></div>
+<div class="line"><span class="lineno">   57</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a>+10, 1); <span class="comment">// &amp; denominator</span></div>
+<div class="line"><span class="lineno">   58</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a>+13, 300); <span class="comment">// 1st torque limit</span></div>
+<div class="line"><span class="lineno">   59</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a>+14, 500); <span class="comment">// position deviation setup</span></div>
+<div class="line"><span class="lineno">   60</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a>+16, 50); <span class="comment">// regenerative braking resitor</span></div>
+<div class="line"><span class="lineno">   61</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a>+17, 50);</div>
+<div class="line"><span class="lineno">   62</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a>+18, 0); <span class="comment">// vibration suppression</span></div>
+<div class="line"><span class="lineno">   63</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a2d9ee1c61159d3c91096b2e0618e284e">pr_0_00</a>+19, 0);</div>
 <div class="line"><span class="lineno">   64</span> </div>
 <div class="line"><span class="lineno">   65</span>  <span class="comment">// Pr1 register</span></div>
-<div class="line"><span class="lineno">   66</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+0, 600); <span class="comment">// 1st position gain</span></div>
-<div class="line"><span class="lineno">   67</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+1, 300); <span class="comment">// 1st velocity loop gain</span></div>
-<div class="line"><span class="lineno">   68</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+2, 300); <span class="comment">// 1st time constant of velocity loop</span></div>
-<div class="line"><span class="lineno">   69</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+3, 15); <span class="comment">// 1st filter of velocity detection</span></div>
-<div class="line"><span class="lineno">   70</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+4, 150); <span class="comment">// 1st torque filter</span></div>
-<div class="line"><span class="lineno">   71</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+10, 200); <span class="comment">// velocity feed forward gain</span></div>
-<div class="line"><span class="lineno">   72</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+11, 6000); <span class="comment">// velocity feed forward filter</span></div>
-<div class="line"><span class="lineno">   73</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+12, 0); <span class="comment">// torque feed forward gain</span></div>
-<div class="line"><span class="lineno">   74</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+13, 0); <span class="comment">// torque feed forward filter</span></div>
-<div class="line"><span class="lineno">   75</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+15, 0); <span class="comment">// control switching mode</span></div>
-<div class="line"><span class="lineno">   76</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+33, 0); <span class="comment">// speed given filter</span></div>
-<div class="line"><span class="lineno">   77</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+35, 0); <span class="comment">// position command filter</span></div>
-<div class="line"><span class="lineno">   78</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+36, 0); <span class="comment">// encoder feedback</span></div>
-<div class="line"><span class="lineno">   79</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+37, 1052); <span class="comment">// special function register</span></div>
+<div class="line"><span class="lineno">   66</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+0, 600); <span class="comment">// 1st position gain</span></div>
+<div class="line"><span class="lineno">   67</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+1, 300); <span class="comment">// 1st velocity loop gain</span></div>
+<div class="line"><span class="lineno">   68</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+2, 300); <span class="comment">// 1st time constant of velocity loop</span></div>
+<div class="line"><span class="lineno">   69</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+3, 15); <span class="comment">// 1st filter of velocity detection</span></div>
+<div class="line"><span class="lineno">   70</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+4, 150); <span class="comment">// 1st torque filter</span></div>
+<div class="line"><span class="lineno">   71</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+10, 200); <span class="comment">// velocity feed forward gain</span></div>
+<div class="line"><span class="lineno">   72</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+11, 6000); <span class="comment">// velocity feed forward filter</span></div>
+<div class="line"><span class="lineno">   73</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+12, 0); <span class="comment">// torque feed forward gain</span></div>
+<div class="line"><span class="lineno">   74</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+13, 0); <span class="comment">// torque feed forward filter</span></div>
+<div class="line"><span class="lineno">   75</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+15, 0); <span class="comment">// control switching mode</span></div>
+<div class="line"><span class="lineno">   76</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+33, 0); <span class="comment">// speed given filter</span></div>
+<div class="line"><span class="lineno">   77</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+35, 0); <span class="comment">// position command filter</span></div>
+<div class="line"><span class="lineno">   78</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+36, 0); <span class="comment">// encoder feedback</span></div>
+<div class="line"><span class="lineno">   79</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a291fed579d793bd94826442688945fab">pr_1_00</a>+37, 1052); <span class="comment">// special function register</span></div>
 <div class="line"><span class="lineno">   80</span>  <span class="comment">// see https://www.oyostepper.com/images/upload/File/ISV57T-180.pdf</span></div>
 <div class="line"><span class="lineno">   81</span>  <span class="comment">// 0x01 = 1: velocity feedforward disabled</span></div>
 <div class="line"><span class="lineno">   82</span>  <span class="comment">// 0x02 = 2: torque feedforward disabled</span></div>
@@ -436,21 +485,21 @@ Here is the caller graph for this function:</div>
 <div class="line"><span class="lineno">   87</span> </div>
 <div class="line"><span class="lineno">   88</span>  <span class="comment">// Pr2 register</span></div>
 <div class="line"><span class="lineno">   89</span>  <span class="comment">// vibration suppression </span></div>
-<div class="line"><span class="lineno">   90</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#aa9490bdcbdcbad215767df4eba786db7">pr_2_00</a>+1, 50);</div>
-<div class="line"><span class="lineno">   91</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#aa9490bdcbdcbad215767df4eba786db7">pr_2_00</a>+2, 20);</div>
-<div class="line"><span class="lineno">   92</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#aa9490bdcbdcbad215767df4eba786db7">pr_2_00</a>+3, 99);</div>
-<div class="line"><span class="lineno">   93</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#aa9490bdcbdcbad215767df4eba786db7">pr_2_00</a>+4, 90);</div>
-<div class="line"><span class="lineno">   94</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#aa9490bdcbdcbad215767df4eba786db7">pr_2_00</a>+5, 20);</div>
-<div class="line"><span class="lineno">   95</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#aa9490bdcbdcbad215767df4eba786db7">pr_2_00</a>+6, 99);</div>
-<div class="line"><span class="lineno">   96</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#aa9490bdcbdcbad215767df4eba786db7">pr_2_00</a>+22, 0);</div>
-<div class="line"><span class="lineno">   97</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#aa9490bdcbdcbad215767df4eba786db7">pr_2_00</a>+23, 0);</div>
+<div class="line"><span class="lineno">   90</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#aa9490bdcbdcbad215767df4eba786db7">pr_2_00</a>+1, 50);</div>
+<div class="line"><span class="lineno">   91</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#aa9490bdcbdcbad215767df4eba786db7">pr_2_00</a>+2, 20);</div>
+<div class="line"><span class="lineno">   92</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#aa9490bdcbdcbad215767df4eba786db7">pr_2_00</a>+3, 99);</div>
+<div class="line"><span class="lineno">   93</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#aa9490bdcbdcbad215767df4eba786db7">pr_2_00</a>+4, 90);</div>
+<div class="line"><span class="lineno">   94</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#aa9490bdcbdcbad215767df4eba786db7">pr_2_00</a>+5, 20);</div>
+<div class="line"><span class="lineno">   95</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#aa9490bdcbdcbad215767df4eba786db7">pr_2_00</a>+6, 99);</div>
+<div class="line"><span class="lineno">   96</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#aa9490bdcbdcbad215767df4eba786db7">pr_2_00</a>+22, 0);</div>
+<div class="line"><span class="lineno">   97</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#aa9490bdcbdcbad215767df4eba786db7">pr_2_00</a>+23, 0);</div>
 <div class="line"><span class="lineno">   98</span> </div>
 <div class="line"><span class="lineno">   99</span>  <span class="comment">// Pr3 register</span></div>
-<div class="line"><span class="lineno">  100</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a304a6f7570bfcea0e6f827101f3a23a3">pr_3_00</a>+24, 5000); <span class="comment">// maximum rpm</span></div>
+<div class="line"><span class="lineno">  100</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a304a6f7570bfcea0e6f827101f3a23a3">pr_3_00</a>+24, 5000); <span class="comment">// maximum rpm</span></div>
 <div class="line"><span class="lineno">  101</span>  </div>
 <div class="line"><span class="lineno">  102</span>  <span class="comment">// Pr5 register</span></div>
-<div class="line"><span class="lineno">  103</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a6f0b43eef9233f0651a01ffe62610dd1">pr_5_00</a>+13, 5000); <span class="comment">// overspeed level</span></div>
-<div class="line"><span class="lineno">  104</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a6f0b43eef9233f0651a01ffe62610dd1">pr_5_00</a>+20, 1); <span class="comment">// encoder output resolution</span></div>
+<div class="line"><span class="lineno">  103</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a6f0b43eef9233f0651a01ffe62610dd1">pr_5_00</a>+13, 5000); <span class="comment">// overspeed level</span></div>
+<div class="line"><span class="lineno">  104</span>  retValue_b |= <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693">checkAndReplaceParameter</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, <a class="code hl_define" href="isv57communication_8h.html#a6f0b43eef9233f0651a01ffe62610dd1">pr_5_00</a>+20, 1); <span class="comment">// encoder output resolution</span></div>
 <div class="line"><span class="lineno">  105</span> </div>
 <div class="line"><span class="lineno">  106</span>  </div>
 <div class="line"><span class="lineno">  107</span> </div>
@@ -458,7 +507,7 @@ Here is the caller graph for this function:</div>
 <div class="line"><span class="lineno">  109</span>  <span class="keywordflow">if</span> (retValue_b)</div>
 <div class="line"><span class="lineno">  110</span>  {</div>
 <div class="line"><span class="lineno">  111</span>    Serial.println(<span class="stringliteral">&quot;Servo registered in NVM have been updated! Please power cycle the servo and the ESP!&quot;</span>);</div>
-<div class="line"><span class="lineno">  112</span>    <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#a3bf629e195b13445c8d6f98173b65e07">holdingRegisterWrite</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, 0x019A, 0x5555); <span class="comment">// store the settings to servos NVM</span></div>
+<div class="line"><span class="lineno">  112</span>    <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#a3bf629e195b13445c8d6f98173b65e07">holdingRegisterWrite</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, 0x019A, 0x5555); <span class="comment">// store the settings to servos NVM</span></div>
 <div class="line"><span class="lineno">  113</span>    delay(2000);</div>
 <div class="line"><span class="lineno">  114</span>  }</div>
 <div class="line"><span class="lineno">  115</span> </div>
@@ -508,13 +557,13 @@ Here is the call graph for this function:</div>
 <div class="line"><span class="lineno">   21</span>  <span class="comment">// The iSV57 has four registers (0x0191, 0x0192, 0x0193, 0x0194) in which we can write, which values we want to obtain cyclicly</span></div>
 <div class="line"><span class="lineno">   22</span>  <span class="comment">// These registers can be obtained by sending e.g. the command: 0x63, 0x03, 0x0191, target_sate, CRC</span></div>
 <div class="line"><span class="lineno">   23</span>  <span class="comment">// tell the modbus slave, which registers will be read cyclicly</span></div>
-<div class="line"><span class="lineno">   24</span>  <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#a3bf629e195b13445c8d6f98173b65e07">holdingRegisterWrite</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, 0x0191, <a class="code hl_define" href="isv57communication_8h.html#a58c45a3536341f82066940058cbec718">reg_add_position_given_p</a>);</div>
+<div class="line"><span class="lineno">   24</span>  <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#a3bf629e195b13445c8d6f98173b65e07">holdingRegisterWrite</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, 0x0191, <a class="code hl_define" href="isv57communication_8h.html#a58c45a3536341f82066940058cbec718">reg_add_position_given_p</a>);</div>
 <div class="line"><span class="lineno">   25</span>  delay(50);</div>
-<div class="line"><span class="lineno">   26</span>  <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#a3bf629e195b13445c8d6f98173b65e07">holdingRegisterWrite</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, 0x0192, <a class="code hl_define" href="isv57communication_8h.html#a6343bf5ebcac05591294b0bc55c833f5">reg_add_velocity_current_feedback_percent</a>);</div>
+<div class="line"><span class="lineno">   26</span>  <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#a3bf629e195b13445c8d6f98173b65e07">holdingRegisterWrite</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, 0x0192, <a class="code hl_define" href="isv57communication_8h.html#a6343bf5ebcac05591294b0bc55c833f5">reg_add_velocity_current_feedback_percent</a>);</div>
 <div class="line"><span class="lineno">   27</span>  delay(50);</div>
-<div class="line"><span class="lineno">   28</span>  <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#a3bf629e195b13445c8d6f98173b65e07">holdingRegisterWrite</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, 0x0193, <a class="code hl_define" href="isv57communication_8h.html#a585271acb69e325e39e48ada91ec8448">reg_add_position_error_p</a>);</div>
+<div class="line"><span class="lineno">   28</span>  <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#a3bf629e195b13445c8d6f98173b65e07">holdingRegisterWrite</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, 0x0193, <a class="code hl_define" href="isv57communication_8h.html#a585271acb69e325e39e48ada91ec8448">reg_add_position_error_p</a>);</div>
 <div class="line"><span class="lineno">   29</span>  delay(50);</div>
-<div class="line"><span class="lineno">   30</span>  <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#a3bf629e195b13445c8d6f98173b65e07">holdingRegisterWrite</a>(<a class="code hl_define" href="isv57communication_8h.html#ad226b4fd3a1f1af2e8ef7a841f998f0d">slaveId</a>, 0x0194, <a class="code hl_define" href="isv57communication_8h.html#afe01e8e4375ce485ea7558be8b4b702f">reg_add_voltage_0p1V</a>);</div>
+<div class="line"><span class="lineno">   30</span>  <a class="code hl_variable" href="isv57communication_8cpp.html#af8d71033de025cb83c2bf0a5696553f1">modbus</a>.<a class="code hl_function" href="classModbus.html#a3bf629e195b13445c8d6f98173b65e07">holdingRegisterWrite</a>(<a class="code hl_variable" href="classisv57communication.html#a7a320e97e54f76a164ace3617b609996">slaveId</a>, 0x0194, <a class="code hl_define" href="isv57communication_8h.html#afe01e8e4375ce485ea7558be8b4b702f">reg_add_voltage_0p1V</a>);</div>
 <div class="line"><span class="lineno">   31</span>  delay(50);</div>
 <div class="line"><span class="lineno">   32</span> </div>
 <div class="line"><span class="lineno">   33</span> </div>
@@ -550,10 +599,10 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="isv57communication_8cpp_source.html#l00136">136</a> of file <a class="el" href="isv57communication_8cpp_source.html">isv57communication.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  137</span>{</div>
-<div class="line"><span class="lineno">  138</span>  <a class="code hl_variable" href="classisv57communication.html#ae3f663a45228097c3545019943debeef">zeroPos</a> = <a class="code hl_variable" href="classisv57communication.html#ae9d47dd3608a96c6ae9fbda4dc6d1a12">servo_pos_given_p</a>;</div>
-<div class="line"><span class="lineno">  139</span>}</div>
+<p class="definition">Definition at line <a class="el" href="isv57communication_8cpp_source.html#l00155">155</a> of file <a class="el" href="isv57communication_8cpp_source.html">isv57communication.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  156</span>{</div>
+<div class="line"><span class="lineno">  157</span>  <a class="code hl_variable" href="classisv57communication.html#ae3f663a45228097c3545019943debeef">zeroPos</a> = <a class="code hl_variable" href="classisv57communication.html#ae9d47dd3608a96c6ae9fbda4dc6d1a12">servo_pos_given_p</a>;</div>
+<div class="line"><span class="lineno">  158</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -578,7 +627,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="isv57communication_8h_source.html#l00070">70</a> of file <a class="el" href="isv57communication_8h_source.html">isv57communication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="isv57communication_8h_source.html#l00073">73</a> of file <a class="el" href="isv57communication_8h_source.html">isv57communication.h</a>.</p>
 
 </div>
 </div>
@@ -602,7 +651,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="isv57communication_8h_source.html#l00069">69</a> of file <a class="el" href="isv57communication_8h_source.html">isv57communication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="isv57communication_8h_source.html#l00072">72</a> of file <a class="el" href="isv57communication_8h_source.html">isv57communication.h</a>.</p>
 
 </div>
 </div>
@@ -618,7 +667,7 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="isv57communication_8h_source.html#l00060">60</a> of file <a class="el" href="isv57communication_8h_source.html">isv57communication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="isv57communication_8h_source.html#l00061">61</a> of file <a class="el" href="isv57communication_8h_source.html">isv57communication.h</a>.</p>
 
 </div>
 </div>
@@ -634,7 +683,7 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="isv57communication_8h_source.html#l00064">64</a> of file <a class="el" href="isv57communication_8h_source.html">isv57communication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="isv57communication_8h_source.html#l00067">67</a> of file <a class="el" href="isv57communication_8h_source.html">isv57communication.h</a>.</p>
 
 </div>
 </div>
@@ -650,7 +699,7 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="isv57communication_8h_source.html#l00063">63</a> of file <a class="el" href="isv57communication_8h_source.html">isv57communication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="isv57communication_8h_source.html#l00066">66</a> of file <a class="el" href="isv57communication_8h_source.html">isv57communication.h</a>.</p>
 
 </div>
 </div>
@@ -666,7 +715,7 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="isv57communication_8h_source.html#l00062">62</a> of file <a class="el" href="isv57communication_8h_source.html">isv57communication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="isv57communication_8h_source.html#l00065">65</a> of file <a class="el" href="isv57communication_8h_source.html">isv57communication.h</a>.</p>
 
 </div>
 </div>
@@ -682,7 +731,23 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="isv57communication_8h_source.html#l00065">65</a> of file <a class="el" href="isv57communication_8h_source.html">isv57communication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="isv57communication_8h_source.html#l00068">68</a> of file <a class="el" href="isv57communication_8h_source.html">isv57communication.h</a>.</p>
+
+</div>
+</div>
+<a id="a7a320e97e54f76a164ace3617b609996" name="a7a320e97e54f76a164ace3617b609996"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7a320e97e54f76a164ace3617b609996">&#9670;&#160;</a></span>slaveId</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int16_t isv57communication::slaveId = 63</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="isv57communication_8h_source.html#l00063">63</a> of file <a class="el" href="isv57communication_8h_source.html">isv57communication.h</a>.</p>
 
 </div>
 </div>
@@ -706,7 +771,7 @@ Here is the call graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="isv57communication_8h_source.html#l00071">71</a> of file <a class="el" href="isv57communication_8h_source.html">isv57communication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="isv57communication_8h_source.html#l00074">74</a> of file <a class="el" href="isv57communication_8h_source.html">isv57communication.h</a>.</p>
 
 </div>
 </div>
