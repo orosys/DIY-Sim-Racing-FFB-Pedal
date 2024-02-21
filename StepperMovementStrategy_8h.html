@@ -209,68 +209,68 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="StepperMovementStrategy_8h_source.html#l00390">390</a> of file <a class="el" href="StepperMovementStrategy_8h_source.html">StepperMovementStrategy.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  391</span>{</div>
-<div class="line"><span class="lineno">  392</span> </div>
-<div class="line"><span class="lineno">  393</span>  int32_t currentPos = stepper-&gt;<a class="code hl_function" href="classStepperWithLimits.html#a6e837fe28ef4ee22e787b5b6d6bfc716">getCurrentPositionFromMin</a>();</div>
-<div class="line"><span class="lineno">  394</span>  int32_t minPos = currentPos - dap_calculationVariables_st.stepperPosRange * 0.05;</div>
-<div class="line"><span class="lineno">  395</span>  int32_t maxPos = currentPos + dap_calculationVariables_st.stepperPosRange * 0.05;</div>
-<div class="line"><span class="lineno">  396</span> </div>
-<div class="line"><span class="lineno">  397</span>  stepper-&gt;<a class="code hl_function" href="classStepperWithLimits.html#afbc22a07418cfeee8055f98b534dc4fd">moveTo</a>(minPos, <span class="keyword">true</span>);</div>
+<p class="definition">Definition at line <a class="el" href="StepperMovementStrategy_8h_source.html#l00396">396</a> of file <a class="el" href="StepperMovementStrategy_8h_source.html">StepperMovementStrategy.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  397</span>{</div>
 <div class="line"><span class="lineno">  398</span> </div>
-<div class="line"><span class="lineno">  399</span>  Serial.println(<span class="stringliteral">&quot;======================================&quot;</span>);</div>
-<div class="line"><span class="lineno">  400</span>  Serial.println(<span class="stringliteral">&quot;Start system identification data:&quot;</span>);</div>
-<div class="line"><span class="lineno">  401</span> </div>
-<div class="line"><span class="lineno">  402</span>  <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> initialTime = micros();</div>
-<div class="line"><span class="lineno">  403</span>  <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> t = micros();</div>
-<div class="line"><span class="lineno">  404</span>  <span class="keywordtype">bool</span> targetPosHasBeenSet_b = <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  405</span>  <span class="keywordtype">float</span> loadcellReading;</div>
-<div class="line"><span class="lineno">  406</span> </div>
-<div class="line"><span class="lineno">  407</span>  int32_t targetPos;</div>
-<div class="line"><span class="lineno">  408</span> </div>
-<div class="line"><span class="lineno">  409</span>  <span class="keywordflow">for</span> (uint32_t cycleIdx = 0; cycleIdx &lt; 5; cycleIdx++)</div>
-<div class="line"><span class="lineno">  410</span>  {</div>
-<div class="line"><span class="lineno">  411</span>    <span class="comment">// toogle target position</span></div>
-<div class="line"><span class="lineno">  412</span>    <span class="keywordflow">if</span> (cycleIdx % 2 == 0)</div>
-<div class="line"><span class="lineno">  413</span>    {</div>
-<div class="line"><span class="lineno">  414</span>      targetPos = maxPos;</div>
-<div class="line"><span class="lineno">  415</span>    }</div>
-<div class="line"><span class="lineno">  416</span>    <span class="keywordflow">else</span></div>
-<div class="line"><span class="lineno">  417</span>    {</div>
-<div class="line"><span class="lineno">  418</span>      targetPos = minPos;</div>
-<div class="line"><span class="lineno">  419</span>    }</div>
-<div class="line"><span class="lineno">  420</span> </div>
-<div class="line"><span class="lineno">  421</span>    targetPos = (int32_t)constrain(targetPos, dap_calculationVariables_st.stepperPosMin, dap_calculationVariables_st.stepperPosMax);</div>
-<div class="line"><span class="lineno">  422</span> </div>
-<div class="line"><span class="lineno">  423</span>    <span class="comment">// execute move to target position and meaure system response</span></div>
-<div class="line"><span class="lineno">  424</span>    <span class="keywordtype">float</span> currentPos;</div>
-<div class="line"><span class="lineno">  425</span>    <span class="keywordflow">for</span> (uint32_t sampleIdx_u32 = 0; sampleIdx_u32 &lt; 2000; sampleIdx_u32++)</div>
-<div class="line"><span class="lineno">  426</span>    {</div>
-<div class="line"><span class="lineno">  427</span>      <span class="comment">// get loadcell reading</span></div>
-<div class="line"><span class="lineno">  428</span>      loadcellReading = loadcell-&gt;<a class="code hl_function" href="classLoadCell__ADS1256.html#ae8d01b4992be881e0d0e94fa8e2ba13c">getReadingKg</a>();</div>
-<div class="line"><span class="lineno">  429</span> </div>
-<div class="line"><span class="lineno">  430</span>      <span class="comment">// update time</span></div>
-<div class="line"><span class="lineno">  431</span>      t = micros() - initialTime;</div>
-<div class="line"><span class="lineno">  432</span> </div>
-<div class="line"><span class="lineno">  433</span>      <span class="comment">// after some time, set target position</span></div>
-<div class="line"><span class="lineno">  434</span>      <span class="keywordflow">if</span> (sampleIdx_u32 == 50)</div>
-<div class="line"><span class="lineno">  435</span>      {</div>
-<div class="line"><span class="lineno">  436</span>        stepper-&gt;<a class="code hl_function" href="classStepperWithLimits.html#afbc22a07418cfeee8055f98b534dc4fd">moveTo</a>(targetPos, <span class="keyword">false</span>);</div>
-<div class="line"><span class="lineno">  437</span>      }</div>
+<div class="line"><span class="lineno">  399</span>  int32_t currentPos = stepper-&gt;<a class="code hl_function" href="classStepperWithLimits.html#a6e837fe28ef4ee22e787b5b6d6bfc716">getCurrentPositionFromMin</a>();</div>
+<div class="line"><span class="lineno">  400</span>  int32_t minPos = currentPos - dap_calculationVariables_st.stepperPosRange * 0.05;</div>
+<div class="line"><span class="lineno">  401</span>  int32_t maxPos = currentPos + dap_calculationVariables_st.stepperPosRange * 0.05;</div>
+<div class="line"><span class="lineno">  402</span> </div>
+<div class="line"><span class="lineno">  403</span>  stepper-&gt;<a class="code hl_function" href="classStepperWithLimits.html#afbc22a07418cfeee8055f98b534dc4fd">moveTo</a>(minPos, <span class="keyword">true</span>);</div>
+<div class="line"><span class="lineno">  404</span> </div>
+<div class="line"><span class="lineno">  405</span>  Serial.println(<span class="stringliteral">&quot;======================================&quot;</span>);</div>
+<div class="line"><span class="lineno">  406</span>  Serial.println(<span class="stringliteral">&quot;Start system identification data:&quot;</span>);</div>
+<div class="line"><span class="lineno">  407</span> </div>
+<div class="line"><span class="lineno">  408</span>  <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> initialTime = micros();</div>
+<div class="line"><span class="lineno">  409</span>  <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> t = micros();</div>
+<div class="line"><span class="lineno">  410</span>  <span class="keywordtype">bool</span> targetPosHasBeenSet_b = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  411</span>  <span class="keywordtype">float</span> loadcellReading;</div>
+<div class="line"><span class="lineno">  412</span> </div>
+<div class="line"><span class="lineno">  413</span>  int32_t targetPos;</div>
+<div class="line"><span class="lineno">  414</span> </div>
+<div class="line"><span class="lineno">  415</span>  <span class="keywordflow">for</span> (uint32_t cycleIdx = 0; cycleIdx &lt; 5; cycleIdx++)</div>
+<div class="line"><span class="lineno">  416</span>  {</div>
+<div class="line"><span class="lineno">  417</span>    <span class="comment">// toogle target position</span></div>
+<div class="line"><span class="lineno">  418</span>    <span class="keywordflow">if</span> (cycleIdx % 2 == 0)</div>
+<div class="line"><span class="lineno">  419</span>    {</div>
+<div class="line"><span class="lineno">  420</span>      targetPos = maxPos;</div>
+<div class="line"><span class="lineno">  421</span>    }</div>
+<div class="line"><span class="lineno">  422</span>    <span class="keywordflow">else</span></div>
+<div class="line"><span class="lineno">  423</span>    {</div>
+<div class="line"><span class="lineno">  424</span>      targetPos = minPos;</div>
+<div class="line"><span class="lineno">  425</span>    }</div>
+<div class="line"><span class="lineno">  426</span> </div>
+<div class="line"><span class="lineno">  427</span>    targetPos = (int32_t)constrain(targetPos, dap_calculationVariables_st.stepperPosMin, dap_calculationVariables_st.stepperPosMax);</div>
+<div class="line"><span class="lineno">  428</span> </div>
+<div class="line"><span class="lineno">  429</span>    <span class="comment">// execute move to target position and meaure system response</span></div>
+<div class="line"><span class="lineno">  430</span>    <span class="keywordtype">float</span> currentPos;</div>
+<div class="line"><span class="lineno">  431</span>    <span class="keywordflow">for</span> (uint32_t sampleIdx_u32 = 0; sampleIdx_u32 &lt; 2000; sampleIdx_u32++)</div>
+<div class="line"><span class="lineno">  432</span>    {</div>
+<div class="line"><span class="lineno">  433</span>      <span class="comment">// get loadcell reading</span></div>
+<div class="line"><span class="lineno">  434</span>      loadcellReading = loadcell-&gt;<a class="code hl_function" href="classLoadCell__ADS1256.html#ae8d01b4992be881e0d0e94fa8e2ba13c">getReadingKg</a>();</div>
+<div class="line"><span class="lineno">  435</span> </div>
+<div class="line"><span class="lineno">  436</span>      <span class="comment">// update time</span></div>
+<div class="line"><span class="lineno">  437</span>      t = micros() - initialTime;</div>
 <div class="line"><span class="lineno">  438</span> </div>
-<div class="line"><span class="lineno">  439</span>      <span class="comment">// get current position</span></div>
-<div class="line"><span class="lineno">  440</span>      currentPos = stepper-&gt;<a class="code hl_function" href="classStepperWithLimits.html#aef91cbf9e5f772215cecfc46977aa7c3">getCurrentPositionFraction</a>();</div>
-<div class="line"><span class="lineno">  441</span>      loadcellReading = (loadcellReading - calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958">Force_Min</a>) / calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">Force_Range</a>; </div>
-<div class="line"><span class="lineno">  442</span> </div>
-<div class="line"><span class="lineno">  443</span>      <span class="keyword">static</span> <a class="code hl_class" href="classRTDebugOutput.html">RTDebugOutput&lt;float, 3, 9&gt;</a> rtDebugFilter;</div>
-<div class="line"><span class="lineno">  444</span>      rtDebugFilter.<a class="code hl_function" href="classRTDebugOutput.html#a5af3bb9ea5c877fe34db54b41c2f9f81">offerData</a>({ ((<span class="keywordtype">float</span>)t) *1e-6 , currentPos,  loadcellReading});   </div>
-<div class="line"><span class="lineno">  445</span>    }</div>
-<div class="line"><span class="lineno">  446</span>  }</div>
-<div class="line"><span class="lineno">  447</span> </div>
-<div class="line"><span class="lineno">  448</span>  Serial.println(<span class="stringliteral">&quot;======================================&quot;</span>);</div>
-<div class="line"><span class="lineno">  449</span>  Serial.println(<span class="stringliteral">&quot;End system identification data&quot;</span>);</div>
-<div class="line"><span class="lineno">  450</span>}</div>
-<div class="ttc" id="aclassLoadCell__ADS1256_html_ae8d01b4992be881e0d0e94fa8e2ba13c"><div class="ttname"><a href="classLoadCell__ADS1256.html#ae8d01b4992be881e0d0e94fa8e2ba13c">LoadCell_ADS1256::getReadingKg</a></div><div class="ttdeci">float getReadingKg() const</div><div class="ttdef"><b>Definition:</b> <a href="LoadCell_8cpp_source.html#l00074">LoadCell.cpp:74</a></div></div>
+<div class="line"><span class="lineno">  439</span>      <span class="comment">// after some time, set target position</span></div>
+<div class="line"><span class="lineno">  440</span>      <span class="keywordflow">if</span> (sampleIdx_u32 == 50)</div>
+<div class="line"><span class="lineno">  441</span>      {</div>
+<div class="line"><span class="lineno">  442</span>        stepper-&gt;<a class="code hl_function" href="classStepperWithLimits.html#afbc22a07418cfeee8055f98b534dc4fd">moveTo</a>(targetPos, <span class="keyword">false</span>);</div>
+<div class="line"><span class="lineno">  443</span>      }</div>
+<div class="line"><span class="lineno">  444</span> </div>
+<div class="line"><span class="lineno">  445</span>      <span class="comment">// get current position</span></div>
+<div class="line"><span class="lineno">  446</span>      currentPos = stepper-&gt;<a class="code hl_function" href="classStepperWithLimits.html#aef91cbf9e5f772215cecfc46977aa7c3">getCurrentPositionFraction</a>();</div>
+<div class="line"><span class="lineno">  447</span>      loadcellReading = (loadcellReading - calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958">Force_Min</a>) / calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">Force_Range</a>; </div>
+<div class="line"><span class="lineno">  448</span> </div>
+<div class="line"><span class="lineno">  449</span>      <span class="keyword">static</span> <a class="code hl_class" href="classRTDebugOutput.html">RTDebugOutput&lt;float, 3, 9&gt;</a> rtDebugFilter;</div>
+<div class="line"><span class="lineno">  450</span>      rtDebugFilter.<a class="code hl_function" href="classRTDebugOutput.html#a5af3bb9ea5c877fe34db54b41c2f9f81">offerData</a>({ ((<span class="keywordtype">float</span>)t) *1e-6 , currentPos,  loadcellReading});   </div>
+<div class="line"><span class="lineno">  451</span>    }</div>
+<div class="line"><span class="lineno">  452</span>  }</div>
+<div class="line"><span class="lineno">  453</span> </div>
+<div class="line"><span class="lineno">  454</span>  Serial.println(<span class="stringliteral">&quot;======================================&quot;</span>);</div>
+<div class="line"><span class="lineno">  455</span>  Serial.println(<span class="stringliteral">&quot;End system identification data&quot;</span>);</div>
+<div class="line"><span class="lineno">  456</span>}</div>
+<div class="ttc" id="aclassLoadCell__ADS1256_html_ae8d01b4992be881e0d0e94fa8e2ba13c"><div class="ttname"><a href="classLoadCell__ADS1256.html#ae8d01b4992be881e0d0e94fa8e2ba13c">LoadCell_ADS1256::getReadingKg</a></div><div class="ttdeci">float getReadingKg() const</div><div class="ttdef"><b>Definition:</b> <a href="LoadCell_8cpp_source.html#l00084">LoadCell.cpp:84</a></div></div>
 <div class="ttc" id="aclassRTDebugOutput_html"><div class="ttname"><a href="classRTDebugOutput.html">RTDebugOutput</a></div><div class="ttdef"><b>Definition:</b> <a href="RTDebugOutput_8h_source.html#l00007">RTDebugOutput.h:7</a></div></div>
 <div class="ttc" id="aclassRTDebugOutput_html_a5af3bb9ea5c877fe34db54b41c2f9f81"><div class="ttname"><a href="classRTDebugOutput.html#a5af3bb9ea5c877fe34db54b41c2f9f81">RTDebugOutput::offerData</a></div><div class="ttdeci">void offerData(std::array&lt; TVALUE, NVALS &gt; values)</div><div class="ttdef"><b>Definition:</b> <a href="RTDebugOutput_8h_source.html#l00020">RTDebugOutput.h:20</a></div></div>
 <div class="ttc" id="aclassStepperWithLimits_html_a6e837fe28ef4ee22e787b5b6d6bfc716"><div class="ttname"><a href="classStepperWithLimits.html#a6e837fe28ef4ee22e787b5b6d6bfc716">StepperWithLimits::getCurrentPositionFromMin</a></div><div class="ttdeci">int32_t getCurrentPositionFromMin() const</div><div class="ttdef"><b>Definition:</b> <a href="Main_2StepperWithLimits_8cpp_source.html#l00227">StepperWithLimits.cpp:227</a></div></div>
@@ -364,104 +364,104 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="StepperMovementStrategy_8h_source.html#l00197">197</a> of file <a class="el" href="StepperMovementStrategy_8h_source.html">StepperMovementStrategy.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  197</span>                                                                                                                                                                                                                                                                                                                          {</div>
-<div class="line"><span class="lineno">  198</span>  </div>
-<div class="line"><span class="lineno">  199</span>  <span class="comment">/*</span></div>
-<div class="line"><span class="lineno">  200</span><span class="comment">  This closed-loop control strategy models the foot as a spring with a certain stiffness k1.</span></div>
-<div class="line"><span class="lineno">  201</span><span class="comment">  The force resulting from that model is F1 = k1 * x. </span></div>
-<div class="line"><span class="lineno">  202</span><span class="comment">  To find the servo target position:</span></div>
-<div class="line"><span class="lineno">  203</span><span class="comment">  1) A line with the slope -k1 at the point of the loadcell reading &amp; current position is drawn.</span></div>
-<div class="line"><span class="lineno">  204</span><span class="comment">  2) The intersection with the force-travel curve gives the target position</span></div>
-<div class="line"><span class="lineno">  205</span><span class="comment">  </span></div>
-<div class="line"><span class="lineno">  206</span><span class="comment">  Since the force-travel curve might be non-linear, Newtons method is used to numerically find the intersection point.</span></div>
-<div class="line"><span class="lineno">  207</span><span class="comment">  f(x_n) = -k1 * x + b - forceCurve(x) = 0</span></div>
-<div class="line"><span class="lineno">  208</span><span class="comment">  x_n+1 = x_n - f(x_n) / f&#39;(x_n)</span></div>
-<div class="line"><span class="lineno">  209</span><span class="comment">  whereas x_n is the servo position at iteration n</span></div>
-<div class="line"><span class="lineno">  210</span><span class="comment">  f(x_n) = -k1 * x + b - forceCurve(x)</span></div>
-<div class="line"><span class="lineno">  211</span><span class="comment">  f&#39;(x_n) = -k1 - d(forceCurve(x)) / dx</span></div>
-<div class="line"><span class="lineno">  212</span><span class="comment">  */</span></div>
-<div class="line"><span class="lineno">  213</span>  </div>
-<div class="line"><span class="lineno">  214</span>  <span class="comment">// get current stepper position</span></div>
-<div class="line"><span class="lineno">  215</span>  <span class="keywordtype">float</span> stepperPos = stepper-&gt;<a class="code hl_function" href="classStepperWithLimits.html#a9387288097ea2cb4dbf120d8df003177">getCurrentPosition</a>();</div>
-<div class="line"><span class="lineno">  216</span> </div>
-<div class="line"><span class="lineno">  217</span>  <span class="comment">// add velocity feedforward</span></div>
-<div class="line"><span class="lineno">  218</span>  stepperPos += changeVelocity * config_st-&gt;<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#a7b12d1ad634a99552afb19617aa8f8f7">PID_velocity_feedforward_gain</a>;</div>
-<div class="line"><span class="lineno">  219</span> </div>
-<div class="line"><span class="lineno">  220</span>  <span class="comment">// motion corrected loadcell reading</span></div>
-<div class="line"><span class="lineno">  221</span>  <span class="keywordtype">float</span> loadCellReadingKg_corrected = loadCellReadingKg;</div>
-<div class="line"><span class="lineno">  222</span>  <span class="comment">//loadCellReadingKg_corrected += config_st-&gt;payLoadPedalConfig_.MPC_1st_order_gain * stepper_vel_filtered_fl32 / STEPS_PER_MOTOR_REVOLUTION / 10;// + stepper_accel_filtered_fl32;</span></div>
-<div class="line"><span class="lineno">  223</span>  <span class="comment">//loadCellReadingKg_corrected += config_st-&gt;payLoadPedalConfig_.MPC_1st_order_gain * stepper_accel_filtered_fl32 / STEPS_PER_MOTOR_REVOLUTION / 10;// + stepper_accel_filtered_fl32;</span></div>
-<div class="line"><span class="lineno">  224</span> </div>
+<p class="definition">Definition at line <a class="el" href="StepperMovementStrategy_8h_source.html#l00203">203</a> of file <a class="el" href="StepperMovementStrategy_8h_source.html">StepperMovementStrategy.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  203</span>                                                                                                                                                                                                                                                                                                                          {</div>
+<div class="line"><span class="lineno">  204</span>  </div>
+<div class="line"><span class="lineno">  205</span>  <span class="comment">/*</span></div>
+<div class="line"><span class="lineno">  206</span><span class="comment">  This closed-loop control strategy models the foot as a spring with a certain stiffness k1.</span></div>
+<div class="line"><span class="lineno">  207</span><span class="comment">  The force resulting from that model is F1 = k1 * x. </span></div>
+<div class="line"><span class="lineno">  208</span><span class="comment">  To find the servo target position:</span></div>
+<div class="line"><span class="lineno">  209</span><span class="comment">  1) A line with the slope -k1 at the point of the loadcell reading &amp; current position is drawn.</span></div>
+<div class="line"><span class="lineno">  210</span><span class="comment">  2) The intersection with the force-travel curve gives the target position</span></div>
+<div class="line"><span class="lineno">  211</span><span class="comment">  </span></div>
+<div class="line"><span class="lineno">  212</span><span class="comment">  Since the force-travel curve might be non-linear, Newtons method is used to numerically find the intersection point.</span></div>
+<div class="line"><span class="lineno">  213</span><span class="comment">  f(x_n) = -k1 * x + b - forceCurve(x) = 0</span></div>
+<div class="line"><span class="lineno">  214</span><span class="comment">  x_n+1 = x_n - f(x_n) / f&#39;(x_n)</span></div>
+<div class="line"><span class="lineno">  215</span><span class="comment">  whereas x_n is the servo position at iteration n</span></div>
+<div class="line"><span class="lineno">  216</span><span class="comment">  f(x_n) = -k1 * x + b - forceCurve(x)</span></div>
+<div class="line"><span class="lineno">  217</span><span class="comment">  f&#39;(x_n) = -k1 - d(forceCurve(x)) / dx</span></div>
+<div class="line"><span class="lineno">  218</span><span class="comment">  */</span></div>
+<div class="line"><span class="lineno">  219</span>  </div>
+<div class="line"><span class="lineno">  220</span>  <span class="comment">// get current stepper position</span></div>
+<div class="line"><span class="lineno">  221</span>  <span class="keywordtype">float</span> stepperPos = stepper-&gt;<a class="code hl_function" href="classStepperWithLimits.html#a9387288097ea2cb4dbf120d8df003177">getCurrentPosition</a>();</div>
+<div class="line"><span class="lineno">  222</span> </div>
+<div class="line"><span class="lineno">  223</span>  <span class="comment">// add velocity feedforward</span></div>
+<div class="line"><span class="lineno">  224</span>  stepperPos += changeVelocity * config_st-&gt;<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#a7b12d1ad634a99552afb19617aa8f8f7">PID_velocity_feedforward_gain</a>;</div>
 <div class="line"><span class="lineno">  225</span> </div>
-<div class="line"><span class="lineno">  226</span>  <span class="comment">// set initial guess</span></div>
-<div class="line"><span class="lineno">  227</span>  <span class="keywordtype">float</span> stepperPos_initial = stepperPos;</div>
-<div class="line"><span class="lineno">  228</span> </div>
-<div class="line"><span class="lineno">  229</span>  <span class="comment">// Find the intersections of the force curve and the foot model via Newtons-method</span></div>
-<div class="line"><span class="lineno">  230</span><span class="preprocessor">  #define MAX_NUMBER_OF_NEWTON_STEPS 5</span></div>
-<div class="line"><span class="lineno">  231</span>  <span class="keywordflow">for</span> (uint8_t iterationIdx = 0; iterationIdx &lt; <a class="code hl_define" href="StepperMovementStrategy_8h.html#aae08e582c5666c00da8bd6b792a7356b">MAX_NUMBER_OF_NEWTON_STEPS</a>; iterationIdx++)</div>
-<div class="line"><span class="lineno">  232</span>  {</div>
-<div class="line"><span class="lineno">  233</span>    <span class="comment">//float stepperPosFraction = stepper-&gt;getCurrentPositionFraction();</span></div>
-<div class="line"><span class="lineno">  234</span>    <span class="keywordtype">float</span> stepperPosFraction = stepper-&gt;<a class="code hl_function" href="classStepperWithLimits.html#a866100a58cdcdb1bddb56fc9d2092924">getCurrentPositionFractionFromExternalPos</a>( stepperPos );</div>
-<div class="line"><span class="lineno">  235</span>  </div>
-<div class="line"><span class="lineno">  236</span>    <span class="comment">// clamp the stepper position to prevent problems with the spline</span></div>
-<div class="line"><span class="lineno">  237</span>    <span class="keywordtype">float</span> x_0 = constrain(stepperPosFraction, 0, 1);</div>
-<div class="line"><span class="lineno">  238</span>    </div>
-<div class="line"><span class="lineno">  239</span>    <span class="comment">// get force and force gradient of force vs travel curve</span></div>
-<div class="line"><span class="lineno">  240</span>    <span class="keywordtype">float</span> loadCellTargetKg = forceCurve-&gt;<a class="code hl_function" href="classForceCurve__Interpolated.html#a765eedafeea4e8688e418b35cda4f840">EvalForceCubicSpline</a>(config_st, calc_st, x_0);</div>
-<div class="line"><span class="lineno">  241</span>    <span class="keywordtype">float</span> gradient_force_curve_fl32 = forceCurve-&gt;<a class="code hl_function" href="classForceCurve__Interpolated.html#a91e1f36518f48944e9779c32c1a3ad51">EvalForceGradientCubicSpline</a>(config_st, calc_st, x_0, <span class="keyword">false</span>);</div>
-<div class="line"><span class="lineno">  242</span> </div>
-<div class="line"><span class="lineno">  243</span>    <span class="comment">// apply effect force offset</span></div>
-<div class="line"><span class="lineno">  244</span>    loadCellTargetKg -=absForceOffset_fl32;</div>
-<div class="line"><span class="lineno">  245</span> </div>
-<div class="line"><span class="lineno">  246</span>    <span class="comment">// how many mm movement to order if 1kg of error force is detected</span></div>
-<div class="line"><span class="lineno">  247</span>    <span class="comment">// this can be tuned for responsiveness vs oscillation</span></div>
-<div class="line"><span class="lineno">  248</span>    <span class="keywordtype">float</span> mm_per_motor_rev = config_st-&gt;<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#a24f9f67fafadfd632d7b691b12b96421">spindlePitch_mmPerRev_u8</a>;<span class="comment">//TRAVEL_PER_ROTATION_IN_MM;</span></div>
-<div class="line"><span class="lineno">  249</span>    <span class="keywordtype">float</span> steps_per_motor_rev = <a class="code hl_variable" href="StepperWithLimits_8h.html#a5e757657a6f06254eb1446089d6444a6">STEPS_PER_MOTOR_REVOLUTION</a>;</div>
-<div class="line"><span class="lineno">  250</span>    <span class="keywordtype">float</span> move_mm_per_kg = config_st-&gt;<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#af00affb8dd0c3832b29a6c305007229c">MPC_0th_order_gain</a>;</div>
+<div class="line"><span class="lineno">  226</span>  <span class="comment">// motion corrected loadcell reading</span></div>
+<div class="line"><span class="lineno">  227</span>  <span class="keywordtype">float</span> loadCellReadingKg_corrected = loadCellReadingKg;</div>
+<div class="line"><span class="lineno">  228</span>  <span class="comment">//loadCellReadingKg_corrected += config_st-&gt;payLoadPedalConfig_.MPC_1st_order_gain * stepper_vel_filtered_fl32 / STEPS_PER_MOTOR_REVOLUTION / 10;// + stepper_accel_filtered_fl32;</span></div>
+<div class="line"><span class="lineno">  229</span>  <span class="comment">//loadCellReadingKg_corrected += config_st-&gt;payLoadPedalConfig_.MPC_1st_order_gain * stepper_accel_filtered_fl32 / STEPS_PER_MOTOR_REVOLUTION / 10;// + stepper_accel_filtered_fl32;</span></div>
+<div class="line"><span class="lineno">  230</span> </div>
+<div class="line"><span class="lineno">  231</span> </div>
+<div class="line"><span class="lineno">  232</span>  <span class="comment">// set initial guess</span></div>
+<div class="line"><span class="lineno">  233</span>  <span class="keywordtype">float</span> stepperPos_initial = stepperPos;</div>
+<div class="line"><span class="lineno">  234</span> </div>
+<div class="line"><span class="lineno">  235</span>  <span class="comment">// Find the intersections of the force curve and the foot model via Newtons-method</span></div>
+<div class="line"><span class="lineno">  236</span><span class="preprocessor">  #define MAX_NUMBER_OF_NEWTON_STEPS 5</span></div>
+<div class="line"><span class="lineno">  237</span>  <span class="keywordflow">for</span> (uint8_t iterationIdx = 0; iterationIdx &lt; <a class="code hl_define" href="StepperMovementStrategy_8h.html#aae08e582c5666c00da8bd6b792a7356b">MAX_NUMBER_OF_NEWTON_STEPS</a>; iterationIdx++)</div>
+<div class="line"><span class="lineno">  238</span>  {</div>
+<div class="line"><span class="lineno">  239</span>    <span class="comment">//float stepperPosFraction = stepper-&gt;getCurrentPositionFraction();</span></div>
+<div class="line"><span class="lineno">  240</span>    <span class="keywordtype">float</span> stepperPosFraction = stepper-&gt;<a class="code hl_function" href="classStepperWithLimits.html#a866100a58cdcdb1bddb56fc9d2092924">getCurrentPositionFractionFromExternalPos</a>( stepperPos );</div>
+<div class="line"><span class="lineno">  241</span>  </div>
+<div class="line"><span class="lineno">  242</span>    <span class="comment">// clamp the stepper position to prevent problems with the spline</span></div>
+<div class="line"><span class="lineno">  243</span>    <span class="keywordtype">float</span> x_0 = constrain(stepperPosFraction, 0, 1);</div>
+<div class="line"><span class="lineno">  244</span>    </div>
+<div class="line"><span class="lineno">  245</span>    <span class="comment">// get force and force gradient of force vs travel curve</span></div>
+<div class="line"><span class="lineno">  246</span>    <span class="keywordtype">float</span> loadCellTargetKg = forceCurve-&gt;<a class="code hl_function" href="classForceCurve__Interpolated.html#a765eedafeea4e8688e418b35cda4f840">EvalForceCubicSpline</a>(config_st, calc_st, x_0);</div>
+<div class="line"><span class="lineno">  247</span>    <span class="keywordtype">float</span> gradient_force_curve_fl32 = forceCurve-&gt;<a class="code hl_function" href="classForceCurve__Interpolated.html#a91e1f36518f48944e9779c32c1a3ad51">EvalForceGradientCubicSpline</a>(config_st, calc_st, x_0, <span class="keyword">false</span>);</div>
+<div class="line"><span class="lineno">  248</span> </div>
+<div class="line"><span class="lineno">  249</span>    <span class="comment">// apply effect force offset</span></div>
+<div class="line"><span class="lineno">  250</span>    loadCellTargetKg -=absForceOffset_fl32;</div>
 <div class="line"><span class="lineno">  251</span> </div>
-<div class="line"><span class="lineno">  252</span>    <span class="keywordtype">float</span> MOVE_STEPS_FOR_1KG = 0;</div>
-<div class="line"><span class="lineno">  253</span>    <span class="keywordflow">if</span> (mm_per_motor_rev&gt;0)</div>
-<div class="line"><span class="lineno">  254</span>    {</div>
-<div class="line"><span class="lineno">  255</span>      MOVE_STEPS_FOR_1KG = (move_mm_per_kg / mm_per_motor_rev) * steps_per_motor_rev;</div>
-<div class="line"><span class="lineno">  256</span>    }</div>
-<div class="line"><span class="lineno">  257</span>    </div>
-<div class="line"><span class="lineno">  258</span> </div>
-<div class="line"><span class="lineno">  259</span>    <span class="comment">// make stiffness dependent on force curve gradient</span></div>
-<div class="line"><span class="lineno">  260</span>    <span class="comment">// less steps per kg --&gt; steeper line</span></div>
-<div class="line"><span class="lineno">  261</span>    <span class="keywordtype">float</span> gradient_normalized_force_curve_fl32 = forceCurve-&gt;<a class="code hl_function" href="classForceCurve__Interpolated.html#a91e1f36518f48944e9779c32c1a3ad51">EvalForceGradientCubicSpline</a>(config_st, calc_st, x_0, <span class="keyword">true</span>);</div>
-<div class="line"><span class="lineno">  262</span>    gradient_normalized_force_curve_fl32 = constrain(gradient_normalized_force_curve_fl32, 0.05, 1);</div>
-<div class="line"><span class="lineno">  263</span>    MOVE_STEPS_FOR_1KG *= gradient_normalized_force_curve_fl32;</div>
-<div class="line"><span class="lineno">  264</span>    </div>
-<div class="line"><span class="lineno">  265</span>    <span class="keywordtype">float</span> m1 = -1000;</div>
-<div class="line"><span class="lineno">  266</span>    <span class="keywordflow">if</span> (MOVE_STEPS_FOR_1KG &gt; 0)</div>
-<div class="line"><span class="lineno">  267</span>    {</div>
-<div class="line"><span class="lineno">  268</span>      m1 = -1. / MOVE_STEPS_FOR_1KG; <span class="comment">// line has negative slope --&gt; pedal moves towards the front endstop will increase the loadcell reading as it pushes more against the foot</span></div>
-<div class="line"><span class="lineno">  269</span>    }</div>
+<div class="line"><span class="lineno">  252</span>    <span class="comment">// how many mm movement to order if 1kg of error force is detected</span></div>
+<div class="line"><span class="lineno">  253</span>    <span class="comment">// this can be tuned for responsiveness vs oscillation</span></div>
+<div class="line"><span class="lineno">  254</span>    <span class="keywordtype">float</span> mm_per_motor_rev = config_st-&gt;<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#a24f9f67fafadfd632d7b691b12b96421">spindlePitch_mmPerRev_u8</a>;<span class="comment">//TRAVEL_PER_ROTATION_IN_MM;</span></div>
+<div class="line"><span class="lineno">  255</span>    <span class="keywordtype">float</span> steps_per_motor_rev = <a class="code hl_variable" href="StepperWithLimits_8h.html#a5e757657a6f06254eb1446089d6444a6">STEPS_PER_MOTOR_REVOLUTION</a>;</div>
+<div class="line"><span class="lineno">  256</span>    <span class="keywordtype">float</span> move_mm_per_kg = config_st-&gt;<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#af00affb8dd0c3832b29a6c305007229c">MPC_0th_order_gain</a>;</div>
+<div class="line"><span class="lineno">  257</span> </div>
+<div class="line"><span class="lineno">  258</span>    <span class="keywordtype">float</span> MOVE_STEPS_FOR_1KG = 0;</div>
+<div class="line"><span class="lineno">  259</span>    <span class="keywordflow">if</span> (mm_per_motor_rev&gt;0)</div>
+<div class="line"><span class="lineno">  260</span>    {</div>
+<div class="line"><span class="lineno">  261</span>      MOVE_STEPS_FOR_1KG = (move_mm_per_kg / mm_per_motor_rev) * steps_per_motor_rev;</div>
+<div class="line"><span class="lineno">  262</span>    }</div>
+<div class="line"><span class="lineno">  263</span>    </div>
+<div class="line"><span class="lineno">  264</span> </div>
+<div class="line"><span class="lineno">  265</span>    <span class="comment">// make stiffness dependent on force curve gradient</span></div>
+<div class="line"><span class="lineno">  266</span>    <span class="comment">// less steps per kg --&gt; steeper line</span></div>
+<div class="line"><span class="lineno">  267</span>    <span class="keywordtype">float</span> gradient_normalized_force_curve_fl32 = forceCurve-&gt;<a class="code hl_function" href="classForceCurve__Interpolated.html#a91e1f36518f48944e9779c32c1a3ad51">EvalForceGradientCubicSpline</a>(config_st, calc_st, x_0, <span class="keyword">true</span>);</div>
+<div class="line"><span class="lineno">  268</span>    gradient_normalized_force_curve_fl32 = constrain(gradient_normalized_force_curve_fl32, 0.05, 1);</div>
+<div class="line"><span class="lineno">  269</span>    MOVE_STEPS_FOR_1KG *= gradient_normalized_force_curve_fl32;</div>
 <div class="line"><span class="lineno">  270</span>    </div>
-<div class="line"><span class="lineno">  271</span>    <span class="keywordtype">float</span> m2 = gradient_force_curve_fl32;</div>
-<div class="line"><span class="lineno">  272</span>    </div>
-<div class="line"><span class="lineno">  273</span>    <span class="comment">// Newton update</span></div>
-<div class="line"><span class="lineno">  274</span>    <span class="keywordtype">float</span> denom = m1 - m2;</div>
-<div class="line"><span class="lineno">  275</span>    <span class="keywordflow">if</span> ( fabs(denom) &gt; 0 )</div>
-<div class="line"><span class="lineno">  276</span>    {</div>
-<div class="line"><span class="lineno">  277</span>      stepperPos -= ( loadCellReadingKg_corrected - loadCellTargetKg) / ( denom );</div>
-<div class="line"><span class="lineno">  278</span>    }</div>
-<div class="line"><span class="lineno">  279</span>  }</div>
-<div class="line"><span class="lineno">  280</span>    </div>
-<div class="line"><span class="lineno">  281</span>  <span class="comment">// limit the position update</span></div>
-<div class="line"><span class="lineno">  282</span>  <span class="keywordtype">float</span> deltaMax = 0.5 * (float)(calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#acec2fd87af191ca72ecea92b5450274e">stepperPosMax</a> - calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#aa158b70f0328e458133519d9acbbf267">stepperPosMin</a>);</div>
-<div class="line"><span class="lineno">  283</span>  int32_t posStepperNew = constrain(stepperPos, stepperPos_initial-deltaMax, stepperPos_initial+deltaMax );</div>
-<div class="line"><span class="lineno">  284</span> </div>
-<div class="line"><span class="lineno">  285</span>  <span class="comment">// clamp target position to range</span></div>
-<div class="line"><span class="lineno">  286</span>  posStepperNew = constrain(posStepperNew,calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#aa158b70f0328e458133519d9acbbf267">stepperPosMin</a>,calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#acec2fd87af191ca72ecea92b5450274e">stepperPosMax</a> );</div>
-<div class="line"><span class="lineno">  287</span> </div>
-<div class="line"><span class="lineno">  288</span>  <span class="keywordflow">return</span> posStepperNew;</div>
-<div class="line"><span class="lineno">  289</span>}</div>
+<div class="line"><span class="lineno">  271</span>    <span class="keywordtype">float</span> m1 = -1000;</div>
+<div class="line"><span class="lineno">  272</span>    <span class="keywordflow">if</span> (MOVE_STEPS_FOR_1KG &gt; 0)</div>
+<div class="line"><span class="lineno">  273</span>    {</div>
+<div class="line"><span class="lineno">  274</span>      m1 = -1. / MOVE_STEPS_FOR_1KG; <span class="comment">// line has negative slope --&gt; pedal moves towards the front endstop will increase the loadcell reading as it pushes more against the foot</span></div>
+<div class="line"><span class="lineno">  275</span>    }</div>
+<div class="line"><span class="lineno">  276</span>    </div>
+<div class="line"><span class="lineno">  277</span>    <span class="keywordtype">float</span> m2 = gradient_force_curve_fl32;</div>
+<div class="line"><span class="lineno">  278</span>    </div>
+<div class="line"><span class="lineno">  279</span>    <span class="comment">// Newton update</span></div>
+<div class="line"><span class="lineno">  280</span>    <span class="keywordtype">float</span> denom = m1 - m2;</div>
+<div class="line"><span class="lineno">  281</span>    <span class="keywordflow">if</span> ( fabs(denom) &gt; 0 )</div>
+<div class="line"><span class="lineno">  282</span>    {</div>
+<div class="line"><span class="lineno">  283</span>      stepperPos -= ( loadCellReadingKg_corrected - loadCellTargetKg) / ( denom );</div>
+<div class="line"><span class="lineno">  284</span>    }</div>
+<div class="line"><span class="lineno">  285</span>  }</div>
+<div class="line"><span class="lineno">  286</span>    </div>
+<div class="line"><span class="lineno">  287</span>  <span class="comment">// limit the position update</span></div>
+<div class="line"><span class="lineno">  288</span>  <span class="keywordtype">float</span> deltaMax = 0.5 * (float)(calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#acec2fd87af191ca72ecea92b5450274e">stepperPosMax</a> - calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#aa158b70f0328e458133519d9acbbf267">stepperPosMin</a>);</div>
+<div class="line"><span class="lineno">  289</span>  int32_t posStepperNew = constrain(stepperPos, stepperPos_initial-deltaMax, stepperPos_initial+deltaMax );</div>
+<div class="line"><span class="lineno">  290</span> </div>
+<div class="line"><span class="lineno">  291</span>  <span class="comment">// clamp target position to range</span></div>
+<div class="line"><span class="lineno">  292</span>  posStepperNew = constrain(posStepperNew,calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#aa158b70f0328e458133519d9acbbf267">stepperPosMin</a>,calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#acec2fd87af191ca72ecea92b5450274e">stepperPosMax</a> );</div>
+<div class="line"><span class="lineno">  293</span> </div>
+<div class="line"><span class="lineno">  294</span>  <span class="keywordflow">return</span> posStepperNew;</div>
+<div class="line"><span class="lineno">  295</span>}</div>
 <div class="ttc" id="aStepperMovementStrategy_8h_html_aae08e582c5666c00da8bd6b792a7356b"><div class="ttname"><a href="StepperMovementStrategy_8h.html#aae08e582c5666c00da8bd6b792a7356b">MAX_NUMBER_OF_NEWTON_STEPS</a></div><div class="ttdeci">#define MAX_NUMBER_OF_NEWTON_STEPS</div></div>
 <div class="ttc" id="aStepperWithLimits_8h_html_a5e757657a6f06254eb1446089d6444a6"><div class="ttname"><a href="StepperWithLimits_8h.html#a5e757657a6f06254eb1446089d6444a6">STEPS_PER_MOTOR_REVOLUTION</a></div><div class="ttdeci">static const uint32_t STEPS_PER_MOTOR_REVOLUTION</div><div class="ttdef"><b>Definition:</b> <a href="StepperWithLimits_8h_source.html#l00007">StepperWithLimits.h:7</a></div></div>
 <div class="ttc" id="aclassForceCurve__Interpolated_html_a765eedafeea4e8688e418b35cda4f840"><div class="ttname"><a href="classForceCurve__Interpolated.html#a765eedafeea4e8688e418b35cda4f840">ForceCurve_Interpolated::EvalForceCubicSpline</a></div><div class="ttdeci">float EvalForceCubicSpline(const DAP_config_st *config_st, const DAP_calculationVariables_st *calc_st, float fractionalPos)</div><div class="ttdef"><b>Definition:</b> <a href="ForceCurve_8cpp_source.html#l00014">ForceCurve.cpp:14</a></div></div>
-<div class="ttc" id="aclassForceCurve__Interpolated_html_a91e1f36518f48944e9779c32c1a3ad51"><div class="ttname"><a href="classForceCurve__Interpolated.html#a91e1f36518f48944e9779c32c1a3ad51">ForceCurve_Interpolated::EvalForceGradientCubicSpline</a></div><div class="ttdeci">float EvalForceGradientCubicSpline(const DAP_config_st *config_st, const DAP_calculationVariables_st *calc_st, float fractionalPos, bool normalized_b)</div><div class="ttdef"><b>Definition:</b> <a href="ForceCurve_8cpp_source.html#l00051">ForceCurve.cpp:51</a></div></div>
+<div class="ttc" id="aclassForceCurve__Interpolated_html_a91e1f36518f48944e9779c32c1a3ad51"><div class="ttname"><a href="classForceCurve__Interpolated.html#a91e1f36518f48944e9779c32c1a3ad51">ForceCurve_Interpolated::EvalForceGradientCubicSpline</a></div><div class="ttdeci">float EvalForceGradientCubicSpline(const DAP_config_st *config_st, const DAP_calculationVariables_st *calc_st, float fractionalPos, bool normalized_b)</div><div class="ttdef"><b>Definition:</b> <a href="ForceCurve_8cpp_source.html#l00059">ForceCurve.cpp:59</a></div></div>
 <div class="ttc" id="aclassStepperWithLimits_html_a866100a58cdcdb1bddb56fc9d2092924"><div class="ttname"><a href="classStepperWithLimits.html#a866100a58cdcdb1bddb56fc9d2092924">StepperWithLimits::getCurrentPositionFractionFromExternalPos</a></div><div class="ttdeci">double getCurrentPositionFractionFromExternalPos(int32_t extPos_i32) const</div><div class="ttdef"><b>Definition:</b> <a href="Main_2StepperWithLimits_8cpp_source.html#l00240">StepperWithLimits.cpp:240</a></div></div>
 <div class="ttc" id="aclassStepperWithLimits_html_a9387288097ea2cb4dbf120d8df003177"><div class="ttname"><a href="classStepperWithLimits.html#a9387288097ea2cb4dbf120d8df003177">StepperWithLimits::getCurrentPosition</a></div><div class="ttdeci">int32_t getCurrentPosition() const</div><div class="ttdef"><b>Definition:</b> <a href="Main_2StepperWithLimits_8cpp_source.html#l00231">StepperWithLimits.cpp:231</a></div></div>
 <div class="ttc" id="astructDAP__calculationVariables__st_html_aa158b70f0328e458133519d9acbbf267"><div class="ttname"><a href="structDAP__calculationVariables__st.html#aa158b70f0328e458133519d9acbbf267">DAP_calculationVariables_st::stepperPosMin</a></div><div class="ttdeci">long stepperPosMin</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00209">DiyActivePedal_types.h:209</a></div></div>
@@ -713,39 +713,45 @@ Here is the call graph for this function:</div>
 <div class="line"><span class="lineno">  157</span>  <span class="comment">//    https://www.youtube.com/watch?v=XaD8Lngfkzk</span></div>
 <div class="line"><span class="lineno">  158</span>  <span class="comment">//    https://github.com/pronenewbits/Arduino_Constrained_MPC_Library</span></div>
 <div class="line"><span class="lineno">  159</span> </div>
-<div class="line"><span class="lineno">  160</span> </div>
-<div class="line"><span class="lineno">  161</span>  <a class="code hl_variable" href="StepperMovementStrategy_8h.html#a651f98f57843e7ac1d346db755aefb98">Input</a> = ( loadCellReadingKg_clip - calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958">Force_Min</a>) / calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">Force_Range</a>;</div>
-<div class="line"><span class="lineno">  162</span>  <a class="code hl_variable" href="StepperMovementStrategy_8h.html#a08c9249c57b274375c6fe56a2dac7ac1">Setpoint</a> = ( loadCellTargetKg_clip - calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958">Force_Min</a>) / calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">Force_Range</a>; </div>
-<div class="line"><span class="lineno">  163</span> </div>
-<div class="line"><span class="lineno">  164</span>  <span class="comment">// compute PID output</span></div>
-<div class="line"><span class="lineno">  165</span>  myPID.Compute();</div>
-<div class="line"><span class="lineno">  166</span> </div>
-<div class="line"><span class="lineno">  167</span>  <span class="comment">// integrate the position update</span></div>
-<div class="line"><span class="lineno">  168</span>  <span class="comment">// The setpoint comes from the force curve. The input comes from the loadcell. When the loadcell reading is below the force curve, the difference becomes positive. </span></div>
-<div class="line"><span class="lineno">  169</span>  <span class="comment">// Thus, the stepper has to move towards the foot to increase the loadcell reading.</span></div>
-<div class="line"><span class="lineno">  170</span>  <span class="comment">// Since the QuickPID has some filtering applied on the input, both variables are changed for performance reasons.</span></div>
-<div class="line"><span class="lineno">  171</span>  <span class="keywordtype">float</span> posStepperNew_fl32 = stepperPosFraction - <a class="code hl_variable" href="StepperMovementStrategy_8h.html#acda7a5c6dbdb658e7ce3704bc39e7eb6">Output</a>;</div>
-<div class="line"><span class="lineno">  172</span>  posStepperNew_fl32 *= (float)(calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#acec2fd87af191ca72ecea92b5450274e">stepperPosMax</a> - calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#aa158b70f0328e458133519d9acbbf267">stepperPosMin</a>);</div>
-<div class="line"><span class="lineno">  173</span>  posStepperNew_fl32 += calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#aa158b70f0328e458133519d9acbbf267">stepperPosMin</a>;</div>
-<div class="line"><span class="lineno">  174</span> </div>
-<div class="line"><span class="lineno">  175</span>  <span class="comment">// add velocity feedforward</span></div>
-<div class="line"><span class="lineno">  176</span>  posStepperNew_fl32 += changeVelocity * config_st-&gt;<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#a7b12d1ad634a99552afb19617aa8f8f7">PID_velocity_feedforward_gain</a>;</div>
-<div class="line"><span class="lineno">  177</span> </div>
-<div class="line"><span class="lineno">  178</span>  <span class="comment">// convert position to integer</span></div>
-<div class="line"><span class="lineno">  179</span>  int32_t posStepperNew = floor(posStepperNew_fl32);</div>
-<div class="line"><span class="lineno">  180</span>  </div>
-<div class="line"><span class="lineno">  181</span>  <span class="comment">// clamp target position to range</span></div>
-<div class="line"><span class="lineno">  182</span>  posStepperNew=constrain(posStepperNew,calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#aa158b70f0328e458133519d9acbbf267">stepperPosMin</a>,calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#acec2fd87af191ca72ecea92b5450274e">stepperPosMax</a> );</div>
+<div class="line"><span class="lineno">  160</span>  <span class="keywordflow">if</span> (calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">Force_Range</a> &gt; 0.001)</div>
+<div class="line"><span class="lineno">  161</span>  {</div>
+<div class="line"><span class="lineno">  162</span>      <a class="code hl_variable" href="StepperMovementStrategy_8h.html#a651f98f57843e7ac1d346db755aefb98">Input</a> = ( loadCellReadingKg_clip - calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958">Force_Min</a>) / calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">Force_Range</a>;</div>
+<div class="line"><span class="lineno">  163</span>      <a class="code hl_variable" href="StepperMovementStrategy_8h.html#a08c9249c57b274375c6fe56a2dac7ac1">Setpoint</a> = ( loadCellTargetKg_clip - calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958">Force_Min</a>) / calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">Force_Range</a>; </div>
+<div class="line"><span class="lineno">  164</span>  }</div>
+<div class="line"><span class="lineno">  165</span>  <span class="keywordflow">else</span></div>
+<div class="line"><span class="lineno">  166</span>  {</div>
+<div class="line"><span class="lineno">  167</span>    <a class="code hl_variable" href="StepperMovementStrategy_8h.html#a651f98f57843e7ac1d346db755aefb98">Input</a> = 0;</div>
+<div class="line"><span class="lineno">  168</span>    <a class="code hl_variable" href="StepperMovementStrategy_8h.html#a08c9249c57b274375c6fe56a2dac7ac1">Setpoint</a>= 0;</div>
+<div class="line"><span class="lineno">  169</span>  }</div>
+<div class="line"><span class="lineno">  170</span>  <span class="comment">// compute PID output</span></div>
+<div class="line"><span class="lineno">  171</span>  myPID.Compute();</div>
+<div class="line"><span class="lineno">  172</span> </div>
+<div class="line"><span class="lineno">  173</span>  <span class="comment">// integrate the position update</span></div>
+<div class="line"><span class="lineno">  174</span>  <span class="comment">// The setpoint comes from the force curve. The input comes from the loadcell. When the loadcell reading is below the force curve, the difference becomes positive. </span></div>
+<div class="line"><span class="lineno">  175</span>  <span class="comment">// Thus, the stepper has to move towards the foot to increase the loadcell reading.</span></div>
+<div class="line"><span class="lineno">  176</span>  <span class="comment">// Since the QuickPID has some filtering applied on the input, both variables are changed for performance reasons.</span></div>
+<div class="line"><span class="lineno">  177</span>  <span class="keywordtype">float</span> posStepperNew_fl32 = stepperPosFraction - <a class="code hl_variable" href="StepperMovementStrategy_8h.html#acda7a5c6dbdb658e7ce3704bc39e7eb6">Output</a>;</div>
+<div class="line"><span class="lineno">  178</span>  posStepperNew_fl32 *= (float)(calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#acec2fd87af191ca72ecea92b5450274e">stepperPosMax</a> - calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#aa158b70f0328e458133519d9acbbf267">stepperPosMin</a>);</div>
+<div class="line"><span class="lineno">  179</span>  posStepperNew_fl32 += calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#aa158b70f0328e458133519d9acbbf267">stepperPosMin</a>;</div>
+<div class="line"><span class="lineno">  180</span> </div>
+<div class="line"><span class="lineno">  181</span>  <span class="comment">// add velocity feedforward</span></div>
+<div class="line"><span class="lineno">  182</span>  posStepperNew_fl32 += changeVelocity * config_st-&gt;<a class="code hl_variable" href="structDAP__config__st.html#a1ec5a3656ddbc7b2705ec005d24e34bb">payLoadPedalConfig_</a>.<a class="code hl_variable" href="structpayloadPedalConfig.html#a7b12d1ad634a99552afb19617aa8f8f7">PID_velocity_feedforward_gain</a>;</div>
 <div class="line"><span class="lineno">  183</span> </div>
-<div class="line"><span class="lineno">  184</span>  <span class="comment">//#define PLOT_PID_VALUES</span></div>
-<div class="line"><span class="lineno">  185</span><span class="preprocessor">  #ifdef PLOT_PID_VALUES</span></div>
-<div class="line"><span class="lineno">  186</span>    <span class="keyword">static</span> <a class="code hl_class" href="classRTDebugOutput.html">RTDebugOutput&lt;float, 8&gt;</a> rtDebugFilter({ <span class="stringliteral">&quot;stepperPosFraction&quot;</span>, <span class="stringliteral">&quot;loadCellTargetKg&quot;</span>, <span class="stringliteral">&quot;loadCellReadingKg&quot;</span>, <span class="stringliteral">&quot;loadCellReadingKg_clip&quot;</span>, <span class="stringliteral">&quot;Setpoint&quot;</span>, <span class="stringliteral">&quot;Input&quot;</span>, <span class="stringliteral">&quot;Output&quot;</span>, <span class="stringliteral">&quot;posStepperNew&quot;</span>});</div>
-<div class="line"><span class="lineno">  187</span>    rtDebugFilter.<a class="code hl_function" href="classRTDebugOutput.html#a5af3bb9ea5c877fe34db54b41c2f9f81">offerData</a>({ stepperPosFraction, loadCellTargetKg, loadCellReadingKg, loadCellReadingKg_clip, <a class="code hl_variable" href="StepperMovementStrategy_8h.html#a08c9249c57b274375c6fe56a2dac7ac1">Setpoint</a>, <a class="code hl_variable" href="StepperMovementStrategy_8h.html#a651f98f57843e7ac1d346db755aefb98">Input</a>, <a class="code hl_variable" href="StepperMovementStrategy_8h.html#acda7a5c6dbdb658e7ce3704bc39e7eb6">Output</a>, posStepperNew});       </div>
-<div class="line"><span class="lineno">  188</span><span class="preprocessor">  #endif</span></div>
-<div class="line"><span class="lineno">  189</span>  </div>
-<div class="line"><span class="lineno">  190</span> </div>
-<div class="line"><span class="lineno">  191</span>  <span class="keywordflow">return</span> posStepperNew;</div>
-<div class="line"><span class="lineno">  192</span>}</div>
+<div class="line"><span class="lineno">  184</span>  <span class="comment">// convert position to integer</span></div>
+<div class="line"><span class="lineno">  185</span>  int32_t posStepperNew = floor(posStepperNew_fl32);</div>
+<div class="line"><span class="lineno">  186</span>  </div>
+<div class="line"><span class="lineno">  187</span>  <span class="comment">// clamp target position to range</span></div>
+<div class="line"><span class="lineno">  188</span>  posStepperNew=constrain(posStepperNew,calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#aa158b70f0328e458133519d9acbbf267">stepperPosMin</a>,calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#acec2fd87af191ca72ecea92b5450274e">stepperPosMax</a> );</div>
+<div class="line"><span class="lineno">  189</span> </div>
+<div class="line"><span class="lineno">  190</span>  <span class="comment">//#define PLOT_PID_VALUES</span></div>
+<div class="line"><span class="lineno">  191</span><span class="preprocessor">  #ifdef PLOT_PID_VALUES</span></div>
+<div class="line"><span class="lineno">  192</span>    <span class="keyword">static</span> <a class="code hl_class" href="classRTDebugOutput.html">RTDebugOutput&lt;float, 8&gt;</a> rtDebugFilter({ <span class="stringliteral">&quot;stepperPosFraction&quot;</span>, <span class="stringliteral">&quot;loadCellTargetKg&quot;</span>, <span class="stringliteral">&quot;loadCellReadingKg&quot;</span>, <span class="stringliteral">&quot;loadCellReadingKg_clip&quot;</span>, <span class="stringliteral">&quot;Setpoint&quot;</span>, <span class="stringliteral">&quot;Input&quot;</span>, <span class="stringliteral">&quot;Output&quot;</span>, <span class="stringliteral">&quot;posStepperNew&quot;</span>});</div>
+<div class="line"><span class="lineno">  193</span>    rtDebugFilter.<a class="code hl_function" href="classRTDebugOutput.html#a5af3bb9ea5c877fe34db54b41c2f9f81">offerData</a>({ stepperPosFraction, loadCellTargetKg, loadCellReadingKg, loadCellReadingKg_clip, <a class="code hl_variable" href="StepperMovementStrategy_8h.html#a08c9249c57b274375c6fe56a2dac7ac1">Setpoint</a>, <a class="code hl_variable" href="StepperMovementStrategy_8h.html#a651f98f57843e7ac1d346db755aefb98">Input</a>, <a class="code hl_variable" href="StepperMovementStrategy_8h.html#acda7a5c6dbdb658e7ce3704bc39e7eb6">Output</a>, posStepperNew});       </div>
+<div class="line"><span class="lineno">  194</span><span class="preprocessor">  #endif</span></div>
+<div class="line"><span class="lineno">  195</span>  </div>
+<div class="line"><span class="lineno">  196</span> </div>
+<div class="line"><span class="lineno">  197</span>  <span class="keywordflow">return</span> posStepperNew;</div>
+<div class="line"><span class="lineno">  198</span>}</div>
 <div class="ttc" id="aMain_8h_html_a04dac192055253ed6a6c3d3b653dc356"><div class="ttname"><a href="Main_8h.html#a04dac192055253ed6a6c3d3b653dc356">PUT_TARGET_CYCLE_TIME_IN_US</a></div><div class="ttdeci">#define PUT_TARGET_CYCLE_TIME_IN_US</div><div class="ttdef"><b>Definition:</b> <a href="Main_8h_source.html#l00043">Main.h:43</a></div></div>
 <div class="ttc" id="aStepperMovementStrategy_8h_html_a08c9249c57b274375c6fe56a2dac7ac1"><div class="ttname"><a href="StepperMovementStrategy_8h.html#a08c9249c57b274375c6fe56a2dac7ac1">Setpoint</a></div><div class="ttdeci">float Setpoint</div><div class="ttdef"><b>Definition:</b> <a href="StepperMovementStrategy_8h_source.html#l00014">StepperMovementStrategy.h:14</a></div></div>
 <div class="ttc" id="aStepperMovementStrategy_8h_html_a1b46b5dbb939e42eff50b99cef6dc98d"><div class="ttname"><a href="StepperMovementStrategy_8h.html#a1b46b5dbb939e42eff50b99cef6dc98d">PID_OUTPUT_LIMIT_FL32</a></div><div class="ttdeci">#define PID_OUTPUT_LIMIT_FL32</div><div class="ttdef"><b>Definition:</b> <a href="StepperMovementStrategy_8h_source.html#l00026">StepperMovementStrategy.h:26</a></div></div>
@@ -830,100 +836,100 @@ Here is the call graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="StepperMovementStrategy_8h_source.html#l00292">292</a> of file <a class="el" href="StepperMovementStrategy_8h_source.html">StepperMovementStrategy.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  293</span>{</div>
-<div class="line"><span class="lineno">  294</span> </div>
-<div class="line"><span class="lineno">  295</span> </div>
-<div class="line"><span class="lineno">  296</span> </div>
-<div class="line"><span class="lineno">  297</span>  <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">float</span> MOVE_MM_FOR_1KG = 3.0;</div>
-<div class="line"><span class="lineno">  298</span>  <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">float</span> MOVE_STEPS_FOR_1KG = (MOVE_MM_FOR_1KG / <a class="code hl_variable" href="PedalGeometry_8h.html#a6393674b6c2a8915f78b5bca3a6651cf">TRAVEL_PER_ROTATION_IN_MM</a>) * <a class="code hl_variable" href="StepperWithLimits_8h.html#a5e757657a6f06254eb1446089d6444a6">STEPS_PER_MOTOR_REVOLUTION</a>;</div>
-<div class="line"><span class="lineno">  299</span> </div>
+<p class="definition">Definition at line <a class="el" href="StepperMovementStrategy_8h_source.html#l00298">298</a> of file <a class="el" href="StepperMovementStrategy_8h_source.html">StepperMovementStrategy.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  299</span>{</div>
 <div class="line"><span class="lineno">  300</span> </div>
 <div class="line"><span class="lineno">  301</span> </div>
-<div class="line"><span class="lineno">  302</span>  <span class="comment">// get target force at current location</span></div>
-<div class="line"><span class="lineno">  303</span>  <span class="keywordtype">float</span> loadCellTargetKg = forceCurve-&gt;<a class="code hl_function" href="classForceCurve__Interpolated.html#a765eedafeea4e8688e418b35cda4f840">EvalForceCubicSpline</a>(config_st, calc_st, stepperPosFraction);</div>
-<div class="line"><span class="lineno">  304</span>  loadCellTargetKg -=absForceOffset_fl32;</div>
+<div class="line"><span class="lineno">  302</span> </div>
+<div class="line"><span class="lineno">  303</span>  <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">float</span> MOVE_MM_FOR_1KG = 3.0;</div>
+<div class="line"><span class="lineno">  304</span>  <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">float</span> MOVE_STEPS_FOR_1KG = (MOVE_MM_FOR_1KG / <a class="code hl_variable" href="PedalGeometry_8h.html#a6393674b6c2a8915f78b5bca3a6651cf">TRAVEL_PER_ROTATION_IN_MM</a>) * <a class="code hl_variable" href="StepperWithLimits_8h.html#a5e757657a6f06254eb1446089d6444a6">STEPS_PER_MOTOR_REVOLUTION</a>;</div>
 <div class="line"><span class="lineno">  305</span> </div>
-<div class="line"><span class="lineno">  306</span>  </div>
+<div class="line"><span class="lineno">  306</span> </div>
 <div class="line"><span class="lineno">  307</span> </div>
-<div class="line"><span class="lineno">  308</span>  <span class="comment">// get loadcell reading</span></div>
-<div class="line"><span class="lineno">  309</span>  <span class="keywordtype">float</span> loadCellReadingKg_clip = constrain(loadCellReadingKg, calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958">Force_Min</a>, calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#a1c2f7c9db353e05269035de94cd82aba">Force_Max</a>);</div>
-<div class="line"><span class="lineno">  310</span> </div>
-<div class="line"><span class="lineno">  311</span>  </div>
+<div class="line"><span class="lineno">  308</span>  <span class="comment">// get target force at current location</span></div>
+<div class="line"><span class="lineno">  309</span>  <span class="keywordtype">float</span> loadCellTargetKg = forceCurve-&gt;<a class="code hl_function" href="classForceCurve__Interpolated.html#a765eedafeea4e8688e418b35cda4f840">EvalForceCubicSpline</a>(config_st, calc_st, stepperPosFraction);</div>
+<div class="line"><span class="lineno">  310</span>  loadCellTargetKg -=absForceOffset_fl32;</div>
+<div class="line"><span class="lineno">  311</span> </div>
 <div class="line"><span class="lineno">  312</span>  </div>
-<div class="line"><span class="lineno">  313</span>  <span class="comment">// if target force at location is lower than loadcell reading --&gt; move towards the foot k_f * n_steps</span></div>
-<div class="line"><span class="lineno">  314</span> </div>
-<div class="line"><span class="lineno">  315</span>  <span class="comment">// Take into account system constraints like stepper rpm &amp; acceleration</span></div>
+<div class="line"><span class="lineno">  313</span> </div>
+<div class="line"><span class="lineno">  314</span>  <span class="comment">// get loadcell reading</span></div>
+<div class="line"><span class="lineno">  315</span>  <span class="keywordtype">float</span> loadCellReadingKg_clip = constrain(loadCellReadingKg, calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#af556ab515de584075f7fe94b94d4d958">Force_Min</a>, calc_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#a1c2f7c9db353e05269035de94cd82aba">Force_Max</a>);</div>
 <div class="line"><span class="lineno">  316</span> </div>
 <div class="line"><span class="lineno">  317</span>  </div>
-<div class="line"><span class="lineno">  318</span> </div>
-<div class="line"><span class="lineno">  319</span>  <span class="comment">// if target force at location is lower than loadcell reading --&gt; move away from the foot -k_f * n_steps</span></div>
+<div class="line"><span class="lineno">  318</span>  </div>
+<div class="line"><span class="lineno">  319</span>  <span class="comment">// if target force at location is lower than loadcell reading --&gt; move towards the foot k_f * n_steps</span></div>
 <div class="line"><span class="lineno">  320</span> </div>
-<div class="line"><span class="lineno">  321</span>  </div>
+<div class="line"><span class="lineno">  321</span>  <span class="comment">// Take into account system constraints like stepper rpm &amp; acceleration</span></div>
 <div class="line"><span class="lineno">  322</span> </div>
-<div class="line"><span class="lineno">  323</span>  <span class="comment">// predict target force at new location and compare to predicted force --&gt; compute cost matrix</span></div>
+<div class="line"><span class="lineno">  323</span>  </div>
 <div class="line"><span class="lineno">  324</span> </div>
-<div class="line"><span class="lineno">  325</span>  </div>
-<div class="line"><span class="lineno">  326</span>  </div>
-<div class="line"><span class="lineno">  327</span> </div>
-<div class="line"><span class="lineno">  328</span>  </div>
-<div class="line"><span class="lineno">  329</span> </div>
-<div class="line"><span class="lineno">  330</span>  </div>
-<div class="line"><span class="lineno">  331</span> </div>
-<div class="line"><span class="lineno">  332</span>  <span class="comment">// e_k = r^2 = (F_lc - k * (delta_x_0) - F_t(x_0 + delta_x_0))^2</span></div>
+<div class="line"><span class="lineno">  325</span>  <span class="comment">// if target force at location is lower than loadcell reading --&gt; move away from the foot -k_f * n_steps</span></div>
+<div class="line"><span class="lineno">  326</span> </div>
+<div class="line"><span class="lineno">  327</span>  </div>
+<div class="line"><span class="lineno">  328</span> </div>
+<div class="line"><span class="lineno">  329</span>  <span class="comment">// predict target force at new location and compare to predicted force --&gt; compute cost matrix</span></div>
+<div class="line"><span class="lineno">  330</span> </div>
+<div class="line"><span class="lineno">  331</span>  </div>
+<div class="line"><span class="lineno">  332</span>  </div>
 <div class="line"><span class="lineno">  333</span> </div>
-<div class="line"><span class="lineno">  334</span>  <span class="comment">// r: force residue</span></div>
+<div class="line"><span class="lineno">  334</span>  </div>
 <div class="line"><span class="lineno">  335</span> </div>
-<div class="line"><span class="lineno">  336</span>  <span class="comment">// e: cost</span></div>
+<div class="line"><span class="lineno">  336</span>  </div>
 <div class="line"><span class="lineno">  337</span> </div>
-<div class="line"><span class="lineno">  338</span>  <span class="comment">// F_lc: current loadcell measurement</span></div>
+<div class="line"><span class="lineno">  338</span>  <span class="comment">// e_k = r^2 = (F_lc - k * (delta_x_0) - F_t(x_0 + delta_x_0))^2</span></div>
 <div class="line"><span class="lineno">  339</span> </div>
-<div class="line"><span class="lineno">  340</span>  <span class="comment">// k: sping stiffness of the foot</span></div>
+<div class="line"><span class="lineno">  340</span>  <span class="comment">// r: force residue</span></div>
 <div class="line"><span class="lineno">  341</span> </div>
-<div class="line"><span class="lineno">  342</span>  <span class="comment">// x_0: current stepper position</span></div>
+<div class="line"><span class="lineno">  342</span>  <span class="comment">// e: cost</span></div>
 <div class="line"><span class="lineno">  343</span> </div>
-<div class="line"><span class="lineno">  344</span>  <span class="comment">// x_1: next stepper pos</span></div>
+<div class="line"><span class="lineno">  344</span>  <span class="comment">// F_lc: current loadcell measurement</span></div>
 <div class="line"><span class="lineno">  345</span> </div>
-<div class="line"><span class="lineno">  346</span>  <span class="comment">// delta_x_0 = x_1 - x_0: step update at time step 0</span></div>
+<div class="line"><span class="lineno">  346</span>  <span class="comment">// k: sping stiffness of the foot</span></div>
 <div class="line"><span class="lineno">  347</span> </div>
-<div class="line"><span class="lineno">  348</span>  <span class="comment">// F_t(x): target force at location</span></div>
+<div class="line"><span class="lineno">  348</span>  <span class="comment">// x_0: current stepper position</span></div>
 <div class="line"><span class="lineno">  349</span> </div>
-<div class="line"><span class="lineno">  350</span>  </div>
+<div class="line"><span class="lineno">  350</span>  <span class="comment">// x_1: next stepper pos</span></div>
 <div class="line"><span class="lineno">  351</span> </div>
-<div class="line"><span class="lineno">  352</span>  </div>
+<div class="line"><span class="lineno">  352</span>  <span class="comment">// delta_x_0 = x_1 - x_0: step update at time step 0</span></div>
 <div class="line"><span class="lineno">  353</span> </div>
-<div class="line"><span class="lineno">  354</span>  <span class="comment">// minimize e with x_1</span></div>
+<div class="line"><span class="lineno">  354</span>  <span class="comment">// F_t(x): target force at location</span></div>
 <div class="line"><span class="lineno">  355</span> </div>
-<div class="line"><span class="lineno">  356</span>  <span class="comment">// d[e(delta_x_0)] / d[delta_x_0] == 0</span></div>
+<div class="line"><span class="lineno">  356</span>  </div>
 <div class="line"><span class="lineno">  357</span> </div>
 <div class="line"><span class="lineno">  358</span>  </div>
 <div class="line"><span class="lineno">  359</span> </div>
-<div class="line"><span class="lineno">  360</span>  <span class="comment">// d[e] / d[delta_x_0] = d[e] / d[r] * d[r] / d[delta_x_0]</span></div>
+<div class="line"><span class="lineno">  360</span>  <span class="comment">// minimize e with x_1</span></div>
 <div class="line"><span class="lineno">  361</span> </div>
-<div class="line"><span class="lineno">  362</span>  <span class="comment">// d[e] / d[r] = 2 * r</span></div>
+<div class="line"><span class="lineno">  362</span>  <span class="comment">// d[e(delta_x_0)] / d[delta_x_0] == 0</span></div>
 <div class="line"><span class="lineno">  363</span> </div>
 <div class="line"><span class="lineno">  364</span>  </div>
 <div class="line"><span class="lineno">  365</span> </div>
-<div class="line"><span class="lineno">  366</span>  <span class="comment">// d[r] / d[delta_x_0] = d[F_lc - k * (delta_x_0) - F_t(x_0 + delta_x_0)] = -k  - d[F_t]/d[delta_x_0]</span></div>
+<div class="line"><span class="lineno">  366</span>  <span class="comment">// d[e] / d[delta_x_0] = d[e] / d[r] * d[r] / d[delta_x_0]</span></div>
 <div class="line"><span class="lineno">  367</span> </div>
-<div class="line"><span class="lineno">  368</span>  </div>
+<div class="line"><span class="lineno">  368</span>  <span class="comment">// d[e] / d[r] = 2 * r</span></div>
 <div class="line"><span class="lineno">  369</span> </div>
 <div class="line"><span class="lineno">  370</span>  </div>
 <div class="line"><span class="lineno">  371</span> </div>
-<div class="line"><span class="lineno">  372</span>  <span class="comment">// MPC: sum up over planing horizon and optimize costs</span></div>
+<div class="line"><span class="lineno">  372</span>  <span class="comment">// d[r] / d[delta_x_0] = d[F_lc - k * (delta_x_0) - F_t(x_0 + delta_x_0)] = -k  - d[F_t]/d[delta_x_0]</span></div>
 <div class="line"><span class="lineno">  373</span> </div>
-<div class="line"><span class="lineno">  374</span>  <span class="comment">// take only the first control value &amp; repeat in the next cycle</span></div>
+<div class="line"><span class="lineno">  374</span>  </div>
 <div class="line"><span class="lineno">  375</span> </div>
-<div class="line"><span class="lineno">  376</span>  <span class="comment">// constraint |delta_x_0| &lt; max step rate</span></div>
+<div class="line"><span class="lineno">  376</span>  </div>
 <div class="line"><span class="lineno">  377</span> </div>
-<div class="line"><span class="lineno">  378</span>  </div>
+<div class="line"><span class="lineno">  378</span>  <span class="comment">// MPC: sum up over planing horizon and optimize costs</span></div>
 <div class="line"><span class="lineno">  379</span> </div>
-<div class="line"><span class="lineno">  380</span>  <span class="comment">// l = sum_k( e_k(delta_x_k, x_0) )</span></div>
+<div class="line"><span class="lineno">  380</span>  <span class="comment">// take only the first control value &amp; repeat in the next cycle</span></div>
 <div class="line"><span class="lineno">  381</span> </div>
-<div class="line"><span class="lineno">  382</span>  <span class="comment">// where k = [0, 1, ..., N]</span></div>
+<div class="line"><span class="lineno">  382</span>  <span class="comment">// constraint |delta_x_0| &lt; max step rate</span></div>
 <div class="line"><span class="lineno">  383</span> </div>
 <div class="line"><span class="lineno">  384</span>  </div>
-<div class="line"><span class="lineno">  385</span>}</div>
+<div class="line"><span class="lineno">  385</span> </div>
+<div class="line"><span class="lineno">  386</span>  <span class="comment">// l = sum_k( e_k(delta_x_k, x_0) )</span></div>
+<div class="line"><span class="lineno">  387</span> </div>
+<div class="line"><span class="lineno">  388</span>  <span class="comment">// where k = [0, 1, ..., N]</span></div>
+<div class="line"><span class="lineno">  389</span> </div>
+<div class="line"><span class="lineno">  390</span>  </div>
+<div class="line"><span class="lineno">  391</span>}</div>
 <div class="ttc" id="aPedalGeometry_8h_html_a6393674b6c2a8915f78b5bca3a6651cf"><div class="ttname"><a href="PedalGeometry_8h.html#a6393674b6c2a8915f78b5bca3a6651cf">TRAVEL_PER_ROTATION_IN_MM</a></div><div class="ttdeci">static const float TRAVEL_PER_ROTATION_IN_MM</div><div class="ttdef"><b>Definition:</b> <a href="PedalGeometry_8h_source.html#l00006">PedalGeometry.h:6</a></div></div>
 </div><!-- fragment --><div class="dynheader">
 Here is the call graph for this function:</div>

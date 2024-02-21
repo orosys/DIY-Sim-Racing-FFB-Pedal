@@ -120,41 +120,45 @@ $(function() {
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>  <span class="keywordtype">float</span> modelNoiseScaling_fl32 = modelNoiseScaling_u8;</div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>  modelNoiseScaling_fl32 /= 255.0;</div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>  <span class="keywordflow">if</span> (elapsedTime &lt; 1) { elapsedTime=1; }</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>  <a class="code hl_variable" href="classKalmanFilter.html#aea7f932e369f80ba7bd0a5cd39c89aeb">_timeLastObservation</a> = currentTime;</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>  <span class="comment">// update state transition and system covariance matrices</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>  <span class="keywordtype">float</span> delta_t = (float)elapsedTime / 1000000.0f; <span class="comment">// convert to seconds</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>  <span class="keywordtype">float</span> delta_t_pow2 = delta_t * delta_t;</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>  <span class="keywordtype">float</span> delta_t_pow3 = delta_t_pow2 * delta_t;</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>  <span class="keywordtype">float</span> delta_t_pow4 = delta_t_pow2 * delta_t_pow2;</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>  <a class="code hl_variable" href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">_K</a>.F = {1.0,  delta_t, </div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>          0.0,  1.0};</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>  <a class="code hl_variable" href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">_K</a>.B = {1.0, </div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>          0.0};</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>  <span class="keywordtype">float</span> K_Q_11 = modelNoiseScaling_fl32 * <a class="code hl_variable" href="PedalGeometry_8cpp.html#aec7950ddffacc3f0760bf13c00ffa875">KF_MODEL_NOISE_FORCE_ACCELERATION</a> * 0.5f * delta_t_pow3;</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>  <a class="code hl_variable" href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">_K</a>.Q = {modelNoiseScaling_fl32 * <a class="code hl_variable" href="PedalGeometry_8cpp.html#aec7950ddffacc3f0760bf13c00ffa875">KF_MODEL_NOISE_FORCE_ACCELERATION</a> * 0.25f * delta_t_pow4,   K_Q_11,</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        K_Q_11, modelNoiseScaling_fl32 * <a class="code hl_variable" href="PedalGeometry_8cpp.html#aec7950ddffacc3f0760bf13c00ffa875">KF_MODEL_NOISE_FORCE_ACCELERATION</a> * delta_t_pow2};</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        </div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>  <span class="comment">// APPLY KALMAN FILTER</span></div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>  <a class="code hl_variable" href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">_K</a>.update({observation}, {command});</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">_K</a>.x(0,0);</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>}</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="classKalmanFilter.html#ac3fffc5e4025a53f7cb5d3d6f659bdf2">   70</a></span><span class="keywordtype">float</span> <a class="code hl_function" href="classKalmanFilter.html#ac3fffc5e4025a53f7cb5d3d6f659bdf2">KalmanFilter::changeVelocity</a>() {</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">_K</a>.x(0,1);</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>  <span class="keywordflow">if</span> (modelNoiseScaling_fl32 &lt; 0.001)</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>  {</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    modelNoiseScaling_fl32 = 0.001;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>  }</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>  <span class="keywordflow">if</span> (elapsedTime &lt; 1) { elapsedTime=1; }</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>  <a class="code hl_variable" href="classKalmanFilter.html#aea7f932e369f80ba7bd0a5cd39c89aeb">_timeLastObservation</a> = currentTime;</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>  <span class="comment">// update state transition and system covariance matrices</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>  <span class="keywordtype">float</span> delta_t = (float)elapsedTime / 1000000.0f; <span class="comment">// convert to seconds</span></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>  <span class="keywordtype">float</span> delta_t_pow2 = delta_t * delta_t;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>  <span class="keywordtype">float</span> delta_t_pow3 = delta_t_pow2 * delta_t;</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>  <span class="keywordtype">float</span> delta_t_pow4 = delta_t_pow2 * delta_t_pow2;</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>  <a class="code hl_variable" href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">_K</a>.F = {1.0,  delta_t, </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>          0.0,  1.0};</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>  <a class="code hl_variable" href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">_K</a>.B = {1.0, </div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>          0.0};</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>  <span class="keywordtype">float</span> K_Q_11 = modelNoiseScaling_fl32 * <a class="code hl_variable" href="PedalGeometry_8cpp.html#aec7950ddffacc3f0760bf13c00ffa875">KF_MODEL_NOISE_FORCE_ACCELERATION</a> * 0.5f * delta_t_pow3;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>  <a class="code hl_variable" href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">_K</a>.Q = {modelNoiseScaling_fl32 * <a class="code hl_variable" href="PedalGeometry_8cpp.html#aec7950ddffacc3f0760bf13c00ffa875">KF_MODEL_NOISE_FORCE_ACCELERATION</a> * 0.25f * delta_t_pow4,   K_Q_11,</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        K_Q_11, modelNoiseScaling_fl32 * <a class="code hl_variable" href="PedalGeometry_8cpp.html#aec7950ddffacc3f0760bf13c00ffa875">KF_MODEL_NOISE_FORCE_ACCELERATION</a> * delta_t_pow2};</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        </div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>  <span class="comment">// APPLY KALMAN FILTER</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>  <a class="code hl_variable" href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">_K</a>.update({observation}, {command});</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">_K</a>.x(0,0);</div>
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>}</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno"><a class="line" href="classKalmanFilter.html#ac3fffc5e4025a53f7cb5d3d6f659bdf2">   74</a></span><span class="keywordtype">float</span> <a class="code hl_function" href="classKalmanFilter.html#ac3fffc5e4025a53f7cb5d3d6f659bdf2">KalmanFilter::changeVelocity</a>() {</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">_K</a>.x(0,1);</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>}</div>
 <div class="ttc" id="aPedalGeometry_8cpp_html_a41707de327d3905607ecfb6172f88f0f"><div class="ttname"><a href="PedalGeometry_8cpp.html#a41707de327d3905607ecfb6172f88f0f">_timeLastObservation</a></div><div class="ttdeci">unsigned long _timeLastObservation</div><div class="ttdef"><b>Definition:</b> <a href="PedalGeometry_8cpp_source.html#l00006">PedalGeometry.cpp:6</a></div></div>
 <div class="ttc" id="aPedalGeometry_8cpp_html_aec7950ddffacc3f0760bf13c00ffa875"><div class="ttname"><a href="PedalGeometry_8cpp.html#aec7950ddffacc3f0760bf13c00ffa875">KF_MODEL_NOISE_FORCE_ACCELERATION</a></div><div class="ttdeci">static const float KF_MODEL_NOISE_FORCE_ACCELERATION</div><div class="ttdef"><b>Definition:</b> <a href="PedalGeometry_8cpp_source.html#l00008">PedalGeometry.cpp:8</a></div></div>
 <div class="ttc" id="aSignalFilter_8cpp_html_aec7950ddffacc3f0760bf13c00ffa875"><div class="ttname"><a href="SignalFilter_8cpp.html#aec7950ddffacc3f0760bf13c00ffa875">KF_MODEL_NOISE_FORCE_ACCELERATION</a></div><div class="ttdeci">static const float KF_MODEL_NOISE_FORCE_ACCELERATION</div><div class="ttdef"><b>Definition:</b> <a href="SignalFilter_8cpp_source.html#l00013">SignalFilter.cpp:13</a></div></div>
 <div class="ttc" id="aSignalFilter_8h_html"><div class="ttname"><a href="SignalFilter_8h.html">SignalFilter.h</a></div></div>
 <div class="ttc" id="aclassKalmanFilter_html_a17598f8b79110a66a42984b04c4e6611"><div class="ttname"><a href="classKalmanFilter.html#a17598f8b79110a66a42984b04c4e6611">KalmanFilter::KalmanFilter</a></div><div class="ttdeci">KalmanFilter(float varianceEstimate)</div><div class="ttdef"><b>Definition:</b> <a href="SignalFilter_8cpp_source.html#l00016">SignalFilter.cpp:16</a></div></div>
 <div class="ttc" id="aclassKalmanFilter_html_a50d0bfbcc244914e2953e6f9f0440857"><div class="ttname"><a href="classKalmanFilter.html#a50d0bfbcc244914e2953e6f9f0440857">KalmanFilter::_K</a></div><div class="ttdeci">KALMAN&lt; Nstate, Nobs, Ncom &gt; _K</div><div class="ttdef"><b>Definition:</b> <a href="SignalFilter_8h_source.html#l00012">SignalFilter.h:12</a></div></div>
-<div class="ttc" id="aclassKalmanFilter_html_ac3fffc5e4025a53f7cb5d3d6f659bdf2"><div class="ttname"><a href="classKalmanFilter.html#ac3fffc5e4025a53f7cb5d3d6f659bdf2">KalmanFilter::changeVelocity</a></div><div class="ttdeci">float changeVelocity()</div><div class="ttdef"><b>Definition:</b> <a href="SignalFilter_8cpp_source.html#l00070">SignalFilter.cpp:70</a></div></div>
+<div class="ttc" id="aclassKalmanFilter_html_ac3fffc5e4025a53f7cb5d3d6f659bdf2"><div class="ttname"><a href="classKalmanFilter.html#ac3fffc5e4025a53f7cb5d3d6f659bdf2">KalmanFilter::changeVelocity</a></div><div class="ttdeci">float changeVelocity()</div><div class="ttdef"><b>Definition:</b> <a href="SignalFilter_8cpp_source.html#l00074">SignalFilter.cpp:74</a></div></div>
 <div class="ttc" id="aclassKalmanFilter_html_ac559f3e571f567c9db4fc66a6b8c78c8"><div class="ttname"><a href="classKalmanFilter.html#ac559f3e571f567c9db4fc66a6b8c78c8">KalmanFilter::filteredValue</a></div><div class="ttdeci">float filteredValue(float observation, float command, uint8_t modelNoiseScaling_u8)</div><div class="ttdef"><b>Definition:</b> <a href="SignalFilter_8cpp_source.html#l00038">SignalFilter.cpp:38</a></div></div>
 <div class="ttc" id="aclassKalmanFilter_html_aea7f932e369f80ba7bd0a5cd39c89aeb"><div class="ttname"><a href="classKalmanFilter.html#aea7f932e369f80ba7bd0a5cd39c89aeb">KalmanFilter::_timeLastObservation</a></div><div class="ttdeci">unsigned long _timeLastObservation</div><div class="ttdef"><b>Definition:</b> <a href="SignalFilter_8h_source.html#l00013">SignalFilter.h:13</a></div></div>
 </div><!-- fragment --></div><!-- contents -->

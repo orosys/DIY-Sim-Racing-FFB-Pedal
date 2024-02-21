@@ -180,13 +180,19 @@ Variables</h2></td></tr>
 <div class="line"><span class="lineno">   38</span>    Serial.println(<span class="stringliteral">&quot;ADC Started&quot;</span>);</div>
 <div class="line"><span class="lineno">   39</span>    </div>
 <div class="line"><span class="lineno">   40</span>    adc.waitDRDY(); <span class="comment">// wait for DRDY to go low before changing multiplexer register</span></div>
-<div class="line"><span class="lineno">   41</span>    adc.setConversionFactor(<a class="code hl_define" href="LoadCell_8cpp.html#a63a75c27912b5c6fd42e3682e252cbc0">CONVERSION_FACTOR</a>);</div>
-<div class="line"><span class="lineno">   42</span> </div>
-<div class="line"><span class="lineno">   43</span>    firstTime = <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">   44</span>  }</div>
-<div class="line"><span class="lineno">   45</span> </div>
-<div class="line"><span class="lineno">   46</span>  <span class="keywordflow">return</span> adc;</div>
-<div class="line"><span class="lineno">   47</span>}</div>
+<div class="line"><span class="lineno">   41</span>    <span class="keywordflow">if</span> ( fabs(<a class="code hl_define" href="LoadCell_8cpp.html#a63a75c27912b5c6fd42e3682e252cbc0">CONVERSION_FACTOR</a>) &gt; 0.01)</div>
+<div class="line"><span class="lineno">   42</span>    {</div>
+<div class="line"><span class="lineno">   43</span>        adc.setConversionFactor(<a class="code hl_define" href="LoadCell_8cpp.html#a63a75c27912b5c6fd42e3682e252cbc0">CONVERSION_FACTOR</a>);</div>
+<div class="line"><span class="lineno">   44</span>    }</div>
+<div class="line"><span class="lineno">   45</span>    <span class="keywordflow">else</span></div>
+<div class="line"><span class="lineno">   46</span>    {</div>
+<div class="line"><span class="lineno">   47</span>        adc.setConversionFactor(1);</div>
+<div class="line"><span class="lineno">   48</span>    }</div>
+<div class="line"><span class="lineno">   49</span>    firstTime = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   50</span>  }</div>
+<div class="line"><span class="lineno">   51</span> </div>
+<div class="line"><span class="lineno">   52</span>  <span class="keywordflow">return</span> adc;</div>
+<div class="line"><span class="lineno">   53</span>}</div>
 <div class="ttc" id="aLoadCell_8cpp_html_a63a75c27912b5c6fd42e3682e252cbc0"><div class="ttname"><a href="LoadCell_8cpp.html#a63a75c27912b5c6fd42e3682e252cbc0">CONVERSION_FACTOR</a></div><div class="ttdeci">#define CONVERSION_FACTOR</div><div class="ttdef"><b>Definition:</b> <a href="LoadCell_8cpp_source.html#l00015">LoadCell.cpp:15</a></div></div>
 <div class="ttc" id="aLoadCell_8cpp_html_ab87b6f0a9d90ea68987f71d0b3860e54"><div class="ttname"><a href="LoadCell_8cpp.html#ab87b6f0a9d90ea68987f71d0b3860e54">ADC_CLOCK_MHZ</a></div><div class="ttdeci">static const float ADC_CLOCK_MHZ</div><div class="ttdef"><b>Definition:</b> <a href="LoadCell_8cpp_source.html#l00007">LoadCell.cpp:7</a></div></div>
 <div class="ttc" id="aLoadCell_8cpp_html_ada119110b2eacdba43c61972c46963e9"><div class="ttname"><a href="LoadCell_8cpp.html#ada119110b2eacdba43c61972c46963e9">ADC_VREF</a></div><div class="ttdeci">static const float ADC_VREF</div><div class="ttdef"><b>Definition:</b> <a href="LoadCell_8cpp_source.html#l00008">LoadCell.cpp:8</a></div></div>

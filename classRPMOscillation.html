@@ -185,38 +185,43 @@ Private Attributes</h2></td></tr>
 <div class="line"><span class="lineno">  122</span>    <span class="keywordtype">float</span> RPM_max_freq = calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#ac1451d24473df986b17644c8e516aa57">RPM_max_freq</a>;</div>
 <div class="line"><span class="lineno">  123</span>    <span class="keywordtype">float</span> RPM_min_freq = calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#a7b53d2a8bda4fd1a8ac0eec833524e19">RPM_min_freq</a>;</div>
 <div class="line"><span class="lineno">  124</span>    <span class="comment">//float RPM_max =10;</span></div>
-<div class="line"><span class="lineno">  125</span>    <span class="keywordtype">float</span> RPM_amp = calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#a355875d1b0cd1024cbea5ee3cb0978db">RPM_AMP</a>;</div>
-<div class="line"><span class="lineno">  126</span>    <span class="keywordflow">if</span>(<a class="code hl_variable" href="classRPMOscillation.html#a67336e19d3aba005123fdd5a6a67e495">RPM_value</a>==0)</div>
-<div class="line"><span class="lineno">  127</span>    {</div>
-<div class="line"><span class="lineno">  128</span>      RPM_min_freq=0;</div>
-<div class="line"><span class="lineno">  129</span>    }</div>
-<div class="line"><span class="lineno">  130</span> </div>
-<div class="line"><span class="lineno">  131</span> </div>
-<div class="line"><span class="lineno">  132</span>    <span class="keywordtype">float</span> RPM_freq=constrain(<a class="code hl_variable" href="classRPMOscillation.html#a67336e19d3aba005123fdd5a6a67e495">RPM_value</a>*(RPM_max_freq-RPM_min_freq)/100, RPM_min_freq, RPM_max_freq);</div>
-<div class="line"><span class="lineno">  133</span>    </div>
-<div class="line"><span class="lineno">  134</span> </div>
-<div class="line"><span class="lineno">  135</span> </div>
-<div class="line"><span class="lineno">  136</span>    <span class="keywordflow">if</span> (timeSinceTrigger &gt; <a class="code hl_variable" href="ABSOscillation_8h.html#ad7c9250452e5f64d4698b354a60d4b1c">RPM_ACTIVE_TIME_PER_TRIGGER_MILLIS</a>)</div>
-<div class="line"><span class="lineno">  137</span>    {</div>
-<div class="line"><span class="lineno">  138</span>      <a class="code hl_variable" href="classRPMOscillation.html#a7786f2b14d758d771fc94d2b3b41993b">_RPMTimeMillis</a> = 0;</div>
-<div class="line"><span class="lineno">  139</span>      RPMForceOffset = <a class="code hl_variable" href="ABSOscillation_8h.html#a51b81e676226d85cde1f82b03fa39937">RPM_VALUE_LAST</a>;</div>
-<div class="line"><span class="lineno">  140</span>    }</div>
-<div class="line"><span class="lineno">  141</span>    <span class="keywordflow">else</span></div>
-<div class="line"><span class="lineno">  142</span>    {</div>
-<div class="line"><span class="lineno">  143</span>      <a class="code hl_variable" href="classRPMOscillation.html#a7786f2b14d758d771fc94d2b3b41993b">_RPMTimeMillis</a> += timeNowMillis - <a class="code hl_variable" href="classRPMOscillation.html#aa4ab00bfa92d40cb0beb4b3944a047bb">_lastCallTimeMillis</a>;</div>
-<div class="line"><span class="lineno">  144</span>      <span class="keywordtype">float</span> RPMTimeSeconds = <a class="code hl_variable" href="classRPMOscillation.html#a7786f2b14d758d771fc94d2b3b41993b">_RPMTimeMillis</a> / 1000.0f;</div>
-<div class="line"><span class="lineno">  145</span> </div>
-<div class="line"><span class="lineno">  146</span>      <span class="comment">//RPMForceOffset = calcVars_st-&gt;absAmplitude * sin(calcVars_st-&gt;absFrequency * RPMTimeSeconds);</span></div>
-<div class="line"><span class="lineno">  147</span>      RPMForceOffset = RPM_amp * sin( 2*PI* RPM_freq* RPMTimeSeconds);</div>
-<div class="line"><span class="lineno">  148</span>    }</div>
-<div class="line"><span class="lineno">  149</span> </div>
-<div class="line"><span class="lineno">  150</span>    <a class="code hl_variable" href="classRPMOscillation.html#aa4ab00bfa92d40cb0beb4b3944a047bb">_lastCallTimeMillis</a> = timeNowMillis;</div>
-<div class="line"><span class="lineno">  151</span>    <a class="code hl_variable" href="ABSOscillation_8h.html#a51b81e676226d85cde1f82b03fa39937">RPM_VALUE_LAST</a>=RPMForceOffset;</div>
-<div class="line"><span class="lineno">  152</span>    <a class="code hl_variable" href="classRPMOscillation.html#a94f84db951e52457a999f86870e4892b">RPM_position_offset</a> = calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#a2c040a32eafad876f06e2153c4601d8a">stepperPosRange</a>*(RPMForceOffset/calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">Force_Range</a>);</div>
-<div class="line"><span class="lineno">  153</span>    <span class="comment">//return RPMForceOffset;</span></div>
-<div class="line"><span class="lineno">  154</span>    </div>
-<div class="line"><span class="lineno">  155</span> </div>
-<div class="line"><span class="lineno">  156</span>  }</div>
+<div class="line"><span class="lineno">  125</span>    <span class="keywordtype">float</span> RPM_amp_base = calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#a355875d1b0cd1024cbea5ee3cb0978db">RPM_AMP</a>;</div>
+<div class="line"><span class="lineno">  126</span>    <span class="keywordtype">float</span> RPM_amp=0;</div>
+<div class="line"><span class="lineno">  127</span>    <span class="keywordflow">if</span>(<a class="code hl_variable" href="classRPMOscillation.html#a67336e19d3aba005123fdd5a6a67e495">RPM_value</a>==0)</div>
+<div class="line"><span class="lineno">  128</span>    {</div>
+<div class="line"><span class="lineno">  129</span>      RPM_min_freq=0;</div>
+<div class="line"><span class="lineno">  130</span>    }</div>
+<div class="line"><span class="lineno">  131</span>    RPM_amp=RPM_amp_base*(1+0.3*<a class="code hl_variable" href="classRPMOscillation.html#a67336e19d3aba005123fdd5a6a67e495">RPM_value</a>/100);</div>
+<div class="line"><span class="lineno">  132</span> </div>
+<div class="line"><span class="lineno">  133</span> </div>
+<div class="line"><span class="lineno">  134</span>    <span class="keywordtype">float</span> RPM_freq=constrain(<a class="code hl_variable" href="classRPMOscillation.html#a67336e19d3aba005123fdd5a6a67e495">RPM_value</a>*(RPM_max_freq-RPM_min_freq)/100, RPM_min_freq, RPM_max_freq);</div>
+<div class="line"><span class="lineno">  135</span>    </div>
+<div class="line"><span class="lineno">  136</span> </div>
+<div class="line"><span class="lineno">  137</span> </div>
+<div class="line"><span class="lineno">  138</span>    <span class="keywordflow">if</span> (timeSinceTrigger &gt; <a class="code hl_variable" href="ABSOscillation_8h.html#ad7c9250452e5f64d4698b354a60d4b1c">RPM_ACTIVE_TIME_PER_TRIGGER_MILLIS</a>)</div>
+<div class="line"><span class="lineno">  139</span>    {</div>
+<div class="line"><span class="lineno">  140</span>      <a class="code hl_variable" href="classRPMOscillation.html#a7786f2b14d758d771fc94d2b3b41993b">_RPMTimeMillis</a> = 0;</div>
+<div class="line"><span class="lineno">  141</span>      RPMForceOffset = <a class="code hl_variable" href="ABSOscillation_8h.html#a51b81e676226d85cde1f82b03fa39937">RPM_VALUE_LAST</a>;</div>
+<div class="line"><span class="lineno">  142</span>    }</div>
+<div class="line"><span class="lineno">  143</span>    <span class="keywordflow">else</span></div>
+<div class="line"><span class="lineno">  144</span>    {</div>
+<div class="line"><span class="lineno">  145</span>      <a class="code hl_variable" href="classRPMOscillation.html#a7786f2b14d758d771fc94d2b3b41993b">_RPMTimeMillis</a> += timeNowMillis - <a class="code hl_variable" href="classRPMOscillation.html#aa4ab00bfa92d40cb0beb4b3944a047bb">_lastCallTimeMillis</a>;</div>
+<div class="line"><span class="lineno">  146</span>      <span class="keywordtype">float</span> RPMTimeSeconds = <a class="code hl_variable" href="classRPMOscillation.html#a7786f2b14d758d771fc94d2b3b41993b">_RPMTimeMillis</a> / 1000.0f;</div>
+<div class="line"><span class="lineno">  147</span> </div>
+<div class="line"><span class="lineno">  148</span>      <span class="comment">//RPMForceOffset = calcVars_st-&gt;absAmplitude * sin(calcVars_st-&gt;absFrequency * RPMTimeSeconds);</span></div>
+<div class="line"><span class="lineno">  149</span>      RPMForceOffset = RPM_amp * sin( 2*PI* RPM_freq* RPMTimeSeconds);</div>
+<div class="line"><span class="lineno">  150</span>    }</div>
+<div class="line"><span class="lineno">  151</span> </div>
+<div class="line"><span class="lineno">  152</span>    <a class="code hl_variable" href="classRPMOscillation.html#aa4ab00bfa92d40cb0beb4b3944a047bb">_lastCallTimeMillis</a> = timeNowMillis;</div>
+<div class="line"><span class="lineno">  153</span>    <a class="code hl_variable" href="ABSOscillation_8h.html#a51b81e676226d85cde1f82b03fa39937">RPM_VALUE_LAST</a>=RPMForceOffset;</div>
+<div class="line"><span class="lineno">  154</span>    <span class="keywordflow">if</span> (calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">Force_Range</a> &gt; 0)</div>
+<div class="line"><span class="lineno">  155</span>    {</div>
+<div class="line"><span class="lineno">  156</span>        <a class="code hl_variable" href="classRPMOscillation.html#a94f84db951e52457a999f86870e4892b">RPM_position_offset</a> = calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#a2c040a32eafad876f06e2153c4601d8a">stepperPosRange</a>*(RPMForceOffset/calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#abf26ec0fd8150996a4622cd6850ba369">Force_Range</a>);</div>
+<div class="line"><span class="lineno">  157</span>    }</div>
+<div class="line"><span class="lineno">  158</span>      <span class="comment">//return RPMForceOffset;</span></div>
+<div class="line"><span class="lineno">  159</span>    </div>
+<div class="line"><span class="lineno">  160</span> </div>
+<div class="line"><span class="lineno">  161</span>  }</div>
 <div class="ttc" id="aABSOscillation_8h_html_a51b81e676226d85cde1f82b03fa39937"><div class="ttname"><a href="ABSOscillation_8h.html#a51b81e676226d85cde1f82b03fa39937">RPM_VALUE_LAST</a></div><div class="ttdeci">static int RPM_VALUE_LAST</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00010">ABSOscillation.h:10</a></div></div>
 <div class="ttc" id="aABSOscillation_8h_html_ad7c9250452e5f64d4698b354a60d4b1c"><div class="ttname"><a href="ABSOscillation_8h.html#ad7c9250452e5f64d4698b354a60d4b1c">RPM_ACTIVE_TIME_PER_TRIGGER_MILLIS</a></div><div class="ttdeci">static const long RPM_ACTIVE_TIME_PER_TRIGGER_MILLIS</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00007">ABSOscillation.h:7</a></div></div>
 <div class="ttc" id="aclassRPMOscillation_html_a67336e19d3aba005123fdd5a6a67e495"><div class="ttname"><a href="classRPMOscillation.html#a67336e19d3aba005123fdd5a6a67e495">RPMOscillation::RPM_value</a></div><div class="ttdeci">float RPM_value</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00109">ABSOscillation.h:109</a></div></div>

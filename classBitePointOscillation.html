@@ -115,7 +115,7 @@ Private Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00159">159</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00164">164</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="adc9e04ea2f7a82c5ade7804ad14a6802" name="adc9e04ea2f7a82c5ade7804ad14a6802"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#adc9e04ea2f7a82c5ade7804ad14a6802">&#9670;&#160;</a></span>BitePointOscillation()</h2>
@@ -140,10 +140,10 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00167">167</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  168</span>    : <a class="code hl_variable" href="classBitePointOscillation.html#a70e2b7981ab7424aa1f5394f484175bc">_timeLastTriggerMillis</a>(0)</div>
-<div class="line"><span class="lineno">  169</span>  {}</div>
-<div class="ttc" id="aclassBitePointOscillation_html_a70e2b7981ab7424aa1f5394f484175bc"><div class="ttname"><a href="classBitePointOscillation.html#a70e2b7981ab7424aa1f5394f484175bc">BitePointOscillation::_timeLastTriggerMillis</a></div><div class="ttdeci">long _timeLastTriggerMillis</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00161">ABSOscillation.h:161</a></div></div>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00172">172</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  173</span>    : <a class="code hl_variable" href="classBitePointOscillation.html#a70e2b7981ab7424aa1f5394f484175bc">_timeLastTriggerMillis</a>(0)</div>
+<div class="line"><span class="lineno">  174</span>  {}</div>
+<div class="ttc" id="aclassBitePointOscillation_html_a70e2b7981ab7424aa1f5394f484175bc"><div class="ttname"><a href="classBitePointOscillation.html#a70e2b7981ab7424aa1f5394f484175bc">BitePointOscillation::_timeLastTriggerMillis</a></div><div class="ttdeci">long _timeLastTriggerMillis</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00166">ABSOscillation.h:166</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -172,43 +172,43 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00177">177</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  177</span>                                                             {</div>
-<div class="line"><span class="lineno">  178</span> </div>
-<div class="line"><span class="lineno">  179</span> </div>
-<div class="line"><span class="lineno">  180</span>    <span class="keywordtype">long</span> timeNowMillis = millis();</div>
-<div class="line"><span class="lineno">  181</span>    <span class="keywordtype">float</span> timeSinceTrigger = (timeNowMillis - <a class="code hl_variable" href="classBitePointOscillation.html#a70e2b7981ab7424aa1f5394f484175bc">_timeLastTriggerMillis</a>);</div>
-<div class="line"><span class="lineno">  182</span>    <span class="keywordtype">float</span> BitePointForceOffset = 0;</div>
-<div class="line"><span class="lineno">  183</span>    <span class="keywordtype">float</span> BP_freq = calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#af7c8127035779283cc13cd6f11fc1ba4">BP_freq</a>;</div>
-<div class="line"><span class="lineno">  184</span>    <span class="comment">//float BP_freq = 15;</span></div>
-<div class="line"><span class="lineno">  185</span>    <span class="keywordtype">float</span> BP_amp = calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#a03ea67a30941af9b493237603844628c">BP_amp</a>;</div>
-<div class="line"><span class="lineno">  186</span>    <span class="comment">//float BP_amp = 2;</span></div>
-<div class="line"><span class="lineno">  187</span> </div>
-<div class="line"><span class="lineno">  188</span>    <span class="keywordflow">if</span> (timeSinceTrigger &gt; <a class="code hl_variable" href="ABSOscillation_8h.html#aeb502589d4d0b618977876ae08841a30">BP_ACTIVE_TIME_PER_TRIGGER_MILLIS</a>)</div>
-<div class="line"><span class="lineno">  189</span>    {</div>
-<div class="line"><span class="lineno">  190</span>      <a class="code hl_variable" href="classBitePointOscillation.html#ac7c1889887e15dec1001a8b45ec2a859">_BiteTimeMillis</a> = 0;</div>
-<div class="line"><span class="lineno">  191</span>      BitePointForceOffset = 0;</div>
-<div class="line"><span class="lineno">  192</span>    }</div>
-<div class="line"><span class="lineno">  193</span>    <span class="keywordflow">else</span></div>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00182">182</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  182</span>                                                             {</div>
+<div class="line"><span class="lineno">  183</span> </div>
+<div class="line"><span class="lineno">  184</span> </div>
+<div class="line"><span class="lineno">  185</span>    <span class="keywordtype">long</span> timeNowMillis = millis();</div>
+<div class="line"><span class="lineno">  186</span>    <span class="keywordtype">float</span> timeSinceTrigger = (timeNowMillis - <a class="code hl_variable" href="classBitePointOscillation.html#a70e2b7981ab7424aa1f5394f484175bc">_timeLastTriggerMillis</a>);</div>
+<div class="line"><span class="lineno">  187</span>    <span class="keywordtype">float</span> BitePointForceOffset = 0;</div>
+<div class="line"><span class="lineno">  188</span>    <span class="keywordtype">float</span> BP_freq = calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#af7c8127035779283cc13cd6f11fc1ba4">BP_freq</a>;</div>
+<div class="line"><span class="lineno">  189</span>    <span class="comment">//float BP_freq = 15;</span></div>
+<div class="line"><span class="lineno">  190</span>    <span class="keywordtype">float</span> BP_amp = calcVars_st-&gt;<a class="code hl_variable" href="structDAP__calculationVariables__st.html#a03ea67a30941af9b493237603844628c">BP_amp</a>;</div>
+<div class="line"><span class="lineno">  191</span>    <span class="comment">//float BP_amp = 2;</span></div>
+<div class="line"><span class="lineno">  192</span> </div>
+<div class="line"><span class="lineno">  193</span>    <span class="keywordflow">if</span> (timeSinceTrigger &gt; <a class="code hl_variable" href="ABSOscillation_8h.html#aeb502589d4d0b618977876ae08841a30">BP_ACTIVE_TIME_PER_TRIGGER_MILLIS</a>)</div>
 <div class="line"><span class="lineno">  194</span>    {</div>
-<div class="line"><span class="lineno">  195</span>      <a class="code hl_variable" href="classBitePointOscillation.html#ac7c1889887e15dec1001a8b45ec2a859">_BiteTimeMillis</a> += timeNowMillis - <a class="code hl_variable" href="classBitePointOscillation.html#a9fdedfadaa3c129f58c21827b11d4458">_lastCallTimeMillis</a>;</div>
-<div class="line"><span class="lineno">  196</span>      <span class="keywordtype">float</span> BPTimeSeconds = <a class="code hl_variable" href="classBitePointOscillation.html#ac7c1889887e15dec1001a8b45ec2a859">_BiteTimeMillis</a> / 1000.0f;</div>
-<div class="line"><span class="lineno">  197</span> </div>
-<div class="line"><span class="lineno">  198</span>      <span class="comment">//RPMForceOffset = calcVars_st-&gt;absAmplitude * sin(calcVars_st-&gt;absFrequency * RPMTimeSeconds);</span></div>
-<div class="line"><span class="lineno">  199</span>      BitePointForceOffset = BP_amp * sin( 2*PI* BP_freq* BPTimeSeconds);</div>
-<div class="line"><span class="lineno">  200</span>    }</div>
-<div class="line"><span class="lineno">  201</span>    <a class="code hl_variable" href="classBitePointOscillation.html#a464b3f3423bfe7edfb05f50ed7ebacc5">BitePoint_Force_offset</a>=BitePointForceOffset;</div>
-<div class="line"><span class="lineno">  202</span>    <a class="code hl_variable" href="classBitePointOscillation.html#a9fdedfadaa3c129f58c21827b11d4458">_lastCallTimeMillis</a> = timeNowMillis;</div>
-<div class="line"><span class="lineno">  203</span>    <span class="comment">//RPM_VALUE_LAST=RPMForceOffset;</span></div>
-<div class="line"><span class="lineno">  204</span>    </div>
-<div class="line"><span class="lineno">  205</span>    <span class="comment">//return RPMForceOffset;</span></div>
-<div class="line"><span class="lineno">  206</span>    </div>
-<div class="line"><span class="lineno">  207</span> </div>
-<div class="line"><span class="lineno">  208</span>  }</div>
+<div class="line"><span class="lineno">  195</span>      <a class="code hl_variable" href="classBitePointOscillation.html#ac7c1889887e15dec1001a8b45ec2a859">_BiteTimeMillis</a> = 0;</div>
+<div class="line"><span class="lineno">  196</span>      BitePointForceOffset = 0;</div>
+<div class="line"><span class="lineno">  197</span>    }</div>
+<div class="line"><span class="lineno">  198</span>    <span class="keywordflow">else</span></div>
+<div class="line"><span class="lineno">  199</span>    {</div>
+<div class="line"><span class="lineno">  200</span>      <a class="code hl_variable" href="classBitePointOscillation.html#ac7c1889887e15dec1001a8b45ec2a859">_BiteTimeMillis</a> += timeNowMillis - <a class="code hl_variable" href="classBitePointOscillation.html#a9fdedfadaa3c129f58c21827b11d4458">_lastCallTimeMillis</a>;</div>
+<div class="line"><span class="lineno">  201</span>      <span class="keywordtype">float</span> BPTimeSeconds = <a class="code hl_variable" href="classBitePointOscillation.html#ac7c1889887e15dec1001a8b45ec2a859">_BiteTimeMillis</a> / 1000.0f;</div>
+<div class="line"><span class="lineno">  202</span> </div>
+<div class="line"><span class="lineno">  203</span>      <span class="comment">//RPMForceOffset = calcVars_st-&gt;absAmplitude * sin(calcVars_st-&gt;absFrequency * RPMTimeSeconds);</span></div>
+<div class="line"><span class="lineno">  204</span>      BitePointForceOffset = BP_amp * sin( 2*PI* BP_freq* BPTimeSeconds);</div>
+<div class="line"><span class="lineno">  205</span>    }</div>
+<div class="line"><span class="lineno">  206</span>    <a class="code hl_variable" href="classBitePointOscillation.html#a464b3f3423bfe7edfb05f50ed7ebacc5">BitePoint_Force_offset</a>=BitePointForceOffset;</div>
+<div class="line"><span class="lineno">  207</span>    <a class="code hl_variable" href="classBitePointOscillation.html#a9fdedfadaa3c129f58c21827b11d4458">_lastCallTimeMillis</a> = timeNowMillis;</div>
+<div class="line"><span class="lineno">  208</span>    <span class="comment">//RPM_VALUE_LAST=RPMForceOffset;</span></div>
+<div class="line"><span class="lineno">  209</span>    </div>
+<div class="line"><span class="lineno">  210</span>    <span class="comment">//return RPMForceOffset;</span></div>
+<div class="line"><span class="lineno">  211</span>    </div>
+<div class="line"><span class="lineno">  212</span> </div>
+<div class="line"><span class="lineno">  213</span>  }</div>
 <div class="ttc" id="aABSOscillation_8h_html_aeb502589d4d0b618977876ae08841a30"><div class="ttname"><a href="ABSOscillation_8h.html#aeb502589d4d0b618977876ae08841a30">BP_ACTIVE_TIME_PER_TRIGGER_MILLIS</a></div><div class="ttdeci">static const long BP_ACTIVE_TIME_PER_TRIGGER_MILLIS</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00008">ABSOscillation.h:8</a></div></div>
-<div class="ttc" id="aclassBitePointOscillation_html_a464b3f3423bfe7edfb05f50ed7ebacc5"><div class="ttname"><a href="classBitePointOscillation.html#a464b3f3423bfe7edfb05f50ed7ebacc5">BitePointOscillation::BitePoint_Force_offset</a></div><div class="ttdeci">float BitePoint_Force_offset</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00171">ABSOscillation.h:171</a></div></div>
-<div class="ttc" id="aclassBitePointOscillation_html_a9fdedfadaa3c129f58c21827b11d4458"><div class="ttname"><a href="classBitePointOscillation.html#a9fdedfadaa3c129f58c21827b11d4458">BitePointOscillation::_lastCallTimeMillis</a></div><div class="ttdeci">long _lastCallTimeMillis</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00163">ABSOscillation.h:163</a></div></div>
-<div class="ttc" id="aclassBitePointOscillation_html_ac7c1889887e15dec1001a8b45ec2a859"><div class="ttname"><a href="classBitePointOscillation.html#ac7c1889887e15dec1001a8b45ec2a859">BitePointOscillation::_BiteTimeMillis</a></div><div class="ttdeci">long _BiteTimeMillis</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00162">ABSOscillation.h:162</a></div></div>
+<div class="ttc" id="aclassBitePointOscillation_html_a464b3f3423bfe7edfb05f50ed7ebacc5"><div class="ttname"><a href="classBitePointOscillation.html#a464b3f3423bfe7edfb05f50ed7ebacc5">BitePointOscillation::BitePoint_Force_offset</a></div><div class="ttdeci">float BitePoint_Force_offset</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00176">ABSOscillation.h:176</a></div></div>
+<div class="ttc" id="aclassBitePointOscillation_html_a9fdedfadaa3c129f58c21827b11d4458"><div class="ttname"><a href="classBitePointOscillation.html#a9fdedfadaa3c129f58c21827b11d4458">BitePointOscillation::_lastCallTimeMillis</a></div><div class="ttdeci">long _lastCallTimeMillis</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00168">ABSOscillation.h:168</a></div></div>
+<div class="ttc" id="aclassBitePointOscillation_html_ac7c1889887e15dec1001a8b45ec2a859"><div class="ttname"><a href="classBitePointOscillation.html#ac7c1889887e15dec1001a8b45ec2a859">BitePointOscillation::_BiteTimeMillis</a></div><div class="ttdeci">long _BiteTimeMillis</div><div class="ttdef"><b>Definition:</b> <a href="ABSOscillation_8h_source.html#l00167">ABSOscillation.h:167</a></div></div>
 <div class="ttc" id="astructDAP__calculationVariables__st_html_a03ea67a30941af9b493237603844628c"><div class="ttname"><a href="structDAP__calculationVariables__st.html#a03ea67a30941af9b493237603844628c">DAP_calculationVariables_st::BP_amp</a></div><div class="ttdeci">float BP_amp</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00218">DiyActivePedal_types.h:218</a></div></div>
 <div class="ttc" id="astructDAP__calculationVariables__st_html_af7c8127035779283cc13cd6f11fc1ba4"><div class="ttname"><a href="structDAP__calculationVariables__st.html#af7c8127035779283cc13cd6f11fc1ba4">DAP_calculationVariables_st::BP_freq</a></div><div class="ttdeci">float BP_freq</div><div class="ttdef"><b>Definition:</b> <a href="DiyActivePedal__types_8h_source.html#l00219">DiyActivePedal_types.h:219</a></div></div>
 </div><!-- fragment -->
@@ -237,10 +237,10 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00173">173</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  173</span>                 {</div>
-<div class="line"><span class="lineno">  174</span>    <a class="code hl_variable" href="classBitePointOscillation.html#a70e2b7981ab7424aa1f5394f484175bc">_timeLastTriggerMillis</a> = millis();</div>
-<div class="line"><span class="lineno">  175</span>  }</div>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00178">178</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  178</span>                 {</div>
+<div class="line"><span class="lineno">  179</span>    <a class="code hl_variable" href="classBitePointOscillation.html#a70e2b7981ab7424aa1f5394f484175bc">_timeLastTriggerMillis</a> = millis();</div>
+<div class="line"><span class="lineno">  180</span>  }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -265,7 +265,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00162">162</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00167">167</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
 
 </div>
 </div>
@@ -289,7 +289,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00163">163</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00168">168</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
 
 </div>
 </div>
@@ -313,7 +313,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00161">161</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00166">166</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
 
 </div>
 </div>
@@ -329,7 +329,7 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00171">171</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ABSOscillation_8h_source.html#l00176">176</a> of file <a class="el" href="ABSOscillation_8h_source.html">ABSOscillation.h</a>.</p>
 
 </div>
 </div>
