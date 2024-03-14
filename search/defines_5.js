@@ -1,6 +1,4 @@
 var searchData=
 [
-  ['loadcell_5fexcitation_5fv_0',['LOADCELL_EXCITATION_V',['../Main_8h.html#a427b269acba12e18c696d5be8cb59e91',1,'Main.h']]],
-  ['loadcell_5fsensitivity_5fmv_5fv_1',['LOADCELL_SENSITIVITY_MV_V',['../Main_8h.html#af46044ba4504bc725cd220af5edeef5a',1,'Main.h']]],
-  ['loadcell_5fweight_5frating_5fkg_2',['LOADCELL_WEIGHT_RATING_KG',['../Main_8h.html#ab869e8b74a0701afafb8d56087a5604b',1,'Main.h']]]
+  ['jquery_5fmin_5fjs_5fv3_5f2_5f1_5fgz_5flen_0',['jquery_min_js_v3_2_1_gz_len',['../ota_8h.html#a5a26fe83b17013c77d7216a84d9d40ab',1,'ota.h']]]
 ];

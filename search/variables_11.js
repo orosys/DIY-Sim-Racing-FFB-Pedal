@@ -19,7 +19,7 @@ var searchData=
   ['rpm_5fmin_5ffreq_16',['RPM_min_freq',['../structpayloadPedalConfig.html#a5e0accbc7d7f113a2ff92afb98c3a282',1,'payloadPedalConfig::RPM_min_freq()'],['../structDAP__calculationVariables__st.html#a7b53d2a8bda4fd1a8ac0eec833524e19',1,'DAP_calculationVariables_st::RPM_min_freq()']]],
   ['rpm_5fposition_5foffset_17',['RPM_position_offset',['../classRPMOscillation.html#a94f84db951e52457a999f86870e4892b',1,'RPMOscillation']]],
   ['rpm_5fu8_18',['RPM_u8',['../structpayloadPedalAction.html#ac139e5011931276ea3e7689a5d7ae1d6',1,'payloadPedalAction']]],
-  ['rpm_5fvalue_19',['RPM_value',['../classRPMOscillation.html#a67336e19d3aba005123fdd5a6a67e495',1,'RPMOscillation']]],
-  ['rpm_5fvalue_20',['rpm_value',['../structDAP__calculationVariables__st.html#ac405804fbcc682edb548e85e945db915',1,'DAP_calculationVariables_st']]],
+  ['rpm_5fvalue_19',['rpm_value',['../structDAP__calculationVariables__st.html#ac405804fbcc682edb548e85e945db915',1,'DAP_calculationVariables_st']]],
+  ['rpm_5fvalue_20',['RPM_value',['../classRPMOscillation.html#a67336e19d3aba005123fdd5a6a67e495',1,'RPMOscillation']]],
   ['rpm_5fvalue_5flast_21',['RPM_VALUE_LAST',['../ABSOscillation_8h.html#a51b81e676226d85cde1f82b03fa39937',1,'ABSOscillation.h']]]
 ];

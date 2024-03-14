@@ -1,6 +1,20 @@
 var searchData=
 [
-  ['sensorless_5fhoming_0',['SENSORLESS_HOMING',['../Main_8h.html#a1f1af256d94506c5dfa26a51ab56069a',1,'Main.h']]],
-  ['stepper_5fwith_5flimits_5fsensorless_5fcurrent_5fthreshold_5fin_5fpercent_1',['STEPPER_WITH_LIMITS_SENSORLESS_CURRENT_THRESHOLD_IN_PERCENT',['../Dev_2StepperWithLimits_8cpp.html#a63f6f0d2dd0bf73350f4182e64e70e37',1,'STEPPER_WITH_LIMITS_SENSORLESS_CURRENT_THRESHOLD_IN_PERCENT():&#160;StepperWithLimits.cpp'],['../Main_2StepperWithLimits_8cpp.html#a63f6f0d2dd0bf73350f4182e64e70e37',1,'STEPPER_WITH_LIMITS_SENSORLESS_CURRENT_THRESHOLD_IN_PERCENT():&#160;StepperWithLimits.cpp']]],
-  ['steppinstepper_2',['stepPinStepper',['../Main_8h.html#a48d6538f9e2e592b98dcd0f97ceaa039',1,'Main.h']]]
+  ['ref_5fcyclic_5fread_5f0_0',['ref_cyclic_read_0',['../isv57communication_8h.html#a71f6251fd4ee90e83456c92355cace03',1,'isv57communication.h']]],
+  ['ref_5fcyclic_5fread_5f1_1',['ref_cyclic_read_1',['../isv57communication_8h.html#a971b12e1d39ea32cd5a251ea87b00b86',1,'isv57communication.h']]],
+  ['ref_5fcyclic_5fread_5f2_2',['ref_cyclic_read_2',['../isv57communication_8h.html#a81126dd8b7f640ded4392c14cdb75ac2',1,'isv57communication.h']]],
+  ['ref_5fcyclic_5fread_5f3_3',['ref_cyclic_read_3',['../isv57communication_8h.html#a47e2b84fdab419a6172a4ccaea2d8181',1,'isv57communication.h']]],
+  ['reg_5fadd_5fcommand_5fposition_5fgiven_5fp_4',['reg_add_command_position_given_p',['../isv57communication_8h.html#a39a3835103e4b0b169a38f3d63e90acd',1,'isv57communication.h']]],
+  ['reg_5fadd_5fposition_5fcommand_5fvelocity_5frpm_5',['reg_add_position_command_velocity_rpm',['../isv57communication_8h.html#a15c100cede49cd4b6c0522943e3e79d8',1,'isv57communication.h']]],
+  ['reg_5fadd_5fposition_5ferror_5fp_6',['reg_add_position_error_p',['../isv57communication_8h.html#a585271acb69e325e39e48ada91ec8448',1,'isv57communication.h']]],
+  ['reg_5fadd_5fposition_5ffeedback_5fp_7',['reg_add_position_feedback_p',['../isv57communication_8h.html#a5761650c103697a2633f232ba048a599',1,'isv57communication.h']]],
+  ['reg_5fadd_5fposition_5fgiven_5fp_8',['reg_add_position_given_p',['../isv57communication_8h.html#a58c45a3536341f82066940058cbec718',1,'isv57communication.h']]],
+  ['reg_5fadd_5fposition_5frelative_5ferror_5fp_9',['reg_add_position_relative_error_p',['../isv57communication_8h.html#a04482bead39acfcf4f46e50a575468d4',1,'isv57communication.h']]],
+  ['reg_5fadd_5fvelocity_5fcurrent_5ffeedback_5fpercent_10',['reg_add_velocity_current_feedback_percent',['../isv57communication_8h.html#a6343bf5ebcac05591294b0bc55c833f5',1,'isv57communication.h']]],
+  ['reg_5fadd_5fvelocity_5fcurrent_5fgiven_5fpercent_11',['reg_add_velocity_current_given_percent',['../isv57communication_8h.html#a1cb5476a032f15138af75b45b4a06e8b',1,'isv57communication.h']]],
+  ['reg_5fadd_5fvelocity_5ferror_5frpm_12',['reg_add_velocity_error_rpm',['../isv57communication_8h.html#a621dfd91dcb366c3cd1aed67bddffc4a',1,'isv57communication.h']]],
+  ['reg_5fadd_5fvelocity_5ffeedback_5fno_5ffilt_5frpm_13',['reg_add_velocity_feedback_no_filt_rpm',['../isv57communication_8h.html#a73104581acbff0f8c2ba5b4052f77323',1,'isv57communication.h']]],
+  ['reg_5fadd_5fvelocity_5ffeedback_5frpm_14',['reg_add_velocity_feedback_rpm',['../isv57communication_8h.html#a30db2df52171c29cee8553aaf6ecf9a0',1,'isv57communication.h']]],
+  ['reg_5fadd_5fvelocity_5fgiven_5frpm_15',['reg_add_velocity_given_rpm',['../isv57communication_8h.html#a57c65a0efb1b7e3424a4bf9378825ba2',1,'isv57communication.h']]],
+  ['reg_5fadd_5fvoltage_5f0p1v_16',['reg_add_voltage_0p1V',['../isv57communication_8h.html#afe01e8e4375ce485ea7558be8b4b702f',1,'isv57communication.h']]]
 ];

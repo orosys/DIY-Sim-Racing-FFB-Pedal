@@ -1,9 +1,6 @@
 var searchData=
 [
-  ['max_5fdata_5fpoints_0',['MAX_DATA_POINTS',['../ABSOscillation_8h.html#a1c0a61ecb2e23d904616be132b1f4467',1,'ABSOscillation.h']]],
-  ['max_5fnumber_5fof_5fnewton_5fsteps_1',['MAX_NUMBER_OF_NEWTON_STEPS',['../StepperMovementStrategy_8h.html#aae08e582c5666c00da8bd6b792a7356b',1,'StepperMovementStrategy.h']]],
-  ['maxpin_2',['maxPin',['../Main_8h.html#ab9b1d60946874151aac1f46ff5b414ab',1,'Main.h']]],
-  ['min_5fpos_5fmax_5fendstop_3',['MIN_POS_MAX_ENDSTOP',['../Dev_2StepperWithLimits_8cpp.html#a9e8f78bc0710966135d0dc094412c5a6',1,'MIN_POS_MAX_ENDSTOP():&#160;StepperWithLimits.cpp'],['../Main_2StepperWithLimits_8cpp.html#a9e8f78bc0710966135d0dc094412c5a6',1,'MIN_POS_MAX_ENDSTOP():&#160;StepperWithLimits.cpp']]],
-  ['minpin_4',['minPin',['../Main_8h.html#af348d8b54fa194da3f964a119e49798e',1,'Main.h']]],
-  ['mode_5',['MODE',['../isv57communication_8h.html#ab8c52c1b4c021ed3e6b6b677bd2ac019',1,'isv57communication.h']]]
+  ['loadcell_5fexcitation_5fv_0',['LOADCELL_EXCITATION_V',['../Main_8h.html#a427b269acba12e18c696d5be8cb59e91',1,'Main.h']]],
+  ['loadcell_5fsensitivity_5fmv_5fv_1',['LOADCELL_SENSITIVITY_MV_V',['../Main_8h.html#af46044ba4504bc725cd220af5edeef5a',1,'Main.h']]],
+  ['loadcell_5fweight_5frating_5fkg_2',['LOADCELL_WEIGHT_RATING_KG',['../Main_8h.html#ab869e8b74a0701afafb8d56087a5604b',1,'Main.h']]]
 ];

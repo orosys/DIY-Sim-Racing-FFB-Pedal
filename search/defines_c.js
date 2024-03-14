@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['write_5fholding_5fregister_0',['Write_Holding_Register',['../Esp32_2Main_2Modbus_8h.html#a111e7ea50fab718b04928f3b5471b9cd',1,'Write_Holding_Register():&#160;Modbus.h'],['../ModbusTest_2Modbus_2src_2Modbus_8h.html#a111e7ea50fab718b04928f3b5471b9cd',1,'Write_Holding_Register():&#160;Modbus.h']]]
+  ['using_5fanalog_5foutput_0',['Using_analog_output',['../Main_8h.html#a28a319b70cd882477c5007ce11b89fb4',1,'Main.h']]]
 ];
