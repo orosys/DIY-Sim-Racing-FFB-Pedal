@@ -1,8 +1,12 @@
 var searchData=
 [
-  ['joystick_5fmax_5fvalue_0',['JOYSTICK_MAX_VALUE',['../Controller_8cpp.html#a6932f6513cabf3082fc4fb11537a4293',1,'Controller.cpp']]],
-  ['joystick_5fmin_5fvalue_1',['JOYSTICK_MIN_VALUE',['../Controller_8cpp.html#ac1e9ca710d3cf526d3500bd08edd4b36',1,'Controller.cpp']]],
-  ['joystick_5frange_2',['JOYSTICK_RANGE',['../Controller_8cpp.html#a7a50456faa7346a8466099e7c9003cc1',1,'Controller.cpp']]],
-  ['joystickoutput_5fu16_3',['joystickOutput_u16',['../structpayloadPedalState__Basic.html#aa5e0dd882e9ecd78f46ab408b3558f18',1,'payloadPedalState_Basic']]],
-  ['jquery_5fmin_5fjs_5fv3_5f2_5f1_5fgz_4',['jquery_min_js_v3_2_1_gz',['../ota_8h.html#ab16d4e2f2ad42456f40bda4f5391aa9d',1,'ota.h']]]
+  ['k_0',['k',['../classMovingAverageFilter.html#a82f23589732914f1ca9f2d5723c91ab0',1,'MovingAverageFilter']]],
+  ['k_5fpedal_5fgeometry_1',['K_pedal_geometry',['../PedalGeometry_8cpp.html#a728f32f5fca814f3a30d730ed7c7a9d6',1,'PedalGeometry.cpp']]],
+  ['kd_2',['Kd',['../StepperMovementStrategy_8h.html#ab9e6bbb0361dc98bc2f5399d014c6c01',1,'StepperMovementStrategy.h']]],
+  ['kf_5fmodel_5fnoise_5fforce_5facceleration_3',['KF_MODEL_NOISE_FORCE_ACCELERATION',['../PedalGeometry_8cpp.html#aec7950ddffacc3f0760bf13c00ffa875',1,'KF_MODEL_NOISE_FORCE_ACCELERATION():&#160;PedalGeometry.cpp'],['../SignalFilter_8cpp.html#aec7950ddffacc3f0760bf13c00ffa875',1,'KF_MODEL_NOISE_FORCE_ACCELERATION():&#160;SignalFilter.cpp']]],
+  ['kf_5fmodel_5fnoise_5fforce_5fjerk_4',['KF_MODEL_NOISE_FORCE_JERK',['../SignalFilter__2nd__order_8cpp.html#ac96ae63b547c37baf930c5871b97eec7',1,'SignalFilter_2nd_order.cpp']]],
+  ['kf_5fmodelnoise_5',['kf_modelNoise',['../structpayloadPedalConfig.html#a2195af7ec0890b96f828b3da7ddafcf4',1,'payloadPedalConfig']]],
+  ['kf_5fmodelorder_6',['kf_modelOrder',['../structpayloadPedalConfig.html#a7beb4cb70424d95ca6351dcda134cefc',1,'payloadPedalConfig']]],
+  ['ki_7',['Ki',['../StepperMovementStrategy_8h.html#aad5977a9e83736178f3b724a1d228652',1,'StepperMovementStrategy.h']]],
+  ['kp_8',['Kp',['../StepperMovementStrategy_8h.html#afd070d90e3f8bb3e9bb9c6dff310503b',1,'StepperMovementStrategy.h']]]
 ];

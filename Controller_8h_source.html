@@ -79,23 +79,28 @@ $(function() {
 <a href="Controller_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &quot;Arduino.h&quot;</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#if CONFIG_IDF_TARGET_ESP32S2</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">  #define USB_JOYSTICK</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#elif CONFIG_IDF_TARGET_ESP32</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">  #define BLUETOOTH_GAMEPAD</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno"><a class="line" href="Controller_8h.html#a28d31c6c7ea0cc5af7af24e9a6a0101d">   12</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="Controller_8h.html#a28d31c6c7ea0cc5af7af24e9a6a0101d">SetupController</a>();</div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno"><a class="line" href="Controller_8h.html#a4cec93967676438c7cea7f8788d35632">   13</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="Controller_8h.html#a4cec93967676438c7cea7f8788d35632">IsControllerReady</a>();</div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &quot;<a class="code" href="Main_8h.html">Main.h</a>&quot;</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">/*#ifdef CONFIG_IDF_TARGET_ESP32S2 ||ARDUINO_ESP32S3_DEV || CONFIG_IDF_TARGET_ESP32S3</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">  #define USB_JOYSTICK</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">#elif CONFIG_IDF_TARGET_ESP32</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">  #define BLUETOOTH_GAMEPAD</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment">#endif</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">*/</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="Controller_8h.html#a69c40a84e94fc5f5e7f85bebfca129ec">   15</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="Controller_8h.html#a69c40a84e94fc5f5e7f85bebfca129ec">SetControllerOutputValue</a>(int32_t value);</div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>int32_t <a class="code hl_function" href="Controller_8h.html#aa4e62cce7d5e694c4e6cb9a92f46b5de">NormalizeControllerOutputValue</a>(<span class="keywordtype">float</span> value, <span class="keywordtype">float</span> minVal, <span class="keywordtype">float</span> maxVal, <span class="keywordtype">float</span> maxGameOutput);</div>
-<div class="ttc" id="aController_8h_html_a28d31c6c7ea0cc5af7af24e9a6a0101d"><div class="ttname"><a href="Controller_8h.html#a28d31c6c7ea0cc5af7af24e9a6a0101d">SetupController</a></div><div class="ttdeci">void SetupController()</div></div>
-<div class="ttc" id="aController_8h_html_a4cec93967676438c7cea7f8788d35632"><div class="ttname"><a href="Controller_8h.html#a4cec93967676438c7cea7f8788d35632">IsControllerReady</a></div><div class="ttdeci">bool IsControllerReady()</div></div>
-<div class="ttc" id="aController_8h_html_a69c40a84e94fc5f5e7f85bebfca129ec"><div class="ttname"><a href="Controller_8h.html#a69c40a84e94fc5f5e7f85bebfca129ec">SetControllerOutputValue</a></div><div class="ttdeci">void SetControllerOutputValue(int32_t value)</div></div>
-<div class="ttc" id="aController_8h_html_aa4e62cce7d5e694c4e6cb9a92f46b5de"><div class="ttname"><a href="Controller_8h.html#aa4e62cce7d5e694c4e6cb9a92f46b5de">NormalizeControllerOutputValue</a></div><div class="ttdeci">int32_t NormalizeControllerOutputValue(float value, float minVal, float maxVal, float maxGameOutput)</div><div class="ttdef"><b>Definition:</b> <a href="Controller_8cpp_source.html#l00090">Controller.cpp:90</a></div></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="keywordtype">void</span> <a class="code hl_function" href="Controller_8h.html#a28d31c6c7ea0cc5af7af24e9a6a0101d">SetupController</a>();</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="keywordtype">bool</span> <a class="code hl_function" href="Controller_8h.html#a4cec93967676438c7cea7f8788d35632">IsControllerReady</a>();</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="keywordtype">void</span> <a class="code hl_function" href="Controller_8h.html#a69c40a84e94fc5f5e7f85bebfca129ec">SetControllerOutputValue</a>(int32_t value);</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>int32_t <a class="code hl_function" href="Controller_8h.html#aa4e62cce7d5e694c4e6cb9a92f46b5de">NormalizeControllerOutputValue</a>(<span class="keywordtype">float</span> value, <span class="keywordtype">float</span> minVal, <span class="keywordtype">float</span> maxVal, <span class="keywordtype">float</span> maxGameOutput);</div>
+<div class="ttc" id="aController_8h_html_a28d31c6c7ea0cc5af7af24e9a6a0101d"><div class="ttname"><a href="Controller_8h.html#a28d31c6c7ea0cc5af7af24e9a6a0101d">SetupController</a></div><div class="ttdeci">void SetupController()</div><div class="ttdef"><b>Definition:</b> <a href="Controller_8cpp_source.html#l00055">Controller.cpp:55</a></div></div>
+<div class="ttc" id="aController_8h_html_a4cec93967676438c7cea7f8788d35632"><div class="ttname"><a href="Controller_8h.html#a4cec93967676438c7cea7f8788d35632">IsControllerReady</a></div><div class="ttdeci">bool IsControllerReady()</div><div class="ttdef"><b>Definition:</b> <a href="Controller_8cpp_source.html#l00074">Controller.cpp:74</a></div></div>
+<div class="ttc" id="aController_8h_html_a69c40a84e94fc5f5e7f85bebfca129ec"><div class="ttname"><a href="Controller_8h.html#a69c40a84e94fc5f5e7f85bebfca129ec">SetControllerOutputValue</a></div><div class="ttdeci">void SetControllerOutputValue(int32_t value)</div><div class="ttdef"><b>Definition:</b> <a href="Controller_8cpp_source.html#l00076">Controller.cpp:76</a></div></div>
+<div class="ttc" id="aController_8h_html_aa4e62cce7d5e694c4e6cb9a92f46b5de"><div class="ttname"><a href="Controller_8h.html#aa4e62cce7d5e694c4e6cb9a92f46b5de">NormalizeControllerOutputValue</a></div><div class="ttdeci">int32_t NormalizeControllerOutputValue(float value, float minVal, float maxVal, float maxGameOutput)</div><div class="ttdef"><b>Definition:</b> <a href="Controller_8cpp_source.html#l00099">Controller.cpp:99</a></div></div>
+<div class="ttc" id="aMain_8h_html"><div class="ttname"><a href="Main_8h.html">Main.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

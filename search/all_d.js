@@ -22,15 +22,16 @@ var searchData=
   ['modbustest_2eino_19',['ModbusTest.ino',['../ModbusTest_8ino.html',1,'']]],
   ['mode_20',['MODE',['../isv57communication_8h.html#ab8c52c1b4c021ed3e6b6b677bd2ac019',1,'isv57communication.h']]],
   ['mode_5f_21',['mode_',['../classModbus.html#a015642f22a07db845b8b97f8be2dcb19',1,'Modbus']]],
-  ['movebyforcetargetingstrategy_22',['MoveByForceTargetingStrategy',['../StepperMovementStrategy_8h.html#a50087aaa118acc3d81e2b45c6f8cd0d0',1,'StepperMovementStrategy.h']]],
+  ['movebyforcetargetingstrategy_22',['MoveByForceTargetingStrategy',['../StepperMovementStrategy_8h.html#ab8a29147ad2e6bee59c97db25bd7f4ad',1,'StepperMovementStrategy.h']]],
   ['movebyinterpolatedstrategy_23',['MoveByInterpolatedStrategy',['../StepperMovementStrategy_8h.html#aa379e5029872844e6bd9d12478134eba',1,'StepperMovementStrategy.h']]],
   ['movebypidstrategy_24',['MoveByPidStrategy',['../StepperMovementStrategy_8h.html#a7d67bdd19f65aa58ac7cfb356dd727a8',1,'StepperMovementStrategy.h']]],
   ['moveto_25',['moveTo',['../classStepperWithLimits.html#afbc22a07418cfeee8055f98b534dc4fd',1,'StepperWithLimits']]],
   ['movingaveragefilter_26',['movingAverageFilter',['../ABSOscillation_8h.html#a9a7d78118751acefb03ad534f4d2fbf5',1,'ABSOscillation.h']]],
   ['movingaveragefilter_27',['MovingAverageFilter',['../classMovingAverageFilter.html',1,'MovingAverageFilter'],['../classMovingAverageFilter.html#a2845e489c746ffaeb9113e3f87bad8e1',1,'MovingAverageFilter::MovingAverageFilter()']]],
-  ['mpc_5f0th_5forder_5fgain_28',['MPC_0th_order_gain',['../structpayloadPedalConfig.html#af00affb8dd0c3832b29a6c305007229c',1,'payloadPedalConfig']]],
-  ['mpc_5f1st_5forder_5fgain_29',['MPC_1st_order_gain',['../structpayloadPedalConfig.html#a646ff316067ef79f1c196fef6bb72651',1,'payloadPedalConfig']]],
-  ['mpc_5f2nd_5forder_5fgain_30',['MPC_2nd_order_gain',['../structpayloadPedalConfig.html#adf6e2e65020bda5458ad84d874bfbcab',1,'payloadPedalConfig']]],
-  ['mpcbasedmove_31',['mpcBasedMove',['../StepperMovementStrategy_8h.html#a97b4fb21147fbe5fab1d571f341b61f9',1,'StepperMovementStrategy.h']]],
-  ['mqtt2modbus_2eino_32',['mqtt2Modbus.ino',['../mqtt2Modbus_8ino.html',1,'']]]
+  ['movingaveragefilter_5froadimpact_28',['movingAverageFilter_roadimpact',['../ABSOscillation_8h.html#aaf6889fd06935a76c7fad1dd6f700727',1,'ABSOscillation.h']]],
+  ['mpc_5f0th_5forder_5fgain_29',['MPC_0th_order_gain',['../structpayloadPedalConfig.html#af00affb8dd0c3832b29a6c305007229c',1,'payloadPedalConfig']]],
+  ['mpc_5f1st_5forder_5fgain_30',['MPC_1st_order_gain',['../structpayloadPedalConfig.html#a646ff316067ef79f1c196fef6bb72651',1,'payloadPedalConfig']]],
+  ['mpc_5f2nd_5forder_5fgain_31',['MPC_2nd_order_gain',['../structpayloadPedalConfig.html#adf6e2e65020bda5458ad84d874bfbcab',1,'payloadPedalConfig']]],
+  ['mpcbasedmove_32',['mpcBasedMove',['../StepperMovementStrategy_8h.html#a97b4fb21147fbe5fab1d571f341b61f9',1,'StepperMovementStrategy.h']]],
+  ['mqtt2modbus_2eino_33',['mqtt2Modbus.ino',['../mqtt2Modbus_8ino.html',1,'']]]
 ];
