@@ -499,7 +499,7 @@ void setup()
                     NULL,        /* parameter of the task */
                     1,           /* priority of the task */
                     &Task1,      /* Task handle to keep track of created task */
-                    0);          /* pin task to core 1 */
+                    1);          /* pin task to core 1 */
   delay(500);
 
   xTaskCreatePinnedToCore(
@@ -510,7 +510,7 @@ void setup()
                     NULL,      
                     1,         
                     &Task2,    
-                    1);     
+                    0);     
   delay(500);
 
   #ifdef ISV_COMMUNICATION
@@ -523,7 +523,7 @@ void setup()
                       NULL,      
                       1,         
                       &Task3,    
-                      1);     
+                      0);     
     delay(500);
 #endif
 
@@ -559,7 +559,7 @@ void setup()
                     NULL,      
                     1,         
                     &Task4,    
-                    1);     
+                    0);     
       delay(500);
     }
   #endif
@@ -632,7 +632,7 @@ void setup()
                       NULL,      
                       1,         
                       &Task5,    
-                      1);     
+                      0);     
         delay(500);
 
   #endif
@@ -695,7 +695,7 @@ void setup()
                       NULL,      
                       1,         
                       &Task6,    
-                      1);     
+                      0);     
     delay(500);
       
     
@@ -1158,6 +1158,10 @@ void pedalUpdateTask( void * pvParameters )
       stepper->moveTo(Position_Next, false);
     }
 
+
+
+   
+
     
 
     // compute controller output
@@ -1272,8 +1276,7 @@ void pedalUpdateTask( void * pvParameters )
       semaphore_updatePedalStates = xSemaphoreCreateMutex();
     }
     
-
-
+    
     
 
 
@@ -1581,22 +1584,38 @@ void serialCommunicationTask( void * pvParameters )
     // transmit controller output
     //Serial.print("Joy 1");
     delay( SERIAL_COOMUNICATION_TASK_DELAY_IN_MS );
+
+    //Serial.print(" 2");
+    if(semaphore_updateJoystick!=NULL)
+    {
+      if(xSemaphoreTake(semaphore_updateJoystick, (TickType_t)1)==pdTRUE)
+      {
+        //Serial.print(" 3");
+        joystickNormalizedToInt32_local = joystickNormalizedToInt32;
+        xSemaphoreGive(semaphore_updateJoystick);
+      }
+    }
+
+
     if (IsControllerReady()) 
     {
-      //Serial.print(" 2");
-      if(semaphore_updateJoystick!=NULL)
-      {
-        if(xSemaphoreTake(semaphore_updateJoystick, (TickType_t)1)==pdTRUE)
-        {
-          //Serial.print(" 3");
-          joystickNormalizedToInt32_local = joystickNormalizedToInt32;
-          xSemaphoreGive(semaphore_updateJoystick);
-        }
-      }
       //Serial.print(" 4");
       //Serial.print("\r\n");
       SetControllerOutputValue(joystickNormalizedToInt32_local);
     }
+
+
+
+     // send pedal state to esp master
+    if(ESPNOW_status==false)
+    {
+      ESPNow_initialize();
+    }
+    else
+    {
+      sendMessageToMaster(joystickNormalizedToInt32_local);
+    }
+
 
   /*#ifdef SERIAL_TIMEOUT
     delay(10);

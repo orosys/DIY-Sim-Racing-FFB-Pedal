@@ -39,6 +39,9 @@ StepperWithLimits::StepperWithLimits(uint8_t pinStep, uint8_t pinDirection, uint
   
   _stepper = stepperEngine().stepperConnectToPin(pinStep);
 
+  // Force usage of RMT, see https://github.com/gin66/FastAccelStepper/issues/174#issuecomment-1567380197
+  //_stepper = stepperEngine().stepperConnectToPin(pinStep, DRIVER_RMT );
+
   
 
   // Stepper Parameters
