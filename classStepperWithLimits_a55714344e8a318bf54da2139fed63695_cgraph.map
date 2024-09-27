@@ -1,9 +1,0 @@
-<map id="StepperWithLimits::findMinMaxSensorless" name="StepperWithLimits::findMinMaxSensorless">
-<area shape="rect" id="node1" title=" " alt="" coords="5,37,157,77"/>
-<area shape="rect" id="node2" href="$classStepperWithLimits.html#a11d69f4e87fb970b84772c4631f11054" title=" " alt="" coords="209,5,343,45"/>
-<area shape="rect" id="node3" href="$classisv57communication.html#a54a21dcfaa7950e51066f49119145c8f" title=" " alt="" coords="205,69,347,109"/>
-<area shape="rect" id="node4" href="$classModbus.html#aaeaf21cf9c6795dee76b775b39630cfe" title=" " alt="" coords="395,27,541,53"/>
-<area shape="rect" id="node6" href="$classModbus.html#a9a0902f1e2f2f664a0a60a6fae5cd74a" title=" " alt="" coords="411,77,525,102"/>
-<area shape="rect" id="node7" href="$classModbus.html#a2c2dd3e6add982e290737dcc66c516d5" title=" " alt="" coords="413,126,523,151"/>
-<area shape="rect" id="node5" href="$classModbus.html#af81965f56bff22d850f97bfc3b5b9760" title=" " alt="" coords="589,27,728,53"/>
-</map>

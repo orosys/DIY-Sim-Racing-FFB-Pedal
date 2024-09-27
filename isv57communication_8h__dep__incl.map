@@ -1,9 +1,0 @@
-<map id="Arduino/Esp32/Main/isv57communication.h" name="Arduino/Esp32/Main/isv57communication.h">
-<area shape="rect" id="node1" title=" " alt="" coords="403,5,558,45"/>
-<area shape="rect" id="node2" href="$StepperWithLimits_8h.html" title=" " alt="" coords="320,93,463,133"/>
-<area shape="rect" id="node7" href="$isv57communication_8cpp.html" title=" " alt="" coords="487,93,656,133"/>
-<area shape="rect" id="node3" href="$Dev_2StepperWithLimits_8cpp.html" title=" " alt="" coords="5,181,188,221"/>
-<area shape="rect" id="node4" href="$DiyActivePedal__types_8cpp.html" title=" " alt="" coords="213,181,389,221"/>
-<area shape="rect" id="node5" href="$PedalGeometry_8cpp.html" title=" " alt="" coords="413,181,551,221"/>
-<area shape="rect" id="node6" href="$Main_2StepperWithLimits_8cpp.html" title=" " alt="" coords="575,181,733,221"/>
-</map>

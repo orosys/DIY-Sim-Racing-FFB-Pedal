@@ -1,6 +1,0 @@
-<map id="Modbus::inputRegisterRead" name="Modbus::inputRegisterRead">
-<area shape="rect" id="node1" title=" " alt="" coords="5,31,185,56"/>
-<area shape="rect" id="node2" href="$classModbus.html#a5031a53eb8c0969d4e6e2b9d4e2bf81e" title=" " alt="" coords="239,5,374,31"/>
-<area shape="rect" id="node3" href="$classModbus.html#aaeaf21cf9c6795dee76b775b39630cfe" title=" " alt="" coords="233,55,380,80"/>
-<area shape="rect" id="node4" href="$classModbus.html#af81965f56bff22d850f97bfc3b5b9760" title=" " alt="" coords="428,55,567,80"/>
-</map>

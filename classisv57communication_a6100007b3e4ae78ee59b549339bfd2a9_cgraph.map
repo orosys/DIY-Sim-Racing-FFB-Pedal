@@ -1,9 +1,0 @@
-<map id="isv57communication::sendTunedServoParameters" name="isv57communication::sendTunedServoParameters">
-<area shape="rect" id="node1" title=" " alt="" coords="5,23,199,63"/>
-<area shape="rect" id="node2" href="$classModbus.html#aa2cf9b1afa39c3c9606a2df6ea588693" title=" " alt="" coords="247,56,485,81"/>
-<area shape="rect" id="node3" href="$classModbus.html#a3bf629e195b13445c8d6f98173b65e07" title=" " alt="" coords="533,5,727,31"/>
-<area shape="rect" id="node4" href="$classModbus.html#aaeaf21cf9c6795dee76b775b39630cfe" title=" " alt="" coords="557,55,703,80"/>
-<area shape="rect" id="node6" href="$classModbus.html#a9a0902f1e2f2f664a0a60a6fae5cd74a" title=" " alt="" coords="573,104,687,129"/>
-<area shape="rect" id="node7" href="$classModbus.html#a2c2dd3e6add982e290737dcc66c516d5" title=" " alt="" coords="575,153,685,179"/>
-<area shape="rect" id="node5" href="$classModbus.html#af81965f56bff22d850f97bfc3b5b9760" title=" " alt="" coords="775,55,913,80"/>
-</map>

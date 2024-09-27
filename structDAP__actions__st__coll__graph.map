@@ -1,8 +1,0 @@
-<map id="DAP_actions_st" name="DAP_actions_st">
-<area shape="rect" id="node1" title=" " alt="" coords="147,343,263,368"/>
-<area shape="rect" id="node2" href="$structpayloadHeader.html" title=" " alt="" coords="5,255,113,280"/>
-<area shape="rect" id="node3" title=" " alt="" coords="94,5,155,31"/>
-<area shape="rect" id="node4" href="$structpayloadPedalAction.html" title=" " alt="" coords="138,255,274,280"/>
-<area shape="rect" id="node5" href="$structpayloadFooter.html" title=" " alt="" coords="309,255,412,280"/>
-<area shape="rect" id="node6" title=" " alt="" coords="327,5,395,31"/>
-</map>

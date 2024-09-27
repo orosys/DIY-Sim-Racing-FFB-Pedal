@@ -1,6 +1,0 @@
-<map id="Modbus::discreteInputRead" name="Modbus::discreteInputRead">
-<area shape="rect" id="node1" title=" " alt="" coords="5,31,184,56"/>
-<area shape="rect" id="node2" href="$classModbus.html#a81a2ed503e4d61409cbc9c1e264f27e8" title=" " alt="" coords="241,5,369,31"/>
-<area shape="rect" id="node3" href="$classModbus.html#aaeaf21cf9c6795dee76b775b39630cfe" title=" " alt="" coords="232,55,379,80"/>
-<area shape="rect" id="node4" href="$classModbus.html#af81965f56bff22d850f97bfc3b5b9760" title=" " alt="" coords="427,55,565,80"/>
-</map>
