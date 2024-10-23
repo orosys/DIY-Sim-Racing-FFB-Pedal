@@ -26,6 +26,8 @@ public:
 
     // Function to set the connection callback
     void onConnected(void (*callback)(bool));
+    void onThrottleVibration(void (*callback)(int));
+    void onBreakVibration(void (*callback)(int));
 
     // Check if connected to the Fanatec device
     bool isConnected();
@@ -61,6 +63,9 @@ private:
 
     // Connection callback function pointer
     void (*_connectedCallback)(bool);
+    
+    void (*_throttleCallback)(int);
+    void (*_breakCallback)(int);
 
     // Initialization flag
     bool _initialized;

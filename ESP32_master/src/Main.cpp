@@ -418,6 +418,62 @@ void setup()
         Serial.println("[L] FANATEC Disconnected from Wheelbase.");
       }
     });
+
+    fanatec.onThrottleVibration([](int value) {
+      dap_action_update = true;
+      payloadPedalAction action;
+      action.triggerAbs_u8 = 0;
+      action.system_action_u8 = 0;
+      action.startSystemIdentification_u8 = 0;
+      action.returnPedalConfig_u8 = 0;
+      action.G_value = 0;
+      action.WS_u8 = 0;
+      action.impact_value_u8 = 0;
+      action.Trigger_CV_1 = 0;
+      action.Trigger_CV_2 = 0;
+      action.Rudder_action = 0;
+      action.Rudder_brake_action = 0;
+      action.RPM_u8 = value;
+
+      DAP_actions_st actions;
+      actions.payLoadHeader_.payloadType = DAP_PAYLOAD_TYPE_ACTION;
+      actions.payLoadHeader_.version = DAP_VERSION_CONFIG;
+      actions.payLoadHeader_.PedalTag = 2;
+      actions.payloadPedalAction_ = action;
+
+      uint16_t crc = checksumCalculator((uint8_t*)(&(actions.payLoadHeader_)), sizeof(actions.payLoadHeader_) + sizeof(actions.payloadPedalAction_));
+      actions.payloadFooter_.checkSum=crc;
+
+      dap_actions_st = actions;
+    });
+
+    fanatec.onBreakVibration([](int value) {
+      dap_action_update = true;
+      payloadPedalAction action;
+      action.system_action_u8 = 0;
+      action.startSystemIdentification_u8 = 0;
+      action.returnPedalConfig_u8 = 0;
+      action.RPM_u8 = 0;
+      action.G_value = 0;
+      action.WS_u8 = 0;
+      action.impact_value_u8 = 0;
+      action.Trigger_CV_1 = 0;
+      action.Trigger_CV_2 = 0;
+      action.Rudder_action = 0;
+      action.Rudder_brake_action = 0;
+      action.triggerAbs_u8 = value > 0 ? 1 : 0;
+
+      DAP_actions_st actions;
+      actions.payLoadHeader_.payloadType = DAP_PAYLOAD_TYPE_ACTION;
+      actions.payLoadHeader_.version = DAP_VERSION_CONFIG;
+      actions.payLoadHeader_.PedalTag = 1;
+      actions.payloadPedalAction_ = action;
+
+      uint16_t crc = checksumCalculator((uint8_t*)(&(actions.payLoadHeader_)), sizeof(actions.payLoadHeader_) + sizeof(actions.payloadPedalAction_));
+      actions.payloadFooter_.checkSum=crc;
+
+      dap_actions_st = actions;
+    });
     delay(2000);
     xTaskCreatePinnedToCore(
                           FanatecUpdate,   
@@ -614,18 +670,18 @@ void ESPNOW_SyncTask( void * pvParameters )
       if(dap_actions_st.payLoadHeader_.PedalTag==0 && dap_bridge_state_st.payloadBridgeState_.Pedal_availability[0]==1)
       {
         ESPNow.send_message(Clu_mac,(uint8_t *) &dap_actions_st,sizeof(dap_actions_st));
-        //Serial.println("BRK sent");
+        // Serial.println("[L]Clutch sent");
       }
       if(dap_actions_st.payLoadHeader_.PedalTag==1 && dap_bridge_state_st.payloadBridgeState_.Pedal_availability[1]==1)
       {
         ESPNow.send_message(Brk_mac,(uint8_t *) &dap_actions_st,sizeof(dap_actions_st));
-        //Serial.println("BRK sent");
+        // Serial.println("[L]BRK sent");
       }
                   
       if(dap_actions_st.payLoadHeader_.PedalTag==2 && dap_bridge_state_st.payloadBridgeState_.Pedal_availability[2]==1)
       {
         ESPNow.send_message(Gas_mac,(uint8_t *) &dap_actions_st,sizeof(dap_actions_st));
-        //Serial.println("GAS sent");
+        // Serial.println("[L]GAS sent");
       }
       
       //ESPNow.send_message(broadcast_mac,(uint8_t *) &dap_actions_st,sizeof(dap_actions_st));

@@ -2,11 +2,21 @@
 
 #include "FanatecInterface.h"
 
+#define FANATEC_EVENT_THROTTLE_VIBRATION 0x40
+#define FANATEC_EVENT_BREAK_VIBRATION 0x9B
+#define FANATEC_EVENT_CALIBRATION_CLUTCH_MIN 0x66
+#define FANATEC_EVENT_CALIBRATION_CLUTCH_MAX 0x51
+#define FANATEC_EVENT_CALIBRATION_THROTTLE_MIN 0x1C
+#define FANATEC_EVENT_CALIBRATION_THROTTLE_MAX 0x2B
+#define FANATEC_EVENT_CALIBRATION_BREAK_MIN 0x21
+#define FANATEC_EVENT_CALIBRATION_HANDBREAK_MIN 0x5B
+#define FANATEC_EVENT_CALIBRATION_HANDBREAK_MAX 0x6C
+
 // Constructor
 FanatecInterface::FanatecInterface(int rxPin, int txPin, int plugPin)
     : _rxPin(rxPin), _txPin(txPin), _plugPin(plugPin), _serial(&Serial1),
       _throttle(0), _brake(0), _clutch(0), _handbrake(0),
-      _connected(false), _connectedCallback(nullptr), _initialized(false) {
+      _connected(false), _connectedCallback(nullptr), _throttleCallback(nullptr), _breakCallback(nullptr), _initialized(false) {
 }
 
 // Initialization function
@@ -44,6 +54,68 @@ void FanatecInterface::communicationUpdate() {
 
 void FanatecInterface::update() {
     if (isPlugged()) {
+        if (_connected) {
+            static bool isThrottleEnabled = false;
+            static bool isBreakEnabled = false;
+            uint8_t rxBuffer[36];
+            size_t rxIndex = 0;
+            unsigned long startTime = millis();
+
+            // Read expected number of bytes
+            while (_serial->available()) {
+                uint8_t receivedByte = _serial->read();
+                rxBuffer[rxIndex++] = receivedByte;
+            }
+            if (rxIndex > 0) {
+                if (isThrottleEnabled) {
+                    if (_throttleCallback) {
+                        _throttleCallback(0);
+                    }
+                    isThrottleEnabled = false;
+                }
+                if (isBreakEnabled) {
+                    if (_breakCallback) {
+                        _breakCallback(0);
+                    }
+                    isBreakEnabled = false;
+                }
+
+                if (rxIndex > 10 && rxBuffer[10] == FANATEC_EVENT_THROTTLE_VIBRATION) {
+                    // 0x7B 0x0 0xFF 0x0 0x1 0x0 0x0 0x0 0x0 0x0 0x40 0x7D
+                    if (_throttleCallback) {
+                        _throttleCallback(rxBuffer[2]);
+                    }
+                    isThrottleEnabled = true;
+                } else if (rxIndex > 10 && rxBuffer[10] == FANATEC_EVENT_BREAK_VIBRATION) {
+                    // 0x7B 0x0 0x0 0xFF 0x1 0x0 0x0 0x0 0x0 0x0 0x9B 0x7D
+                    if (_breakCallback) {
+                        _breakCallback(rxBuffer[3]);
+                    }
+                    isBreakEnabled = true;
+                } else if (rxIndex > 10 && rxBuffer[10] == FANATEC_EVENT_CALIBRATION_CLUTCH_MIN) {
+                    Serial.println("[L]FANATEC Calibration Clutch Min ");
+                    // 0x7B 0x3 0x1 0x2 0x0 0x0 0x0 0x0 0x0 0x0 0x66 0x7D
+                } else if (rxIndex > 10 && rxBuffer[10] == FANATEC_EVENT_CALIBRATION_CLUTCH_MAX) {
+                    Serial.println("[L]FANATEC Calibration Clutch Max ");
+                    // 0x7B 0x3 0x1 0x2 0x1 0x0 0x0 0x0 0x0 0x0 0x51 0x7D
+                } else if (rxIndex > 10 && rxBuffer[10] == FANATEC_EVENT_CALIBRATION_BREAK_MIN) {
+                    Serial.println("[L]FANATEC Calibration Break Min ");
+                    // 0x7B 0x3 0x1 0x1 0x0 0x0 0x0 0x0 0x0 0x0 0x21 0x7D
+                } else if (rxIndex > 10 && rxBuffer[10] == FANATEC_EVENT_CALIBRATION_THROTTLE_MIN) {
+                    Serial.println("[L]FANATEC Calibration Throttle Min ");
+                    // 0x7B 0x3 0x1 0x0 0x0 0x0 0x0 0x0 0x0 0x0 0x1C 0x7D
+                } else if (rxIndex > 10 && rxBuffer[10] == FANATEC_EVENT_CALIBRATION_THROTTLE_MAX) {
+                    Serial.println("[L]FANATEC Calibration Throttle Max ");
+                    // 0x7B 0x3 0x1 0x0 0x1 0x0 0x0 0x0 0x0 0x0 0x2B 0x7D
+                } else if (rxIndex > 10 && rxBuffer[10] == FANATEC_EVENT_CALIBRATION_HANDBREAK_MIN) {
+                    Serial.println("[L]FANATEC Calibration Handbreak Min ");
+                    // 0x7B 0x3 0x1 0x3 0x0 0x0 0x0 0x0 0x0 0x0 0x5B 0x7D
+                } else if (rxIndex > 10 && rxBuffer[10] == FANATEC_EVENT_CALIBRATION_HANDBREAK_MAX) {
+                    Serial.println("[L]FANATEC Calibration Handbreak Max ");
+                    // 0x7B 0x3 0x1 0x3 0x1 0x0 0x0 0x0 0x0 0x0 0x6C 0x7D
+                }
+            }
+        }
         // Create and send pedal data packet
         uint8_t packet[12];
         createPacket(packet);
@@ -77,6 +149,14 @@ void FanatecInterface::onConnected(void (*callback)(bool)) {
     _connectedCallback = callback;
 }
 
+void FanatecInterface::onThrottleVibration(void (*callback)(int)) {
+    _throttleCallback = callback;
+}
+
+void FanatecInterface::onBreakVibration(void (*callback)(int)) {
+    _breakCallback = callback;
+}
+
 // Check if connected to the Fanatec device
 bool FanatecInterface::isConnected() {
     return _connected;
@@ -105,25 +185,19 @@ void FanatecInterface::performCommunicationSteps() {
     // Third step data (combined message)
     const uint8_t rxData3[] = {
         // First message
-        0x7B, 0x02, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x26, 0x7D,
+        0x7B, 0x02, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x26, 0x7D,
         // Second message
-        0x7B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0xAA, 0x7D,
+        0x7B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xAA, 0x7D,
         // Third message
-        0x7B, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x5F, 0x7D
+        0x7B, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x5F, 0x7D
     };
     const uint8_t txData3[] = {
         // First message
-        0x7B, 0x02, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x26, 0x7D,
+        0x7B, 0x02, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x26, 0x7D,
         // Second message
-        0x7B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0xAA, 0x7D,
+        0x7B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xAA, 0x7D,
         // Third message
-        0x7B, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x5F, 0x7D
+        0x7B, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x5F, 0x7D
     };
 
     Step steps[] = {
