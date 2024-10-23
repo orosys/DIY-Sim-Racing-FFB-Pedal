@@ -292,7 +292,7 @@ void setup()
     SetupController();
     //delay(3000);
   #endif
-  delay(3000);
+  //delay(3000);
   Serial.println("This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.");
   Serial.println("Please check github repo for more detail: https://github.com/ChrGri/DIY-Sim-Racing-FFB-Pedal");
   //printout the github releasing version

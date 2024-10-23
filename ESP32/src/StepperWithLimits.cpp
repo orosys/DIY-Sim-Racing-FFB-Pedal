@@ -82,7 +82,7 @@ StepperWithLimits::StepperWithLimits(uint8_t pinStep, uint8_t pinDirection, uint
 	/************************************************************/
 	/* 					iSV57 initialization					*/
 	/************************************************************/
-	
+	//delay(3000);
 	// find iSV57 servo ID
 	bool isv57slaveIdFound_b = isv57.findServosSlaveId();
 	Serial.print("iSV57 slaveId found:  ");
