@@ -67,7 +67,7 @@ struct payloadPedalState_Extended {
 struct payloadBridgeState {
   uint8_t Pedal_RSSI;
   uint8_t Pedal_availability[3];
-  uint8_t Bridge_action;//0=none, 1=enable pairing
+  uint8_t Bridge_action;//0=none, 1=enable pairing 2=Restart 3=download mode 4=Fanatec_mode
 };
 
 struct payloadPedalConfig {

@@ -223,7 +223,7 @@ int32_t MoveByForceTargetingStrategy(float loadCellReadingKg, StepperWithLimits*
   float stepperPos = stepper->getCurrentPosition();
 
   // add velocity feedforward
-  stepperPos += changeVelocity * config_st->payLoadPedalConfig_.PID_velocity_feedforward_gain;
+  //stepperPos += changeVelocity * config_st->payLoadPedalConfig_.PID_velocity_feedforward_gain;
 
   // motion corrected loadcell reading
   float loadCellReadingKg_corrected = loadCellReadingKg;

@@ -1849,9 +1849,9 @@
                                                     <Rectangle x:Name="RSSI_4" Width="3" Height="15" Fill="{DynamicResource AccentColorBrush}" Canvas.Left="12" Canvas.Top="0" />
                                                 </Canvas>
                                             </StackPanel>
-                                            <StackPanel Height="55" Width="160" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top">
-                                                <Label x:Name="info_label_system" Content="" Height="55" Width="80" FontFamily="Arial" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
-                                                <Label x:Name="info_label_2_system" Content="" Height="55" Width="80" FontFamily="Arial" VerticalAlignment="Top" FontSize="10"/>
+                                            <StackPanel Height="65" Width="160" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                                <Label x:Name="info_label_system" Content="" Height="65" Width="80" FontFamily="Arial" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
+                                                <Label x:Name="info_label_2_system" Content="" Height="65" Width="80" FontFamily="Arial" VerticalAlignment="Top" FontSize="10"/>
                                             </StackPanel>
                                             <StackPanel HorizontalAlignment="Left" Height="22" Grid.Row="4" VerticalAlignment="Top" Width="168" Grid.RowSpan="3" Orientation="Horizontal" Margin="0,2,0,0">
                                                 <ComboBox x:Name="SerialPortSelection_ESPNow" SelectionChanged="ESPNow_SerialPortSelectionChanged" Width="100" ItemsSource="{Binding}" DisplayMemberPath="Display" SelectedValuePath="Value" FontSize="8" Height="20" HorizontalAlignment="Left" MinHeight="20"/>
@@ -1861,8 +1861,10 @@
                                             <styles:SHButtonPrimary x:Name="btn_Bridge_restart" Click="btn_Bridge_restart_Click" Width="160" Content="Bridge Restart" Height="25" Margin="0,2,0,0" HorizontalAlignment="Center" Padding="15,0,15,0" VerticalContentAlignment="Center" />
                                             <styles:SHButtonPrimary x:Name="btn_Bridge_boot_restart" Click="btn_Bridge_boot_restart_Click" Width="160" Content="Enable Download Mode" Height="25" Margin="0,2,0,0" HorizontalAlignment="Center" Padding="15,0,15,0" VerticalContentAlignment="Center" ToolTip="Click for enabling Bridge into firmware download mode" />
                                             <styles:SHButtonPrimary x:Name="btn_Pairing" Click="btn_Pairing_Click" Width="160" Content="Enable Pairing Mode" Height="25" Margin="0,2,0,0" HorizontalAlignment="Center" Padding="15,0,15,0" VerticalContentAlignment="Center" />
-                                            <Border Background="#FF4E4E4E" Height="284" CornerRadius="5,5,5,5" BorderThickness="0,0,0,0" Width="160" HorizontalAlignment="Left" Margin="0,3,0,0" >
-                                                <StackPanel HorizontalAlignment="Center" Height="284" VerticalAlignment="Top" Width="160">
+                                            <styles:SHButtonPrimary x:Name="btn_Fanatec_mode" Click="btn_Fanatec_mode_Click" Width="160" Content="Fanatec Mode" Height="25" Margin="0,2,0,0" HorizontalAlignment="Center" Padding="15,0,15,0" VerticalContentAlignment="Center" />
+                                            <styles:SHButtonPrimary x:Name="btn_Bridge_OTA" Click="btn_Bridge_OTA_Click" Width="160" Content="Bridge OTA" Height="25" Margin="0,2,0,0" HorizontalAlignment="Center" Padding="15,0,15,0" VerticalContentAlignment="Center" />
+                                            <Border Background="#FF4E4E4E" Height="247" CornerRadius="5,5,5,5" BorderThickness="0,0,0,0" Width="160" HorizontalAlignment="Left" Margin="0,3,0,0" >
+                                                <StackPanel HorizontalAlignment="Center" Height="247" VerticalAlignment="Top" Width="160">
                                                     <Label Content="System Setting" Height="20" Width="150" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial Black" HorizontalAlignment="Left" FontSize="10" Margin="2,0,0,0"/>
 
                                                     <StackPanel Height="20" Width="160" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,2,0,0">
@@ -2054,6 +2056,27 @@
                                                 </StackPanel>
                                             </StackPanel>
 
+                                        </TabItem>
+                                        <TabItem Width="180" Height="30" Padding="0,0,0,0" ToolTip="General setting for Pedal, will save to pedal">
+                                            <TabItem.Header>
+                                                <Border  Width="180" Height="30" Margin="0,0,0,0" >
+                                                    <Label Content="Wifi"  FontFamily="Arial Black" FontSize="18" Height="30" Width="180" Padding="0,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" UseLayoutRounding="True"  />
+                                                </Border>
+                                            </TabItem.Header>
+                                            <Border Background="#7F4E4E4E" Height="177" CornerRadius="5,5,5,5" BorderThickness="0,2,0,0" >
+                                                <StackPanel Width="540" Height="177" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                                    <StackPanel HorizontalAlignment="Left" Height="30" VerticalAlignment="Top" Width="540" Grid.Column="1" Grid.Row="5" Orientation="Horizontal">
+                                                        <Label Content="SSID:" Height="15" Width="90" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial Black" HorizontalAlignment="Left" Margin="2,0,0,0"/>
+                                                        <TextBox x:Name="textbox_SSID" Text="" TextChanged="textbox_SSID_TextChanged" Height="20" Width="150" Padding="0,0,0,0"  VerticalContentAlignment="Center" FontFamily="Arial" HorizontalAlignment="Left" FontSize="15" BorderThickness="0,0,0,0" MaxLength="30"/>
+                                                        <Label x:Name="Label_SSID" Content=""  Height="15" Width="150" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" HorizontalAlignment="Left" Margin="2,0,0,0"/>
+                                                    </StackPanel>
+                                                    <StackPanel HorizontalAlignment="Left" Height="30" VerticalAlignment="Top" Width="540" Grid.Column="1" Grid.Row="5" Orientation="Horizontal">
+                                                        <Label Content="PASS:" Height="15" Width="90" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial Black" HorizontalAlignment="Left" Margin="2,0,0,0"/>
+                                                        <PasswordBox x:Name="textbox_PASS"   PasswordChanged="textbox_PASS_PasswordChanged" Height="20" Width="150" Padding="0,0,0,0"  VerticalContentAlignment="Center" FontFamily="Arial" HorizontalAlignment="Left" FontSize="15" BorderThickness="0,0,0,0" MaxLength="30"/>
+                                                        <Label x:Name="Label_PASS" Content="" Height="15" Width="150" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" HorizontalAlignment="Left" Margin="2,0,0,0"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </Border>
                                         </TabItem>
                                         <TabItem Width="180" Height="30" Padding="0,0,0,0" ToolTip="General setting for Pedal, will save to pedal">
                                             <TabItem.Header>

@@ -25,7 +25,7 @@
 #include "esp_system.h"
 #include "soc/rtc_cntl_reg.h"
 #include "FanatecInterface.h"
-
+#include "OTA_Pull.h"
 
 
 //#define ALLOW_SYSTEM_IDENTIFICATION
@@ -152,6 +152,7 @@ TaskHandle_t Task2;
 TaskHandle_t Task3;
 TaskHandle_t Task4;
 TaskHandle_t Task5;
+
 //static SemaphoreHandle_t semaphore_updateConfig=NULL;
   bool configUpdateAvailable = false;                              // semaphore protected data
   DAP_config_st dap_config_st_local;
@@ -224,6 +225,12 @@ void FanatecUpdate(void * pvParameters);
 
 #ifdef Fanatec_comunication
   FanatecInterface fanatec(Fanatec_serial_RX, Fanatec_serial_TX, Fanatec_plug); // RX: GPIO18, TX: GPIO17, PLUG: GPIO16
+  bool Fanatec_Mode=false;
+#endif
+
+#ifdef OTA_Update
+  void OTATask( void * pvParameters );
+  TaskHandle_t Task7;
 #endif
 
 /**********************************************************************************************/
@@ -486,7 +493,27 @@ void setup()
                           1);     
     delay(500);
   #endif
+
+  #ifdef OTA_Update
+    xTaskCreatePinnedToCore(
+                          OTATask,   
+                          "OTA_update_Task", 
+                          16000,  
+                          //STACK_SIZE_FOR_TASK_5,    
+                          NULL,      
+                          1,         
+                          &Task7,    
+                          1);     
+    delay(500);
+  #endif
   Serial.println("[L]Setup end");
+  //initialize wifi 
+  for(uint i=0;i<30;i++)
+  {
+    _basic_wifi_info.WIFI_PASS[i]=0;
+    _basic_wifi_info.WIFI_SSID[i]=0;
+  }
+  
   
 }
 
@@ -709,6 +736,8 @@ void Serial_Task( void * pvParameters)
     bool structChecker = true;
     if (n > 0)
     {
+      //Serial.print("[L]get size:");
+      //Serial.println(n);
       switch (n) 
       {
         case sizeof(DAP_actions_st) :            
@@ -849,10 +878,65 @@ void Serial_Task( void * pvParameters)
               #endif
 
             }
+            if(dap_bridge_state_lcl.payloadBridgeState_.Bridge_action==4)
+            {
+              //aciton=4 Fanatec Mode
+              #ifdef Fanatec_comunication
+                if(Fanatec_Mode)
+                {
+                  Fanatec_Mode=false;
+                  Serial.println("[L]Fanatec Mode off");
+                }
+                else
+                {
+                  Fanatec_Mode=true;
+                  Serial.println("[L]Fanatec Mode on");
+                }
+              #else
+                Serial.println("[L]Fanatec Mode Command not supported ");
+                delay(1000);
+              #endif
+
+            }
 
           }
           break;
-
+        case sizeof(Basic_WIfi_info) : 
+          Serial.println("[L]get basic wifi info");
+          Serial.readBytes((char*)&_basic_wifi_info, sizeof(Basic_WIfi_info));
+          #ifdef OTA_Update
+            if(_basic_wifi_info.device_ID==deviceID)
+            {
+              SSID=new char[_basic_wifi_info.SSID_Length+1];
+              PASS=new char[_basic_wifi_info.PASS_Length+1];
+              memcpy(SSID,_basic_wifi_info.WIFI_SSID,_basic_wifi_info.SSID_Length);
+              memcpy(PASS,_basic_wifi_info.WIFI_PASS,_basic_wifi_info.PASS_Length);
+              SSID[_basic_wifi_info.SSID_Length]=0;
+              PASS[_basic_wifi_info.PASS_Length]=0;
+              Serial.print("[L]SSID(uint)=");
+              for(uint i=0; i<_basic_wifi_info.SSID_Length;i++)
+              {
+                Serial.print(_basic_wifi_info.WIFI_SSID[i]);
+                Serial.print(",");
+              }
+              Serial.println(" ");
+              Serial.print("[L]PASS(uint)=");
+              for(uint i=0; i<_basic_wifi_info.PASS_Length;i++)
+              {
+                Serial.print(_basic_wifi_info.WIFI_PASS[i]);
+                Serial.print(",");
+              }
+              Serial.println(" ");
+              
+              Serial.print("[L]SSID=");
+              Serial.println(SSID);
+              Serial.print("[L]PASS=");
+              Serial.println(PASS);   
+              OTA_enable_b=true;
+            }
+          #endif
+          
+          break;
         default:
         // flush the input buffer
           while (Serial.available()) 
@@ -1073,6 +1157,85 @@ void Joystick_Task( void * pvParameters )
 
     #endif
       delay(2);
+  }
+}
+
+//OTA multitask
+uint16_t OTA_count=0;
+bool message_out_b=false;
+bool OTA_enable_start=false;
+uint32_t otaTask_stackSizeIdx_u32 = 0;
+void OTATask( void * pvParameters )
+{
+
+  for(;;)
+  {
+    #ifdef OTA_Update
+    if(OTA_count>200)
+    {
+      message_out_b=true;
+      OTA_count=0;
+    }
+    else
+    {
+      OTA_count++;
+    }
+
+    
+    if(OTA_enable_b)
+    {
+      if(message_out_b)
+      {
+        message_out_b=false;
+        Serial1.println("[L]OTA enable flag on");
+      }
+      if(OTA_status)
+      {
+        
+        //server.handleClient();
+      }
+      else
+      {
+        Serial.println("[L]de-initialize espnow");
+        Serial.println("[L]wait...");
+        esp_err_t result= esp_now_deinit();
+        ESPNow_initial_status=false;
+        ESPNOW_status=false;
+        delay(200);
+        if(result==ESP_OK)
+        {
+          OTA_status=true;
+          delay(1000);
+          //ota_wifi_initialize(APhost);
+          wifi_initialized(SSID,PASS);
+          delay(2000);
+          ESP32OTAPull ota;
+
+          ota.SetCallback(OTAcallback);
+          //Serial.printf("We are running version %s of the sketch, Board='%s', Device='%s'.\n", VERSION, ARDUINO_BOARD, WiFi.macAddress().c_str());
+          Serial.printf("[L]Checking %s to see if an update is available...\n", JSON_URL);
+          int ret = ota.CheckForOTAUpdate(JSON_URL, VERSION);
+          Serial.printf("[L]CheckForOTAUpdate returned %d (%s)\n\n", ret, errtext(ret));
+
+          delay(3000);
+        }
+
+      }
+    }
+    
+    delay(2);
+    #endif
+
+    #ifdef PRINT_TASK_FREE_STACKSIZE_IN_WORDS
+      if( otaTask_stackSizeIdx_u32 == 1000)
+      {
+        UBaseType_t stackHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+        Serial.print("StackSize (OTA): ");
+        Serial.println(stackHighWaterMark);
+        otaTask_stackSizeIdx_u32 = 0;
+      }
+      otaTask_stackSizeIdx_u32++;
+    #endif
   }
 }
 

@@ -61,6 +61,7 @@ class isv57communication {
     bool clearServoAlarms();
     bool readAlarmHistory();
     bool readCurrentAlarm();
+    void resetToFactoryParams();
 	
 	void clearServoUnitPosition();
     void disableAxis();

@@ -139,7 +139,7 @@ bool Modbus::checkAndReplaceParameter(uint16_t slaveId_local_u16, uint16_t param
 
 
 
-    holdingRegisterWrite(slaveId_local_u16, parameterAdress, value); // deactivate auto gain
+    holdingRegisterWrite(slaveId_local_u16, parameterAdress, value); 
     delay(50);
     retValue_b = true;
   }

@@ -1,6 +1,9 @@
 #pragma once
 //#include <ADS1256.h>
 
+
+//#define PRINT_TASK_FREE_STACKSIZE_IN_WORDS
+
 /********************************************************************/
 /*                      Select the PCB      */
 /********************************************************************/
@@ -37,8 +40,8 @@ static const uint32_t STEPS_PER_MOTOR_REVOLUTION = 6400;
 //#define PUT_TARGET_CYCLE_TIME_IN_US DAP_MICROSECONDS_PER_SECOND / 3750
 
 // 2.0kHz
-//#define ADC_SAMPLE_RATE ADS1256_DRATE_2000SPS
-//#define PUT_TARGET_CYCLE_TIME_IN_US DAP_MICROSECONDS_PER_SECOND / 2000
+// #define ADC_SAMPLE_RATE ADS1256_DRATE_2000SPS
+// #define PUT_TARGET_CYCLE_TIME_IN_US DAP_MICROSECONDS_PER_SECOND / 2000
 
 // 1.0kHz
 #define ADC_SAMPLE_RATE ADS1256_DRATE_1000SPS

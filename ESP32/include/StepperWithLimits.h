@@ -43,7 +43,7 @@ private:
 	int32_t servoPos_i16 = 0;
 	int32_t servo_offset_compensation_steps_i32 = 0;
 
-	
+	bool restartServo = false;
 	void setLifelineSignal();
 
 	

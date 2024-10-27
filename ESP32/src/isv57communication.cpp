@@ -22,6 +22,7 @@ void isv57communication::setupServoStateReading() {
   // These registers can be obtained by sending e.g. the command: 0x63, 0x03, 0x0191, target_sate, CRC
   // tell the modbus slave, which registers will be read cyclicly
   modbus.holdingRegisterWrite(slaveId, 0x0191, reg_add_position_given_p);
+  //modbus.holdingRegisterWrite(slaveId, 0x0191, reg_add_command_position_given_p);
   delay(50);
   modbus.holdingRegisterWrite(slaveId, 0x0192, reg_add_velocity_current_feedback_percent);
   delay(50);
@@ -41,19 +42,38 @@ void isv57communication::readAllServoParameters() {
   }
 }
 
-// ToDo: 
 // Disable aixs command
-//retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_5_00+06, 1); // Dsable axis?
-// Alternatively disable axis via Pr4.08? see iSV57 docu 0x303: disable; 0x8383: enable psotion mode
 void isv57communication::disableAxis()
 {
-	modbus.checkAndReplaceParameter(slaveId, pr_5_00+06, 1); //  {0: enable axis; 1: disable axis}
+
+  Serial.println("Disabling servo");
+
+  // 0x3f, 0x06, 0x00, 0x85, 0x03, 0x03, 0xdc, 0x0c
+  //modbus.checkAndReplaceParameter(slaveId, 0x0085, 0x0303);
+  modbus.holdingRegisterWrite(slaveId, 0x0085, 0x0303);
+  delay(12);
+  // 0x3f, 0x06, 0x01, 0x39, 0x00, 0x00, 0x5c, 0xe5
+  //modbus.checkAndReplaceParameter(slaveId, 0x0139, 0x0000); 
+  modbus.holdingRegisterWrite(slaveId, 0x0139, 0x0000);
+  delay(10);
 }
 
 void isv57communication::enableAxis() 
 {
-	modbus.checkAndReplaceParameter(slaveId, pr_5_00+06, 0); // {0: enable axis; 1: disable axis}
+  Serial.println("Enabling servo");
+
+  // 0x3f, 0x06, 0x00, 0x85, 0x03, 0x83, 0xdd, 0xac
+  modbus.holdingRegisterWrite(slaveId, 0x0085, 0x0383);
+  delay(12);
+  // 0x3f, 0x06, 0x01, 0x39, 0x00, 0x08, 0x5d, 0x23
+  modbus.holdingRegisterWrite(slaveId, 0x0139, 0x0008);
+  delay(10);
+
+  
 }
+
+
+
 
 
 
@@ -78,11 +98,11 @@ void isv57communication::sendTunedServoParameters(bool commandRotationDirection)
 
 
   // Pr0 register
-  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_0_00+1, 0); // control mode 
+  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_0_00+1, 0); // control mode #
   retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_0_00+2, 0); // deactivate auto gain
   retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_0_00+3, 10); // machine stiffness
   retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_0_00+4, 80); // ratio of inertia
-  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_0_00+6, commandRotationDirection); // Command Pulse Rotational Direction
+  //retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_0_00+6, commandRotationDirection); // Command Pulse Rotational Direction
   retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_0_00+8, STEPS_PER_MOTOR_REVOLUTION); // microsteps
   retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_0_00+9, 1); // 1st numerator 
   retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_0_00+10, 1); // & denominator
@@ -125,11 +145,12 @@ void isv57communication::sendTunedServoParameters(bool commandRotationDirection)
   retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_2_00+5, 20);
   retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_2_00+6, 99);
   retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_2_00+22, 0);
-  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_2_00+23, 0);
+  retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_2_00+23, 80);// FIR based command smoothing time. Since the stpper task runs every 4ms, this time is selected to be larger than that. Unit is 0.1ms 
+  
 
   // Pr3 register
   retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_3_00+24, 5000); // maximum rpm
-  
+
   // Pr5 register
   retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_5_00+13, 5000); // overspeed level
   retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_5_00+20, 1); // encoder output resolution  {0: Encoder units; 1: Command units; 2: 10000pulse/rotation}
@@ -143,23 +164,45 @@ void isv57communication::sendTunedServoParameters(bool commandRotationDirection)
   retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_7_00+32, 40); // bleeder braking voltage. Voltage when braking is activated
   retValue_b |= modbus.checkAndReplaceParameter(slaveId, pr_7_00+33, 1); // bleeder hysteresis voltage; Contrary to the manual this seems to be an offset voltage, thus Braking disabling voltage = Pr7.32 + Pr.33
   
+  // disable axis after servo startup --> ESP has to enable the axis first
+  // Pr4.08
+  // long servoEnableStatus = modbus.holdingRegisterRead(slaveId, 0x03, pr_4_00+8);
+  // Serial.print("Servo enable setting: ");
+  // Serial.println(servoEnableStatus, HEX);
+  // delay(100);
+  // if (servoEnableStatus != 0x303)
+  // {
+  //   isv57communication::disableAxis();
+  // }
+  // delay(100);
+  // servoEnableStatus = modbus.holdingRegisterRead(slaveId, 0x03, pr_4_00+8);
+  // Serial.print("Servo enable setting: ");
+  // Serial.println(servoEnableStatus, HEX);
+
+
+  //isv57communication::enableAxis();
+  
+
 
   // store the settings to servos NVM if necesssary
   if (retValue_b)
   {
     Serial.println("Servo registered in NVM have been updated! Please power cycle the servo and the ESP!");
+
+    // identified with logic analyzer. See \StepperParameterization\Meesages\StoreSettingsToEEPROM_0.png
     modbus.holdingRegisterWrite(slaveId, 0x019A, 0x5555); // store the settings to servos NVM
-	// ToDo: according to iSV57 manual, 0x2211 is the command to write values to EEPROM
-	delay(500);
-	
-	
-	// ToDo: soft reset servo. The iSV57 docu says Pr0.25: 0x6666 is soft reset
-	// modbus.holdingRegisterWrite(slaveId, 0x019A, 0x6666); // store the settings to servos NVM
-	
-	
+    // ToDo: according to iSV57 manual, 0x2211 is the command to write values to EEPROM
+    delay(500);
+    
+    
+    // ToDo: soft reset servo. The iSV57 docu says Pr0.25: 0x6666 is soft reset
+    // modbus.holdingRegisterWrite(slaveId, 0x019A, 0x6666); // store the settings to servos NVM
+    
+    
     isv57_update_parameter_b=true;
-    delay(2000);
+    delay(1000);
   }
+
 
 }
 
@@ -219,6 +262,12 @@ int16_t isv57communication::getZeroPos()
 // read servo states
 void isv57communication::readServoStates() {
 
+  // initialize with -1 to indicate non-trustworthyness
+  regArray[0] = -1;
+  regArray[1] = -1;
+  regArray[2] = -1;
+  regArray[3] = -1;
+
   // read the four registers simultaneously
   int8_t numberOfRegistersToRead_u8 = 4;
   int bytesReceived_i = modbus.requestFrom(slaveId, 0x03, ref_cyclic_read_0, numberOfRegistersToRead_u8);
@@ -229,13 +278,14 @@ void isv57communication::readServoStates() {
     { 
       regArray[regIdx] = modbus.uint16(regIdx);
     }
-
-    // write to public variables
-    servo_pos_given_p = regArray[0];
-    servo_current_percent = regArray[1];
-    servo_pos_error_p = regArray[2];
-    servo_voltage_0p1V = regArray[3];
   }
+
+  // write to public variables
+  servo_pos_given_p = regArray[0];
+  servo_current_percent = regArray[1];
+  servo_pos_error_p = regArray[2];
+  servo_voltage_0p1V = regArray[3];
+  
   //Serial.print("Bytes :");
   //Serial.println(bytesReceived_i);
   
@@ -292,6 +342,8 @@ bool isv57communication::readCurrentAlarm() {
       Serial.println( tmp, HEX);
     }
   }
+
+  return 1;
 }
 
 
@@ -327,5 +379,13 @@ bool isv57communication::readAlarmHistory() {
 	Serial.print("\n");
     
 	return 1;
+}
+
+void isv57communication::resetToFactoryParams() 
+{
+  // identified with logic analyzer. See \StepperParameterization\Meesages\ResetToFactorySettings_0.png
+	//modbus.holdingRegisterWrite(slaveId, 0x01F0, 0x0001);
+  // 0x3f, 0x03, 0x01, 0xF0, 0x00, 0x01, 0x81, 0x1B
+  modbus.holdingRegisterRead(0x01F0);
 }
 
