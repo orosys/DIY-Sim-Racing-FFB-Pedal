@@ -13,6 +13,7 @@ FanatecInterface::FanatecInterface(int rxPin, int txPin, int plugPin)
 void FanatecInterface::begin() {
     // Initialize serial port
     _serial->begin(250000, SERIAL_8N1, _rxPin, _txPin);
+    _lastBaudrate = 250000;
     pinMode(_plugPin, INPUT_PULLDOWN);
 
     // Generate CRC table
@@ -190,12 +191,14 @@ void FanatecInterface::performCommunicationSteps() {
 }
 
 void FanatecInterface::changeBaudRate(unsigned long baudrate) {
-    _serial->updateBaudRate(baudrate);
-    _serial->flush();
-    while (_serial->available()) {
-        _serial->read();
+    if (_lastBaudrate != baudrate) {
+        _lastBaudrate = baudrate;
+        _serial->updateBaudRate(baudrate);
+        _serial->flush();
+        while (_serial->available()) {
+            _serial->read();
+        }
     }
-    delay(50);
 }
 
 void FanatecInterface::makeCRCTable(uint8_t poly) {

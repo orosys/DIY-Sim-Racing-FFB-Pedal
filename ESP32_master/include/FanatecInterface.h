@@ -43,6 +43,7 @@ private:
     int _rxPin;
     int _txPin;
     int _plugPin;
+    unsigned long _lastBaudrate;
 
     // HardwareSerial object
     HardwareSerial* _serial;
