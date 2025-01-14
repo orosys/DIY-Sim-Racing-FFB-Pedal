@@ -1,6 +1,21 @@
 // FanatecInterface.cpp
 
 #include "FanatecInterface.h"
+#include <EEPROM.h>
+
+#define ADDR_HANDBREAK_MIN 0
+#define ADDR_HANDBREAK_MAX 4
+#define EEPROM_SIZE 64
+const uint8_t patternCalibrationHandbreakMin[] = {0x7B, 0x3, 0x1, 0x3, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x5B, 0x7D};
+const uint8_t patternCalibrationHandbreakMax[] = {0x7B, 0x3, 0x1, 0x3, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x6C, 0x7D};
+
+uint16_t _valCalibrationHandBreakMin;
+uint16_t _valCalibrationHandBreakMax;
+uint16_t _lastHandBreak;
+
+bool matchesPattern(const uint8_t* buffer, const uint8_t* pattern, size_t length) {
+    return memcmp(buffer, pattern, length) == 0;
+}
 
 // Constructor
 FanatecInterface::FanatecInterface(int rxPin, int txPin, int plugPin)
@@ -13,7 +28,20 @@ FanatecInterface::FanatecInterface(int rxPin, int txPin, int plugPin)
 void FanatecInterface::begin() {
     // Initialize serial port
     _serial->begin(250000, SERIAL_8N1, _rxPin, _txPin);
+    _lastBaudrate = 250000;
     pinMode(_plugPin, INPUT_PULLDOWN);
+
+    if (!EEPROM.begin(EEPROM_SIZE)) {
+        Serial.println("[L] Failed to initialise EEPROM");
+        return;
+    }
+    
+    int readMin, readMax;
+    EEPROM.get(ADDR_HANDBREAK_MIN, readMin);
+    EEPROM.get(ADDR_HANDBREAK_MAX, readMax);
+
+    _valCalibrationHandBreakMin = readMin;
+    _valCalibrationHandBreakMax = readMax;
 
     // Generate CRC table
     makeCRCTable(0x8C);
@@ -44,10 +72,34 @@ void FanatecInterface::communicationUpdate() {
 
 void FanatecInterface::update() {
     if (isPlugged()) {
-        // Create and send pedal data packet
-        uint8_t packet[12];
-        createPacket(packet);
-        _serial->write(packet, 12);
+        if (isConnected()) {
+            uint8_t rxBuffer[48];
+            size_t rxIndex = 0;
+            unsigned long startTime = millis();
+
+            // Read expected number of bytes
+            while (_serial->available()) {
+                uint8_t receivedByte = _serial->read();
+                rxBuffer[rxIndex++] = receivedByte;
+            }
+            if (rxIndex == sizeof(patternCalibrationHandbreakMin) && matchesPattern(rxBuffer, patternCalibrationHandbreakMin, sizeof(patternCalibrationHandbreakMin))) {
+                _valCalibrationHandBreakMin = _lastHandBreak;
+                EEPROM.put(ADDR_HANDBREAK_MIN, _lastHandBreak);
+                EEPROM.commit();
+                Serial.print("[L] HANDBREAK MIN New value saved: ");
+                Serial.println(_lastHandBreak);
+            } else if (rxIndex == sizeof(patternCalibrationHandbreakMax) && matchesPattern(rxBuffer, patternCalibrationHandbreakMax, sizeof(patternCalibrationHandbreakMax))) {
+                _valCalibrationHandBreakMax = _lastHandBreak;
+                EEPROM.put(ADDR_HANDBREAK_MAX, _lastHandBreak);
+                EEPROM.commit();
+                Serial.print("[L] HANDBREAK MAX New value saved: ");
+                Serial.println(_lastHandBreak);
+            }
+            // Create and send pedal data packet
+            uint8_t packet[12];
+            createPacket(packet);
+            _serial->write(packet, 12);
+        }
     }
 }
 
@@ -69,7 +121,14 @@ void FanatecInterface::setClutch(uint16_t value) {
 }
 
 void FanatecInterface::setHandbrake(uint16_t value) {
-    _handbrake = value;
+    _lastHandBreak = value;
+    uint16_t newValue = value;
+    if (newValue < _valCalibrationHandBreakMin) {
+        newValue = _valCalibrationHandBreakMin;
+    } else if (newValue > _valCalibrationHandBreakMax) {
+        newValue = _valCalibrationHandBreakMax;
+    }
+    _handbrake = map(newValue, _valCalibrationHandBreakMin, _valCalibrationHandBreakMax, 0, 65535);
 }
 
 // Function to set the connection callback
@@ -190,12 +249,15 @@ void FanatecInterface::performCommunicationSteps() {
 }
 
 void FanatecInterface::changeBaudRate(unsigned long baudrate) {
-    _serial->updateBaudRate(baudrate);
-    _serial->flush();
-    while (_serial->available()) {
-        _serial->read();
+    if (_lastBaudrate != baudrate) {
+        _lastBaudrate = baudrate;
+        _serial->updateBaudRate(baudrate);
+        _serial->flush();
+        while (_serial->available()) {
+            _serial->read();
+        }
+
     }
-    delay(50);
 }
 
 void FanatecInterface::makeCRCTable(uint8_t poly) {
