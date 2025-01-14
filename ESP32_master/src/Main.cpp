@@ -18,6 +18,7 @@
 #define BAUD3M 3000000
 #define PI 3.14159267
 #define DEG_TO_RAD PI / 180
+#define HANDBREAK_ANALOG_PIN 1
 
 #include "Arduino.h"
 #include "Main.h"
@@ -333,6 +334,9 @@ void setup()
     delay(500);
   #endif
   #ifdef Fanatec_comunication
+    // pinMode(HANDBREAK_ANALOG_PIN, INPUT);
+    analogReadResolution(12);
+
     // Initialize FanatecInterface
     fanatec.begin();
 
@@ -1737,7 +1741,7 @@ void fanatecUpdateTask(void * pvParameters)
           uint16_t throttleValue = g_pedalThrottleValue_u16;
           uint16_t brakeValue = g_pedalBrakeValue_u16;
           uint16_t clutchValue = g_pedalClutchValue_u16;
-          uint16_t handbrakeValue = 0;             // Set if needed
+          uint16_t handbrakeValue = analogRead(HANDBREAK_ANALOG_PIN);
 
           // Pedal input values to 0 - 10000
           throttleValue = map(throttleValue, 0, 10000, 0, 65535);
