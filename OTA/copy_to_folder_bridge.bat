@@ -53,5 +53,23 @@ set destination=..\OTA\Bridge\dev_kit\
 echo Copying %source% to %destination%...
 xcopy "%source%" "%destination%" /y
 
+set source=..\ESP32_master\.pio\build\esp32s3_external_joystick\firmware.bin
+set destination=..\OTA\Bridge\dev_kit_with_external_joystick\
+
+echo Copying %source% to %destination%...
+xcopy "%source%" "%destination%" /y
+
+set source=..\ESP32_master\.pio\build\esp32s3_external_joystick\bootloader.bin
+set destination=..\OTA\Bridge\dev_kit_with_external_joystick\
+
+echo Copying %source% to %destination%...
+xcopy "%source%" "%destination%" /y
+
+set source=..\ESP32_master\.pio\build\esp32s3_external_joystick\partitions.bin
+set destination=..\OTA\Bridge\dev_kit_with_external_joystick\
+
+echo Copying %source% to %destination%...
+xcopy "%source%" "%destination%" /y
+
 echo File copied successfully.
 pause

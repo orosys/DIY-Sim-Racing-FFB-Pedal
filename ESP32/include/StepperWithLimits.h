@@ -4,8 +4,17 @@
 #include "Main.h"
 
 // these are physical properties of the stepper
-static const int32_t MAXIMUM_STEPPER_ACCELERATION = INT32_MAX / 10;                                                 // steps/s²
+static const int32_t MAXIMUM_STEPPER_ACCELERATION = INT32_MAX / 10;       
+static const int32_t MAXIMUM_STEPPER_IDLE_TIMEOUT = 1800000; //set the servo idle timeout      
+static const float STEPPER_WAKEUP_FORCE=0.5f; //set the servo wakeup force in kg.
+ // steps/s²
 // 10000000; //
+enum ServoStatus
+{
+	SERVO_NOT_CONNECTED,
+	SERVO_CONNECTED,
+	SERVO_IDLE_NOT_CONNECTED
+};
 
 class StepperWithLimits {
 private:
@@ -45,10 +54,12 @@ private:
 	bool enableCrashDetection_b = true;
 
 	bool logAllServoParams = false;
+	bool clearAllServoAlarms_b = false;
 
 	int32_t servoPos_local_corrected_i32 = 0;
 
 	uint32_t stepsPerMotorRev_u32 = 3200u;
+	bool brakeResistorState_b = false;
 
 	
 
@@ -86,10 +97,15 @@ public:
 	int32_t getServosVoltage();
 	int32_t getServosCurrent();
 	int32_t getServosPos();
+	int32_t getServosPosError();
+	int32_t getEstimatedPosError();
+	//int32_t getEstimatedPosError_getCurrentStepperPos();
+	
 	bool getLifelineSignal();
 	
 	void configSteplossRecovAndCrashDetection(uint8_t flags_u8);
 	void printAllServoParameters();
+	void clearAllServoAlarms();
 
 
 	void setServosInternalPositionCorrected(int32_t posCorrected_i32);
@@ -97,5 +113,11 @@ public:
 
 
 	static void servoCommunicationTask( void * pvParameters );
+	bool getBrakeResistorState();
+	
+	bool servoIdleAction();
+	uint8_t servoStatus=0;
+
+	
 
 };

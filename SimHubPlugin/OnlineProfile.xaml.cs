@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using Newtonsoft.Json;
 using System.Net.Http;
 using System.ComponentModel;
+using SimHub.Plugins.DataPlugins.ShakeItV3;
 
 
 
@@ -24,10 +25,29 @@ namespace User.PluginSdkDemo
     {
         public string SelectedFileName { get; private set; }
         private DAP_config_st tmp_config;
+        private byte[] force;
+        private byte[] compatibleForce;
+        private byte[] travel;
+        private int maxQuantity = 11;
+        private int minQuantity = 6;
+        private const double RectSize = 6;
+        public int rectCount = 0;
+        public List<double> rectPositionX = new List<double>();
+        public List<double> rectPositionY = new List<double>();
+        bool compatibleMode = false;
         public OnlineProfile()
         {
             InitializeComponent();
+            InitRectangles();
             LoadProfiles();
+            force = new byte[maxQuantity];
+            travel = new byte[maxQuantity];
+            compatibleForce = new byte[minQuantity];
+            for (int i = 0; i < maxQuantity; i++)
+            {
+                force[i] = 0;
+                travel[i] = 0;
+            }
         }
 
         private async void LoadProfiles()
@@ -63,19 +83,45 @@ namespace User.PluginSdkDemo
         {
             if (ProfilesListBox.SelectedItem is Profile selectedProfile)
             {
-                Textbox_Online_Profile_Description.Text = "Author: "+selectedProfile.Author+"\nVersion: "+selectedProfile.Version+"\n"+selectedProfile.Description+"\n"; ;
+                Textbox_Online_Profile_Description.Text = "Author: " + selectedProfile.Author + "\nVersion: " + selectedProfile.Version + "\n" + selectedProfile.Description + "\n"; ;
                 //Label_Online_Profile_Description.Content = "\n URL:" + selectedProfile.FileName;
                 try
                 {
                     string jsonUrl = "https://raw.githubusercontent.com/tcfshcrw/FFB_PEDAL_PROFILE/master/Profiles/" + selectedProfile.FileName;
                     tmp_config = await GetProfileDataAsync(jsonUrl);
+                    if (tmp_config.payloadHeader_.version < 150)
+                    {
+                        //compatibleMode = true;
+
+                        tmp_config.payloadPedalConfig_.quantityOfControl = 6;
+                        /*
+                        tmp_config.payloadPedalConfig_.relativeForce00 = tmp_config.payloadPedalConfig_.relativeForce_p000;
+                        tmp_config.payloadPedalConfig_.relativeForce01 = tmp_config.payloadPedalConfig_.relativeForce_p020;
+                        tmp_config.payloadPedalConfig_.relativeForce02 = tmp_config.payloadPedalConfig_.relativeForce_p040;
+                        tmp_config.payloadPedalConfig_.relativeForce03 = tmp_config.payloadPedalConfig_.relativeForce_p060;
+                        tmp_config.payloadPedalConfig_.relativeForce04 = tmp_config.payloadPedalConfig_.relativeForce_p080;
+                        tmp_config.payloadPedalConfig_.relativeForce05 = tmp_config.payloadPedalConfig_.relativeForce_p100;
+                        */
+                        tmp_config.payloadPedalConfig_.relativeForce00 = compatibleForce[0];
+                        tmp_config.payloadPedalConfig_.relativeForce01 = compatibleForce[1];
+                        tmp_config.payloadPedalConfig_.relativeForce02 = compatibleForce[2];
+                        tmp_config.payloadPedalConfig_.relativeForce03 = compatibleForce[3];
+                        tmp_config.payloadPedalConfig_.relativeForce04 = compatibleForce[4];
+                        tmp_config.payloadPedalConfig_.relativeForce05 = compatibleForce[5];
+                        tmp_config.payloadPedalConfig_.relativeTravel00 = 0;
+                        tmp_config.payloadPedalConfig_.relativeTravel01 = 20;
+                        tmp_config.payloadPedalConfig_.relativeTravel02 = 40;
+                        tmp_config.payloadPedalConfig_.relativeTravel03 = 60;
+                        tmp_config.payloadPedalConfig_.relativeTravel04 = 80;
+                        tmp_config.payloadPedalConfig_.relativeTravel05 = 100;
+                    }
                     Update_ForceCurve();
                     Textbox_Online_Profile_Description.Text += "\nPreview:\n";
-                    Textbox_Online_Profile_Description.Text += "DAP Version: "+tmp_config.payloadHeader_.version+"\n";
+                    Textbox_Online_Profile_Description.Text += "DAP Version: " + tmp_config.payloadHeader_.version + "\n";
                     Textbox_Online_Profile_Description.Text += "Max force: " + tmp_config.payloadPedalConfig_.maxForce + "\n";
                     Textbox_Online_Profile_Description.Text += "Preload: " + tmp_config.payloadPedalConfig_.preloadForce + "\n";
                     //Textbox_Online_Profile_Description.Text += "Max force: " + tmp_config.payloadPedalConfig_.maxForce + "\n";
-                    Textbox_Online_Profile_Description.Text += "Travel: " + ((float)(tmp_config.payloadPedalConfig_.pedalEndPosition-tmp_config.payloadPedalConfig_.pedalStartPosition)/100.0f*tmp_config.payloadPedalConfig_.lengthPedal_travel) + "\n";
+                    Textbox_Online_Profile_Description.Text += "Travel: " + ((float)(tmp_config.payloadPedalConfig_.pedalEndPosition - tmp_config.payloadPedalConfig_.pedalStartPosition) / 100.0f * tmp_config.payloadPedalConfig_.lengthPedal_travel) + "\n";
                     Textbox_Online_Profile_Description.Text += "Damping: " + tmp_config.payloadPedalConfig_.dampingPress + "\n";
                     switch (tmp_config.payloadPedalConfig_.kf_modelOrder)
                     {
@@ -97,7 +143,7 @@ namespace User.PluginSdkDemo
                     {
                         case 0:
                             Textbox_Online_Profile_Description.Text += "Control: Static PID\n";
-                            Textbox_Online_Profile_Description.Text += "P Gain:"+tmp_config.payloadPedalConfig_.PID_p_gain+"\n";
+                            Textbox_Online_Profile_Description.Text += "P Gain:" + tmp_config.payloadPedalConfig_.PID_p_gain + "\n";
                             Textbox_Online_Profile_Description.Text += "I Gain:" + tmp_config.payloadPedalConfig_.PID_i_gain + "\n";
                             Textbox_Online_Profile_Description.Text += "D Gain:" + tmp_config.payloadPedalConfig_.PID_d_gain + "\n";
                             Textbox_Online_Profile_Description.Text += "Feed Forward Gain:" + tmp_config.payloadPedalConfig_.PID_velocity_feedforward_gain + "\n";
@@ -124,10 +170,10 @@ namespace User.PluginSdkDemo
                     System.Windows.MessageBox.Show($"Error loading JSON: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
 
                 }
-                
+
 
             }
-            
+
         }
 
 
@@ -141,6 +187,28 @@ namespace User.PluginSdkDemo
             using (HttpClient client = new HttpClient())
             {
                 string jsonString = await client.GetStringAsync(url);
+                dynamic data = JsonConvert.DeserializeObject(jsonString);
+                int version = 0;
+                try
+                {
+                    version = (int)data["payloadHeader_"]["version"];
+
+                    if (version < 150)
+                    {
+                        //MessageBox.Show($"This config is created in DAP{version}, Compatible Mode on");
+                        compatibleMode = true;
+                        compatibleForce[0] = (byte)data["payloadPedalConfig_"]["relativeForce_p000"];
+                        compatibleForce[1] = (byte)data["payloadPedalConfig_"]["relativeForce_p020"];
+                        compatibleForce[2] = (byte)data["payloadPedalConfig_"]["relativeForce_p040"];
+                        compatibleForce[3] = (byte)data["payloadPedalConfig_"]["relativeForce_p060"];
+                        compatibleForce[4] = (byte)data["payloadPedalConfig_"]["relativeForce_p080"];
+                        compatibleForce[5] = (byte)data["payloadPedalConfig_"]["relativeForce_p100"];
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                }
                 //return JsonConvert.DeserializeObject<Profile_Online>(jsonString);
                 return JsonConvert.DeserializeObject<DAP_config_st>(jsonString);
             }
@@ -148,26 +216,46 @@ namespace User.PluginSdkDemo
         private void Update_ForceCurve()
         {
 
-            double[] x = new double[6];
-            double[] y = new double[6];
-            double x_quantity = 100;
-            double y_max = 100;
-            double dx = canvas_Online_Config_curve.Width / x_quantity;
-            double dy = canvas_Online_Config_curve.Height / y_max;
-            //draw pedal force-travel curve
-            x[0] = 0;
-            x[1] = 20;
-            x[2] = 40;
-            x[3] = 60;
-            x[4] = 80;
-            x[5] = 100;
+            double[] x = new double[tmp_config.payloadPedalConfig_.quantityOfControl];
+            double[] y = new double[tmp_config.payloadPedalConfig_.quantityOfControl];
+            double x_quantity = 101;
+            double y_max = 101;
+            double dx = canvas_Online_Config_curve.Width / (x_quantity-1);
+            double dy = canvas_Online_Config_curve.Height / (y_max-1);
+            checkExistingRect(tmp_config.payloadPedalConfig_.quantityOfControl);
 
-            y[0] = tmp_config.payloadPedalConfig_.relativeForce_p000;
-            y[1] = tmp_config.payloadPedalConfig_.relativeForce_p020;
-            y[2] = tmp_config.payloadPedalConfig_.relativeForce_p040;
-            y[3] = tmp_config.payloadPedalConfig_.relativeForce_p060;
-            y[4] = tmp_config.payloadPedalConfig_.relativeForce_p080;
-            y[5] = tmp_config.payloadPedalConfig_.relativeForce_p100;
+            //int count =
+            //draw pedal force-travel curve
+            //read all parameter in
+            travel[0] = tmp_config.payloadPedalConfig_.relativeTravel00;
+            travel[1] = tmp_config.payloadPedalConfig_.relativeTravel01;
+            travel[2] = tmp_config.payloadPedalConfig_.relativeTravel02;
+            travel[3] = tmp_config.payloadPedalConfig_.relativeTravel03;
+            travel[4] = tmp_config.payloadPedalConfig_.relativeTravel04;
+            travel[5] = tmp_config.payloadPedalConfig_.relativeTravel05;
+            travel[6] = tmp_config.payloadPedalConfig_.relativeTravel06;
+            travel[7] = tmp_config.payloadPedalConfig_.relativeTravel07;
+            travel[8] = tmp_config.payloadPedalConfig_.relativeTravel08;
+            travel[9] = tmp_config.payloadPedalConfig_.relativeTravel09;
+            travel[10] = tmp_config.payloadPedalConfig_.relativeTravel10;
+
+            force[0] = tmp_config.payloadPedalConfig_.relativeForce00;
+            force[1] = tmp_config.payloadPedalConfig_.relativeForce01;
+            force[2] = tmp_config.payloadPedalConfig_.relativeForce02;
+            force[3] = tmp_config.payloadPedalConfig_.relativeForce03;
+            force[4] = tmp_config.payloadPedalConfig_.relativeForce04;
+            force[5] = tmp_config.payloadPedalConfig_.relativeForce05;
+            force[6] = tmp_config.payloadPedalConfig_.relativeForce06;
+            force[7] = tmp_config.payloadPedalConfig_.relativeForce07;
+            force[8] = tmp_config.payloadPedalConfig_.relativeForce08;
+            force[9] = tmp_config.payloadPedalConfig_.relativeForce09;
+            force[10] = tmp_config.payloadPedalConfig_.relativeForce10;
+
+            for (int i = 0; i < tmp_config.payloadPedalConfig_.quantityOfControl; i++)
+            {
+                x[i] = travel[i];
+                y[i] = force[i];
+            }
 
             // Use cubic interpolation to smooth the original data
             (double[] xs2, double[] ys2, double[] a, double[] b) = Cubic.Interpolate1D(x, y, 100);
@@ -178,27 +266,110 @@ namespace User.PluginSdkDemo
             {
                 System.Windows.Point Pointlcl = new System.Windows.Point(dx * xs2[pointIdx], dy * ys2[pointIdx]);
                 myPointCollection2.Add(Pointlcl);
-                
+
             }
             this.Polyline_Online_Config_ForceCurve.Points = myPointCollection2;
             //set the rect
-            double control_rect_value_max = 100;
-            double dyy = canvas_Online_Config_curve.Height / control_rect_value_max;
-            Canvas.SetTop(rect0_Online_Config, canvas_Online_Config_curve.Height - dyy * tmp_config.payloadPedalConfig_.relativeForce_p000 - rect0_Online_Config.Height / 2);
-            Canvas.SetLeft(rect0_Online_Config, 0 * canvas_Online_Config_curve.Width / 5 - rect0_Online_Config.Width / 2);
-            Canvas.SetTop(rect1_Online_Config, canvas_Online_Config_curve.Height - dyy * tmp_config.payloadPedalConfig_.relativeForce_p020 - rect1_Online_Config.Height / 2);
-            Canvas.SetLeft(rect1_Online_Config, 1 * canvas_Online_Config_curve.Width / 5 - rect1_Online_Config.Width / 2);
-            Canvas.SetTop(rect2_Online_Config, canvas_Online_Config_curve.Height - dyy * tmp_config.payloadPedalConfig_.relativeForce_p040 - rect2_Online_Config.Height / 2);
-            Canvas.SetLeft(rect2_Online_Config, 2 * canvas_Online_Config_curve.Width / 5 - rect2_Online_Config.Width / 2);
-            Canvas.SetTop(rect3_Online_Config, canvas_Online_Config_curve.Height - dyy * tmp_config.payloadPedalConfig_.relativeForce_p060 - rect3_Online_Config.Height / 2);
-            Canvas.SetLeft(rect3_Online_Config, 3 * canvas_Online_Config_curve.Width / 5 - rect3_Online_Config.Width / 2);
-            Canvas.SetTop(rect4_Online_Config, canvas_Online_Config_curve.Height - dyy * tmp_config.payloadPedalConfig_.relativeForce_p080 - rect4_Online_Config.Height / 2);
-            Canvas.SetLeft(rect4_Online_Config, 4 * canvas_Online_Config_curve.Width / 5 - rect4_Online_Config.Width / 2);
-            Canvas.SetTop(rect5_Online_Config, canvas_Online_Config_curve.Height - dyy * tmp_config.payloadPedalConfig_.relativeForce_p100 - rect5_Online_Config.Height / 2);
-            Canvas.SetLeft(rect5_Online_Config, 5 * canvas_Online_Config_curve.Width / 5 - rect5_Online_Config.Width / 2);
-        }
+
+            var toDraw = canvas_Online_Config_curve.Children
+             .OfType<Rectangle>()
+             .Where(r => r.Tag != null && r.Tag is int tagValue && tagValue < rectCount)
+             .ToList();
+            //fix the latest one to 100%
+            Canvas.SetLeft(toDraw[rectCount - 1], canvas_Online_Config_curve.Width - 0.5 * RectSize);
+            Canvas.SetTop(toDraw[rectCount - 1], 0 - 0.5 * RectSize);
+
+            for (int i = 1; i < rectCount - 1; i++)
+            {
+                //fill with new loaded value, only fill from 1 to rectNewCount-2
+                Canvas.SetLeft(toDraw[i], (double)travel[i] * dx - 0.5 * RectSize);
+                Canvas.SetTop(toDraw[i], canvas_Online_Config_curve.Height - (double)force[i] * dy - 0.5 * RectSize);
+
+            }
         }
 
+
+        private void InitRectangles()
+        {
+            for (int i = 0; i < minQuantity; i++)
+            {
+                AddRectAt(i*canvas_Online_Config_curve.Width/5 - 0.5 * RectSize, canvas_Online_Config_curve.Height - i*canvas_Online_Config_curve.Height/5 - 0.5 * RectSize);
+            }
+            UpdateRectState();
+        }
+
+        private void AddRectAt(double x, double y)
+        {
+            Rectangle rect = new Rectangle
+            {
+                Width = RectSize,
+                Height = RectSize,
+                StrokeThickness = 0,
+                Opacity = 0.8
+            };
+            rect.Tag = (int)-1;
+            rect.SetResourceReference(Shape.FillProperty, "AccentColorBrush");
+            Canvas.SetLeft(rect, x);
+            Canvas.SetTop(rect, y);
+
+
+            canvas_Online_Config_curve.Children.Add(rect);
+
+        }
+        private void checkExistingRect(byte rectNewCount)
+        {
+            if (rectNewCount < rectCount)
+            {
+                var toRemove = canvas_Online_Config_curve.Children
+                 .OfType<Rectangle>()
+                 .Where(r => r.Tag != null && r.Tag is int tagValue && tagValue > (rectNewCount - 1))
+                 .ToList();
+
+                foreach (var rect in toRemove)
+                {
+                    canvas_Online_Config_curve.Children.Remove(rect);
+                }
+            }
+            if (rectNewCount > rectCount)
+            {
+                for (int i = rectCount; i < rectNewCount; i++)
+                {
+                    AddRectAt(i * 80 - 0.5 * RectSize, canvas_Online_Config_curve.Height - i * 40 - 0.5 * RectSize);
+                }
+
+            }
+            if (rectNewCount < minQuantity)
+            {
+                //do nothing
+            }
+            UpdateRectState();
+            //Update_BrakeForceCurve();
+
+
+        }
+        private void UpdateRectState()
+        {
+            List<Rectangle> taggedRects = canvas_Online_Config_curve.Children
+                .OfType<Rectangle>()
+                .Where(r => r.Tag != null)
+                .OrderBy(r => Canvas.GetLeft(r))
+                .ToList();
+
+            rectCount = taggedRects.Count;
+            rectPositionX.Clear();
+            rectPositionY.Clear();
+
+            for (int i = 0; i < taggedRects.Count; i++)
+            {
+                taggedRects[i].Tag = i;
+                rectPositionX.Add(Canvas.GetLeft(taggedRects[i]) + 0.5 * RectSize);
+                rectPositionY.Add(Canvas.GetTop(taggedRects[i]) + 0.5 * RectSize);
+            }
+
+            //Title = "rectCount: " + rectCount + " | X: [" + string.Join(", ", rectPositionX) + "]";
+        }
+
+    }
     public class ProfilesData
     {
         public List<Profile> Profiles { get; set; }
@@ -213,3 +384,4 @@ namespace User.PluginSdkDemo
         public string Description { get; set; }
     }
 }
+

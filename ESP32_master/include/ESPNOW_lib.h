@@ -6,6 +6,8 @@
 #include "Main.h"
 
 //#define ESPNow_debug
+#define ESPNOW_LOG_MAGIC_KEY 0x99
+#define ESPNOW_LOG_MAGIC_KEY_2 0x97
 uint8_t esp_master[] = {0x36, 0x33, 0x33, 0x33, 0x33, 0x31};
 uint8_t Clu_mac[] = {0x36, 0x33, 0x33, 0x33, 0x33, 0x32};
 uint8_t Gas_mac[] = {0x36, 0x33, 0x33, 0x33, 0x33, 0x33};
@@ -17,6 +19,7 @@ uint8_t* Recv_mac;
 uint16_t ESPNow_send=0;
 uint16_t ESPNow_recieve=0;
 int rssi_display;
+int32_t rssi[3]={0,0,0};
 //bool MAC_get=false;
 bool ESPNOW_status =false;
 bool ESPNow_initial_status=false;
@@ -26,6 +29,7 @@ bool update_basic_state=false;
 bool update_extend_state=false;
 bool pedal_OTA_action_b=false;
 uint16_t Joystick_value[]={0,0,0};
+uint16_t Joystick_value_original[]={0,0,0};
 bool ESPNow_request_config_b[3]={false,false,false};
 bool ESPNow_error_b=false;
 uint16_t pedal_throttle_value=0;
@@ -38,6 +42,9 @@ bool ESPNow_Pairing_status = false;
 bool UpdatePairingToEeprom = false;
 bool ESPNow_pairing_action_b = false;
 bool software_pairing_action_b = false;
+char espnowLog[240];
+bool getESPNOWLog_b=false;
+
 
 bool MacCheck(uint8_t* Mac_A, uint8_t*  Mac_B)
 {
@@ -70,42 +77,43 @@ typedef struct ESP_pairing_reg
   uint8_t Pair_mac[4][6];
 } ESP_pairing_reg;
 
-typedef struct struct_message {
+typedef struct DAP_Joystick_Message {
+  uint8_t payloadtype;
   uint64_t cycleCnt_u64;
   int64_t timeSinceBoot_i64;
 	int32_t controllerValue_i32;
   int8_t pedal_status; //0=default, 1=rudder, 2=rudder brake
-} struct_message;
+} DAP_Joystick_Message;
 
 // Create a struct_message called myData
-struct_message myData;
-struct_message broadcast_incoming;
+DAP_Joystick_Message Joystick_Data;
+DAP_Joystick_Message broadcast_incoming;
 ESPNow_Send_Struct _ESPNow_Recv;
 ESPNow_Send_Struct _ESPNow_Send;
 ESP_pairing_reg _ESP_pairing_reg;
 
 bool sendMessageToMaster(int32_t controllerValue)
 {
-
-  myData.cycleCnt_u64++;
-  myData.timeSinceBoot_i64 = esp_timer_get_time() / 1000;
-  myData.controllerValue_i32 = controllerValue;
+  Joystick_Data.payloadtype=DAP_PAYLOAD_TYPE_ESPNOW_JOYSTICK;
+  Joystick_Data.cycleCnt_u64++;
+  Joystick_Data.timeSinceBoot_i64 = esp_timer_get_time() / 1000;
+  Joystick_Data.controllerValue_i32 = controllerValue;
   if(dap_calculationVariables_st.Rudder_status)
   {
     if(dap_calculationVariables_st.rudder_brake_status)
     {
-      myData.pedal_status=2;
+      Joystick_Data.pedal_status=2;
     }
     else
     {
-      myData.pedal_status=1;
+      Joystick_Data.pedal_status=1;
     }
   }
   else
   {
-    myData.pedal_status=0;
+    Joystick_Data.pedal_status=0;
   }
-  esp_now_send(broadcast_mac, (uint8_t *) &myData, sizeof(myData));
+  esp_now_send(broadcast_mac, (uint8_t *) &Joystick_Data, sizeof(Joystick_Data));
   return true;
   
 }
@@ -144,33 +152,52 @@ void onRecv(const uint8_t *mac_addr, const uint8_t *data, int data_len)
   //only recieve the package from registed mac address
   if(MacCheck((uint8_t*)mac_addr, Clu_mac)||MacCheck((uint8_t*)mac_addr, Brk_mac)||MacCheck((uint8_t*)mac_addr, Gas_mac))
   {
-    if(data_len==sizeof(myData))
+    if(data[0]==DAP_PAYLOAD_TYPE_ESPNOW_LOG && data[1]==ESPNOW_LOG_MAGIC_KEY && data[2]==ESPNOW_LOG_MAGIC_KEY_2)
     {
-      memcpy(&myData, data, sizeof(myData));
+      if(!getESPNOWLog_b)
+      {
+        getESPNOWLog_b = true;
+        memset(espnowLog, 0, sizeof(espnowLog));
+        memcpy(&espnowLog, &data[4], data[3]);
+      }
+
+    }
+    if(data_len==sizeof(Joystick_Data))
+    {
+
       
-      //#ifdef ACTIVATE_JOYSTICK_OUTPUT
-      // normalize controller output
-      int32_t joystickNormalizedToInt32 = NormalizeControllerOutputValue(myData.controllerValue_i32, 0, 10000, 100); 
-      //if(esp_now_info->src_addr[5]==Clu_mac[5])
-      if(mac_addr[5]==Clu_mac[5])
+      memcpy(&Joystick_Data, data, sizeof(DAP_Joystick_Message));
+      if(Joystick_Data.payloadtype==DAP_PAYLOAD_TYPE_ESPNOW_JOYSTICK)
       {
-        pedal_cluth_value=joystickNormalizedToInt32;
-        Joystick_value[0]=myData.controllerValue_i32;
-        //joystick_update=true;
+        //#ifdef ACTIVATE_JOYSTICK_OUTPUT
+        // normalize controller output
+        int32_t joystickNormalizedToInt32 = NormalizeControllerOutputValue(Joystick_Data.controllerValue_i32, 0, 10000, 100); 
+        //if(esp_now_info->src_addr[5]==Clu_mac[5])
+        if(mac_addr[5]==Clu_mac[5])
+        {
+          pedal_cluth_value=joystickNormalizedToInt32;
+          Joystick_value[0]=Joystick_Data.controllerValue_i32;
+          Joystick_value_original[0]=joystickNormalizedToInt32;
+          //joystick_update=true;
+        }
+        if(mac_addr[5]==Brk_mac[5])
+        {
+          pedal_brake_value=joystickNormalizedToInt32;
+          Joystick_value[1]=Joystick_Data.controllerValue_i32;
+          Joystick_value_original[1]=joystickNormalizedToInt32;
+          
+          //joystick_update=true;
+        }
+        if(mac_addr[5]==Gas_mac[5])
+        {
+          pedal_throttle_value=joystickNormalizedToInt32;
+          Joystick_value[2]=Joystick_Data.controllerValue_i32;
+          Joystick_value_original[2]=joystickNormalizedToInt32;
+          pedal_status=Joystick_Data.pedal_status;//control pedal status only by Throttle
+          //joystick_update=true;
+        }
       }
-      if(mac_addr[5]==Brk_mac[5])
-      {
-        pedal_brake_value=joystickNormalizedToInt32;
-        Joystick_value[1]=myData.controllerValue_i32;
-        pedal_status=myData.pedal_status;//control pedal status only by brake
-        //joystick_update=true;
-      }
-      if(mac_addr[5]==Gas_mac[5])
-      {
-        pedal_throttle_value=joystickNormalizedToInt32;
-        Joystick_value[2]=myData.controllerValue_i32;
-        //joystick_update=true;
-      }
+
       #ifdef ESPNow_debug
       Serial.print("Bytes received: ");
       Serial.println(len);
@@ -238,9 +265,33 @@ void promiscuous_rx_cb(void *buf, wifi_promiscuous_pkt_type_t type) {
   const wifi_promiscuous_pkt_t *ppkt = (wifi_promiscuous_pkt_t *)buf;
   //const wifi_ieee80211_packet_t *ipkt = (wifi_ieee80211_packet_t *)ppkt->payload;
   //const wifi_ieee80211_mac_hdr_t *hdr = &ipkt->hdr;
-
-  int rssi = ppkt->rx_ctrl.rssi;
-  rssi_display = rssi;
+  const uint8_t* payload = ppkt->payload;
+  if (ppkt->rx_ctrl.sig_len > 24)
+  {
+    const uint8_t *addr_DESTINATION = payload + 4;   
+    const uint8_t *addr_SOURCE = payload + 10;  // 傳送端 MAC
+    uint8_t addr_package[6];
+    memcpy(addr_package, addr_SOURCE, 6);
+    if(MacCheck(addr_package, Clu_mac))
+    {
+      rssi[0]=ppkt->rx_ctrl.rssi;
+      rssi_display=rssi[0];
+    }
+    if(MacCheck(addr_package, Brk_mac))
+    {
+      rssi[1]=ppkt->rx_ctrl.rssi;
+      rssi_display=rssi[1];
+    }
+    if(MacCheck(addr_package, Gas_mac))
+    {
+      rssi[2]=ppkt->rx_ctrl.rssi;
+      rssi_display=rssi[2];
+    }
+  }
+  
+  //int rssi = ppkt->rx_ctrl.rssi;
+  //rssi_display = rssi;
+  
 }
 
 void ESPNow_initialize()
@@ -369,4 +420,15 @@ void ESPNow_initialize()
     ESPNow_initial_status=true;
     Serial.println("[L]ESPNow Initialized");
   
+}
+void print_struct_hex(DAP_bridge_state_st* s) {
+    const uint8_t* p = (const uint8_t*)s;
+    for (size_t i = 0; i < sizeof(DAP_bridge_state_st); i++) 
+    {
+      Serial.print("0x");  
+      if (p[i] < 16) Serial.print('0');
+      Serial.print(p[i], HEX);
+      Serial.print("-");
+    }
+    Serial.println("");
 }

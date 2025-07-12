@@ -89,5 +89,59 @@ set destination=..\OTA\ControlBoard\Speedcrafter\
 echo Copying %source% to %destination%...
 xcopy "%source%" "%destination%" /y
 
+set source=..\ESP32\.pio\build\esp32s3usbotg_pcbV5_without_espnow\firmware.bin
+set destination=..\OTA\ControlBoard\esp32S3_V5_without_wireless\
+
+echo Copying %source% to %destination%...
+xcopy "%source%" "%destination%" /y
+
+set source=..\ESP32\.pio\build\esp32s3usbotg_pcbV5_without_espnow\bootloader.bin
+set destination=..\OTA\ControlBoard\esp32S3_V5_without_wireless\
+
+echo Copying %source% to %destination%...
+xcopy "%source%" "%destination%" /y
+
+set source=..\ESP32\.pio\build\esp32s3usbotg_pcbV5_without_espnow\partitions.bin
+set destination=..\OTA\ControlBoard\esp32S3_V5_without_wireless\
+
+echo Copying %source% to %destination%...
+xcopy "%source%" "%destination%" /y
+
+set source=..\ESP32\.pio\build\esp32s3usbotg_pcbV5\firmware.bin
+set destination=..\OTA\ControlBoard\esp32S3_V5\
+
+echo Copying %source% to %destination%...
+xcopy "%source%" "%destination%" /y
+
+set source=..\ESP32\.pio\build\esp32s3usbotg_pcbV5\bootloader.bin
+set destination=..\OTA\ControlBoard\esp32S3_V5\
+
+echo Copying %source% to %destination%...
+xcopy "%source%" "%destination%" /y
+
+set source=..\ESP32\.pio\build\esp32s3usbotg_pcbV5\partitions.bin
+set destination=..\OTA\ControlBoard\esp32S3_V5\
+
+echo Copying %source% to %destination%...
+xcopy "%source%" "%destination%" /y
+
+set source=..\ESP32\.pio\build\esp32s3usbotg-gilphilbert_2_0_without_espnow\firmware.bin
+set destination=..\OTA\ControlBoard\Gilphilbert_2_0_without_wireless\
+
+echo Copying %source% to %destination%...
+xcopy "%source%" "%destination%" /y
+
+set source=..\ESP32\.pio\build\esp32s3usbotg-gilphilbert_2_0_without_espnow\bootloader.bin
+set destination=..\OTA\ControlBoard\Gilphilbert_2_0_without_wireless\
+
+echo Copying %source% to %destination%...
+xcopy "%source%" "%destination%" /y
+
+set source=..\ESP32\.pio\build\esp32s3usbotg-gilphilbert_2_0_without_espnow\partitions.bin
+set destination=..\OTA\ControlBoard\Gilphilbert_2_0_without_wireless\
+
+echo Copying %source% to %destination%...
+xcopy "%source%" "%destination%" /y
+
 echo File copied successfully.
 pause

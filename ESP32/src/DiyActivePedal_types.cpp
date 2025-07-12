@@ -1,5 +1,5 @@
 #include "DiyActivePedal_types.h"
-#include "Arduino.h"
+
 
 #include "PedalGeometry.h"
 #include "StepperWithLimits.h"
@@ -7,6 +7,8 @@
 #include <EEPROM.h>
 
 static const float ABS_SCALING = 50;
+
+#define WAIT_TIME_IN_MS_TO_AQUIRE_GLOBAL_STRUCT 500
 
 const uint32_t EEPROM_OFFSET = (DAP_VERSION_CONFIG-128) * sizeof(DAP_config_st) % (2048-sizeof(DAP_config_st));
 
@@ -27,6 +29,29 @@ void DAP_config_st::initialiseDefaults() {
   payLoadPedalConfig_.relativeForce_p060 = 60;
   payLoadPedalConfig_.relativeForce_p080 = 80;
   payLoadPedalConfig_.relativeForce_p100 = 100;
+  payLoadPedalConfig_.quantityOfControl=6;
+  payLoadPedalConfig_.relativeForce00 = 0;
+  payLoadPedalConfig_.relativeForce01 = 20;
+  payLoadPedalConfig_.relativeForce02 = 40;
+  payLoadPedalConfig_.relativeForce03 = 60;
+  payLoadPedalConfig_.relativeForce04 = 80;
+  payLoadPedalConfig_.relativeForce05 = 100;
+  payLoadPedalConfig_.relativeForce06 = 0;
+  payLoadPedalConfig_.relativeForce07 = 0;
+  payLoadPedalConfig_.relativeForce08 = 0;
+  payLoadPedalConfig_.relativeForce09 = 0;
+  payLoadPedalConfig_.relativeForce10 = 0;
+  payLoadPedalConfig_.relativeTravel00 = 0;
+  payLoadPedalConfig_.relativeTravel01 = 20;
+  payLoadPedalConfig_.relativeTravel02 = 40;
+  payLoadPedalConfig_.relativeTravel03 = 60;
+  payLoadPedalConfig_.relativeTravel04 = 80;
+  payLoadPedalConfig_.relativeTravel05 = 100;
+  payLoadPedalConfig_.relativeTravel06 = 0;
+  payLoadPedalConfig_.relativeTravel07 = 0;
+  payLoadPedalConfig_.relativeTravel08 = 0;
+  payLoadPedalConfig_.relativeTravel09 = 0;
+  payLoadPedalConfig_.relativeTravel10 = 0;
 
   payLoadPedalConfig_.dampingPress = 0;
   payLoadPedalConfig_.dampingPull = 0;
@@ -59,6 +84,7 @@ void DAP_config_st::initialiseDefaults() {
   payLoadPedalConfig_.WS_freq=15;
   payLoadPedalConfig_.Road_multi = 50;
   payLoadPedalConfig_.Road_window=60;
+  /*
   payLoadPedalConfig_.cubic_spline_param_a_array[0] = 0;
   payLoadPedalConfig_.cubic_spline_param_a_array[1] = 0;
   payLoadPedalConfig_.cubic_spline_param_a_array[2] = 0;
@@ -70,6 +96,7 @@ void DAP_config_st::initialiseDefaults() {
   payLoadPedalConfig_.cubic_spline_param_b_array[2] = 0;
   payLoadPedalConfig_.cubic_spline_param_b_array[3] = 0;
   payLoadPedalConfig_.cubic_spline_param_b_array[4] = 0;
+  */
 
   payLoadPedalConfig_.PID_p_gain = 0.3f;
   payLoadPedalConfig_.PID_i_gain = 50.0f;
@@ -98,9 +125,10 @@ void DAP_config_st::initialiseDefaults() {
 
   payLoadPedalConfig_.invertMotorDirection_u8 = 0;
   payLoadPedalConfig_.pedal_type=4;
-  //payLoadPedalConfig_.OTA_flag=0;
   payLoadPedalConfig_.stepLossFunctionFlags_u8=0b11;
-  //payLoadPedalConfig_.Joystick_ESPsync_to_ESP=0;
+  payLoadPedalConfig_.kf_modelNoise_joystick=1;
+  payLoadPedalConfig_.kf_Joystick_u8=0;
+  payLoadPedalConfig_.servoIdleTimeout=0;
 }
 
 
@@ -153,16 +181,61 @@ void DAP_config_st::loadConfigFromEprom(DAP_config_st& config_st)
 
 
 
-void DAP_calculationVariables_st::updateFromConfig(DAP_config_st& config_st) {
+void DAP_calculationVariables_st::updateFromConfig(DAP_config_st& config_st) 
+{
   startPosRel = ((float)config_st.payLoadPedalConfig_.pedalStartPosition) / 100.0f;
   endPosRel = ((float)config_st.payLoadPedalConfig_.pedalEndPosition) / 100.0f;
+  
+  //read force and trave linto calculaiton Variables
+  force[0] = config_st.payLoadPedalConfig_.relativeForce00;
+  force[1] = config_st.payLoadPedalConfig_.relativeForce01;
+  force[2] = config_st.payLoadPedalConfig_.relativeForce02;
+  force[3] = config_st.payLoadPedalConfig_.relativeForce03;
+  force[4] = config_st.payLoadPedalConfig_.relativeForce04;
+  force[5] = config_st.payLoadPedalConfig_.relativeForce05;
+  force[6] = config_st.payLoadPedalConfig_.relativeForce06;
+  force[7] = config_st.payLoadPedalConfig_.relativeForce07;
+  force[8] = config_st.payLoadPedalConfig_.relativeForce08;
+  force[9] = config_st.payLoadPedalConfig_.relativeForce09;
+  force[10] = config_st.payLoadPedalConfig_.relativeForce10;
 
-
-  if (startPosRel  ==  endPosRel)
+  travel[0] = config_st.payLoadPedalConfig_.relativeTravel00;
+  travel[1] = config_st.payLoadPedalConfig_.relativeTravel01;
+  travel[2] = config_st.payLoadPedalConfig_.relativeTravel02;
+  travel[3] = config_st.payLoadPedalConfig_.relativeTravel03;
+  travel[4] = config_st.payLoadPedalConfig_.relativeTravel04;
+  travel[5] = config_st.payLoadPedalConfig_.relativeTravel05;
+  travel[6] = config_st.payLoadPedalConfig_.relativeTravel06;
+  travel[7] = config_st.payLoadPedalConfig_.relativeTravel07;
+  travel[8] = config_st.payLoadPedalConfig_.relativeTravel08;
+  travel[9] = config_st.payLoadPedalConfig_.relativeTravel09;
+  travel[10] = config_st.payLoadPedalConfig_.relativeTravel10;
+  // cubic interpolator
+  float travel_x[config_st.payLoadPedalConfig_.quantityOfControl];
+  float force_y[config_st.payLoadPedalConfig_.quantityOfControl];
+  for (int i = 0; i < config_st.payLoadPedalConfig_.quantityOfControl;i++)
   {
-    endPosRel =   startPosRel + 1 / 100;
+    travel_x[i]=travel[i];
+    force_y[i]=force[i];
+  }
+  _cubic.Interpolate1D(travel_x, force_y, config_st.payLoadPedalConfig_.quantityOfControl - 1, config_st.payLoadPedalConfig_.quantityOfControl-1);
+  interpolatorA = _cubic._result.a;
+  interpolatorB = _cubic._result.b;
+
+  for (int i = 0; i < config_st.payLoadPedalConfig_.quantityOfControl - 1; ++i)
+  {
+    //Serial.printf("original a=%.3f, b=%.3f\n", config_st.payLoadPedalConfig_.cubic_spline_param_a_array[i], config_st.payLoadPedalConfig_.cubic_spline_param_b_array[i]);
+    Serial.printf("ESP calculated a=%.3f, b=%.3f\n", interpolatorA[i], interpolatorB[i]);
   }
   
+  
+
+
+  if (startPosRel == endPosRel)
+  {
+    endPosRel = startPosRel + 1 / 100;
+  }
+
   absFrequency = ((float)config_st.payLoadPedalConfig_.absFrequency);
   absAmplitude = ((float)config_st.payLoadPedalConfig_.absAmplitude) / 20.0f; // in kg or percent
 
@@ -170,31 +243,32 @@ void DAP_calculationVariables_st::updateFromConfig(DAP_config_st& config_st) {
   RPM_max_freq = ((float)config_st.payLoadPedalConfig_.RPM_max_freq);
   RPM_min_freq = ((float)config_st.payLoadPedalConfig_.RPM_min_freq);
   RPM_AMP = ((float)config_st.payLoadPedalConfig_.RPM_AMP) / 100.0f;
-  //Bite point effect;
-  
-  BP_trigger_value=(float)config_st.payLoadPedalConfig_.BP_trigger_value;
-  BP_amp=((float)config_st.payLoadPedalConfig_.BP_amp) / 100.0f;
-  BP_freq=(float)config_st.payLoadPedalConfig_.BP_freq;
-  WS_amp=((float)config_st.payLoadPedalConfig_.WS_amp) / 20.0f;
-  WS_freq=(float)config_st.payLoadPedalConfig_.WS_freq;
+  // Bite point effect;
+
+  BP_trigger_value = (float)config_st.payLoadPedalConfig_.BP_trigger_value;
+  BP_amp = ((float)config_st.payLoadPedalConfig_.BP_amp) / 100.0f;
+  BP_freq = (float)config_st.payLoadPedalConfig_.BP_freq;
+  WS_amp = ((float)config_st.payLoadPedalConfig_.WS_amp) / 20.0f;
+  WS_freq = (float)config_st.payLoadPedalConfig_.WS_freq;
   // update force variables
   Force_Min = ((float)config_st.payLoadPedalConfig_.preloadForce);
-  Force_Max = ((float)config_st.payLoadPedalConfig_.maxForce); 
+  Force_Max = ((float)config_st.payLoadPedalConfig_.maxForce);
   Force_Range = Force_Max - Force_Min;
-  Force_Max_default=((float)config_st.payLoadPedalConfig_.maxForce); 
-  pedal_type=config_st.payLoadPedalConfig_.pedal_type;
+  Force_Max_default = ((float)config_st.payLoadPedalConfig_.maxForce);
+  pedal_type = config_st.payLoadPedalConfig_.pedal_type;
 
   // calculate steps per motor revolution
-  // float helper = MAXIMUM_STEPPER_SPEED / (MAXIMUM_STEPPER_RPM / SECONDS_PER_MINUTE);
-  // helper = floor(helper / 10) * 10;
-  // helper = constrain(helper, 2000, 10000);
-  // stepsPerMotorRevolution = helper;
+  float helper = MAXIMUM_STEPPER_SPEED / (MAXIMUM_STEPPER_RPM / SECONDS_PER_MINUTE);
+  helper = floor(helper / 10) * 10;
+  helper = constrain(helper, 2000, 10000);
+  stepsPerMotorRevolution = helper;
 
-  // when spindle pitch is smaller than 8, choose coarse microstepping
-  if ( 8 > config_st.payLoadPedalConfig_.spindlePitch_mmPerRev_u8)
-  {stepsPerMotorRevolution = 3200;}
-  else{stepsPerMotorRevolution = 6400;}
-  
+    // // when spindle pitch is smaller than 8, choose coarse microstepping
+    // if ( 8 > config_st.payLoadPedalConfig_.spindlePitch_mmPerRev_u8)
+    // {stepsPerMotorRevolution = 3200;}
+    // else{stepsPerMotorRevolution = 6400;}
+
+    // stepsPerMotorRevolution = 3750;
 }
 
 void DAP_calculationVariables_st::dynamic_update()
@@ -266,3 +340,89 @@ void DAP_calculationVariables_st::Default_pos()
 }
 
 
+
+/**********************************************************************************************/
+/*                                                                                            */
+/*                         DAP_config_class                                                   */
+/*                                                                                            */
+/**********************************************************************************************/
+// constructor
+DAP_config_class::DAP_config_class() {
+
+  // create the mutex
+  mutex = xSemaphoreCreateMutex();
+  if (mutex == NULL) {
+    Serial.println("Error: Mutex could not be created!");
+    ESP.restart();
+  }
+
+  // initialize the default config
+  _config_st.initialiseDefaults();
+}
+
+
+// method to safely get the config variable
+DAP_config_st DAP_config_class::getConfig() {
+  DAP_config_st tmp;
+  // requests the mutex, waits N milliseconds if not available immediately
+  if (xSemaphoreTake(mutex, pdMS_TO_TICKS(WAIT_TIME_IN_MS_TO_AQUIRE_GLOBAL_STRUCT)) == pdTRUE) {
+    tmp = _config_st;
+    // gives back the mutex
+    xSemaphoreGive(mutex);
+  }
+
+  return tmp;
+}
+
+// method to safely set the config variable
+void DAP_config_class::setConfig(DAP_config_st tmp) {
+  // boolean returnV_b = false;
+  // requests the mutex, waits N milliseconds if not available immediately
+  if (xSemaphoreTake(mutex, pdMS_TO_TICKS(WAIT_TIME_IN_MS_TO_AQUIRE_GLOBAL_STRUCT)) == pdTRUE) {
+    _config_st = tmp;
+    // returnV_b = true;
+    // gives back the mutex
+    xSemaphoreGive(mutex);
+  }
+  else
+  {
+    Serial.println("Error: Coul not aquire mutex!");
+  }
+
+  // return returnV_b;
+}
+
+
+
+void DAP_config_class::loadConfigFromEprom() {
+  if (xSemaphoreTake(mutex, pdMS_TO_TICKS(WAIT_TIME_IN_MS_TO_AQUIRE_GLOBAL_STRUCT)) == pdTRUE) {
+    _config_st.loadConfigFromEprom(_config_st);
+    xSemaphoreGive(mutex);
+  }
+}
+
+void DAP_config_class::storeConfigToEprom() {
+  if (xSemaphoreTake(mutex, pdMS_TO_TICKS(WAIT_TIME_IN_MS_TO_AQUIRE_GLOBAL_STRUCT)) == pdTRUE) {
+    _config_st.storeConfigToEprom(_config_st);
+    xSemaphoreGive(mutex);
+  }
+}
+
+void DAP_config_class::initializedConfig()
+{
+  // boolean returnV_b = false;
+  // requests the mutex, waits N milliseconds if not available immediately
+  if (xSemaphoreTake(mutex, pdMS_TO_TICKS(WAIT_TIME_IN_MS_TO_AQUIRE_GLOBAL_STRUCT)) == pdTRUE)
+  {
+    _config_st.initialiseDefaults();
+    // returnV_b = true;
+    // gives back the mutex
+    xSemaphoreGive(mutex);
+  }
+  else
+  {
+    Serial.println("Error: Coul not aquire mutex!");
+  }
+
+  // return returnV_b;
+}

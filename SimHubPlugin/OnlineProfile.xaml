@@ -41,12 +41,6 @@
                                     </TransformGroup>
                                 </Polyline.RenderTransform>
                             </Polyline>
-                            <Rectangle x:Name="rect0_Online_Config" Width="6" Height="6" Fill="{DynamicResource AccentColorBrush}" Canvas.Left="-3" Canvas.Top="97" Opacity="0.8" StrokeThickness="0"/>
-                            <Rectangle x:Name="rect1_Online_Config" Width="6" Height="6" Fill="{DynamicResource AccentColorBrush}" Canvas.Left="37" Canvas.Top="77" Opacity="0.8"/>
-                            <Rectangle x:Name="rect2_Online_Config" Width="6" Height="6" Fill="{DynamicResource AccentColorBrush}" Canvas.Left="77" Canvas.Top="57" Opacity="0.8"/>
-                            <Rectangle x:Name="rect3_Online_Config" Width="6" Height="6" Fill="{DynamicResource AccentColorBrush}" Canvas.Left="117" Canvas.Top="37" Opacity="0.8"/>
-                            <Rectangle x:Name="rect4_Online_Config" Width="6" Height="6" Fill="{DynamicResource AccentColorBrush}" Canvas.Left="157" Canvas.Top="17" Opacity="0.8"/>
-                            <Rectangle x:Name="rect5_Online_Config" Width="6" Height="6" Fill="{DynamicResource AccentColorBrush}" Canvas.Left="197" Canvas.Top="-3" Opacity="0.8"/>
                         </Canvas>
                     </StackPanel>
                     <TextBox x:Name="Textbox_Online_Profile_Description" Text="" Height="200" Width="210" FontFamily="Arial" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="10" Background="{x:Null}" BorderBrush="{x:Null}" ScrollViewer.CanContentScroll="True" CaretBrush="{x:Null}" BorderThickness="0,0,0,0" VerticalScrollBarVisibility="Auto"/>

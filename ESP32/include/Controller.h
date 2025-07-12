@@ -22,3 +22,8 @@ bool IsControllerReady();
 void SetControllerOutputValue(int32_t value);
 void SetControllerOutputValue_rudder(int32_t value, int32_t value2);
 int32_t NormalizeControllerOutputValue(float value, float minVal, float maxVal, float maxGameOutput);
+#ifdef USB_JOYSTICK
+  void JoystickSendState();
+  bool GetJoystickStatus();
+  void RestartJoystick();
+#endif

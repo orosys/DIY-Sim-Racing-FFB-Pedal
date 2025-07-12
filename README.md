@@ -10,7 +10,7 @@ The reason for that license selection is that at some point in time, individuals
 - Started mass production of FFB Pedals from these designs in their living rooms to make money, by taking parts from this project and Simucube's design files
 - The DIY FFB Pedal project is not affiliated with the video (https://www.youtube.com/watch?v=9ibAyHcSjO0) or its channel (https://www.youtube.com/@xiaoximu). We do not provide support or after-sales service for the content of this video or the associated website.<br>
 
-All that, without contributing anything to this project.
+All that, without contributing anything to this project. 
 
 [cc-by-nc-sa]: http://creativecommons.org/licenses/by-nc-sa/4.0/
 [cc-by-nc-sa-image]: https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png
@@ -68,5 +68,5 @@ Detailed descriptions of all aspects of the build can be found on the dedicated 
 Our [Discord server](https://discord.gg/zTfQaxpAUz) has thousands of users just like you and contains additional designs, insight and provides a place to find answers to all of your questions.
 
 # Architecture
-A Doxygen report of the sources can be found [here](https://chrgri.github.io/DIY-Sim-Racing-FFB-Pedal/Arduino/html/index.html).
+A Deepwiki of the sources can be found [here](https://deepwiki.com/ChrGri/DIY-Sim-Racing-FFB-Pedal).
 

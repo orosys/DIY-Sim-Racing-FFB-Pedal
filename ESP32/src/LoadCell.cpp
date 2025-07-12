@@ -1,19 +1,26 @@
 #include "LoadCell.h"
+#include "Main.h"
+
+#ifndef USES_ADS1220
 
 #include <SPI.h>
 #include <ADS1256.h>
-#include "Main.h"
+
 
 static const float ADC_CLOCK_MHZ = 7.68f;  // crystal frequency used on ADS1256
 static const float ADC_VREF = 2.5f;        // voltage reference
 
 static const int NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION = 1000;
 static const float DEFAULT_VARIANCE_ESTIMATE = 0.2f * 0.2f;
-static const float LOADCELL_VARIANCE_MIN = 0.001f;
+static const float LOADCELL_VARIANCE_MIN = 7.0 * 1e-5; // on 8th april 2025, approx. 50g fluctuation were observed --> 6 * sigma = 50g --> sigma = 50g / 6 = 8g --> sigma^2 = (8g)^2 = 0.00064
 //static const float CONVERSION_FACTOR = LOADCELL_WEIGHT_RATING_KG / (LOADCELL_EXCITATION_V * (LOADCELL_SENSITIVITY_MV_V/1000));
 
 float updatedConversionFactor_f64 = 1.0f;
 #define CONVERSION_FACTOR LOADCELL_WEIGHT_RATING_KG / (LOADCELL_EXCITATION_V * (LOADCELL_SENSITIVITY_MV_V/1000.0f))
+
+
+
+uint8_t global_channel0_u8, global_channel1_u8, global_channel2_u8;
 
 
 ADS1256& ADC() {
@@ -56,18 +63,18 @@ void LoadCell_ADS1256::setLoadcellRating(uint8_t loadcellRating_u8) const {
   ADS1256& adc = ADC();
   float originalConversionFactor_f64 = CONVERSION_FACTOR;
   
-  float updatedConversionFactor_f64 = 1.0f;
+  updatedConversionFactor_f64 = 1.0f;
   if (LOADCELL_WEIGHT_RATING_KG>0)
   {
       updatedConversionFactor_f64 = 2.0f * ((float)loadcellRating_u8) * (CONVERSION_FACTOR/LOADCELL_WEIGHT_RATING_KG);
   }
-  Serial.print("OrigConversionFactor: ");
-  Serial.print(originalConversionFactor_f64);
-  Serial.print(",     NewConversionFactor:");
-  Serial.println(updatedConversionFactor_f64);
+  // Serial.print("OrigConversionFactor: ");
+  // Serial.print(originalConversionFactor_f64);
+  // Serial.print(",     NewConversionFactor:");
+  // Serial.println(updatedConversionFactor_f64);
 
-
-  adc.setConversionFactor( updatedConversionFactor_f64 );
+  // adc.setConversionFactor( updatedConversionFactor_f64 );
+  adc.setConversionFactor( 1 );
 }
 
 
@@ -76,64 +83,76 @@ void LoadCell_ADS1256::setLoadcellRating(uint8_t loadcellRating_u8) const {
 LoadCell_ADS1256::LoadCell_ADS1256(uint8_t channel0, uint8_t channel1)
   : _zeroPoint(0.0f), _varianceEstimate(DEFAULT_VARIANCE_ESTIMATE)
 {
+  global_channel0_u8 = channel0;
+  global_channel1_u8 = channel1;
   ADC().setChannel(channel0,channel1);   // Set the MUX for differential between ch0 and ch1 
-  //ADC().setChannel(channel1, channel0);   // Set the MUX for differential between ch0 and ch1 
 }
 
 float LoadCell_ADS1256::getReadingKg() const {
   ADS1256& adc = ADC();
   adc.waitDRDY();        // wait for DRDY to go low before next register read
-
+  // adc.setGain(ADS1256_GAIN_64);
+  // adc.setChannel(global_channel0_u8, global_channel1_u8);   // Set the MUX for differential between ch0 and ch1
   // correct bias, assume AWGN --> 3 * sigma is 99.9 %
-  return adc.readCurrentChannel() - ( _zeroPoint + 3.0f * _standardDeviationEstimate );
+  return adc.readCurrentChannel()*updatedConversionFactor_f64 - ( _zeroPoint + 3.0f * _standardDeviationEstimate );
 }
 
-void LoadCell_ADS1256::setZeroPoint() {
-  Serial.println("ADC: Identify loadcell offset");
-  
-  // Due to construction and gravity, the loadcell measures an initial voltage difference.
-  // To compensate this difference, the difference is estimated by moving average filter.
-  float loadcellOffset = 0.0f;
-  for (long i = 0; i < NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION; i++) {
-    loadcellOffset += getReadingKg(); // DOUT arriving here are from MUX AIN0 and 
-  }
-  loadcellOffset /= NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION;
+// float LoadCell_ADS1256::getAngleMeasurement() const {
+//   ADS1256& adc = ADC();
+//   adc.waitDRDY();        // wait for DRDY to go low before next register read
+//   adc.setGain(ADS1256_GAIN_1);
+//   adc.setChannel(global_channel2_u8);  
+//   return adc.readCurrentChannel();
+// }
 
-  Serial.print("Offset ");
-  Serial.println(loadcellOffset,10);
 
-  _zeroPoint = loadcellOffset;
-}
 
-void LoadCell_ADS1256::estimateVariance() {
+
+
+void LoadCell_ADS1256::estimateBiasAndVariance() {
   ADS1256& adc = ADC();
   
+  Serial.println("Identify loadcell bias and variance");
+  float varEstimate;
+  float mean = 0.0f;
+  float M2 = 0.0f;
+  long n = 0;
 
-  Serial.println("ADC: Identify loadcell variance");
-  float varNormalizer = 1. / (float)(NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION - 1);
-  float varEstimate = 0.0f;
+  // capturer N measurements on do regressive mean and variance estimate
+  // Use Welford-algorithm
   for (long i = 0; i < NUMBER_OF_SAMPLES_FOR_LOADCELL_OFFFSET_ESTIMATION; i++){
     float loadcellReading = getReadingKg();
-    //Serial.println(loadcellReading);
-    varEstimate += sq(loadcellReading) * varNormalizer;
+    n++;
+    float delta = loadcellReading - mean;
+    mean += delta / n;
+    M2 += delta * (loadcellReading - mean);
   }
 
-  _standardDeviationEstimate = sqrt(varEstimate);
-
-  Serial.println("Variance est.:");
-  Serial.println(varEstimate);
-
-  Serial.println("Stddev est.:");
-  Serial.println(_standardDeviationEstimate);
-
+  varEstimate = M2 / ((float)n - 1.0f); // empirical variance 
   // make sure estimate is nonzero
   if (varEstimate < LOADCELL_VARIANCE_MIN) { 
     varEstimate = LOADCELL_VARIANCE_MIN;
   }
-  varEstimate *= 9.0f; // The variance is 1*sigma --> to make it 3*sigma, we have to multiply by 3*3
 
+  _zeroPoint = mean;
+  _standardDeviationEstimate = sqrt(varEstimate);
   _varianceEstimate = varEstimate;
 
-  
-  
+  Serial.print("Offset ");
+  Serial.print(_zeroPoint, 5);
+  Serial.println("kg");
+
+  // Serial.print("Variance est.: ");
+  // Serial.print(varEstimate, 5);
+  // Serial.println("kg");
+
+  Serial.print("Stddev. est.: ");
+  Serial.print(_standardDeviationEstimate, 5);
+  Serial.println("kg");
 }
+
+
+
+
+
+#endif

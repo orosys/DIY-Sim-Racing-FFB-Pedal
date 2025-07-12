@@ -229,6 +229,14 @@ int32_t MoveByForceTargetingStrategy(float loadCellReadingKg, StepperWithLimits*
   
   // get current stepper position
   float stepperPos = stepper->getCurrentPositionFromMin();
+
+  float estimatedServoPosErrorInSteps_fl32 = stepper->getEstimatedPosError();
+  if (0)
+  {
+    stepperPos += estimatedServoPosErrorInSteps_fl32;
+  }
+
+
   // float lagedPos;
 
   // posArray[arrayIndex] = stepperPos;
@@ -275,11 +283,9 @@ int32_t MoveByForceTargetingStrategy(float loadCellReadingKg, StepperWithLimits*
   // motion corrected loadcell reading
   float loadCellReadingKg_corrected = loadCellReadingKg;
 
-  
   // set initial guess
   float stepperPos_initial = stepperPos;
 
-  
   // foot spring stiffness
   float d_f_d_x_hor = -config_st->payLoadPedalConfig_.MPC_0th_order_gain;
 
@@ -560,7 +566,12 @@ int32_t MoveByForceTargetingStrategy(float loadCellReadingKg, StepperWithLimits*
 
 
 // see https://pidtuner.com
-void measureStepResponse(StepperWithLimits* stepper, const DAP_calculationVariables_st* calc_st, const DAP_config_st* config_st, const LoadCell_ADS1256* loadcell)
+
+#ifdef USES_ADS1220
+  void measureStepResponse(StepperWithLimits* stepper, const DAP_calculationVariables_st* calc_st, const DAP_config_st* config_st, const LoadCell_ADS1220* loadcell)
+#else
+  void measureStepResponse(StepperWithLimits* stepper, const DAP_calculationVariables_st* calc_st, const DAP_config_st* config_st, const LoadCell_ADS1256* loadcell)
+#endif
 {
 
   int32_t currentPos = stepper->getCurrentPositionFromMin();

@@ -1,9 +1,10 @@
 #pragma once
 
 #include <stdint.h>
-
+#include "Arduino.h"
+#include "CubicInterpolatorFloat.h"
 // define the payload revision
-#define DAP_VERSION_CONFIG 142
+#define DAP_VERSION_CONFIG 150
 
 // define the payload types
 #define DAP_PAYLOAD_TYPE_CONFIG 100
@@ -11,7 +12,10 @@
 #define DAP_PAYLOAD_TYPE_STATE_BASIC 120
 #define DAP_PAYLOAD_TYPE_STATE_EXTENDED 130
 #define DAP_PAYLOAD_TYPE_ESPNOW_PAIRING 140
+#define DAP_PAYLOAD_TYPE_ESPNOW_RUDDER 150
+#define DAP_PAYLOAD_TYPE_ESPNOW_JOYSTICK 160
 #define DAP_PAYLOAD_TYPE_BRIDGE_STATE 210
+#define DAP_PAYLOAD_TYPE_ESPNOW_LOG 225
 
 struct payloadHeader {
   
@@ -51,6 +55,8 @@ struct payloadPedalState_Basic {
   uint16_t pedalForce_u16;
   uint16_t joystickOutput_u16;
   uint8_t erroe_code_u8;
+  uint8_t pedalFirmwareVersion_u8[3];
+  uint8_t servoStatus;
 };
 
 struct payloadPedalState_Extended {
@@ -63,14 +69,25 @@ struct payloadPedalState_Extended {
   // register values from servo
   int16_t servoPosition_i16;
   int16_t servoPositionTarget_i16;
+  int16_t servoPositionEstimated_i16;
+  //int16_t servoPositionEstimated_stepperPos_i16;
+  int16_t servo_position_error_i16;
+  uint16_t angleSensorOutput_ui16;
   int16_t servo_voltage_0p1V;
   int16_t servo_current_percent_i16;
+  uint8_t brakeResistorState_b;
 };
 
 struct payloadBridgeState {
   uint8_t Pedal_RSSI;
   uint8_t Pedal_availability[3];
   uint8_t Bridge_action;//0=none, 1=enable pairing
+
+};
+
+struct payloadRudderState {
+  uint16_t pedal_position;
+  float pedal_position_ratio;
 
 };
 struct payloadPedalConfig {
@@ -92,6 +109,29 @@ struct payloadPedalConfig {
   uint8_t relativeForce_p080;
   uint8_t relativeForce_p100;
 
+  uint8_t quantityOfControl;
+  uint8_t relativeForce00;
+  uint8_t relativeForce01;
+  uint8_t relativeForce02;
+  uint8_t relativeForce03;
+  uint8_t relativeForce04;
+  uint8_t relativeForce05;
+  uint8_t relativeForce06;
+  uint8_t relativeForce07;
+  uint8_t relativeForce08;
+  uint8_t relativeForce09;
+  uint8_t relativeForce10;
+  uint8_t relativeTravel00;
+  uint8_t relativeTravel01;
+  uint8_t relativeTravel02;
+  uint8_t relativeTravel03;
+  uint8_t relativeTravel04;
+  uint8_t relativeTravel05;
+  uint8_t relativeTravel06;
+  uint8_t relativeTravel07;
+  uint8_t relativeTravel08;
+  uint8_t relativeTravel09;
+  uint8_t relativeTravel10;
   // parameter to configure damping
   uint8_t dampingPress;
   uint8_t dampingPull;
@@ -142,9 +182,10 @@ struct payloadPedalConfig {
   uint8_t CV_amp_2;
   uint8_t CV_freq_2;
   // cubic spline parameters
+  /*
   float cubic_spline_param_a_array[5];
   float cubic_spline_param_b_array[5];
-
+  */
   // PID parameters
   float PID_p_gain;
   float PID_i_gain;
@@ -191,6 +232,10 @@ struct payloadPedalConfig {
   uint8_t stepLossFunctionFlags_u8;
   //joystick out flag
   //uint8_t Joystick_ESPsync_to_ESP;
+
+  uint8_t kf_Joystick_u8;
+  uint8_t kf_modelNoise_joystick;
+  uint8_t servoIdleTimeout;
   
 
 };
@@ -237,9 +282,7 @@ struct DAP_config_st {
   payloadPedalConfig payLoadPedalConfig_;
   payloadFooter payloadFooter_; 
   
-  
   void initialiseDefaults();
-  void initialiseDefaults_Accelerator();
   void loadConfigFromEprom(DAP_config_st& config_st);
   void storeConfigToEprom(DAP_config_st& config_st);
 };
@@ -247,6 +290,11 @@ struct DAP_config_st {
 struct DAP_ESPPairing_st {
   payloadHeader payLoadHeader_;
   payloadESPNowInfo payloadESPNowInfo_;
+  payloadFooter payloadFooter_; 
+};
+struct DAP_Rudder_st {
+  payloadHeader payLoadHeader_;
+  payloadRudderState payloadRudderState_;
   payloadFooter payloadFooter_; 
 };
 
@@ -279,6 +327,9 @@ struct DAP_calculationVariables_st
   float WS_amp;
   float WS_freq;
   bool Rudder_status;
+  bool isRudderInitialized=false;
+  bool helicopterRudderStatus;
+  bool isHelicopterRudderInitialized=false;
   uint8_t pedal_type;
   uint32_t sync_pedal_position;
   uint32_t current_pedal_position;
@@ -289,7 +340,13 @@ struct DAP_calculationVariables_st
   long stepperPosMax_default;
   float stepperPosRange_default;
   uint32_t stepsPerMotorRevolution;
-
+  uint8_t TrackCondition;
+  float currentForceReading;
+  float force[11];
+  float travel[11]; 
+  float *interpolatorA= nullptr;
+  float *interpolatorB = nullptr;
+  Cubic _cubic;
   void updateFromConfig(DAP_config_st& config_st);
   void updateEndstops(long newMinEndstop, long newMaxEndstop);
   void updateStiffness();
@@ -299,4 +356,49 @@ struct DAP_calculationVariables_st
   void Default_pos();
   void update_stepperMinpos(long newMinstop);
   void update_stepperMaxpos(long newMaxstop);
+};
+
+enum class PedalSystemAction
+{
+  NONE,
+  RESET_PEDAL_POSITION,//not in use
+  PEDAL_RESTART,
+  ENABLE_OTA,//not in use
+  ENABLE_PAIRING,//not in use
+  ESP_BOOT_INTO_DOWNLOAD_MODE,
+  PRINT_PEDAL_INFO
+};
+enum class RudderAction
+{
+  NONE,
+  RUDDER_THROTTLE_AND_BRAKE,
+  RUDDER_CLEAR_RUDDER_STATUS,
+  RUDDER_THROTTLE_AND_CLUTCH,
+  HELIRUDDER_THROTTLE_AND_BRAKE,
+  HELIRUDDER_THROTTLE_AND_CLUTCH
+};
+
+class DAP_config_class {
+public:
+  // Konstruktor
+  DAP_config_class();
+
+  // Methode zum sicheren Abrufen der Konfiguration
+  DAP_config_st getConfig();
+
+  // Methode zum sicheren Setzen der Konfiguration
+  void setConfig(DAP_config_st tmp);
+
+  // Methode zum Laden der Konfiguration aus dem EEPROM
+  void loadConfigFromEprom();
+
+  // Methode zum Speichern der Konfiguration im EEPROM
+  void storeConfigToEprom();
+
+  //initialized config if needed
+  void initializedConfig();
+
+private:
+  SemaphoreHandle_t mutex;
+  DAP_config_st _config_st;
 };

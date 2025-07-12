@@ -48,6 +48,16 @@
 
 
 
+struct isv57dynamicStates {
+    int16_t servo_pos_given_p = 0;
+    int16_t servo_pos_error_p = 0;
+    int16_t servo_current_percent = 0;
+    int16_t servo_voltage_0p1V = 0;
+    int16_t estimated_pos_error_i16 = 0;
+    // int16_t estimated_pos_error_currentStepperPos_i16 = 0;
+    unsigned long lastUpdateTimeInMS_u32 = 0;
+};
+
 class isv57communication {
 	
 	public:
@@ -62,6 +72,7 @@ class isv57communication {
     bool readAlarmHistory();
     bool readCurrentAlarm();
     void resetToFactoryParams();
+    bool setServoVoltage(uint16_t voltageInVolt_u16);
 	
 	void clearServoUnitPosition();
     void disableAxis();
@@ -77,10 +88,12 @@ class isv57communication {
 
     int16_t slaveId = 63; 
 
-    int16_t servo_pos_given_p = 0;
-    int16_t servo_pos_error_p = 0;
-    int16_t servo_current_percent = 0;
-    int16_t servo_voltage_0p1V = 0;
+    // int16_t servo_pos_given_p = 0;
+    // int16_t servo_pos_error_p = 0;
+    // int16_t servo_current_percent = 0;
+    // int16_t servo_voltage_0p1V = 0;
+    isv57dynamicStates isv57dynamicStates_;
+
     bool isv57_update_parameter_b=false;
 
   private:

@@ -1,7 +1,11 @@
 #pragma once
 
-#include <stdint.h>
 #include "Main.h"
+#include <stdint.h>
+
+#ifndef USES_ADS1220
+
+
 
 class LoadCell_ADS1256 {
 private:
@@ -12,12 +16,13 @@ private:
 public:
   LoadCell_ADS1256(uint8_t channel0=0, uint8_t channel1=1);
   float getReadingKg() const;
+  // float getAngleMeasurement() const;
   void setLoadcellRating(uint8_t loadcellRating_u8) const;
-  
-public:
-  void setZeroPoint();
-  void estimateVariance();
-
-public:
+  void estimateBiasAndVariance();
   float getVarianceEstimate() const { return _varianceEstimate; }
+  float getShiftingEstimate() const { return _zeroPoint; }
+  float getSTDEstimate() const { return _standardDeviationEstimate; }
 };
+
+
+#endif

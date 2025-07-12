@@ -1,7 +1,7 @@
 #pragma once
 
 #include "DiyActivePedal_types.h"
-
+#include "MovingAverageFilter.h"
 
 static const long ABS_ACTIVE_TIME_PER_TRIGGER_MILLIS = 100;
 static const long RPM_ACTIVE_TIME_PER_TRIGGER_MILLIS = 100;
@@ -10,6 +10,16 @@ static const long WS_ACTIVE_TIME_PER_TRIGGER_MILLIS = 100;
 static const long CV_ACTIVE_TIME_PER_TRIGGER_MILLIS = 100;
 static int RPM_VALUE_LAST = 0;
 
+enum class TrackCondition
+{
+  Dry,
+  MostlyDry,
+  VeryLightWet,
+  LightWet,
+  ModeratelyWet,
+  VeryWet,
+  ExtremelyWet
+};
 class ABSOscillation {
 private:
   long _timeLastTriggerMillis;
@@ -32,6 +42,10 @@ public:
     long timeNowMillis = millis();
     float timeSinceTrigger = (timeNowMillis - _timeLastTriggerMillis);
     float absForceOffset_local = 0.00f;
+    float absFreq=calcVars_st->absFrequency;
+    //frequency depend on road condition
+    absFreq=absFreq*(1+((float)calcVars_st->TrackCondition)/10.0f);
+    absFreq=constrain(absFreq,0,50.0f);
 
     if (timeSinceTrigger > ABS_ACTIVE_TIME_PER_TRIGGER_MILLIS)
     {
@@ -61,13 +75,13 @@ public:
       switch (absPattern) {
         case 0:
           // sine wave pattern
-          absForceOffset_local =  absAmp_fl32 * sin(2.0f * PI * calcVars_st->absFrequency * absTimeSeconds);
+          absForceOffset_local =  absAmp_fl32 * sin(2.0f * PI * absFreq * absTimeSeconds);
           break;
         case 1:
           // sawtooth pattern
           if (calcVars_st->absFrequency > 0.0f)
           {
-            absForceOffset_local = absAmp_fl32 * fmod(absTimeSeconds, 1.0f / (float)calcVars_st->absFrequency) * (float)calcVars_st->absFrequency;
+            absForceOffset_local = absAmp_fl32 * fmod(absTimeSeconds, 1.0f / (float)absFreq) * (float)absFreq;
             absForceOffset_local -= absAmp_fl32 * 0.5f; // make it symmetrical around 0
           }
           break;
@@ -217,60 +231,6 @@ public:
   }
 };
 
-// moving average filter:https://github.com/sebnil/Moving-Avarage-Filter--Arduino-Library-/tree/master
-
-#define MAX_DATA_POINTS 100
-class MovingAverageFilter
-{
-public:
-  //construct without coefs
-  MovingAverageFilter(unsigned int newDataPointsCount);
-  int dataPointsCount;
-  float process(float in);
-  
-
-private:
-  float values[MAX_DATA_POINTS];
-  int k; // k stores the index of the current array read to create a circular memory through the array
-  
-  float out;
-  int i; // just a loop counter
-};
-
-MovingAverageFilter::MovingAverageFilter(unsigned int newDataPointsCount)
-{
-  k = 0; //initialize so that we start to write at index 0
-  if (newDataPointsCount < MAX_DATA_POINTS)
-    dataPointsCount = newDataPointsCount;
-  else
-    dataPointsCount = MAX_DATA_POINTS;
-
-  for (i = 0; i < dataPointsCount; i++)
-  {
-    values[i] = 0.0f; // fill the array with 0's
-  }
-}
-
-float MovingAverageFilter::process(float in)
-{
-  out = 0.0f;
-
-  values[k] = in;
-  k = (k + 1) % dataPointsCount;
-
-  for (i = 0; i < dataPointsCount; i++)
-  {
-    out += values[i];
-  }
-
-  float retValue= 0.0f;
-  if (dataPointsCount> 0)
-  {
-    retValue= out / dataPointsCount;
-  }
-  
-  return retValue;
-}
 
 MovingAverageFilter movingAverageFilter(100);
 // G force effect
@@ -434,130 +394,4 @@ public:
     
 
   }
-};
-MovingAverageFilter averagefilter_rudder(50);
-MovingAverageFilter averagefilter_rudder_force(50);
-class Rudder{
-  public:
-  int32_t Center_offset;
-  int32_t offset_raw;
-  int32_t offset_filter;
-  int32_t stepper_range;
-  int32_t dead_zone_upper;
-  int32_t dead_zone_lower;
-  int32_t dead_zone;
-  int32_t sync_pedal_position;
-  int32_t current_pedal_position;
-  float endpos_travel;
-  float force_range;  
-  float force_offset_raw;
-  float force_offset_filter;
-  float force_center_offset;
-  float position_ratio_sync;
-  float position_ratio_current;
-  int debug_count=0;
-
-  void offset_calculate(DAP_calculationVariables_st* calcVars_st)
-  {
-    current_pedal_position=calcVars_st->current_pedal_position;
-    position_ratio_sync=calcVars_st->Sync_pedal_position_ratio;
-    endpos_travel=(float)calcVars_st->stepperPosRange;
-    position_ratio_current=((float)(current_pedal_position-calcVars_st->stepperPosMin))/endpos_travel;    
-    dead_zone=20;
-    Center_offset=calcVars_st->stepperPosMin+ calcVars_st->stepperPosRange/2.0f;
-    float center_deadzone = 0.51f;
-    if(calcVars_st->Rudder_status)
-    {
-      if(position_ratio_sync>center_deadzone)
-      {
-        offset_raw=(int32_t)(-1*(position_ratio_sync-0.50f)*endpos_travel);
-          
-      }
-      else
-      {
-        offset_raw=0;
-      }
-      if(calcVars_st->rudder_brake_status)
-      {
-        offset_raw=0;
-      }
-      offset_filter=averagefilter_rudder.process(offset_raw+Center_offset);
-    }
-    else
-    {
-      offset_filter=calcVars_st->stepperPosMin;
-    }
-
-  }
-  void force_offset_calculate(DAP_calculationVariables_st* calcVars_st)
-  {
-    dead_zone=20;
-    Center_offset=calcVars_st->stepperPosRange/2.0f;
-    dead_zone_upper=Center_offset+dead_zone/2.0f;
-    dead_zone_lower=Center_offset-dead_zone/2.0f;
-    sync_pedal_position=calcVars_st->sync_pedal_position;
-    current_pedal_position=calcVars_st->current_pedal_position;
-    stepper_range=calcVars_st->stepperPosRange;
-    force_range=calcVars_st->Force_Range;
-    force_center_offset=force_range/2+calcVars_st->Force_Min;
-    endpos_travel=(float)calcVars_st->stepperPosRange;
-    //endpos_travel=((float)(calcVars_st->current_pedal_position-calcVars_st->stepperPosMin))/((float)calcVars_st->stepperPosRange);
-    position_ratio_sync=calcVars_st->Sync_pedal_position_ratio;
-    position_ratio_current=((float)(current_pedal_position-calcVars_st->stepperPosMin))/endpos_travel;
-    
-
-    float center_deadzone = 0.51f;
-    if(calcVars_st->Rudder_status)
-    {
-      
-        
-        if(position_ratio_sync>center_deadzone)
-        {
-          force_offset_raw=(float)(-1.0f*(position_ratio_sync-0.50f)*force_range);
-          
-        }
-        else
-        {
-          force_offset_raw=0.0f;
-        }
-        if(calcVars_st->rudder_brake_status)
-        {
-          force_offset_raw=0.0f;
-        }
-     
-      force_offset_filter=averagefilter_rudder_force.process(force_offset_raw+force_center_offset);
-    }
-    else
-    {
-      force_offset_filter=0;
-    }
-  }
-};
-//Rudder impact
-MovingAverageFilter Averagefilter_Rudder_G_Offset(50);
-class Rudder_G_Force{
-  public:
-  int32_t offset_raw;
-  int32_t offset_filter;
-  int32_t stepper_range;
-  uint8_t G_value;
-  long stepperPosMax;
-  void offset_calculate(DAP_calculationVariables_st* calcVars_st)
-  {
-    stepperPosMax=(float)calcVars_st->stepperPosMax;
-    stepper_range=(float)calcVars_st->stepperPosRange;
-    float Amp_max=0.3*stepper_range;
-    if(calcVars_st->Rudder_status)
-    {
-      float offset= Amp_max*((float)G_value)/100.0f;
-      //offset=constrain(offset,0,Amp_max);
-      offset_filter=Averagefilter_Rudder_G_Offset.process((stepperPosMax-offset));
-    }
-    else
-    {
-      offset_filter=calcVars_st->stepperPosMax;
-    }
-
-  }
-  
 };

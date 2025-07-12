@@ -15,22 +15,43 @@ float ForceCurve_Interpolated::EvalForceCubicSpline(const DAP_config_st* config_
 {
 
   float fractionalPos_lcl = constrain(fractionalPos, 0, 1);
-
-  float splineSegment_fl32 = fractionalPos_lcl * 5.0f;
+  float fractionalPos_float=fractionalPos_lcl*100.0f;
+  //float splineSegment_fl32 = fractionalPos_lcl * 5.0f;
+  float splineSegment_fl32 = 0;
+  for(int i=0;i<config_st->payLoadPedalConfig_.quantityOfControl;i++)
+  {
+    if(fractionalPos_float>calc_st->travel[i])
+    {
+      if(i==config_st->payLoadPedalConfig_.quantityOfControl-1)
+      {
+        splineSegment_fl32=(float)i;
+      }
+      else
+      {
+        float diff= (fractionalPos_float-(float)calc_st->travel[i])/(float)(calc_st->travel[i+1]-calc_st->travel[i]);
+        splineSegment_fl32=(float)i+diff;
+      }  
+    }
+    else
+    {
+      break;
+    }
+  }
   uint8_t splineSegment_u8 = (uint8_t)floor(splineSegment_fl32);
   
   if (splineSegment_u8 < 0){splineSegment_u8 = 0;}
-  if (splineSegment_u8 > (NUMBER_OF_SPLINE_SEGMENTS-1) ){splineSegment_u8 = NUMBER_OF_SPLINE_SEGMENTS-1;}
-  float a = config_st->payLoadPedalConfig_.cubic_spline_param_a_array[splineSegment_u8];
-  float b = config_st->payLoadPedalConfig_.cubic_spline_param_b_array[splineSegment_u8];
+  if (splineSegment_u8 > (config_st->payLoadPedalConfig_.quantityOfControl-1) )
+  {
+    splineSegment_u8 = config_st->payLoadPedalConfig_.quantityOfControl - 1;
+  }
+  float a = calc_st->interpolatorA[splineSegment_u8];
+  float b = calc_st->interpolatorB[splineSegment_u8];
 
-  float yOrig[ NUMBER_OF_SPLINE_SEGMENTS + 1 ];
-  yOrig[0] = config_st->payLoadPedalConfig_.relativeForce_p000;
-  yOrig[1] = config_st->payLoadPedalConfig_.relativeForce_p020;
-  yOrig[2] = config_st->payLoadPedalConfig_.relativeForce_p040;
-  yOrig[3] = config_st->payLoadPedalConfig_.relativeForce_p060;
-  yOrig[4] = config_st->payLoadPedalConfig_.relativeForce_p080;
-  yOrig[5] = config_st->payLoadPedalConfig_.relativeForce_p100;
+  float yOrig[config_st->payLoadPedalConfig_.quantityOfControl];
+  for(int i=0;i<config_st->payLoadPedalConfig_.quantityOfControl;i++)
+  {
+    yOrig[i]=calc_st->force[i];
+  }
 
   //double dx = 1.0f;
   float t = (splineSegment_fl32 - (float)splineSegment_u8);// / dx;
@@ -58,30 +79,51 @@ float ForceCurve_Interpolated::EvalForceCubicSpline(const DAP_config_st* config_
 
 float ForceCurve_Interpolated::EvalForceGradientCubicSpline(const DAP_config_st* config_st, const DAP_calculationVariables_st* calc_st, float fractionalPos, bool normalized_b)
 {
-
   float fractionalPos_lcl = constrain(fractionalPos, 0, 1);
-
-  float splineSegment_fl32 = fractionalPos_lcl * 5.0f;
+  float fractionalPos_float=fractionalPos_lcl*100.0f;
+  //float splineSegment_fl32 = fractionalPos_lcl * 5.0f;
+  float splineSegment_fl32 = 0;
+  for(int i=0;i<config_st->payLoadPedalConfig_.quantityOfControl;i++)
+  {
+    if(fractionalPos_float>calc_st->travel[i])
+    {
+      if(i==config_st->payLoadPedalConfig_.quantityOfControl-1)
+      {
+        splineSegment_fl32=(float)i;
+      }
+      else
+      {
+        float diff= (fractionalPos_float-(float)calc_st->travel[i])/(float)(calc_st->travel[i+1]-calc_st->travel[i]);
+        splineSegment_fl32=(float)i+diff;
+      }  
+    }
+    else
+    {
+      break;
+    }
+  }
   uint8_t splineSegment_u8 = (uint8_t)floor(splineSegment_fl32);
   
   if (splineSegment_u8 < 0){splineSegment_u8 = 0;}
-  if (splineSegment_u8 > 4){splineSegment_u8 = 4;}
-  float a = config_st->payLoadPedalConfig_.cubic_spline_param_a_array[splineSegment_u8];
-  float b = config_st->payLoadPedalConfig_.cubic_spline_param_b_array[splineSegment_u8];
+  if (splineSegment_u8 > (config_st->payLoadPedalConfig_.quantityOfControl-1) )
+  {
+    splineSegment_u8 = config_st->payLoadPedalConfig_.quantityOfControl - 1;
+  }
+  float a = calc_st->interpolatorA[splineSegment_u8];
+  float b = calc_st->interpolatorB[splineSegment_u8];
 
-  float yOrig[NUMBER_OF_SPLINE_SEGMENTS + 1];
-  yOrig[0] = config_st->payLoadPedalConfig_.relativeForce_p000;
-  yOrig[1] = config_st->payLoadPedalConfig_.relativeForce_p020;
-  yOrig[2] = config_st->payLoadPedalConfig_.relativeForce_p040;
-  yOrig[3] = config_st->payLoadPedalConfig_.relativeForce_p060;
-  yOrig[4] = config_st->payLoadPedalConfig_.relativeForce_p080;
-  yOrig[5] = config_st->payLoadPedalConfig_.relativeForce_p100;
+  float yOrig[config_st->payLoadPedalConfig_.quantityOfControl];
+  for(int i=0;i<config_st->payLoadPedalConfig_.quantityOfControl;i++)
+  {
+    yOrig[i]=calc_st->force[i];
+  }
 
 
 
   float Delta_x_orig = 100.0f; // total horizontal range [0,100]
-  float dx = Delta_x_orig / NUMBER_OF_SPLINE_SEGMENTS; // spline segment horizontal range
+  float dx = Delta_x_orig / config_st->payLoadPedalConfig_.quantityOfControl; // spline segment horizontal range
   float t = (splineSegment_fl32 - (float)splineSegment_u8); // relative position in spline segment [0, 1]
+  
   float dy = yOrig[splineSegment_u8 + 1] - yOrig[splineSegment_u8]; // spline segment vertical range
   float y_prime = 0.0f;
   if (fabsf(dx) > 0)

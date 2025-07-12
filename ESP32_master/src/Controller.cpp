@@ -1,26 +1,34 @@
 #include <string>
 //#include <string>
 #include "Controller.h"
-
+#include "esp32-hal-tinyusb.h"
+#define WAITTIME_FOR_HOST_TO_RESPOND_TO_HID_REPORT_IN_MS (uint32_t)500
 
 
 //#define USB_JOYSTICK
 #ifdef USB_JOYSTICK
+#include "Joystick_ESP32S2.h"
   //#include <Joystick_ESP32S2.h>
-  #include <Joystick_ESP32S2.h>
   Joystick_ Joystick(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_GAMEPAD,
-                   0, 0,                 // Button Count, Hat Switch Count
-                   true, true, true,  // X and Y, but no Z Axis
-                   true, true, true,  // No Rx, Ry, or Rz
-                   false, false,         // No rudder or throttle
-                   false, false, false);  // No accelerator, brake, or steering
+                    0, 0,                 // Button Count, Hat Switch Count
+                    true, true, true,  // X and Y, but no Z Axis
+                    true, true, true,  // No Rx, Ry, or Rz
+                    false, false,         // No rudder or throttle
+                    false, false, false);  // No accelerator, brake, or steering
+
   
-  void SetupController() {
-    	USB.PID(0x8213);
-      USB.VID(0x3035);
-      USB.productName("DIY_FFB_PEDAL_JOYSTICK");
-      USB.manufacturerName("OPENSOURCE");
-      USB.begin();
+  void SetupController() 
+  {
+    // Force USB re-enumeration
+    tud_disconnect();
+    delay(200);  // Ensure host sees disconnect
+    tud_connect();
+    USB.PID(0x8213);
+    USB.VID(0x3035);
+    USB.productName("DIY_FFB_PEDAL_JOYSTICK");
+    USB.manufacturerName("OPENSOURCE");
+    USB.begin();
+
     Joystick.setRxAxisRange(JOYSTICK_MIN_VALUE, JOYSTICK_MAX_VALUE);
     Joystick.setRyAxisRange(JOYSTICK_MIN_VALUE, JOYSTICK_MAX_VALUE);
     Joystick.setRzAxisRange(JOYSTICK_MIN_VALUE, JOYSTICK_MAX_VALUE);
@@ -29,8 +37,8 @@
     Joystick.setZAxisRange(JOYSTICK_MIN_VALUE, JOYSTICK_MAX_VALUE);//rudder brake throttle
     delay(100);
     //Joystick.begin();
-    Joystick.begin(false);
-
+    //Joystick.begin(false);
+    Joystick.begin(false, WAITTIME_FOR_HOST_TO_RESPOND_TO_HID_REPORT_IN_MS);
     // rename HID device name, see e.g. https://github.com/schnoog/Joystick_ESP32S2/issues/8
     //USB.PID(0x8211);
     //USB.VID(0x303b);
@@ -61,6 +69,16 @@
   {
     Joystick.sendState();
   }
+  bool GetJoystickStatus()
+  {
+   return Joystick._usbDeviceStatus;
+  }
+  void RestartJoystick()
+  {
+    Joystick.end();
+    delay(1000);
+    SetupController();
+  };
 
 
   

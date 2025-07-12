@@ -3,7 +3,7 @@
 #include "DiyActivePedal_types.h"
 
 // The number of segments, which are defined for the spline
-#define NUMBER_OF_SPLINE_SEGMENTS 5
+//#define NUMBER_OF_SPLINE_SEGMENTS 5
 
 class ForceCurve_Interpolated {
 
