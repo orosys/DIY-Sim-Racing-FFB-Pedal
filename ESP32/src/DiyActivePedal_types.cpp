@@ -22,13 +22,14 @@ void DAP_config_st::initialiseDefaults() {
 
   payLoadPedalConfig_.maxForce = 60;
   payLoadPedalConfig_.preloadForce = 2;
-
+  /*
   payLoadPedalConfig_.relativeForce_p000 = 0;
   payLoadPedalConfig_.relativeForce_p020 = 20;
   payLoadPedalConfig_.relativeForce_p040 = 40;
   payLoadPedalConfig_.relativeForce_p060 = 60;
   payLoadPedalConfig_.relativeForce_p080 = 80;
   payLoadPedalConfig_.relativeForce_p100 = 100;
+  */
   payLoadPedalConfig_.quantityOfControl=6;
   payLoadPedalConfig_.relativeForce00 = 0;
   payLoadPedalConfig_.relativeForce01 = 20;
@@ -53,6 +54,30 @@ void DAP_config_st::initialiseDefaults() {
   payLoadPedalConfig_.relativeTravel09 = 0;
   payLoadPedalConfig_.relativeTravel10 = 0;
 
+  payLoadPedalConfig_.numOfJoystickMapControl=6;
+  payLoadPedalConfig_.joystickMapOrig00=0;
+  payLoadPedalConfig_.joystickMapOrig01=20;
+  payLoadPedalConfig_.joystickMapOrig02=40;
+  payLoadPedalConfig_.joystickMapOrig03=60;
+  payLoadPedalConfig_.joystickMapOrig04=80;
+  payLoadPedalConfig_.joystickMapOrig05=100;
+  payLoadPedalConfig_.joystickMapOrig06=0;
+  payLoadPedalConfig_.joystickMapOrig07=0;
+  payLoadPedalConfig_.joystickMapOrig08=0;
+  payLoadPedalConfig_.joystickMapOrig09=0;
+  payLoadPedalConfig_.joystickMapOrig10=0;
+  payLoadPedalConfig_.joystickMapMapped00=0;
+  payLoadPedalConfig_.joystickMapMapped01=20;
+  payLoadPedalConfig_.joystickMapMapped02=40;
+  payLoadPedalConfig_.joystickMapMapped03=60;
+  payLoadPedalConfig_.joystickMapMapped04=80;
+  payLoadPedalConfig_.joystickMapMapped05=100;
+  payLoadPedalConfig_.joystickMapMapped06=0;
+  payLoadPedalConfig_.joystickMapMapped07=0;
+  payLoadPedalConfig_.joystickMapMapped08=0;
+  payLoadPedalConfig_.joystickMapMapped09=0;
+  payLoadPedalConfig_.joystickMapMapped10=0;
+
   payLoadPedalConfig_.dampingPress = 0;
   payLoadPedalConfig_.dampingPull = 0;
 
@@ -67,7 +92,7 @@ void DAP_config_st::initialiseDefaults() {
   payLoadPedalConfig_.lengthPedal_c_horizontal = 215;
   payLoadPedalConfig_.lengthPedal_c_vertical = 60;
   payLoadPedalConfig_.lengthPedal_travel = 100;
-  
+  payLoadPedalConfig_.spindlePitch_mmPerRev_u8=5;
 
   payLoadPedalConfig_.Simulate_ABS_trigger = 0;// add for abs trigger
   payLoadPedalConfig_.Simulate_ABS_value = 80;// add for abs trigger
@@ -213,22 +238,70 @@ void DAP_calculationVariables_st::updateFromConfig(DAP_config_st& config_st)
   // cubic interpolator
   float travel_x[config_st.payLoadPedalConfig_.quantityOfControl];
   float force_y[config_st.payLoadPedalConfig_.quantityOfControl];
+  
   for (int i = 0; i < config_st.payLoadPedalConfig_.quantityOfControl;i++)
   {
     travel_x[i]=travel[i];
     force_y[i]=force[i];
   }
+  
   _cubic.Interpolate1D(travel_x, force_y, config_st.payLoadPedalConfig_.quantityOfControl - 1, config_st.payLoadPedalConfig_.quantityOfControl-1);
   interpolatorA = _cubic._result.a;
   interpolatorB = _cubic._result.b;
-
+  /*
   for (int i = 0; i < config_st.payLoadPedalConfig_.quantityOfControl - 1; ++i)
   {
     //Serial.printf("original a=%.3f, b=%.3f\n", config_st.payLoadPedalConfig_.cubic_spline_param_a_array[i], config_st.payLoadPedalConfig_.cubic_spline_param_b_array[i]);
     Serial.printf("ESP calculated a=%.3f, b=%.3f\n", interpolatorA[i], interpolatorB[i]);
   }
+  */
   
+  //testing code
+  numOfJoystickControl=config_st.payLoadPedalConfig_.numOfJoystickMapControl;
+  joystickOrig[0]=config_st.payLoadPedalConfig_.joystickMapOrig00;
+  joystickOrig[1]=config_st.payLoadPedalConfig_.joystickMapOrig01;
+  joystickOrig[2]=config_st.payLoadPedalConfig_.joystickMapOrig02;
+  joystickOrig[3]=config_st.payLoadPedalConfig_.joystickMapOrig03;
+  joystickOrig[4]=config_st.payLoadPedalConfig_.joystickMapOrig04;
+  joystickOrig[5]=config_st.payLoadPedalConfig_.joystickMapOrig05;
+  joystickOrig[6]=config_st.payLoadPedalConfig_.joystickMapOrig06;
+  joystickOrig[7]=config_st.payLoadPedalConfig_.joystickMapOrig07;
+  joystickOrig[8]=config_st.payLoadPedalConfig_.joystickMapOrig08;
+  joystickOrig[9]=config_st.payLoadPedalConfig_.joystickMapOrig09;
+  joystickOrig[10]=config_st.payLoadPedalConfig_.joystickMapOrig10;
+  joystickMapping[0]=config_st.payLoadPedalConfig_.joystickMapMapped00;
+  joystickMapping[1]=config_st.payLoadPedalConfig_.joystickMapMapped01;
+  joystickMapping[2]=config_st.payLoadPedalConfig_.joystickMapMapped02;
+  joystickMapping[3]=config_st.payLoadPedalConfig_.joystickMapMapped03;
+  joystickMapping[4]=config_st.payLoadPedalConfig_.joystickMapMapped04;
+  joystickMapping[5]=config_st.payLoadPedalConfig_.joystickMapMapped05;
+  joystickMapping[6]=config_st.payLoadPedalConfig_.joystickMapMapped06;
+  joystickMapping[7]=config_st.payLoadPedalConfig_.joystickMapMapped07;
+  joystickMapping[8]=config_st.payLoadPedalConfig_.joystickMapMapped08;
+  joystickMapping[9]=config_st.payLoadPedalConfig_.joystickMapMapped09;
+  joystickMapping[10]=config_st.payLoadPedalConfig_.joystickMapMapped10;
   
+  float joystick_x[numOfJoystickControl]={0};
+  float joystick_y[numOfJoystickControl]={0};
+  for(int i=0;i<numOfJoystickControl;i++)
+  {
+    joystick_x[i]=joystickOrig[i]-joystickOrig[0];
+    joystick_y[i]=joystickMapping[i];
+  }
+  joystickInterpolarter.Interpolate1D(joystick_x,joystick_y,numOfJoystickControl,100);
+  /*
+  for (int i = 0; i < 5; ++i)
+  {
+    //Serial.printf("original a=%.3f, b=%.3f\n", config_st.payLoadPedalConfig_.cubic_spline_param_a_array[i], config_st.payLoadPedalConfig_.cubic_spline_param_b_array[i]);
+    Serial.printf("joystick calculated a=%.3f, b=%.3f\n", joystickInterpolarter._result.a[i], joystickInterpolarter._result.b[i]);
+  }
+  
+  for(int i=0;i<100;i++)
+  {
+    Serial.printf("joystick value:y= %.3f\n",joystickInterpolarter._result.yInterp[i]);
+  }
+  */
+
 
 
   if (startPosRel == endPosRel)

@@ -23,12 +23,14 @@ namespace User.PluginSdkDemo
 
         // design force vs travel curve
         // In percent
+        /*
         public byte relativeForce_p000;
         public byte relativeForce_p020;
         public byte relativeForce_p040;
         public byte relativeForce_p060;
         public byte relativeForce_p080;
         public byte relativeForce_p100;
+        */
         public byte quantityOfControl;
         public byte relativeForce00;
         public byte relativeForce01;
@@ -53,7 +55,31 @@ namespace User.PluginSdkDemo
         public byte relativeTravel08;
         public byte relativeTravel09;
         public byte relativeTravel10;
-        
+
+        public byte numOfJoystickMapControl;
+        public byte joystickMapOrig00;
+        public byte joystickMapOrig01;
+        public byte joystickMapOrig02;
+        public byte joystickMapOrig03;
+        public byte joystickMapOrig04;
+        public byte joystickMapOrig05;
+        public byte joystickMapOrig06;
+        public byte joystickMapOrig07;
+        public byte joystickMapOrig08;
+        public byte joystickMapOrig09;
+        public byte joystickMapOrig10;
+        public byte joystickMapMapped00;
+        public byte joystickMapMapped01;
+        public byte joystickMapMapped02;
+        public byte joystickMapMapped03;
+        public byte joystickMapMapped04;
+        public byte joystickMapMapped05;
+        public byte joystickMapMapped06;
+        public byte joystickMapMapped07;
+        public byte joystickMapMapped08;
+        public byte joystickMapMapped09;
+        public byte joystickMapMapped10;
+
         // parameter to configure damping
         public byte dampingPress;
         public byte dampingPull;

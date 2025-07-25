@@ -248,6 +248,8 @@ namespace User.PluginSdkDemo
         public void SerialPortSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             string tmp = (string)SerialPortSelection.SelectedValue;
+            //string tmp_2= Plugin.comportList[SerialPortSelection.SelectedIndex].ComPortName;
+            //System.Windows.MessageBox.Show("connect to " + tmp_2);
             //Plugin._serialPort[indexOfSelectedPedal_u].PortName = tmp;
 
 
@@ -282,19 +284,6 @@ namespace User.PluginSdkDemo
         public void ESPNow_SerialPortSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             string tmp = (string)SerialPortSelection_ESPNow.SelectedValue;
-            //Plugin._serialPort[indexOfSelectedPedal_u].PortName = tmp;
-
-
-            //try 
-            //{
-            //    TextBox_debugOutput.Text = "Debug: " + Plugin.Settings.selectedComPortNames[indexOfSelectedPedal_u];
-            //}
-            //catch (Exception caughtEx)
-            //{
-            //    string errorMessage = caughtEx.Message;
-            //    TextBox_debugOutput.Text = errorMessage;
-            //}
-
             try
             {
                 //if (Plugin.Settings.connect_status[indexOfSelectedPedal_u] == 0)
@@ -389,6 +378,19 @@ namespace User.PluginSdkDemo
         {
             ToastNotification("Debug", "Print All parameter in Serial log");
             PrintUnknownStructParameters(dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_);
+            //readRudderSettingToConfig();
+            //PrintUnknownStructParameters(dap_config_st_rudder.payloadPedalConfig_);
+            /*
+            if (_serial_monitor_window != null)
+            {
+                _serial_monitor_window.TextBox_SerialMonitor.Text += "\nCom port count: " + Plugin.comportList.Count;
+                foreach (var items in Plugin.comportList)
+                {              
+                    _serial_monitor_window.TextBox_SerialMonitor.Text += "\ndevice name:" + items.DeviceName + "\nVID:" + items.Vid + " PID:" + items.Pid;
+                }
+            }
+            */
+
         }
 
 

@@ -34,7 +34,7 @@ namespace User.PluginSdkDemo.UIFunction
             if (_calculations != null && OTAChannel_Sel_1 != null && OTAChannel_Sel_2 != null )
             {
                 if (Label_update_channel_notice != null) Label_update_channel_notice.Content = "";
-                switch (_calculations.UpdateChannel)
+                switch (_settings.updateChannel)
                 {
                     case 0:
                         OTAChannel_Sel_1.IsChecked = true;
@@ -57,7 +57,6 @@ namespace User.PluginSdkDemo.UIFunction
                 if (textbox_PASS != null) textbox_PASS.Password = _settings.PASS_string;
             }
             CheckForUpdateAsync();
-            
 
         }
 
@@ -92,13 +91,13 @@ namespace User.PluginSdkDemo.UIFunction
             if (OTAChannel_Sel_1 != null && OTAChannel_Sel_2 != null)
             {
                 Label_update_channel_notice.Content = "";
-                if ((bool)OTAChannel_Sel_1.IsChecked) _calculations.UpdateChannel = 0;
+                if ((bool)OTAChannel_Sel_1.IsChecked) _settings.updateChannel = 0;
                 if ((bool)OTAChannel_Sel_2.IsChecked)
                 {
-                    _calculations.UpdateChannel = 1;
+                    _settings.updateChannel = 1;
                     Label_update_channel_notice.Content = "Warning: This is a daily build intended for development and testing purposes only.\nIt may be unstable and is not recommended for production use.";
                 } 
-                textBox_changelog.Text = "Version:" + versions[_calculations.UpdateChannel] + "\n" + changelogs[_calculations.UpdateChannel];
+                textBox_changelog.Text = "Version:" + versions[_settings.updateChannel] + "\n" + changelogs[_settings.updateChannel];
 
             }
         }
@@ -146,7 +145,7 @@ namespace User.PluginSdkDemo.UIFunction
                             changelogs[i] = "Channel not found.";
                         }
                     }
-                    if (textBox_changelog != null) textBox_changelog.Text = "Version:" + versions[_calculations.UpdateChannel] + "\n" + changelogs[_calculations.UpdateChannel];
+                    if (textBox_changelog != null) textBox_changelog.Text = "Version:" + versions[_settings.updateChannel] + "\n" + changelogs[_settings.updateChannel];
 
                 }
                 

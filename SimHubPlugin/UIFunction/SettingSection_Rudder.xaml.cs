@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -18,7 +19,7 @@ namespace User.PluginSdkDemo.UIFunction
     /// <summary>
     /// SettingSection_System.xaml 的互動邏輯
     /// </summary>
-    public partial class SettingSection_Rudder : UserControl
+    public partial class SettingSection_Rudder : System.Windows.Controls.UserControl
     {
         public vJoyInterfaceWrap.vJoy _joystick;
         public bool IsJoystickInitialized = false;
@@ -55,7 +56,7 @@ namespace User.PluginSdkDemo.UIFunction
             get => (DIYFFBPedalSettings)GetValue(Settings_Property);
             set
             {
-              
+                SetValue(Settings_Property, value);
 
             }
         }
@@ -84,6 +85,11 @@ namespace User.PluginSdkDemo.UIFunction
             {
                 if (Settings != null)
                 {
+                    if (CheckBox_RudderType_1 != null && CheckBox_RudderType_2 != null)
+                    {
+                        CheckBox_RudderType_1.IsChecked = Settings.rudderMode == 0;
+                       CheckBox_RudderType_2.IsChecked = Settings.rudderMode == 1;
+                    }
                 }
 
             }
@@ -128,11 +134,7 @@ namespace User.PluginSdkDemo.UIFunction
             {
                 try
                 {
-                    if (control.CheckBox_RudderType_1 != null && control.CheckBox_RudderType_2 != null)
-                    {
-                        control.CheckBox_RudderType_1.IsChecked = newData.rudderType == 0;
-                        control.CheckBox_RudderType_2.IsChecked = newData.rudderType == 1;
-                    }
+
                 }
                 catch
                 {
@@ -163,11 +165,11 @@ namespace User.PluginSdkDemo.UIFunction
             {
                 if (CheckBox_RudderType_1.IsChecked == true)
                 {
-                    calculation.rudderType = 0;
+                    Settings.rudderMode = 0;
                 }
                 if (CheckBox_RudderType_2.IsChecked == true)
                 {
-                    calculation.rudderType = 1;
+                    Settings.rudderMode = 1;
                 }
             }
 

@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 // define the payload revision
-#define DAP_VERSION_CONFIG 150
+#define DAP_VERSION_CONFIG 152
 
 // define the payload types
 #define DAP_PAYLOAD_TYPE_CONFIG 100
@@ -62,7 +62,7 @@ struct payloadPedalState_Basic
 struct payloadPedalState_Extended
 {
 
-  unsigned long timeInMs_u32;
+  unsigned long timeInUs_u32;
   float pedalForce_raw_fl32;
   float pedalForce_filtered_fl32;
   float forceVel_est_fl32;
@@ -112,13 +112,14 @@ struct payloadPedalConfig
 
   // design force vs travel curve
   // In percent
+  /*
   uint8_t relativeForce_p000;
   uint8_t relativeForce_p020;
   uint8_t relativeForce_p040;
   uint8_t relativeForce_p060;
   uint8_t relativeForce_p080;
   uint8_t relativeForce_p100;
-
+  */
   uint8_t quantityOfControl;
   uint8_t relativeForce00;
   uint8_t relativeForce01;
@@ -143,6 +144,29 @@ struct payloadPedalConfig
   uint8_t relativeTravel09;
   uint8_t relativeTravel10;
 
+  uint8_t numOfJoystickMapControl;
+  uint8_t joystickMapOrig00;
+  uint8_t joystickMapOrig01;
+  uint8_t joystickMapOrig02;
+  uint8_t joystickMapOrig03;
+  uint8_t joystickMapOrig04;
+  uint8_t joystickMapOrig05;
+  uint8_t joystickMapOrig06;
+  uint8_t joystickMapOrig07;
+  uint8_t joystickMapOrig08;
+  uint8_t joystickMapOrig09;
+  uint8_t joystickMapOrig10;
+  uint8_t joystickMapMapped00;
+  uint8_t joystickMapMapped01;
+  uint8_t joystickMapMapped02;
+  uint8_t joystickMapMapped03;
+  uint8_t joystickMapMapped04;
+  uint8_t joystickMapMapped05;
+  uint8_t joystickMapMapped06;
+  uint8_t joystickMapMapped07;
+  uint8_t joystickMapMapped08;
+  uint8_t joystickMapMapped09;
+  uint8_t joystickMapMapped10;
   // parameter to configure damping
   uint8_t dampingPress;
   uint8_t dampingPull;

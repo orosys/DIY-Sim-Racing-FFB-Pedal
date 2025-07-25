@@ -82,11 +82,11 @@ namespace User.PluginSdkDemo
                 {
                     tmp_2.wifi_action = 1;
                 }
-                if (Plugin._calculations.UpdateChannel == 0)
+                if (Plugin.Settings.updateChannel == 0)
                 {
                     tmp_2.mode_select = 1;
                 }
-                if (Plugin._calculations.UpdateChannel == 1)
+                if (Plugin.Settings.updateChannel == 1)
                 {
                     tmp_2.mode_select = 2;
                 }
@@ -213,12 +213,14 @@ namespace User.PluginSdkDemo
                     {
                         dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.maxForce = tmp_config.payloadPedalConfig_.maxForce;
                         dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.preloadForce = tmp_config.payloadPedalConfig_.preloadForce;
+                        /*
                         dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p000 = tmp_config.payloadPedalConfig_.relativeForce_p000;
                         dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p020 = tmp_config.payloadPedalConfig_.relativeForce_p020;
                         dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p040 = tmp_config.payloadPedalConfig_.relativeForce_p040;
                         dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p060 = tmp_config.payloadPedalConfig_.relativeForce_p060;
                         dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p080 = tmp_config.payloadPedalConfig_.relativeForce_p080;
                         dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeForce_p100 = tmp_config.payloadPedalConfig_.relativeForce_p100;
+                        */
                         dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.dampingPress = tmp_config.payloadPedalConfig_.dampingPress;
                         dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.dampingPull = tmp_config.payloadPedalConfig_.dampingPull;
                         dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.pedalEndPosition = max_pos;
@@ -826,11 +828,11 @@ namespace User.PluginSdkDemo
                 {
                     tmp_2.wifi_action = 1;
                 }
-                if (Plugin._calculations.UpdateChannel == 0)
+                if (Plugin.Settings.updateChannel == 0)
                 {
                     tmp_2.mode_select = 1;
                 }
-                if (Plugin._calculations.UpdateChannel == 1)
+                if (Plugin.Settings.updateChannel == 1)
                 {
                     tmp_2.mode_select = 2;
                 }
@@ -1282,7 +1284,7 @@ namespace User.PluginSdkDemo
                             dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.relativeTravel05 = 100;
                         }
                     }
-
+                    writeRudderConfigToSetting();
                     updateTheGuiFromConfig();
                     /*
                     TextBox_debugOutput.Text = "Config new imported!";
@@ -1429,7 +1431,7 @@ namespace User.PluginSdkDemo
             {
                 string downloadUrl;
                 string MSG_tmp = "Plugin will update from ";
-                switch (Plugin._calculations.UpdateChannel)
+                switch (Plugin.Settings.updateChannel)
                 {
                     case 0:
                         downloadUrl = "https://raw.githubusercontent.com/ChrGri/DIY-Sim-Racing-FFB-Pedal/develop/OTA/Plugin/DiyActivePedal.dll";
@@ -1510,6 +1512,41 @@ namespace User.PluginSdkDemo
             }
             
             
+        }
+
+        private void btn_rudder_export_config_Click(object sender, RoutedEventArgs e)
+        {
+            using (System.Windows.Forms.SaveFileDialog saveFileDialog = new System.Windows.Forms.SaveFileDialog())
+            {
+                readRudderSettingToConfig();
+                saveFileDialog.Title = "Datei speichern";
+                saveFileDialog.Filter = "Textdateien (*.json)|*.json";
+                string currentDirectory = Directory.GetCurrentDirectory();
+                saveFileDialog.InitialDirectory = currentDirectory + "\\PluginsData\\Common";
+
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    string fileName = saveFileDialog.FileName;
+                    dap_config_st_rudder.payloadHeader_.version = (byte)Constants.pedalConfigPayload_version;
+                    var stream1 = new MemoryStream();
+                    var writer = JsonReaderWriterFactory.CreateJsonWriter(stream1, Encoding.UTF8, true, true, "  ");
+                    var serializer = new DataContractJsonSerializer(typeof(DAP_config_st));
+                    serializer.WriteObject(writer, dap_config_st_rudder);
+                    writer.Flush();
+
+                    stream1.Position = 0;
+                    StreamReader sr = new StreamReader(stream1);
+                    string jsonString = sr.ReadToEnd();
+
+                    // Check if file already exists. If yes, delete it.     
+                    if (File.Exists(fileName))
+                    {
+                        File.Delete(fileName);
+                    }
+                    System.IO.File.WriteAllText(fileName, jsonString);
+                    TextBox2.Text = "Save " + saveFileDialog.FileName;
+                }
+            }
         }
     }
 }

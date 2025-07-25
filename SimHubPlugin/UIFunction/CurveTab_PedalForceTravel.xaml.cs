@@ -211,6 +211,7 @@ namespace User.PluginSdkDemo.UIFunction
             text_point_pos.Visibility = Visibility.Hidden;
             double control_rect_value_max = 100;
             double dyy = canvas.Height / control_rect_value_max;
+            /*
             Canvas.SetTop(rect0, canvas.Height - dyy * dap_config_st.payloadPedalConfig_.relativeForce_p000 - rect0.Height / 2);
             Canvas.SetLeft(rect0, 0 * canvas.Width / 5 - rect0.Width / 2);
             Canvas.SetTop(rect1, canvas.Height - dyy * dap_config_st.payloadPedalConfig_.relativeForce_p020 - rect0.Height / 2);
@@ -223,6 +224,7 @@ namespace User.PluginSdkDemo.UIFunction
             Canvas.SetLeft(rect4, 4 * canvas.Width / 5 - rect4.Width / 2);
             Canvas.SetTop(rect5, canvas.Height - dyy * dap_config_st.payloadPedalConfig_.relativeForce_p100 - rect0.Height / 2);
             Canvas.SetLeft(rect5, 5 * canvas.Width / 5 - rect5.Width / 2);
+            */
             if (dap_config_st.payloadPedalConfig_.debug_flags_0 != 32)
             {
                 rect_State.Visibility = Visibility.Visible;
@@ -263,12 +265,14 @@ namespace User.PluginSdkDemo.UIFunction
         private void btn_linearcurve_Click(object sender, RoutedEventArgs e)
         {
             var tmp = dap_config_st;
+            /*
             tmp.payloadPedalConfig_.relativeForce_p000 = 0;
             tmp.payloadPedalConfig_.relativeForce_p020 = 20;
             tmp.payloadPedalConfig_.relativeForce_p040 = 40;
             tmp.payloadPedalConfig_.relativeForce_p060 = 60;
             tmp.payloadPedalConfig_.relativeForce_p080 = 80;
             tmp.payloadPedalConfig_.relativeForce_p100 = 100;
+            */
             dap_config_st = tmp;
             Update_BrakeForceCurve();
             ConfigChangedEvent(dap_config_st);
@@ -277,12 +281,14 @@ namespace User.PluginSdkDemo.UIFunction
         private void btn_Scurve_Click(object sender, RoutedEventArgs e)
         {
             var tmp = dap_config_st;
+            /*
             tmp.payloadPedalConfig_.relativeForce_p000 = 0;
             tmp.payloadPedalConfig_.relativeForce_p020 = 7;
             tmp.payloadPedalConfig_.relativeForce_p040 = 28;
             tmp.payloadPedalConfig_.relativeForce_p060 = 70;
             tmp.payloadPedalConfig_.relativeForce_p080 = 93;
             tmp.payloadPedalConfig_.relativeForce_p100 = 100;
+            */
             dap_config_st = tmp;
             Update_BrakeForceCurve();
             ConfigChangedEvent(dap_config_st);
@@ -291,12 +297,14 @@ namespace User.PluginSdkDemo.UIFunction
         private void btn_10xcurve_Click(object sender, RoutedEventArgs e)
         {
             var tmp = dap_config_st;
+            /*
             tmp.payloadPedalConfig_.relativeForce_p000 = 0;
             tmp.payloadPedalConfig_.relativeForce_p020 = 43;
             tmp.payloadPedalConfig_.relativeForce_p040 = 69;
             tmp.payloadPedalConfig_.relativeForce_p060 = 85;
             tmp.payloadPedalConfig_.relativeForce_p080 = 95;
             tmp.payloadPedalConfig_.relativeForce_p100 = 100;
+            */
             dap_config_st = tmp;
             Update_BrakeForceCurve();
             ConfigChangedEvent(dap_config_st);
@@ -305,12 +313,14 @@ namespace User.PluginSdkDemo.UIFunction
         private void btn_logcurve_Click(object sender, RoutedEventArgs e)
         {
             var tmp = dap_config_st;
+            /*
             tmp.payloadPedalConfig_.relativeForce_p000 = 0;
             tmp.payloadPedalConfig_.relativeForce_p020 = 6;
             tmp.payloadPedalConfig_.relativeForce_p040 = 17;
             tmp.payloadPedalConfig_.relativeForce_p060 = 33;
             tmp.payloadPedalConfig_.relativeForce_p080 = 59;
             tmp.payloadPedalConfig_.relativeForce_p100 = 100;
+            */
             dap_config_st = tmp;
             Update_BrakeForceCurve();
             ConfigChangedEvent(dap_config_st);
@@ -447,6 +457,7 @@ namespace User.PluginSdkDemo.UIFunction
                 double dx = canvas.Height / y_max;
                 double y_actual = (canvas.Height - y - rectangle.Height / 2) / dx;
                 var tmp = dap_config_st;
+                /*
                 if (rectangle.Name == "rect0")
                 {
                     tmp.payloadPedalConfig_.relativeForce_p000 = Convert.ToByte(y_actual);
@@ -485,6 +496,7 @@ namespace User.PluginSdkDemo.UIFunction
                     text_point_pos.Text = "Travel:100%";
                     text_point_pos.Text += "\nForce: " + (int)y_actual + "%";
                 }
+                */
 
                 text_point_pos.Visibility = Visibility.Visible; ;
 
@@ -596,14 +608,14 @@ namespace User.PluginSdkDemo.UIFunction
             x[3] = 60;
             x[4] = 80;
             x[5] = 100;
-
+            /*
             y[0] = dap_config_st.payloadPedalConfig_.relativeForce_p000;
             y[1] = dap_config_st.payloadPedalConfig_.relativeForce_p020;
             y[2] = dap_config_st.payloadPedalConfig_.relativeForce_p040;
             y[3] = dap_config_st.payloadPedalConfig_.relativeForce_p060;
             y[4] = dap_config_st.payloadPedalConfig_.relativeForce_p080;
             y[5] = dap_config_st.payloadPedalConfig_.relativeForce_p100;
-
+            */
             // Use cubic interpolation to smooth the original data
             (double[] xs2, double[] ys2, double[] a, double[] b) = Cubic.Interpolate1D(x, y, 100);
 

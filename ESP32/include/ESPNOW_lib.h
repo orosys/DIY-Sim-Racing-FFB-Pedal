@@ -584,7 +584,7 @@ void ESPNow_initialize()
     esp_wifi_config_espnow_rate(WIFI_IF_STA, WIFI_PHY_RATE_11M_L);
   // esp_wifi_set_max_tx_power(WIFI_POWER_8_5dBm);
     #if PCB_VERSION == 9
-      esp_wifi_set_max_tx_power(WIFI_POWER_19_5dBm);
+      //esp_wifi_set_max_tx_power(WIFI_POWER_19_5dBm);
     #else
       esp_wifi_set_max_tx_power(WIFI_POWER_8_5dBm);
     #endif

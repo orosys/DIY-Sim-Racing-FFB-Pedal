@@ -262,6 +262,12 @@ namespace User.PluginSdkDemo
                                         string tmp = "Pedal:" + pedalSelected + " Servo idle reach timeout, power cutoff, please restart pedal to wake it up";
                                         ToastNotification("Wireless Connection", tmp);
                                     }
+                                    // Force stop action
+                                    if (Plugin._calculations.ServoStatus[pedalSelected] == (byte)enumServoStatus.On && pedalState_read_st.payloadPedalBasicState_.servoStatus == (byte)enumServoStatus.ForceStop)
+                                    {
+                                        string tmp = "Pedal:" + pedalSelected + " force Stopped";
+                                        ToastNotification("Wireless Connection", tmp);
+                                    }
 
                                     //fill servo status
 
@@ -300,6 +306,14 @@ namespace User.PluginSdkDemo
                                             round_x = Math.Max(0, Math.Min(round_x, 99));
                                             current_pedal_travel_state = x_showed;
                                             Plugin.pedal_state_in_ratio = (byte)current_pedal_travel_state;
+                                        }
+                                        if (dap_config_st[indexOfSelectedPedal_u].payloadPedalConfig_.travelAsJoystickOutput_u8 == 1)
+                                        {
+                                            PedalJoystick_Tab.JoystickStateUpdate(pedalState_read_st.payloadPedalBasicState_.pedalPosition_u16);
+                                        }
+                                        else
+                                        {
+                                            PedalJoystick_Tab.JoystickStateUpdate(pedalState_read_st.payloadPedalBasicState_.pedalForce_u16);
                                         }
                                         for (int i = 0; i < 3; i++)
                                         {
@@ -378,7 +392,7 @@ namespace User.PluginSdkDemo
                                                 {
                                                     // Write the content to the file
                                                     writer.Write("cycleCtr");
-                                                    writer.Write(", time_InMs");
+                                                    writer.Write(", time_InUs");
                                                     writer.Write(", forceRaw_InKg");
                                                     writer.Write(", forceFiltered_InKg");
                                                     writer.Write(", forceVelocity_InKgPerSec");
@@ -404,7 +418,7 @@ namespace User.PluginSdkDemo
                                                 writeCntr++;
                                                 writer.Write(writeCntr);
                                                 writer.Write(", ");
-                                                writer.Write(pedalState_ext_read_st.payloadPedalExtendedState_.timeInMs_u32);
+                                                writer.Write(pedalState_ext_read_st.payloadPedalExtendedState_.timeInUs_u32);
                                                 writer.Write(", ");
                                                 writer.Write(pedalState_ext_read_st.payloadPedalExtendedState_.pedalForce_raw_fl32);
                                                 writer.Write(", ");

@@ -19,14 +19,14 @@ void DAP_config_st::initialiseDefaults() {
 
   payLoadPedalConfig_.maxForce = 60;
   payLoadPedalConfig_.preloadForce = 2;
-
+  /*
   payLoadPedalConfig_.relativeForce_p000 = 0;
   payLoadPedalConfig_.relativeForce_p020 = 20;
   payLoadPedalConfig_.relativeForce_p040 = 40;
   payLoadPedalConfig_.relativeForce_p060 = 60;
   payLoadPedalConfig_.relativeForce_p080 = 80;
   payLoadPedalConfig_.relativeForce_p100 = 100;
-
+  */
   payLoadPedalConfig_.dampingPress = 0;
   payLoadPedalConfig_.dampingPull = 0;
 

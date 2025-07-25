@@ -105,3 +105,11 @@ int melody_Airship_theme[] = {
 double melody_Airship_theme_duration[] = {
   8, 8, 8, 8, 16, 16, 16, 16, 8/*, 16, 16, 4, 2*/
 };
+
+int melodyAirwolfTheme[] = {
+  NOTE_A3, NOTE_D4, NOTE_E4, NOTE_G4, NOTE_A4, NOTE_C5, NOTE_B4, NOTE_G4, NOTE_A4, NOTE_C5, NOTE_B4, NOTE_G4, NOTE_A4, NOTE_G4, NOTE_B4, NOTE_E4
+};
+
+double melodyAirwolfThemeDuration[] = {
+  4, 16, 16, 16, 4, 16, 16, 16, 4, 16, 16, 16, 4, 8, 16, 4
+};

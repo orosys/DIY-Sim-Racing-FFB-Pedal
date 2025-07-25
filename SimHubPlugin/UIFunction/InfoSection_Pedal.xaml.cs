@@ -124,6 +124,9 @@ namespace User.PluginSdkDemo.UIFunction
                     case (byte)enumServoStatus.Idle:
                         calculation.PedalStatusString += "\nIdle";
                         break;
+                    case (byte)enumServoStatus.ForceStop:
+                        calculation.PedalStatusString += "\nForceStop";
+                        break;
                     default:
                         calculation.PedalStatusString += "\n";
                         break;

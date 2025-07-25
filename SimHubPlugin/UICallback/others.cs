@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -15,6 +16,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using Windows.UI.Notifications;
+using static User.PluginSdkDemo.ComPortHelper;
 
 namespace User.PluginSdkDemo
 {
@@ -40,17 +42,30 @@ namespace User.PluginSdkDemo
         {
 
             var SerialPortSelectionArray = new List<SerialPortChoice>();
+            
             string[] comPorts = SerialPort.GetPortNames();
-
+            var SerialPortList = new List<string>();
             comPorts = comPorts.Distinct().ToArray(); // unique
-
+            Plugin.comportList.Clear();
+            SerialPortList.Clear();
+     
             if (comPorts.Length > 0)
             {
 
                 foreach (string portName in comPorts)
                 {
-                    SerialPortSelectionArray.Add(new SerialPortChoice(portName, portName));
+                    
+                    //SerialPortSelectionArray.Add(new SerialPortChoice(portName, portName));
+                    //int index = Plugin.comportList.FindIndex(item => item.ComPortName == portName);
+                    var parseResult= ComPortHelper.GetVidPidFromComPort(portName);
+                    Plugin.comportList.Add(parseResult);
+                    var portDeviceName = portName+" "+parseResult.DeviceName;
+                    //SerialPortList.Add((string)Plugin.comportList[index].DeviceName);
+                    SerialPortSelectionArray.Add(new SerialPortChoice(portDeviceName, portName));
+                    
+
                 }
+                
             }
             else
             {
@@ -58,7 +73,10 @@ namespace User.PluginSdkDemo
             }
 
             SerialPortSelection.DataContext = SerialPortSelectionArray;
+            //SerialPortSelection.DataContext = SerialPortList;
             SerialPortSelection_ESPNow.DataContext = SerialPortSelectionArray;
+            
+
         }
 
 
@@ -73,12 +91,14 @@ namespace User.PluginSdkDemo
             dap_config_st[pedalIdx].payloadPedalConfig_.pedalEndPosition = 80;
             dap_config_st[pedalIdx].payloadPedalConfig_.maxForce = 50;
             dap_config_st[pedalIdx].payloadPedalConfig_.preloadForce = 0;
+            /*
             dap_config_st[pedalIdx].payloadPedalConfig_.relativeForce_p000 = 0;
             dap_config_st[pedalIdx].payloadPedalConfig_.relativeForce_p020 = 20;
             dap_config_st[pedalIdx].payloadPedalConfig_.relativeForce_p040 = 40;
             dap_config_st[pedalIdx].payloadPedalConfig_.relativeForce_p060 = 60;
             dap_config_st[pedalIdx].payloadPedalConfig_.relativeForce_p080 = 80;
             dap_config_st[pedalIdx].payloadPedalConfig_.relativeForce_p100 = 100;
+            */
             dap_config_st[pedalIdx].payloadPedalConfig_.quantityOfControl = 6;
             dap_config_st[pedalIdx].payloadPedalConfig_.relativeForce00 = 0;
             dap_config_st[pedalIdx].payloadPedalConfig_.relativeForce01 = 20;
@@ -102,6 +122,29 @@ namespace User.PluginSdkDemo
             dap_config_st[pedalIdx].payloadPedalConfig_.relativeTravel08 = 0;
             dap_config_st[pedalIdx].payloadPedalConfig_.relativeTravel09 = 0;
             dap_config_st[pedalIdx].payloadPedalConfig_.relativeTravel10 = 0;
+            dap_config_st[pedalIdx].payloadPedalConfig_.numOfJoystickMapControl = 6;
+            dap_config_st[pedalIdx].payloadPedalConfig_.joystickMapMapped00 = 0;
+            dap_config_st[pedalIdx].payloadPedalConfig_.joystickMapMapped01 = 20;
+            dap_config_st[pedalIdx].payloadPedalConfig_.joystickMapMapped02 = 40;
+            dap_config_st[pedalIdx].payloadPedalConfig_.joystickMapMapped03 = 60;
+            dap_config_st[pedalIdx].payloadPedalConfig_.joystickMapMapped04 = 80;
+            dap_config_st[pedalIdx].payloadPedalConfig_.joystickMapMapped05 = 100;
+            dap_config_st[pedalIdx].payloadPedalConfig_.joystickMapMapped06 = 0;
+            dap_config_st[pedalIdx].payloadPedalConfig_.joystickMapMapped07 = 0;
+            dap_config_st[pedalIdx].payloadPedalConfig_.joystickMapMapped08 = 0;
+            dap_config_st[pedalIdx].payloadPedalConfig_.joystickMapMapped09 = 0;
+            dap_config_st[pedalIdx].payloadPedalConfig_.joystickMapMapped10 = 0;
+            dap_config_st[pedalIdx].payloadPedalConfig_.joystickMapOrig00 = 0;
+            dap_config_st[pedalIdx].payloadPedalConfig_.joystickMapOrig01 = 20;
+            dap_config_st[pedalIdx].payloadPedalConfig_.joystickMapOrig02 = 40;
+            dap_config_st[pedalIdx].payloadPedalConfig_.joystickMapOrig03 = 60;
+            dap_config_st[pedalIdx].payloadPedalConfig_.joystickMapOrig04 = 80;
+            dap_config_st[pedalIdx].payloadPedalConfig_.joystickMapOrig05 = 100;
+            dap_config_st[pedalIdx].payloadPedalConfig_.joystickMapOrig06 = 0;
+            dap_config_st[pedalIdx].payloadPedalConfig_.joystickMapOrig07 = 0;
+            dap_config_st[pedalIdx].payloadPedalConfig_.joystickMapOrig08 = 0;
+            dap_config_st[pedalIdx].payloadPedalConfig_.joystickMapOrig09 = 0;
+            dap_config_st[pedalIdx].payloadPedalConfig_.joystickMapOrig10 = 0;
             dap_config_st[pedalIdx].payloadPedalConfig_.dampingPress = 0;
             dap_config_st[pedalIdx].payloadPedalConfig_.dampingPull = 0;
             dap_config_st[pedalIdx].payloadPedalConfig_.absFrequency = 5;
@@ -132,9 +175,9 @@ namespace User.PluginSdkDemo
             dap_config_st[pedalIdx].payloadPedalConfig_.Impact_multi = 50;
             dap_config_st[pedalIdx].payloadPedalConfig_.Impact_window = 60;
             dap_config_st[pedalIdx].payloadPedalConfig_.CV_amp_1 = 0;
-            dap_config_st[pedalIdx].payloadPedalConfig_.CV_freq_1 = 0;
+            dap_config_st[pedalIdx].payloadPedalConfig_.CV_freq_1 = 10;
             dap_config_st[pedalIdx].payloadPedalConfig_.CV_amp_2 = 0;
-            dap_config_st[pedalIdx].payloadPedalConfig_.CV_freq_2 = 0;
+            dap_config_st[pedalIdx].payloadPedalConfig_.CV_freq_2 = 10;
             dap_config_st[pedalIdx].payloadPedalConfig_.maxGameOutput = 100;
             dap_config_st[pedalIdx].payloadPedalConfig_.kf_modelNoise = 128;
             dap_config_st[pedalIdx].payloadPedalConfig_.kf_modelOrder = 0;
@@ -186,12 +229,14 @@ namespace User.PluginSdkDemo
             dap_config_st_rudder.payloadPedalConfig_.pedalEndPosition = 95;
             dap_config_st_rudder.payloadPedalConfig_.maxForce = 10;
             dap_config_st_rudder.payloadPedalConfig_.preloadForce = 1.0f;
+            /*
             dap_config_st_rudder.payloadPedalConfig_.relativeForce_p000 = 0;
             dap_config_st_rudder.payloadPedalConfig_.relativeForce_p020 = 20;
             dap_config_st_rudder.payloadPedalConfig_.relativeForce_p040 = 40;
             dap_config_st_rudder.payloadPedalConfig_.relativeForce_p060 = 60;
             dap_config_st_rudder.payloadPedalConfig_.relativeForce_p080 = 80;
             dap_config_st_rudder.payloadPedalConfig_.relativeForce_p100 = 100;
+            */
 
             dap_config_st_rudder.payloadPedalConfig_.quantityOfControl = 6;
             dap_config_st_rudder.payloadPedalConfig_.relativeForce00 = 0;
@@ -216,6 +261,31 @@ namespace User.PluginSdkDemo
             dap_config_st_rudder.payloadPedalConfig_.relativeTravel08 = 0;
             dap_config_st_rudder.payloadPedalConfig_.relativeTravel09 = 0;
             dap_config_st_rudder.payloadPedalConfig_.relativeTravel10 = 0;
+
+
+            dap_config_st_rudder.payloadPedalConfig_.numOfJoystickMapControl = 6;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapMapped00 = 0;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapMapped01 = 20;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapMapped02 = 40;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapMapped03 = 60;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapMapped04 = 80;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapMapped05 = 100;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapMapped06 = 0;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapMapped07 = 0;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapMapped08 = 0;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapMapped09 = 0;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapMapped10 = 0;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapOrig00 = 0;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapOrig01 = 20;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapOrig02 = 40;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapOrig03 = 60;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapOrig04 = 80;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapOrig05 = 100;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapOrig06 = 0;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapOrig07 = 0;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapOrig08 = 0;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapOrig09 = 0;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapOrig10 = 0;
 
             dap_config_st_rudder.payloadPedalConfig_.dampingPress = 0;
             dap_config_st_rudder.payloadPedalConfig_.dampingPull = 0;
@@ -247,9 +317,9 @@ namespace User.PluginSdkDemo
             dap_config_st_rudder.payloadPedalConfig_.Impact_multi = 50;
             dap_config_st_rudder.payloadPedalConfig_.Impact_window = 60;
             dap_config_st_rudder.payloadPedalConfig_.CV_amp_1 = 0;
-            dap_config_st_rudder.payloadPedalConfig_.CV_freq_1 = 0;
+            dap_config_st_rudder.payloadPedalConfig_.CV_freq_1 = 10;
             dap_config_st_rudder.payloadPedalConfig_.CV_amp_2 = 0;
-            dap_config_st_rudder.payloadPedalConfig_.CV_freq_2 = 0;
+            dap_config_st_rudder.payloadPedalConfig_.CV_freq_2 = 10;
 
             dap_config_st_rudder.payloadPedalConfig_.maxGameOutput = 100;
             dap_config_st_rudder.payloadPedalConfig_.kf_modelNoise = 200;
@@ -636,7 +706,33 @@ namespace User.PluginSdkDemo
         {
             try
             {
+                /*
+                VidPidResult info = ComPortHelper.GetVidPidFromComPort(Plugin._serialPort[pedalIdx].PortName);
+
+                if (info.Found)
+                {
+                    MessageBox.Show(Plugin._serialPort[pedalIdx].PortName+"\nVID: " + info.Vid + "\nPID: " + info.Pid+ "\n Device Name:"+info.DeviceName);
+                }
+                else
+                {
+                    MessageBox.Show("Can't found"+ Plugin._serialPort[pedalIdx].PortName);
+                }
+                */
+
                 // serial port settings
+                //Plugin._serialPort[pedalIdx].BaudRate = 921600;
+                var serialInfo = ComPortHelper.GetVidPidFromComPort(Plugin._serialPort[pedalIdx].PortName);
+                if (serialInfo.Vid == "1A86" && serialInfo.Pid == "55D3")
+                {
+                    //target CH343
+                    //change baud here
+                    Plugin._serialPort[pedalIdx].BaudRate = Constants.BAUD3M;
+                    //MessageBox.Show("CH343 connected");
+                }
+                else
+                {
+                    Plugin._serialPort[pedalIdx].BaudRate = Constants.DEFAULTBAUD;
+                }
                 Plugin._serialPort[pedalIdx].Handshake = Handshake.None;
                 Plugin._serialPort[pedalIdx].Parity = Parity.None;
                 //_serialPort[pedalIdx].StopBits = StopBits.None;
@@ -1087,8 +1183,9 @@ namespace User.PluginSdkDemo
             //System.Threading.Thread.Sleep(200);
             DelayCall((int)(900), () =>
             {
+                readRudderSettingToConfig();
                 for (uint idx = 0; idx < 2; idx++)
-                {
+                {   
                     uint i = Plugin.Rudder_Pedal_idx[idx];
                     CurveRudderForce_Tab.text_rudder_log.Visibility = Visibility.Visible;
                     //read pedal kinematic
@@ -1186,6 +1283,82 @@ namespace User.PluginSdkDemo
                 //MessageBox.Show($"Error:{ex.Message}");
                 Plugin._calculations.versionCheck_b = false;
             }
+        }
+
+        public void readRudderSettingToConfig()
+        {
+            dap_config_st_rudder.payloadPedalConfig_.quantityOfControl=Plugin.Settings.rudderControlQuantity;
+            dap_config_st_rudder.payloadPedalConfig_.relativeForce00 = Plugin.Settings.rudderForce[0];
+            dap_config_st_rudder.payloadPedalConfig_.relativeForce01 = Plugin.Settings.rudderForce[1];
+            dap_config_st_rudder.payloadPedalConfig_.relativeForce02 = Plugin.Settings.rudderForce[2];
+            dap_config_st_rudder.payloadPedalConfig_.relativeForce03 = Plugin.Settings.rudderForce[3];
+            dap_config_st_rudder.payloadPedalConfig_.relativeForce04 = Plugin.Settings.rudderForce[4];
+            dap_config_st_rudder.payloadPedalConfig_.relativeForce05 = Plugin.Settings.rudderForce[5];
+            dap_config_st_rudder.payloadPedalConfig_.relativeForce06 = Plugin.Settings.rudderForce[6];
+            dap_config_st_rudder.payloadPedalConfig_.relativeForce07 = Plugin.Settings.rudderForce[7];
+            dap_config_st_rudder.payloadPedalConfig_.relativeForce08 = Plugin.Settings.rudderForce[8];
+            dap_config_st_rudder.payloadPedalConfig_.relativeForce09 = Plugin.Settings.rudderForce[9];
+            dap_config_st_rudder.payloadPedalConfig_.relativeForce10 = Plugin.Settings.rudderForce[10];
+
+            dap_config_st_rudder.payloadPedalConfig_.relativeTravel00 = Plugin.Settings.rudderTravel[0];
+            dap_config_st_rudder.payloadPedalConfig_.relativeTravel01 = Plugin.Settings.rudderTravel[1];
+            dap_config_st_rudder.payloadPedalConfig_.relativeTravel02 = Plugin.Settings.rudderTravel[2];
+            dap_config_st_rudder.payloadPedalConfig_.relativeTravel03 = Plugin.Settings.rudderTravel[3];
+            dap_config_st_rudder.payloadPedalConfig_.relativeTravel04 = Plugin.Settings.rudderTravel[4];
+            dap_config_st_rudder.payloadPedalConfig_.relativeTravel05 = Plugin.Settings.rudderTravel[5];
+            dap_config_st_rudder.payloadPedalConfig_.relativeTravel06 = Plugin.Settings.rudderTravel[6];
+            dap_config_st_rudder.payloadPedalConfig_.relativeTravel07 = Plugin.Settings.rudderTravel[7];
+            dap_config_st_rudder.payloadPedalConfig_.relativeTravel08 = Plugin.Settings.rudderTravel[8];
+            dap_config_st_rudder.payloadPedalConfig_.relativeTravel09 = Plugin.Settings.rudderTravel[9];
+            dap_config_st_rudder.payloadPedalConfig_.relativeTravel10 = Plugin.Settings.rudderTravel[10];
+
+            dap_config_st_rudder.payloadPedalConfig_.dampingPress = Plugin.Settings.rudderDamping;
+            dap_config_st_rudder.payloadPedalConfig_.dampingPull = Plugin.Settings.rudderDamping;
+            dap_config_st_rudder.payloadPedalConfig_.maxForce = Plugin.Settings.rudderMaxForce;
+            dap_config_st_rudder.payloadPedalConfig_.preloadForce = Plugin.Settings.rudderMinForce;
+            dap_config_st_rudder.payloadPedalConfig_.pedalStartPosition = Plugin.Settings.rudderMinTravel;
+            dap_config_st_rudder.payloadPedalConfig_.pedalEndPosition = Plugin.Settings.rudderMaxTravel;
+            dap_config_st_rudder.payloadPedalConfig_.MPC_0th_order_gain = Plugin.Settings.rudderMPCGain;
+            dap_config_st_rudder.payloadPedalConfig_.RPM_max_freq= Plugin.Settings.rudderRPMMaxFrequency;
+            dap_config_st_rudder.payloadPedalConfig_.RPM_min_freq = Plugin.Settings.rudderRPMMinFrequency;
+            dap_config_st_rudder.payloadPedalConfig_.RPM_AMP = Plugin.Settings.rudderRPMAmp;
+        }
+        public void writeRudderConfigToSetting()
+        {
+            Plugin.Settings.rudderControlQuantity = dap_config_st_rudder.payloadPedalConfig_.quantityOfControl;
+            Plugin.Settings.rudderForce[0]= dap_config_st_rudder.payloadPedalConfig_.relativeForce00;
+            Plugin.Settings.rudderForce[1]= dap_config_st_rudder.payloadPedalConfig_.relativeForce01;
+            Plugin.Settings.rudderForce[2] = dap_config_st_rudder.payloadPedalConfig_.relativeForce02;
+            Plugin.Settings.rudderForce[3] = dap_config_st_rudder.payloadPedalConfig_.relativeForce03;
+            Plugin.Settings.rudderForce[4] = dap_config_st_rudder.payloadPedalConfig_.relativeForce04;
+            Plugin.Settings.rudderForce[5] = dap_config_st_rudder.payloadPedalConfig_.relativeForce05;
+            Plugin.Settings.rudderForce[6] = dap_config_st_rudder.payloadPedalConfig_.relativeForce06;
+            Plugin.Settings.rudderForce[7] = dap_config_st_rudder.payloadPedalConfig_.relativeForce07;
+            Plugin.Settings.rudderForce[8] = dap_config_st_rudder.payloadPedalConfig_.relativeForce08;
+            Plugin.Settings.rudderForce[9] = dap_config_st_rudder.payloadPedalConfig_.relativeForce09;
+            Plugin.Settings.rudderForce[10] = dap_config_st_rudder.payloadPedalConfig_.relativeForce10;
+
+            Plugin.Settings.rudderTravel[0] = dap_config_st_rudder.payloadPedalConfig_.relativeTravel00;
+            Plugin.Settings.rudderTravel[1] = dap_config_st_rudder.payloadPedalConfig_.relativeTravel01;
+            Plugin.Settings.rudderTravel[2] = dap_config_st_rudder.payloadPedalConfig_.relativeTravel02;
+            Plugin.Settings.rudderTravel[3] = dap_config_st_rudder.payloadPedalConfig_.relativeTravel03;
+            Plugin.Settings.rudderTravel[4] = dap_config_st_rudder.payloadPedalConfig_.relativeTravel04;
+            Plugin.Settings.rudderTravel[5] = dap_config_st_rudder.payloadPedalConfig_.relativeTravel05;
+            Plugin.Settings.rudderTravel[6] = dap_config_st_rudder.payloadPedalConfig_.relativeTravel06;
+            Plugin.Settings.rudderTravel[7] = dap_config_st_rudder.payloadPedalConfig_.relativeTravel07;
+            Plugin.Settings.rudderTravel[8] = dap_config_st_rudder.payloadPedalConfig_.relativeTravel08;
+            Plugin.Settings.rudderTravel[9] = dap_config_st_rudder.payloadPedalConfig_.relativeTravel09;
+            Plugin.Settings.rudderTravel[10] = dap_config_st_rudder.payloadPedalConfig_.relativeTravel10;
+
+            Plugin.Settings.rudderDamping = dap_config_st_rudder.payloadPedalConfig_.dampingPress;
+            Plugin.Settings.rudderMaxForce = dap_config_st_rudder.payloadPedalConfig_.maxForce;
+            Plugin.Settings.rudderMinForce = dap_config_st_rudder.payloadPedalConfig_.preloadForce;
+            Plugin.Settings.rudderMinTravel = dap_config_st_rudder.payloadPedalConfig_.pedalStartPosition;
+            Plugin.Settings.rudderMaxTravel = dap_config_st_rudder.payloadPedalConfig_.pedalEndPosition;
+            Plugin.Settings.rudderMPCGain = dap_config_st_rudder.payloadPedalConfig_.MPC_0th_order_gain;
+            Plugin.Settings.rudderRPMMaxFrequency = dap_config_st_rudder.payloadPedalConfig_.RPM_max_freq;
+            Plugin.Settings.rudderRPMMinFrequency = dap_config_st_rudder.payloadPedalConfig_.RPM_min_freq;
+            Plugin.Settings.rudderRPMAmp = dap_config_st_rudder.payloadPedalConfig_.RPM_AMP;
         }
     }
 }

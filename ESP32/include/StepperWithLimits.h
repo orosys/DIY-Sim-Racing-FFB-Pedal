@@ -6,14 +6,15 @@
 // these are physical properties of the stepper
 static const int32_t MAXIMUM_STEPPER_ACCELERATION = INT32_MAX / 10;       
 static const int32_t MAXIMUM_STEPPER_IDLE_TIMEOUT = 1800000; //set the servo idle timeout      
-static const float STEPPER_WAKEUP_FORCE=0.5f; //set the servo wakeup force in kg.
+static const float STEPPER_WAKEUP_FORCE=1.0f; //set the servo wakeup force in kg.
  // steps/s²
 // 10000000; //
 enum ServoStatus
 {
 	SERVO_NOT_CONNECTED,
 	SERVO_CONNECTED,
-	SERVO_IDLE_NOT_CONNECTED
+	SERVO_IDLE_NOT_CONNECTED,
+	SERVO_FORCE_STOP
 };
 
 class StepperWithLimits {
@@ -24,23 +25,6 @@ private:
 
 	isv57communication isv57;
 	
-
-	/*public: void StartTask(void)
-	{      
-		//Start Task with input parameter set to "this" class
-		xTaskCreatePinnedToCore(
-		this->servoCommunicationTask,        //Function to implement the task 
-		"servoCommunicationTask",            //Name of the task
-		5000,                   //Stack size in words 
-		this,                   //Task input parameter 
-		1,           //Priority of the task 
-		&task_iSV_Communication,                 //Task handle.
-		0);              //Core where the task should run 
-	}*/
-
-
-
-
 	
 	bool isv57LifeSignal_b = false;
 	bool invertMotorDir_global_b = false;

@@ -145,8 +145,8 @@ namespace User.PluginSdkDemo.UIFunction
 
                     if (control.mainCanvas != null) control.CanvasDraw();
                     if (control.mainCanvas != null) control.updateRectControlFromConfig();
-                    if (control.Label_min_force != null) control.Label_min_force.Content = "Preload:\n" + (float)control.dap_config_st.payloadPedalConfig_.preloadForce + "kg";
-                    if (control.Label_max_force != null) control.Label_max_force.Content = "Max force:\n" + (float)control.dap_config_st.payloadPedalConfig_.maxForce + "kg";
+                    if (control.Label_min_force != null) control.Label_min_force.Content = "Preload:\n" + Math.Round((float)control.dap_config_st.payloadPedalConfig_.preloadForce,1) + "kg";
+                    if (control.Label_max_force != null) control.Label_max_force.Content = "Max force:\n" + Math.Round((float)control.dap_config_st.payloadPedalConfig_.maxForce,1) + "kg";
                     if (control.Label_max_pos != null) control.Label_max_pos.Content = "MAX\n" + control.dap_config_st.payloadPedalConfig_.pedalEndPosition + "%\n" + Math.Round((float)(control.dap_config_st.payloadPedalConfig_.lengthPedal_travel * control.dap_config_st.payloadPedalConfig_.pedalEndPosition) / 100) + "mm";
                     if (control.Label_min_pos != null) control.Label_min_pos.Content = "MIN\n" + control.dap_config_st.payloadPedalConfig_.pedalStartPosition + "%\n" + Math.Round((float)(control.dap_config_st.payloadPedalConfig_.lengthPedal_travel * control.dap_config_st.payloadPedalConfig_.pedalStartPosition) / 100) + "mm";
                     if (control.dap_config_st.payloadPedalConfig_.pedalStartPosition < 5)
@@ -496,6 +496,7 @@ namespace User.PluginSdkDemo.UIFunction
                 double dx = mainCanvas.Height / y_max;
                 double y_actual = (mainCanvas.Height - y - rectangle.Height / 2) / dx;
                 var tmp = dap_config_st;
+                /*
                 if (rectangle.Name == "rect0")
                 {
                     tmp.payloadPedalConfig_.relativeForce_p000 = Convert.ToByte(y_actual);
@@ -534,7 +535,7 @@ namespace User.PluginSdkDemo.UIFunction
                     text_point_pos.Text = "Travel:100%";
                     text_point_pos.Text += "\nForce: " + (int)y_actual + "%";
                 }
-
+                */
                 text_point_pos.Visibility = Visibility.Visible; ;
 
                 dap_config_st = tmp;
@@ -573,7 +574,7 @@ namespace User.PluginSdkDemo.UIFunction
             var tmp = dap_config_st;
             tmp.payloadPedalConfig_.preloadForce = (float)e.NewValue;
             dap_config_st = tmp;
-            if(Label_min_force!=null) Label_min_force.Content = "Preload:\n" + (float)dap_config_st.payloadPedalConfig_.preloadForce + "kg";
+            if(Label_min_force!=null) Label_min_force.Content = "Preload:\n" + Math.Round((float)dap_config_st.payloadPedalConfig_.preloadForce,1) + "kg";
             ConfigChangedEvent(dap_config_st);
             
         }
@@ -583,7 +584,7 @@ namespace User.PluginSdkDemo.UIFunction
             var tmp = dap_config_st;
             tmp.payloadPedalConfig_.maxForce = (float)e.NewValue;
             dap_config_st = tmp;
-            if(Label_max_force!=null) Label_max_force.Content = "Max force:\n" + (float)dap_config_st.payloadPedalConfig_.maxForce + "kg";
+            if(Label_max_force!=null) Label_max_force.Content = "Max force:\n" + Math.Round((float)dap_config_st.payloadPedalConfig_.maxForce, 1) + "kg";
             ConfigChangedEvent(dap_config_st);
             PedalServoForceCheck();
         }
@@ -668,15 +669,25 @@ namespace User.PluginSdkDemo.UIFunction
 
 
             System.Windows.Media.PointCollection myPointCollection2 = new System.Windows.Media.PointCollection();
-
+            System.Windows.Media.PointCollection myPointCollection3 = new System.Windows.Media.PointCollection();
 
             for (int pointIdx = 0; pointIdx < (int)x_quantity; pointIdx++)
             {
                 System.Windows.Point Pointlcl = new System.Windows.Point(xs2[pointIdx], ys2[pointIdx]);
                 myPointCollection2.Add(Pointlcl);
+                myPointCollection3.Add(Pointlcl);
                 calculation.Force_curve_Y[pointIdx] = ys2[pointIdx];
             }
             this.Polyline_BrakeForceCurve.Points = myPointCollection2;
+            
+            System.Windows.Point Pointend1 = new System.Windows.Point(mainCanvas.Width, mainCanvas.Height);
+            System.Windows.Point Pointend2 = new System.Windows.Point(0, mainCanvas.Height);
+            myPointCollection3.Add(Pointend1);
+            myPointCollection3.Add(Pointend2);
+            polygonCurveBackground.Points= myPointCollection3;
+
+
+
         }
 
         public void updatePedalState(ushort pedalPosition_u16, ushort pedalForce_u16)
@@ -852,17 +863,38 @@ namespace User.PluginSdkDemo.UIFunction
             UpdateRectState();
         }
 
+        
         private void AddRectAt(double x, double y)
         {
+            /*
+            Border border = new Border
+            {
+                Width = RectSize,
+                Height = RectSize,
+                BorderThickness = new Thickness(2),
+                Background = System.Windows.Media.Brushes.Transparent,
+                CornerRadius = new CornerRadius(2),
+                Opacity = 1.0
+            };
+            border.SetResourceReference(Border.BorderBrushProperty, "AccentColorBrush");
+            border.Tag = -1;
+            Canvas.SetLeft(border, x);
+            Canvas.SetTop(border, y);
+            mainCanvas.Children.Add(border);
+            */
             Rectangle rect = new Rectangle
             {
                 Width = RectSize,
                 Height = RectSize,
-                StrokeThickness = 0,
-                Opacity = 0.8
+                StrokeThickness = 2,
+                RadiusX = 1,
+                RadiusY = 1,
+                Fill = System.Windows.Media.Brushes.Transparent,
+                Opacity = 1.0
             };
             rect.Tag = (int)-1;
-            rect.SetResourceReference(Shape.FillProperty, "AccentColorBrush");
+            //rect.SetResourceReference(Shape.FillProperty, "AccentColorBrush");
+            rect.SetResourceReference(Rectangle.StrokeProperty, "AccentColorBrush");
             Canvas.SetLeft(rect, x);
             Canvas.SetTop(rect, y);
 
@@ -872,8 +904,9 @@ namespace User.PluginSdkDemo.UIFunction
             rect.MouseMove += Rect_MouseMove;
 
             mainCanvas.Children.Add(rect);
-            
         }
+        
+      
 
         private void Rect_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -988,7 +1021,7 @@ namespace User.PluginSdkDemo.UIFunction
                 text_point_pos.Text = "#"+draggingRect.Tag.ToString();
                 text_point_pos.Text += "\nTravel:" + travel[(int)draggingRect.Tag ] + "%";
                 text_point_pos.Text += "\nForce: " + force[(int)draggingRect.Tag ] + "%";
-                writeForceAndTravelToConfig();
+                //writeForceAndTravelToConfig();
             }
         }
 

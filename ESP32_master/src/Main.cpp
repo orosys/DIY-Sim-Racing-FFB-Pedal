@@ -299,7 +299,7 @@ void setup()
     Serial.print("[L]Version:");
     Serial.println(BRIDGE_FIRMWARE_VERSION);
   #endif
-
+  parse_version(BRIDGE_FIRMWARE_VERSION,&versionMajor,&versionMinor,&versionPatch);
   // setup multi tasking
   /*
   semaphore_updateJoystick = xSemaphoreCreateMutex();
@@ -1069,8 +1069,10 @@ void Serial_Task( void * pvParameters)
       dap_bridge_state_st.payLoadHeader_.version=DAP_VERSION_CONFIG;
       dap_bridge_state_st.payloadBridgeState_.Bridge_action=0;
       memcpy(dap_bridge_state_st.payloadBridgeState_.Pedal_RSSI_Realtime,rssi,sizeof(int32_t)*3);
-      parse_version(BRIDGE_FIRMWARE_VERSION,&dap_bridge_state_st.payloadBridgeState_.Bridge_firmware_version_u8[0],&dap_bridge_state_st.payloadBridgeState_.Bridge_firmware_version_u8[1],&dap_bridge_state_st.payloadBridgeState_.Bridge_firmware_version_u8[2]);
-      
+      //parse_version(BRIDGE_FIRMWARE_VERSION,&dap_bridge_state_st.payloadBridgeState_.Bridge_firmware_version_u8[0],&dap_bridge_state_st.payloadBridgeState_.Bridge_firmware_version_u8[1],&dap_bridge_state_st.payloadBridgeState_.Bridge_firmware_version_u8[2]);
+      dap_bridge_state_st.payloadBridgeState_.Bridge_firmware_version_u8[0]=versionMajor;
+      dap_bridge_state_st.payloadBridgeState_.Bridge_firmware_version_u8[1]=versionMinor;
+      dap_bridge_state_st.payloadBridgeState_.Bridge_firmware_version_u8[2]=versionPatch;
       //CRC check should be in the final
       crc = checksumCalculator((uint8_t*)(&(dap_bridge_state_st.payLoadHeader_)), sizeof(dap_bridge_state_st.payLoadHeader_) + sizeof(dap_bridge_state_st.payloadBridgeState_));
       dap_bridge_state_st.payloadFooter_.checkSum=crc;
@@ -1173,12 +1175,22 @@ void Serial_Task( void * pvParameters)
 }
 unsigned long last_serial_joy_out =millis();
 unsigned long now;
+uint16_t  pedalJoystick_last[3]={0,0,0};
+bool pedalJoystickUpdate_b=false;
 void Joystick_Task( void * pvParameters )
 {
   for(;;)
   {
+    for(int i=0;i<3;i++)
+    {
+      if(pedalJoystick_last[i]!=Joystick_value_original[i])
+      {
+        pedalJoystick_last[i]=Joystick_value_original[i];
+        pedalJoystickUpdate_b=true;
+      }
+    }
     #ifdef USB_JOYSTICK
-    if(IsControllerReady())
+    if(IsControllerReady() && pedalJoystickUpdate_b)
     {
       if(pedal_status==0)
       {
@@ -1225,15 +1237,20 @@ void Joystick_Task( void * pvParameters )
         
       }
       
-
-      joystickSendState();
-      //bool joystatus=GetJoystickStatus();
-      if(!GetJoystickStatus())
+      if(pedalJoystickUpdate_b)
       {
-        RestartJoystick();
-        Serial.println("[L]HID Error, Restart Joystick...");
-        //last_serial_joy_out=millis();
+        joystickSendState();
+        pedalJoystickUpdate_b=false;
       }
+      
+      //bool joystatus=GetJoystickStatus();
+
+    }
+    if(!GetJoystickStatus())
+    {
+      RestartJoystick();
+      Serial.println("[L]HID Error, Restart Joystick...");
+      //last_serial_joy_out=millis();
     }
     #endif
     // set analog value

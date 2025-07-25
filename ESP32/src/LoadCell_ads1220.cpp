@@ -22,9 +22,14 @@ float refVoltageInMV_fl32 = 5000.0f;
 // This flag will be set to true by the ISR
 volatile bool newDataReady = false;
 
+
+unsigned long timeInUsSinceLastUpdat_ul=0;
+
+
 // This is our Interrupt Service Routine
 void IRAM_ATTR drdyInterrupt() {
   newDataReady = true;
+  timeInUsSinceLastUpdat_ul = micros();
 }
 
 
@@ -129,13 +134,27 @@ void LoadCell_ADS1220::setLoadcellRating(uint8_t loadcellRating_u8) const {
 }
 
 
-
+#define LOADCELL_RADING_INTERVALL_IN_US (uint32_t)500
 float LoadCell_ADS1220::getReadingKg() const {
   ADS1220_WE& adc = ADC();
-  unsigned int timeout_us = 0;//TIMEOUT_FOR_DRDY_TO_BECOME_LOW;
-  bool timeoutReached_b = false;
+  unsigned int timeout_us = 0; //TIMEOUT_FOR_DRDY_TO_BECOME_LOW;
+  boolean timeoutReached_b = false;
   float voltage_mV = 0.0f;
   
+  // wait 500us since last update to reduce CPU load
+  if(!newDataReady)
+  {
+    unsigned long timeInUsSince_ul = micros();
+    unsigned long timeInUsTarget_ul = (timeInUsSinceLastUpdat_ul + LOADCELL_RADING_INTERVALL_IN_US);
+
+    if (timeInUsSince_ul < timeInUsTarget_ul)
+    {
+      uint32_t waitTimeInUs_i32 = constrain( timeInUsTarget_ul - timeInUsSince_ul, 0, LOADCELL_RADING_INTERVALL_IN_US);
+      delayMicroseconds(waitTimeInUs_i32);
+    }
+  }
+
+  // wait longer, if still not available
   while(!newDataReady){
     if(timeout_us < TIMEOUT_FOR_DRDY_TO_BECOME_LOW){
       timeout_us += DELAY_IN_US_FOR_DRDY_TO_BECOME_LOW;  
@@ -156,7 +175,7 @@ float LoadCell_ADS1220::getReadingKg() const {
   
   float weight_grams = voltage_mV * updatedConversionFactor_f64;
 
-  float weight_kg = weight_grams / 1000.0f; // convert grams to kg
+  float weight_kg = weight_grams * 0.001f; // convert grams to kg
   
   // correct bias, assume AWGN --> 3 * sigma is 99.9 %
   return weight_kg - ( _zeroPoint + 3.0f * _standardDeviationEstimate );
@@ -196,10 +215,6 @@ void LoadCell_ADS1220::estimateBiasAndVariance() {
   Serial.print("Offset ");
   Serial.print(_zeroPoint, 5);
   Serial.println("kg");
-
-  // Serial.print("Variance est.: ");
-  // Serial.print(varEstimate, 5);
-  // Serial.println("kg");
 
   Serial.print("Stddev. est.: ");
   Serial.print(_standardDeviationEstimate, 5);

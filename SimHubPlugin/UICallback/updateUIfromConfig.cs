@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using User.PluginSdkDemo.UIFunction;
 
 namespace User.PluginSdkDemo
 {
@@ -75,7 +76,7 @@ namespace User.PluginSdkDemo
                 EffectsCustom1_tab.dap_config_st = tmp_struct;
                 EffectsCustom2_Tab.dap_config_st = tmp_struct;
                 PedalForceTravel_Tab.dap_config_st = tmp_struct;
-
+                PedalJoystick_Tab.dap_config_st= tmp_struct;
 
                 PedalKinematics_Tab.dap_config_st = tmp_struct;
                 PedalSettingsSection.dap_config_st = tmp_struct;
@@ -98,13 +99,17 @@ namespace User.PluginSdkDemo
                 PedalKinematics_Tab.Settings = Plugin.Settings;
                 PedalSettingsSection.Settings = Plugin.Settings;
                 EffectsRPMRudder_Tab.Settings = Plugin.Settings;
+                CurveRudderForce_Tab.Settings = Plugin.Settings;
                 EffectRudderACC_Tab.Settings = Plugin.Settings;
+                RudderSetting_Tab.Settings = Plugin.Settings;
                 SystemProfile_Tab.Settings = Plugin.Settings;
                 //SettingOTA_Tab.Settings = Plugin.Settings;
                 SystemLicense_Tab.Settings = Plugin.Settings;
                 SystemSetting_Section.Settings = Plugin.Settings;
                 SystemInfo.Settings = Plugin.Settings;
                 PedalInfo.Settings = Plugin.Settings;
+                RudderSettingSection.Settings = Plugin.Settings;
+
 
                 EffectsABS_Tab.calculation = Plugin._calculations;
                 EffectsBitePoint_Tab.calculation = Plugin._calculations;
@@ -151,6 +156,7 @@ namespace User.PluginSdkDemo
 
             //// Select serial port accordingly
             string tmp = (string)Plugin._serialPort[indexOfSelectedPedal_u].PortName;
+            
             try
             {
                 SerialPortSelection.SelectedValue = tmp;
@@ -212,24 +218,29 @@ namespace User.PluginSdkDemo
             {
                 if (Plugin._calculations.verisonCreate_b == false)
                 {
-                    Plugin._calculations.updateVerison = new Version(Plugin._calculations.pluginVersionReading[0]);
+                    if (Plugin.Settings.updateChannel == 0)
+                    {
+                        Plugin._calculations.updateVerison = new Version(Plugin._calculations.pluginVersionReading[0]);
+                    }
+                    else
+                    {
+                        Plugin._calculations.updateVerison = new Version(Plugin._calculations.pluginVersionReading[1]);
+                    }
+
                     Plugin._calculations.pluginVersion = new Version(Constants.pluginVersion);
                     Plugin._calculations.verisonCreate_b = true;
                 }
 
                 if (Plugin._calculations.updateVerison > Plugin._calculations.pluginVersion)
                 {
-                    textBox_VersionUpdate.Text = "New Verison:" + Plugin._calculations.pluginVersionReading[0];
+                    string tmpUpdateChannel = Plugin.Settings.updateChannel == 0 ? "Stable release" : "Nightly build";
+
+                    textBox_VersionUpdate.Text = "New "+tmpUpdateChannel+" available:" + Plugin._calculations.updateVerison;
                     textBox_VersionUpdate.Foreground=System.Windows.Media.Brushes.Red;
                 }
                 else
                 {
                     textBox_VersionUpdate.Text = "";
-                    /*
-                    textBox_VersionUpdate.Text = "No update";
-                    textBox_VersionUpdate.Text += "\nOnline Verison:" + Plugin._calculations.updateVerison.ToString();
-                    textBox_VersionUpdate.Foreground = System.Windows.Media.Brushes.White;
-                    */
                 }
             }
 

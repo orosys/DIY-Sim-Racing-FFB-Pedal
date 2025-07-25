@@ -60,6 +60,21 @@ namespace User.PluginSdkDemo
         public string SSID_string = "";
         public string PASS_string = "";
         public bool[] LivePreview = new bool[3] { false, false, false };
+        public float rudderMaxForce = 10;
+        public float rudderMinForce = 1;
+        public byte rudderMaxTravel = 95;
+        public byte rudderMinTravel = 5;
+        public byte[] rudderForce=new byte[11] { 0, 20, 40, 60, 80, 100, 0, 0, 0, 0, 0 };
+        public byte[] rudderTravel = new byte[11] { 0, 20, 40, 60, 80, 100, 0, 0, 0, 0, 0 };
+        public byte rudderControlQuantity = 6;
+        public byte rudderDamping = 0;
+        public float rudderMPCGain = 6.0f;
+        public byte rudderRPMAmp = 1;
+        public byte rudderRPMMaxFrequency = 40;
+        public byte rudderRPMMinFrequency = 15;
+        public uint rudderMode = 0;
+        public int updateChannel = 0;
+
     }
         
 

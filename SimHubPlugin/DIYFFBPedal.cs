@@ -9,6 +9,7 @@ using SimHub.Plugins.DataPlugins.RGBMatrixDriver.Settings;
 using SimHub.Plugins.DataPlugins.ShakeItV3.UI.Effects;
 using SimHub.Plugins.OutputPlugins.Dash.GLCDTemplating;
 using System;
+using System.Collections.Generic;
 using System.IO.Ports;
 using System.Media;
 using System.Runtime;
@@ -84,6 +85,7 @@ namespace User.PluginSdkDemo
         public string Current_Game = "";
         public byte TrackSurfaceCondition = 0;
         public bool[] PedalConfigRead_b = new bool[3] { false, false, false };
+        public List<VidPidResult> comportList = new List<VidPidResult>();
         //public vJoyInterfaceWrap.vJoy joystick;
         //effect trigger timer
         DateTime[] Action_currentTime = new DateTime[3];
@@ -105,29 +107,7 @@ namespace User.PluginSdkDemo
         DateTime Rudder_Action_currentTime = DateTime.Now;
         DateTime Rudder_Action_lastTime = DateTime.Now;
 
-        public enum RudderAction
-        {
-            None,
-            EnableRudderTwoPedals,
-            ClearRudderStatus,
-            EnableRudderThreePedals,
-            EnableHeliRudderTwoPedals,
-            EnableHeliRudderThreePedals
-
-        };
-
-        public enum TrackConditionEnum
-        {
-            Dry,
-            MostlyDry,
-            VeryLightWet,
-            LightWet,
-            ModeratelyWet,
-            VeryWet,
-            ExtremelyWet,
-            DIRT,
-            ICED
-        };
+        
 
         //https://www.c-sharpcorner.com/uploadfile/eclipsed4utoo/communicating-with-serial-port-in-C-Sharp/
         public SerialPort[] _serialPort = new SerialPort[4] {new SerialPort("COM7", 921600, Parity.None, 8, StopBits.One),
@@ -407,8 +387,8 @@ namespace User.PluginSdkDemo
             double _G_force = 128;
             byte WS_value = 0;
             byte Road_impact_value = 0;
-            byte CV1_value = 0;
-            byte CV2_value = 0;
+            double CV1_value = 0;
+            double CV2_value = 0;
             double MSFS_RPM_Value_Simhub = 0;
             double RUDDER_DEFLECTION_Simhub = 0;
             double RELATIVE_WIND_VELOCITY_BODY_Z_Simhub = 0;
@@ -740,46 +720,71 @@ namespace User.PluginSdkDemo
                             }
                         }
                      //custom effcts
-                     if (Settings.CV1_enable_flag[pedalIdx] == true)
-                     {
-                        //CV1_value = Convert.ToByte(pluginManager.GetPropertyValue(Settings.CV1_bindings[pedalIdx]));
-                        string temp_string = Ncalc_reading(Settings.CV1_bindings[pedalIdx]);
-                        if (temp_string != "Error")
+                    if (Settings.CV1_enable_flag[pedalIdx] == true)
+                    {
+                        try
                         {
-                            CV1_value = Convert.ToByte(temp_string);
+                            //CV1_value = Convert.ToByte(pluginManager.GetPropertyValue(Settings.CV1_bindings[pedalIdx]));
+                            string temp_string = Ncalc_reading(Settings.CV1_bindings[pedalIdx]);
+                            if (temp_string != "Error")
+                            {
+                                CV1_value = Convert.ToDouble(temp_string);
+                            }
+                            else
+                            {
+                                CV1_value = 0;
+                                SimHub.Logging.Current.Error("CV1 Reading error");
+                            }
+                            if (CV1_value > Byte.MaxValue)
+                            {
+                                SimHub.Logging.Current.Error("CV1 value exceed limit");
+                            }
+
+                            if (CV1_value > (Settings.CV1_trigger[pedalIdx]))
+                            {
+                                tmp.payloadPedalAction_.Trigger_CV_1 = 1;
+                                update_flag = true;
+                            }
                         }
-                        else
+                        catch (Exception caughtEx)
                         {
                             CV1_value = 0;
-                            SimHub.Logging.Current.Error("CV1 Reading error");
+                            SimHub.Logging.Current.Error("CV1 Reading error:" + caughtEx);
                         }
 
-
-                        if (CV1_value > (Settings.CV1_trigger[pedalIdx]))
-                        {
-                            tmp.payloadPedalAction_.Trigger_CV_1 = 1;
-                            update_flag = true;
-                        }
                     }
-                     if (Settings.CV2_enable_flag[pedalIdx] == true)
-                     {
+                    if (Settings.CV2_enable_flag[pedalIdx] == true)
+                    {
 
                         //CV2_value = Convert.ToByte(pluginManager.GetPropertyValue(Settings.CV2_bindings[pedalIdx]));
-                        string temp_string = Ncalc_reading(Settings.CV2_bindings[pedalIdx]);
-                        if (temp_string != "Error")
+                        try
                         {
-                            CV2_value = Convert.ToByte(temp_string);
+                            string temp_string = Ncalc_reading(Settings.CV2_bindings[pedalIdx]);
+                            if (temp_string != "Error")
+                            {
+                                CV2_value = Convert.ToDouble(temp_string);
+                            }
+                            else
+                            {
+                                CV2_value = 0;
+                                SimHub.Logging.Current.Error("CV2 Reading error");
+                            }
+                            if (CV2_value > Byte.MaxValue)
+                            {
+                                SimHub.Logging.Current.Error("CV2 value exceed limit");
+                            }
+                            if (CV2_value > (Settings.CV2_trigger[pedalIdx]))
+                            {
+                                tmp.payloadPedalAction_.Trigger_CV_2 = 1;
+                                update_flag = true;
+                            }
                         }
-                        else
+                        catch (Exception caughtEx)
                         {
                             CV2_value = 0;
-                            SimHub.Logging.Current.Error("CV2 Reading error");
+                            SimHub.Logging.Current.Error("CV2 Reading error:"+ caughtEx);
                         }
-                        if (CV2_value > (Settings.CV2_trigger[pedalIdx]))
-                        {
-                            tmp.payloadPedalAction_.Trigger_CV_2 = 1;
-                            update_flag = true;
-                        }
+
 
                     }
                     //ABS/TC function
@@ -996,7 +1001,7 @@ namespace User.PluginSdkDemo
                 tmp.payloadPedalAction_.impact_value = 0;
                 tmp.payloadPedalAction_.Trigger_CV_1 = 0;
                 tmp.payloadPedalAction_.Trigger_CV_2 = 0;
-                if (_calculations.rudderType == 0)
+                if (Settings.rudderMode == 0)
                 {
                     if (Rudder_Pedal_idx[0] == 0)
                     {
@@ -1007,7 +1012,7 @@ namespace User.PluginSdkDemo
                         tmp.payloadPedalAction_.Rudder_action = (byte)RudderAction.EnableRudderTwoPedals;
                     }
                 }
-                if (_calculations.rudderType == 1)
+                if (Settings.rudderMode == 1)
                 {
                     if (Rudder_Pedal_idx[0] == 0)
                     {
@@ -1854,85 +1859,7 @@ namespace User.PluginSdkDemo
 
 
 
-            dap_config_initial_st.payloadHeader_.payloadType = (byte)Constants.pedalConfigPayload_type;
-            dap_config_initial_st.payloadHeader_.version = (byte)Constants.pedalConfigPayload_version;
-            dap_config_initial_st.payloadHeader_.storeToEeprom = 0;
-            dap_config_initial_st.payloadPedalConfig_.pedalStartPosition = 35;
-            dap_config_initial_st.payloadPedalConfig_.pedalEndPosition = 80;
-            dap_config_initial_st.payloadPedalConfig_.maxForce = 50;
-            dap_config_initial_st.payloadPedalConfig_.relativeForce_p000 = 0;
-            dap_config_initial_st.payloadPedalConfig_.relativeForce_p020 = 20;
-            dap_config_initial_st.payloadPedalConfig_.relativeForce_p040 = 40;
-            dap_config_initial_st.payloadPedalConfig_.relativeForce_p060 = 60;
-            dap_config_initial_st.payloadPedalConfig_.relativeForce_p080 = 80;
-            dap_config_initial_st.payloadPedalConfig_.relativeForce_p100 = 100;
-            dap_config_initial_st.payloadPedalConfig_.dampingPress = 0;
-            dap_config_initial_st.payloadPedalConfig_.dampingPull = 0;
-            dap_config_initial_st.payloadPedalConfig_.absFrequency = 5;
-            dap_config_initial_st.payloadPedalConfig_.absAmplitude = 100;
-            dap_config_initial_st.payloadPedalConfig_.absPattern = 0;
-            dap_config_initial_st.payloadPedalConfig_.absForceOrTarvelBit = 0;
-
-            dap_config_initial_st.payloadPedalConfig_.lengthPedal_a = 205;
-            dap_config_initial_st.payloadPedalConfig_.lengthPedal_b = 220;
-            dap_config_initial_st.payloadPedalConfig_.lengthPedal_d = 60;
-            dap_config_initial_st.payloadPedalConfig_.lengthPedal_c_horizontal = 215;
-            dap_config_initial_st.payloadPedalConfig_.lengthPedal_c_vertical = 60;
-
-            dap_config_initial_st.payloadPedalConfig_.Simulate_ABS_trigger = 0;
-            dap_config_initial_st.payloadPedalConfig_.Simulate_ABS_value = 50;
-            dap_config_initial_st.payloadPedalConfig_.RPM_max_freq = 40;
-            dap_config_initial_st.payloadPedalConfig_.RPM_min_freq = 10;
-            dap_config_initial_st.payloadPedalConfig_.RPM_AMP = 5;
-            dap_config_initial_st.payloadPedalConfig_.BP_trigger_value = 50;
-            dap_config_initial_st.payloadPedalConfig_.BP_amp = 1;
-            dap_config_initial_st.payloadPedalConfig_.BP_freq = 15;
-            dap_config_initial_st.payloadPedalConfig_.BP_trigger = 0;
-            dap_config_initial_st.payloadPedalConfig_.G_multi = 50;
-            dap_config_initial_st.payloadPedalConfig_.G_window = 60;
-            dap_config_initial_st.payloadPedalConfig_.WS_amp = 1;
-            dap_config_initial_st.payloadPedalConfig_.WS_freq = 15;
-
-            dap_config_initial_st.payloadPedalConfig_.maxGameOutput = 100;
-
-            dap_config_initial_st.payloadPedalConfig_.kf_modelNoise = 128;
-            dap_config_initial_st.payloadPedalConfig_.kf_modelOrder = 0;
-            dap_config_initial_st.payloadPedalConfig_.debug_flags_0 = 0;
-            /*
-            dap_config_initial_st.payloadPedalConfig_.cubic_spline_param_a_0 = 0;
-            dap_config_initial_st.payloadPedalConfig_.cubic_spline_param_a_1 = 0;
-            dap_config_initial_st.payloadPedalConfig_.cubic_spline_param_a_2 = 0;
-            dap_config_initial_st.payloadPedalConfig_.cubic_spline_param_a_3 = 0;
-            dap_config_initial_st.payloadPedalConfig_.cubic_spline_param_a_4 = 0;
-
-            dap_config_initial_st.payloadPedalConfig_.cubic_spline_param_b_0 = 0;
-            dap_config_initial_st.payloadPedalConfig_.cubic_spline_param_b_1 = 0;
-            dap_config_initial_st.payloadPedalConfig_.cubic_spline_param_b_2 = 0;
-            dap_config_initial_st.payloadPedalConfig_.cubic_spline_param_b_3 = 0;
-            dap_config_initial_st.payloadPedalConfig_.cubic_spline_param_b_4 = 0;
-            */
-            dap_config_initial_st.payloadPedalConfig_.PID_p_gain = 0.3f;
-            dap_config_initial_st.payloadPedalConfig_.PID_i_gain = 50.0f;
-            dap_config_initial_st.payloadPedalConfig_.PID_d_gain = 0.0f;
-            dap_config_initial_st.payloadPedalConfig_.PID_velocity_feedforward_gain = 0.0f;
-
-            dap_config_initial_st.payloadPedalConfig_.MPC_0th_order_gain = 10.0f;
-            dap_config_initial_st.payloadPedalConfig_.MPC_1st_order_gain = 0.0f;
-
-            dap_config_initial_st.payloadPedalConfig_.control_strategy_b = 2;
-
-            dap_config_initial_st.payloadPedalConfig_.loadcell_rating = 150;
-
-            dap_config_initial_st.payloadPedalConfig_.travelAsJoystickOutput_u8 = 0;
-
-            dap_config_initial_st.payloadPedalConfig_.invertLoadcellReading_u8 = 0;
-
-            dap_config_initial_st.payloadPedalConfig_.invertMotorDirection_u8 = 0;
-
-            dap_config_initial_st.payloadPedalConfig_.spindlePitch_mmPerRev_u8 = 5;
-            dap_config_initial_st.payloadPedalConfig_.pedal_type = 0;
-            //dap_config_initial_st.payloadPedalConfig_.OTA_flag = 0;
-            dap_config_initial_st.payloadPedalConfig_.stepLossFunctionFlags_u8 = 0b11;
+            
 
 
 

@@ -101,6 +101,7 @@
     </Reference>
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
     </Reference>
@@ -174,6 +175,7 @@
     <Compile Include="UICallback\AutoConnectTimer.cs" />
     <Compile Include="UICallback\BridgeSerialTimer.cs" />
     <Compile Include="UICallback\btnCallbacks.cs" />
+    <Compile Include="UICallback\comPortHelper.cs" />
     <Compile Include="UICallback\others.cs" />
     <Compile Include="UICallback\SerialTImer.cs" />
     <Compile Include="UICallback\TableCallbacks.cs" />
@@ -186,6 +188,9 @@
     </Compile>
     <Compile Include="UIElement\SliderWithLabel.xaml.cs">
       <DependentUpon>SliderWithLabel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UIFunction\CurveTab_JoystickMapping.xaml.cs">
+      <DependentUpon>CurveTab_JoystickMapping.xaml</DependentUpon>
     </Compile>
     <Compile Include="UIFunction\CurveTab_PedalForceTravel_Modified.xaml.cs">
       <DependentUpon>CurveTab_PedalForceTravel_Modified.xaml</DependentUpon>
@@ -323,6 +328,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="UIFunction\CurveTab_JoystickMapping.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="UIFunction\CurveTab_PedalForceTravel_Modified.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -440,6 +449,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UIFunction\UpdateSettingWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UIStyles\DefaultStyles.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

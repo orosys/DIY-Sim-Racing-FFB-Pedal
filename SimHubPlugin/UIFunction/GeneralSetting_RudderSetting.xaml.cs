@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -18,7 +19,7 @@ namespace User.PluginSdkDemo.UIFunction
     /// <summary>
     /// GeneralSetting_RudderSetting.xaml 的互動邏輯
     /// </summary>
-    public partial class GeneralSetting_RudderSetting : UserControl
+    public partial class GeneralSetting_RudderSetting : System.Windows.Controls.UserControl
     {
         public GeneralSetting_RudderSetting()
         {
@@ -76,7 +77,13 @@ namespace User.PluginSdkDemo.UIFunction
 
         private static void OnSettingsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-
+            var control = d as GeneralSetting_RudderSetting;
+            if (control != null && e.NewValue is DAP_config_st newData)
+            {
+                //slider
+                control.updateUI();
+            }
+            
         }
         private void updateUI()
         {
@@ -84,7 +91,8 @@ namespace User.PluginSdkDemo.UIFunction
             {
                 if (Settings != null)
                 {
-
+                    if (Slider_MPC_0th_gain_rudder != null) Slider_MPC_0th_gain_rudder.SliderValue = Settings.rudderMPCGain;
+                    if (Slider_damping_rudder != null) Slider_damping_rudder.SliderValue = (double)Settings.rudderDamping * (double)Slider_damping_rudder.TickFrequency;
                 }
             }
             catch
@@ -98,12 +106,6 @@ namespace User.PluginSdkDemo.UIFunction
             if (control != null && e.NewValue is DAP_config_st newData)
             {
                 //slider
-
-                if (control != null)
-                {
-                    if(control.Slider_MPC_0th_gain_rudder!=null) control.Slider_MPC_0th_gain_rudder.SliderValue = control.dap_config_st.payloadPedalConfig_.MPC_0th_order_gain;           
-                    if(control.Slider_damping_rudder!=null) control.Slider_damping_rudder.SliderValue = (double)control.dap_config_st.payloadPedalConfig_.dampingPress * (double)control.Slider_damping_rudder.TickFrequency;
-                }
             }
 
         }
@@ -114,6 +116,7 @@ namespace User.PluginSdkDemo.UIFunction
             {
                 try
                 {
+
                 }
                 catch
                 {
@@ -140,19 +143,25 @@ namespace User.PluginSdkDemo.UIFunction
 
         private void Slider_damping_rudder_SliderValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            /*
             var tmp = dap_config_st;
             tmp.payloadPedalConfig_.dampingPress = (Byte)((double)e.NewValue / (double)Slider_damping_rudder.TickFrequency);
             tmp.payloadPedalConfig_.dampingPull = (Byte)((double)e.NewValue / (double)Slider_damping_rudder.TickFrequency);
             dap_config_st = tmp;
             ConfigChangedEvent(dap_config_st);
+            */
+            Settings.rudderDamping= (byte)((double)e.NewValue / (double)Slider_damping_rudder.TickFrequency);
         }
 
         private void Slider_MPC_0th_gain_rudder_SliderValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            /*
             var tmp = dap_config_st;
             tmp.payloadPedalConfig_.MPC_0th_order_gain = (float)e.NewValue;
             dap_config_st = tmp;
             ConfigChangedEvent(dap_config_st);
+            */
+            Settings.rudderMPCGain= (float)e.NewValue;
         }
     }
 }

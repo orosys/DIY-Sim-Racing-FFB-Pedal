@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       Version_date: ${{ steps.output_version_date.outputs.Version_date }}
-      Upload_URL: ${{ steps.create-new-PreRelease.outputs.upload_url }}
+      Upload_URL: ${{ steps.create-new-Release.outputs.upload_url }}
     steps:
       # get date
       - name: Dynamically set MY_DATE environment variable
@@ -28,7 +28,7 @@ jobs:
         run: echo ${{ env.MY_DATE }}
       - name: output_version_date
         id: output_version_date
-        run: echo "Version_date=Release_Package_v${{ env.MY_DATE }}" >> "$GITHUB_OUTPUT"
+        run: echo "Version_date=Stable_Release_Package_${{ env.MY_DATE }}" >> "$GITHUB_OUTPUT"
 
 
 
@@ -100,6 +100,8 @@ jobs:
           pio run --environment esp32s3usbotg-gilphilbert_2_0_without_espnow
           pio run --environment esp32s3usbotg_pcbV5
           pio run --environment esp32s3usbotg_pcbV5_without_espnow
+          pio run --environment esp32s3usbotg_pcbV6
+          pio run --environment esp32s3usbotg_pcbV6_without_espnow
              
         
         
@@ -134,7 +136,13 @@ jobs:
           copy ${{ github.workspace }}/ESP32/.pio/build/esp32s3usbotg_pcbV5_without_espnow/firmware.bin  ${{ github.workspace }}/Helper/bins/esp32s3_V5_without_espnow
           copy ${{ github.workspace }}/ESP32/.pio/build/esp32s3usbotg-gilphilbert_2_0_without_espnow/firmware.bin  ${{ github.workspace }}/Helper/bins/esp32s3_esp32s3usbotg-gilphilbert_2_0_without_espnow
           copy ${{ github.workspace }}/ESP32/.pio/build/esp32s3usbotg-gilphilbert_2_0_without_espnow/bootloader.bin  ${{ github.workspace }}/Helper/bins/esp32s3_esp32s3usbotg-gilphilbert_2_0_without_espnow
-          copy ${{ github.workspace }}/ESP32/.pio/build/esp32s3usbotg-gilphilbert_2_0_without_espnow/partitions.bin  ${{ github.workspace }}/Helper/bins/esp32s3_esp32s3usbotg-gilphilbert_2_0_without_espnow   
+          copy ${{ github.workspace }}/ESP32/.pio/build/esp32s3usbotg-gilphilbert_2_0_without_espnow/partitions.bin  ${{ github.workspace }}/Helper/bins/esp32s3_esp32s3usbotg-gilphilbert_2_0_without_espnow
+          copy ${{ github.workspace }}/ESP32/.pio/build/esp32s3usbotg_pcbV6_without_espnow/bootloader.bin  ${{ github.workspace }}/Helper/bins/esp32s3_V6_without_espnow
+          copy ${{ github.workspace }}/ESP32/.pio/build/esp32s3usbotg_pcbV6_without_espnow/partitions.bin  ${{ github.workspace }}/Helper/bins/esp32s3_V6_without_espnow
+          copy ${{ github.workspace }}/ESP32/.pio/build/esp32s3usbotg_pcbV6_without_espnow/firmware.bin  ${{ github.workspace }}/Helper/bins/esp32s3_V6_without_espnow   
+          copy ${{ github.workspace }}/ESP32/.pio/build/esp32s3usbotg_pcbV6/firmware.bin  ${{ github.workspace }}/Helper/bins/esp32s3_V6
+          copy ${{ github.workspace }}/ESP32/.pio/build/esp32s3usbotg_pcbV6/bootloader.bin  ${{ github.workspace }}/Helper/bins/esp32s3_V6
+          copy ${{ github.workspace }}/ESP32/.pio/build/esp32s3usbotg_pcbV6/partitions.bin  ${{ github.workspace }}/Helper/bins/esp32s3_V6
     
     
     
@@ -160,6 +168,8 @@ jobs:
           7z a ${{ github.workspace }}/Helper/zip/esp32s3_V5_without_espnow.zip ${{ github.workspace }}/Helper/bins/esp32s3_V5_without_espnow/
           7z a ${{ github.workspace }}/Helper/zip/esp32s3-gilphilbertV2.zip ${{ github.workspace }}/Helper/bins/esp32s3_esp32s3usbotg-gilphilbert_2_0
           7z a ${{ github.workspace }}/Helper/zip/esp32s3-gilphilbertV2_without_espnow.zip ${{ github.workspace }}/Helper/bins/esp32s3_esp32s3usbotg-gilphilbert_2_0_without_espnow
+          7z a ${{ github.workspace }}/Helper/zip/esp32s3_V6.zip ${{ github.workspace }}/Helper/bins/esp32s3_V6/
+          7z a ${{ github.workspace }}/Helper/zip/esp32s3_V6_without_espnow.zip ${{ github.workspace }}/Helper/bins/esp32s3_V6_without_espnow/
     #      7z a ./Helper/zip/esp32.zip @./Helper/zip/filelist_esp32.txt
     #      7z a ./Helper/zip/esp32s3.zip @Helper/zip/filelist_esp32s3.txt
     #      7z a./Helper/zip/esp32_speedcrafter.zip @Helper/zip/filelist_esp32_speedcrafter.txt
@@ -305,6 +315,30 @@ jobs:
           asset_name: esp32s3-gilphilbertV2_without_espnow.zip
           asset_content_type: application/zip
 
+      - name: Upload ESP32S3 release assets without ESPnow
+        id: upload-release-asset-ESP32S3_V6_without_espnow
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          url: ${{needs.Build-date.outputs.Upload_URL}}
+        with:
+          upload_url: ${{ env.url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: ./Helper/zip/esp32s3_V6_without_espnow.zip
+          asset_name: esp32s3_V6_without_espnow.zip
+          asset_content_type: application/zip
+
+      - name: Upload ESP32S3 release assets 
+        id: upload-release-asset-ESP32S3_V6
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          url: ${{needs.Build-date.outputs.Upload_URL}}
+        with:
+          upload_url: ${{ env.url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: ./Helper/zip/esp32s3_V6.zip
+          asset_name: esp32s3_V6.zip
+          asset_content_type: application/zip
+
       - name: Upload ESP release assets esp32s3 bridge with joystick receiver
         id: upload-release-asset-ESP32S3-ESPmaster
         uses: actions/upload-release-asset@v1
@@ -357,7 +391,7 @@ jobs:
 #       Build SimHub plugin
 ########################################################################
   buildSimhubPlugin:
-      runs-on: windows-2019
+      runs-on: windows-2022
       needs: [BuildFirmware, Build-date]
       steps:
       - uses: actions/checkout@v2

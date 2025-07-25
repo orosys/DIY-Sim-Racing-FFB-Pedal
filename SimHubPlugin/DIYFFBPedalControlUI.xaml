@@ -114,7 +114,7 @@
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type Thumb}">
                             <Grid SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}">
-                                <Rectangle Fill="{TemplateBinding Background}" Margin="{TemplateBinding BorderThickness}" RadiusX="0" RadiusY="0"/>
+                                <Rectangle RadiusX="2" RadiusY="2" Fill="Transparent" Stroke="{DynamicResource AccentColorBrush}" StrokeThickness="2" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" />
                                 <Rectangle x:Name="DisabledVisualElement" Fill="{DynamicResource DisabledWhiteBrush}" IsHitTestVisible="false" Opacity="0"/>
 
                             </Grid>
@@ -161,7 +161,7 @@
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type RepeatButton}">
                             <Grid x:Name="Root" Margin="0 -1 0 0">
-                                <Rectangle Height="4" Margin="0 1 0 0" RadiusX="1" RadiusY="1">
+                                <Rectangle Height="2" Margin="0 1 0 0" RadiusX="1" RadiusY="1">
                                     <Rectangle.Fill>
                                         <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0" Opacity="0.9">
                                             <GradientStop Color="{TemplateBinding Background}" Offset="0.0"/>
@@ -315,7 +315,7 @@
                                     <Setter Property="Template">
                                         <Setter.Value>
                                             <ControlTemplate>
-                                                <Rectangle Fill="{DynamicResource AccentColorBrush}" Height="4" Margin="0 1 0 0" Opacity="0.8"/>
+                                                <Rectangle Fill="{DynamicResource AccentColorBrush}" Height="2" Margin="0 1 0 0" Opacity="0.8"/>
                                             </ControlTemplate>
                                         </Setter.Value>
                                     </Setter>
@@ -352,7 +352,7 @@
                                     <Setter Property="Template">
                                         <Setter.Value>
                                             <ControlTemplate>
-                                                <Rectangle Fill="{DynamicResource AccentColorBrush}" Margin="0 0 0 0" Width="3" Opacity="0.7"/>
+                                                <Rectangle Fill="{DynamicResource AccentColorBrush}" Margin="0 0 0 0" Width="2" Opacity="0.8"/>
                                             </ControlTemplate>
                                         </Setter.Value>
                                     </Setter>
@@ -622,21 +622,29 @@
                                                 </Setter>
                                             </Style>
                                         </TabControl.Resources>
-                                        <TabItem Width="270" Height="30" Padding="0,0,0,0" ToolTip="General setting for Pedal, will save to pedal">
+                                        <TabItem Width="180" Height="30" Padding="0,0,0,0" ToolTip="General setting for Pedal, will save to pedal">
                                             <TabItem.Header>
-                                                <Border  Width="270" Height="30" Margin="0,0,0,0" >
-                                                    <Label Content="FORCE-TRAVEL CURVE"  FontFamily="Arial Black" FontSize="10" Height="30" Padding="0,0,0,0" VerticalAlignment="Center" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" UseLayoutRounding="True" Width="270"  />
+                                                <Border  Width="180" Height="30" Margin="0,0,0,0" >
+                                                    <Label Content="FORCE-TRAVEL CURVE"  FontFamily="Arial Black" FontSize="10" Height="30" Padding="0,0,0,0" VerticalAlignment="Center" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" UseLayoutRounding="True" Width="180"  />
                                                 </Border>
                                             </TabItem.Header>
                                             <localFunction:CurveTab_PedalForceTravel_Modified x:Name="PedalForceTravel_Tab" ConfigChanged="Tab_ConfigChanged" SettingsChanged="Tab_SettingsChanged" CalculationChanged="Tab_CalculationChanged"/>
                                         </TabItem>
-                                        <TabItem x:Name="pedalKinematicTab" Width="270" Height="30" Padding="0,0,0,0" ToolTip="General setting for Pedal, will save to pedal">
+                                        <TabItem x:Name="pedalKinematicTab" Width="180" Height="30" Padding="0,0,0,0" ToolTip="General setting for Pedal, will save to pedal">
                                             <TabItem.Header>
-                                                <Border  Width="270" Height="30" Margin="0,0,0,0" >
+                                                <Border  Width="180" Height="30" Margin="0,0,0,0" >
                                                     <Label Content="PEDAL KINEMATIC"  FontFamily="Arial Black" FontSize="10" Height="30" Width="270" Padding="0,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" UseLayoutRounding="True"  />
                                                 </Border>
                                             </TabItem.Header>
                                             <localFunction:KinematicsTab_Pedal x:Name="PedalKinematics_Tab" ConfigChanged="Tab_ConfigChanged" SettingsChanged="Tab_SettingsChanged" CalculationChanged="Tab_CalculationChanged"/>
+                                        </TabItem>
+                                        <TabItem x:Name="pedalJoystickTab" Width="180" Height="30" Padding="0,0,0,0" ToolTip="General setting for Pedal, will save to pedal">
+                                            <TabItem.Header>
+                                                <Border  Width="180" Height="30" Margin="0,0,0,0" >
+                                                    <Label Content="JOYSTICK MAPPING"  FontFamily="Arial Black" FontSize="10" Height="30" Width="180" Padding="0,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" UseLayoutRounding="True"  />
+                                                </Border>
+                                            </TabItem.Header>
+                                            <localFunction:CurveTab_JoystickMapping x:Name="PedalJoystick_Tab" ConfigChanged="Tab_ConfigChanged" SettingsChanged="Tab_SettingsChanged" CalculationChanged="Tab_CalculationChanged"/>
                                         </TabItem>
 
                                     </TabControl>
@@ -873,8 +881,8 @@
                                             <TextBox x:Name="TextBox_rudder_debug" HorizontalAlignment="Left" Grid.Column="2" Grid.Row="0" Grid.RowSpan="3" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="160" Height="25" AutomationProperties.Name="TextBox2" BorderBrush="#00CCCCCC" Background="#00252525" FontSize="8" FontFamily="Arial" />
                                             <styles:SHButtonPrimary x:Name="btn_rudder_initialize" Click="btn_rudder_initialize_Click" Width="160" Height="25" Content="Rudder" Margin="0,2,0,0" HorizontalAlignment="Center" VerticalContentAlignment="Center" Padding="15,0,15,0" />
                                             <styles:SHButtonPrimary x:Name="btn_Rudder_load_config" Click="btn_Rudder_load_config_Click" Width="160" Content="Load Config from Local" Height="25" Margin="0,2,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="15,0,15,0" VerticalContentAlignment="Center" />
-                                            <styles:SHButtonPrimary Click="SaveButton_Click" Width="160" Content="Export Config to Local" Height="25" Margin="0,2,0,0" HorizontalAlignment="Left" Padding="15,0,15,0" VerticalContentAlignment="Center" />
-                                            <localFunction:SettingSection_Rudder x:Name="RudderSettingSection" HorizontalAlignment="Left" />
+                                            <styles:SHButtonPrimary x:Name="btn_rudder_export_config" Click="btn_rudder_export_config_Click" Width="160" Content="Export Config to Local" Height="25" Margin="0,2,0,0" HorizontalAlignment="Left" Padding="15,0,15,0" VerticalContentAlignment="Center" />
+                                            <localFunction:SettingSection_Rudder x:Name="RudderSettingSection" HorizontalAlignment="Left"/>
                                         </StackPanel>
                                     </Border>
                                 </StackPanel>

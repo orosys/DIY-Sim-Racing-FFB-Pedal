@@ -1096,12 +1096,16 @@ void StepperWithLimits::servoCommunicationTask(void *pvParameters)
 		}
 		else
 		{
-			if(stepper_cl->servoStatus!=SERVO_IDLE_NOT_CONNECTED)
+			if(stepper_cl->servoStatus!=SERVO_IDLE_NOT_CONNECTED && stepper_cl->servoStatus!=SERVO_FORCE_STOP)
 			{
 				stepper_cl->servoStatus=SERVO_NOT_CONNECTED;
 			}
 
-			Serial.println("Servo communication lost!");
+			if(stepper_cl->servoStatus==SERVO_NOT_CONNECTED)
+			{
+				Serial.println("Servo communication lost!");
+			}
+			
 			delay(100);
 			previousIsv57LifeSignal_b = false;
 			// De-activate brake resistor once servo communication is lost to prevent resistor damage
