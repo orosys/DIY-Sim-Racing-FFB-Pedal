@@ -5,7 +5,7 @@
 
 
 
-#define STEPPER_WITH_LIMITS_SENSORLESS_CURRENT_THRESHOLD_IN_PERCENT 30
+#define STEPPER_WITH_LIMITS_SENSORLESS_CURRENT_THRESHOLD_IN_PERCENT 20
 #define MIN_POS_MAX_ENDSTOP 10000 // servo has to drive minimum N steps before it allows the detection of the max endstop
 #define INCLUDE_vTaskDelete 1
 
@@ -277,7 +277,7 @@ void StepperWithLimits::findMinMaxSensorless(DAP_config_st dap_config_st)
 		setPosition = - 5 * ENDSTOP_MOVEMENT_SENSORLESS;
 		delay(20);
 		_stepper->forceStopAndNewPosition(setPosition);
-		delay(100);
+		delay(20);
 		
 		Serial.println("Min endstop reached.");
 		Serial.printf("Current pos: %d\n", _stepper->getCurrentPosition() );
