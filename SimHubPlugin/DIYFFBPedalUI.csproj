@@ -224,6 +224,9 @@
     <Compile Include="UIFunction\AssignmentConfigurationWindow.xaml.cs">
       <DependentUpon>AssignmentConfigurationWindow.xaml</DependentUpon>
     </Compile>
+        <Compile Include="UIFunction\CurveTab_RudderJoystickMapping.xaml.cs">
+      <DependentUpon>CurveTab_RudderJoystickMapping.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UIFunction\CurveTab_JoystickMapping.xaml.cs">
       <DependentUpon>CurveTab_JoystickMapping.xaml</DependentUpon>
     </Compile>
@@ -324,6 +327,9 @@
     <Compile Include="UIFunction\SystemSetting_License.xaml.cs">
       <DependentUpon>SystemSetting_License.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UIFunction\SystemSetting_Wireless.xaml.cs">
+      <DependentUpon>SystemSetting_Wireless.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UIFunction\SystemSetting_OTA.xaml.cs">
       <DependentUpon>SystemSetting_OTA.xaml</DependentUpon>
     </Compile>
@@ -404,6 +410,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UIFunction\AssignmentConfigurationWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+        <Page Include="UIFunction\CurveTab_RudderJoystickMapping.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -540,6 +550,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UIFunction\SystemSetting_License.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UIFunction\SystemSetting_Wireless.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

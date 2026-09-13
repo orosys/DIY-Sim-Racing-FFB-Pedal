@@ -2539,11 +2539,29 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
                     .maxGameOutput_u8);
           }
         }
-        joystickfrac = (float)joystickNormalizedToInt32_orig /
-                       (float)s_JOYSTICK_MAX_VALUE_U16;
-        joystickNormalizedToInt32_eval = forceCurve.EvalJoystickCubicSpline(
-            &dap_config_pedalUpdateTask_st, &dap_calculationVariables_st,
-            joystickfrac);
+        if (dap_calculationVariables_st.rudderStatus_b &&
+            !dap_calculationVariables_st.rudderBrakeStatus_b) {
+          // Symmetrical Yaw Mapping around 50% (neutral position anchored at 50%)
+          float yawFrac = constrain(pedalArcPercentage_fl32, 0.0f, 1.0f);
+          if (yawFrac >= 0.5f) {
+            joystickNormalizedToInt32_eval = forceCurve.EvalJoystickCubicSpline(
+                &dap_config_pedalUpdateTask_st, &dap_calculationVariables_st,
+                yawFrac);
+          } else {
+            // Mirror left deflection around 50% center
+            float mirroredFrac = 1.0f - yawFrac;
+            float evalRight = forceCurve.EvalJoystickCubicSpline(
+                &dap_config_pedalUpdateTask_st, &dap_calculationVariables_st,
+                mirroredFrac);
+            joystickNormalizedToInt32_eval = 50.0f - (evalRight - 50.0f);
+          }
+        } else {
+          joystickfrac = (float)joystickNormalizedToInt32_orig /
+                         (float)s_JOYSTICK_MAX_VALUE_U16;
+          joystickNormalizedToInt32_eval = forceCurve.EvalJoystickCubicSpline(
+              &dap_config_pedalUpdateTask_st, &dap_calculationVariables_st,
+              joystickfrac);
+        }
 
         joystickNormalizedToUInt16 =
             joystickNormalizedToInt32_eval / 100.0f * s_JOYSTICK_MAX_VALUE_U16;

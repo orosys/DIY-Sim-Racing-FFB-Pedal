@@ -104,12 +104,14 @@ namespace DiyFfbPedal
                 EffectsRPMRudder_Tab.Settings = Plugin.Settings;
                 CurveRudderForce_Tab.Settings = Plugin.Settings;
                 RudderJoystick_Tab.Settings = Plugin.Settings;
+                RudderJoystick_Tab.updateUI();
                 EffectRudderACC_Tab.Settings = Plugin.Settings;
                 RudderDynamics_Tab.Settings = Plugin.Settings;
                 CurveRudderForce_Tab.updateUI();
                 RudderDynamics_Tab.updateUI();
                 //SettingOTA_Tab.Settings = Plugin.Settings;
                 SystemLicense_Tab.Settings = Plugin.Settings;
+                if (SystemWireless_Tab != null) { SystemWireless_Tab.Plugin = Plugin; SystemWireless_Tab.ParentUI = this; SystemWireless_Tab.UpdateLiveTable(); }
                 SystemSetting_Section.Settings = Plugin.Settings;
                 SystemInfo.Settings = Plugin.Settings;
                 PedalInfo.Settings = Plugin.Settings;

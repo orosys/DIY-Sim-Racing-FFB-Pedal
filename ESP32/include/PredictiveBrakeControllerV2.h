@@ -94,8 +94,8 @@ private:
 
   // Telemetry delay compensation ring buffer
   static constexpr uint8_t TELEMETRY_HISTORY_SIZE = 128;
-  float busVoltageHistory_fl32[TELEMETRY_HISTORY_SIZE];
-  uint8_t historyWriteIdx_u8 = 0;
+  //float busVoltageHistory_fl32[TELEMETRY_HISTORY_SIZE];
+  //uint8_t historyWriteIdx_u8 = 0;
 
   /**
    * @brief Updates the 10W resistor thermal energy accumulator
@@ -147,12 +147,12 @@ public:
     voltageBusEstimated_V = DEFAULT_PSU_VOLTAGE_V;
     isBaselineInitialized_b = false;
     lastServoCycleCounter_u32 = 0xFFFFFFFF;
-    historyWriteIdx_u8 = 0;
+    //historyWriteIdx_u8 = 0;
     prevError_fl32 = 0.0f;
     prevTimeUs_u32 = 0;
-    for (uint8_t i = 0; i < TELEMETRY_HISTORY_SIZE; i++) {
-      busVoltageHistory_fl32[i] = DEFAULT_PSU_VOLTAGE_V;
-    }
+    //for (uint8_t i = 0; i < TELEMETRY_HISTORY_SIZE; i++) {
+    //  busVoltageHistory_fl32[i] = DEFAULT_PSU_VOLTAGE_V;
+    //}
   }
 
   void setVoltageThreshold(float threshold_V) {
@@ -275,8 +275,8 @@ public:
     }
 
     // Keep history ring buffer updated
-    busVoltageHistory_fl32[historyWriteIdx_u8] = voltageBusEstimated_V;
-    historyWriteIdx_u8 = (historyWriteIdx_u8 + 1) & (TELEMETRY_HISTORY_SIZE - 1);
+    //busVoltageHistory_fl32[historyWriteIdx_u8] = voltageBusEstimated_V;
+    //historyWriteIdx_u8 = (historyWriteIdx_u8 + 1) & (TELEMETRY_HISTORY_SIZE - 1);
 
     return isPulseActive_b;
   }
@@ -454,8 +454,8 @@ public:
     }
 
     // Store in ring buffer
-    busVoltageHistory_fl32[historyWriteIdx_u8] = voltageBusEstimated_V;
-    historyWriteIdx_u8 = (historyWriteIdx_u8 + 1) & (TELEMETRY_HISTORY_SIZE - 1);
+    //busVoltageHistory_fl32[historyWriteIdx_u8] = voltageBusEstimated_V;
+    //historyWriteIdx_u8 = (historyWriteIdx_u8 + 1) & (TELEMETRY_HISTORY_SIZE - 1);
 
     return isPulseActive_b;
   }

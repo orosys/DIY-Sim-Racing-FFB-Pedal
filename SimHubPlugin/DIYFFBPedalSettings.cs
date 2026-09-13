@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 using System.Windows.Media.Converters;
 
 namespace DiyFfbPedal
@@ -59,6 +59,8 @@ namespace DiyFfbPedal
         public bool Rudder_RPM_effect_b = false;
         public bool Rudder_ACC_effect_b = false;
         public byte ActiveWifiChannel = 11;
+        public string[] AssignedPedalMac = new string[3] { "", "", "" };
+        public int[] PedalDetectedChannel = new int[3] { 0, 0, 0 };
         public bool Rudder_ACC_WindForce = false;
         public bool advanced_b = false;
         public string SSID_string = "";
@@ -108,6 +110,15 @@ namespace DiyFfbPedal
         public byte[] rudderJoystickMapOrig = new byte[11] { 0, 20, 40, 60, 80, 100, 0, 0, 0, 0, 0 };
         public byte[] rudderJoystickMapMapped = new byte[11] { 0, 20, 40, 60, 80, 100, 0, 0, 0, 0, 0 };
         public byte rudderNumOfJoystickMapControl = 6;
+
+        // Rudder Dedicated Dual Mapping: Yaw (50% - 100% Symmetrical) & Toe Brake (0% - 100% Unipolar)
+        public byte[] rudderYawJoystickMapOrig = new byte[11] { 50, 60, 70, 80, 90, 100, 0, 0, 0, 0, 0 };
+        public byte[] rudderYawJoystickMapMapped = new byte[11] { 50, 60, 70, 80, 90, 100, 0, 0, 0, 0, 0 };
+        public byte rudderYawNumOfJoystickMapControl = 6;
+
+        public byte[] rudderToeJoystickMapOrig = new byte[11] { 0, 20, 40, 60, 80, 100, 0, 0, 0, 0, 0 };
+        public byte[] rudderToeJoystickMapMapped = new byte[11] { 0, 20, 40, 60, 80, 100, 0, 0, 0, 0, 0 };
+        public byte rudderToeNumOfJoystickMapControl = 6;
 
     }
         

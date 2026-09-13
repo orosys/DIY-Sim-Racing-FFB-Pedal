@@ -253,6 +253,12 @@ namespace DiyFfbPedal
                 if (combo_wifi_channel != null) combo_wifi_channel.SelectedValue = plugin.Settings.ActiveWifiChannel.ToString();
             }
 
+            if (SystemWireless_Tab != null)
+            {
+                SystemWireless_Tab.Plugin = plugin;
+                SystemWireless_Tab.ParentUI = this;
+            }
+
             // WICHTIG: Hier abonnieren wir die neuen Batch-Events für den Servo-Tab,
             // damit die UI-Events auch wirklich an die C#-Methoden weitergeleitet werden!
             if (Servo_Tab != null)
