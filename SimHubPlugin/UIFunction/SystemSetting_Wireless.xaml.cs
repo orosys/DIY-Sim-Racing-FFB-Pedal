@@ -118,19 +118,19 @@ namespace DiyFfbPedal.UIFunction
         {
             PedalRows.Clear();
 
-            // Clutch
+            // Clutch (Red: RGB convention)
             PedalRows.Add(new WirelessPedalRow
             {
                 RoleName = "CLUTCH",
                 RoleTag = 0,
                 IsAssigned = true,
                 CanClear = true,
-                RoleBadgeForeground = new SolidColorBrush(Color.FromRgb(41, 121, 255)),
-                RoleBadgeBackground = new SolidColorBrush(Color.FromArgb(34, 41, 121, 255)),
-                RoleBadgeBorder = new SolidColorBrush(Color.FromArgb(68, 41, 121, 255))
+                RoleBadgeForeground = new SolidColorBrush(Color.FromRgb(255, 82, 82)),
+                RoleBadgeBackground = new SolidColorBrush(Color.FromArgb(34, 255, 82, 82)),
+                RoleBadgeBorder = new SolidColorBrush(Color.FromArgb(68, 255, 82, 82))
             });
 
-            // Brake
+            // Brake (Green: RGB convention)
             PedalRows.Add(new WirelessPedalRow
             {
                 RoleName = "BRAKE",
@@ -142,16 +142,16 @@ namespace DiyFfbPedal.UIFunction
                 RoleBadgeBorder = new SolidColorBrush(Color.FromArgb(68, 0, 230, 118))
             });
 
-            // Throttle
+            // Throttle (Blue: RGB convention)
             PedalRows.Add(new WirelessPedalRow
             {
                 RoleName = "THROTTLE",
                 RoleTag = 2,
                 IsAssigned = true,
                 CanClear = true,
-                RoleBadgeForeground = new SolidColorBrush(Color.FromRgb(0, 176, 255)),
-                RoleBadgeBackground = new SolidColorBrush(Color.FromArgb(34, 0, 176, 255)),
-                RoleBadgeBorder = new SolidColorBrush(Color.FromArgb(68, 0, 176, 255))
+                RoleBadgeForeground = new SolidColorBrush(Color.FromRgb(41, 121, 255)),
+                RoleBadgeBackground = new SolidColorBrush(Color.FromArgb(34, 41, 121, 255)),
+                RoleBadgeBorder = new SolidColorBrush(Color.FromArgb(68, 41, 121, 255))
             });
         }
 
