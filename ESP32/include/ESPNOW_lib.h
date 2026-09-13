@@ -911,8 +911,8 @@ void espNowInitialize()
   esp_wifi_set_channel(g_currentWifiChannel_u8, WIFI_SECOND_CHAN_NONE);
   delay(3000);
   #ifdef ESPNow_S3
+    esp_wifi_config_espnow_rate(WIFI_IF_STA, WIFI_PHY_RATE_11M_L);
     #ifdef LOWER_WIFI_TRANSMISSION_POWER
-      esp_wifi_config_espnow_rate(WIFI_IF_STA, WIFI_PHY_RATE_11M_L);
       esp_wifi_set_max_tx_power(WIFI_POWER_8_5dBm);
     #endif
   #endif

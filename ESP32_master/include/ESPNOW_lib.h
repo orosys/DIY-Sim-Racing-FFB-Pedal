@@ -414,12 +414,11 @@ void espNowInitialize()
     ESPNow.init();
     delay(3000);
     #ifdef Using_Board_ESP32
-    esp_wifi_config_espnow_rate(WIFI_IF_STA, WIFI_PHY_RATE_MCS0_LGI);
+    esp_wifi_config_espnow_rate(WIFI_IF_STA, WIFI_PHY_RATE_11M_L);
     #endif
     
     #ifdef Using_Board_ESP32S3
-    //esp_wifi_config_espnow_rate(WIFI_IF_STA, WIFI_PHY_RATE_54M);
-    //esp_wifi_config_espnow_rate(WIFI_IF_STA, 	WIFI_PHY_RATE_11M_L);
+    esp_wifi_config_espnow_rate(WIFI_IF_STA, WIFI_PHY_RATE_11M_L);
       #ifdef LOW_TX_POWER
       esp_wifi_set_max_tx_power(WIFI_POWER_8_5dBm);
       ActiveSerial->println("[L]Setting Wifi strength to 8.5dbm ");
