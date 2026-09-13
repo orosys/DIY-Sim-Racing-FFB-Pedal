@@ -3787,8 +3787,8 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
       }
       // entend state send out interval
       if ((millis() - extend_state_update_last > extendStateUpdateInterval) &&
-          espnow_dap_config_st.payloadPedalConfig_st.debugFlags0_u8 ==
-              DEBUG_INFO_0_STATE_EXTENDED_INFO_STRUCT_U8) {
+          (espnow_dap_config_st.payloadPedalConfig_st.debugFlags0_u8 &
+              DEBUG_INFO_0_STATE_EXTENDED_INFO_STRUCT_U8)) {
         extend_state_send_b = true;
         extend_state_update_last = millis();
       }

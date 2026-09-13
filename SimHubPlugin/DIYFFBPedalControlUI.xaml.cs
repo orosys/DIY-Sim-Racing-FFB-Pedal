@@ -192,6 +192,10 @@ namespace DiyFfbPedal
         private void RootLayout_Loaded(object sender, RoutedEventArgs e)
         {
             UpdateRootScale();
+            if (LivePlotSection != null && Plugin != null)
+            {
+                LivePlotSection.SetReferences(Plugin, this);
+            }
         }
 
         private void RootLayout_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -241,6 +245,14 @@ namespace DiyFfbPedal
             
             indexOfSelectedPedal_u = plugin.Settings.table_selected;
             MyTab.SelectedIndex = (int)indexOfSelectedPedal_u;
+            if (LivePlotSection != null)
+            {
+                LivePlotSection.SetReferences(plugin, this);
+            }
+            if (LivePlotSection != null)
+            {
+                LivePlotSection.SetReferences(plugin, this);
+            }
             for (uint pedalIdx = 0; pedalIdx < 3; pedalIdx++)
             {
                 DAP_config_set_default(pedalIdx);

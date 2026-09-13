@@ -409,7 +409,15 @@ namespace DiyFfbPedal
                                     {
 
                                         bufferByteAssignedToStruct.AsSpan(srcBufferOffset_0, sizeof(DAP_state_extended_st)).Fill(true);
+                                        bufferByteAssignedToStruct_class.AsSpan(srcBufferOffset_0, sizeof(DAP_state_extended_st)).Fill(2);
                                         lastTrueElementIndex = Math.Max(lastTrueElementIndex, srcBufferOffset_0 + sizeof(DAP_state_extended_st));
+
+                                        if (pedalSelected >= 0 && pedalSelected < 3 && Plugin != null && Plugin._calculations != null)
+                                        {
+                                            Plugin._calculations.pedalState_extended[pedalSelected] = pedalState_ext_read_st;
+                                            Plugin._calculations.pedalState_extended_counter[pedalSelected]++;
+                                            Plugin._calculations.OnExtendedStateReceived?.Invoke(pedalSelected, pedalState_ext_read_st);
+                                        }
 
                                         if (indexOfSelectedPedal_u == pedalSelected)
                                         {

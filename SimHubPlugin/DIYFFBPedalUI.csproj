@@ -315,6 +315,9 @@
     <Compile Include="UIFunction\SerialMonitor.xaml.cs">
       <DependentUpon>SerialMonitor.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UIFunction\LivePlot_ExtendedState.xaml.cs">
+      <DependentUpon>LivePlot_ExtendedState.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UIFunction\SettingSection_Pedal.xaml.cs">
       <DependentUpon>SettingSection_Pedal.xaml</DependentUpon>
     </Compile>
@@ -534,6 +537,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UIFunction\SerialMonitor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UIFunction\LivePlot_ExtendedState.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
