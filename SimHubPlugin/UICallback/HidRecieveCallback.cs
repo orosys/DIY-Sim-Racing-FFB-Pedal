@@ -226,10 +226,21 @@ namespace DiyFfbPedal
 
                                                 if (RudderJoystick_Tab != null)
                                                 {
-                                                    double rudderRatio = Math.Max(0.0, Math.Min(1.0, 0.5 + 0.5 * (rightRel - leftRel)));
-                                                    double toeRatio = Math.Max(0.0, Math.Min(1.0, (leftRel + rightRel) * 0.5));
-                                                    RudderJoystick_Tab.UpdateYawState(rudderRatio);
-                                                    RudderJoystick_Tab.UpdateToeBrakeState(toeRatio);
+                                                    bool isToeBrakeMode = (Plugin.Settings.rudderMode == 3 || (Plugin.Settings.rudderMode == 2 && (Plugin.Rudder_brake_status || (leftRel > 0.52 && rightRel > 0.52))));
+                                                    if (isToeBrakeMode)
+                                                    {
+                                                        double toeRatio = (Plugin.Settings.rudderMode == 3)
+                                                            ? Math.Max(0.0, Math.Min(1.0, Math.Max(leftRel, rightRel)))
+                                                            : Math.Max(0.0, Math.Min(1.0, (Math.Max(leftRel, rightRel) - 0.5) * 2.0));
+                                                        RudderJoystick_Tab.UpdateYawState(0.5);
+                                                        RudderJoystick_Tab.UpdateToeBrakeState(toeRatio);
+                                                    }
+                                                    else
+                                                    {
+                                                        double rudderRatio = Math.Max(0.0, Math.Min(1.0, 0.5 + 0.5 * (rightRel - leftRel)));
+                                                        RudderJoystick_Tab.UpdateYawState(rudderRatio);
+                                                        RudderJoystick_Tab.UpdateToeBrakeState(0.0);
+                                                    }
                                                 }
                                             }
                                             else
