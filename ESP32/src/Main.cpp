@@ -163,11 +163,11 @@ MovingAverageFilter g_averageFilterJoystick_st(40);
 /*                         Predictive Brake Controller */
 /*                                                                                            */
 /**********************************************************************************************/
-// #include "PredictiveBrakeController.h"
-// PredictiveBrakeController brakeController;
+#include "PredictiveBrakeController.h"
+PredictiveBrakeController brakeController;
 
-#include "PredictiveBrakeControllerV2.h"
-PredictiveBrakeControllerV2 brakeController;
+// #include "PredictiveBrakeControllerV2.h"
+// PredictiveBrakeControllerV2 brakeController;
 
 /**********************************************************************************************/
 /*                                                                                            */
@@ -943,8 +943,8 @@ void setup() {
       CORE_ID_CONFIG_HANDLING_TASK_U8);             /* pin task to core 1 */
 
 // setup brake resistor pin
-#ifdef BRAKE_RESISTOR_PIN_U8
-  pinMode(BRAKE_RESISTOR_PIN_U8, OUTPUT);   // Set GPIO13 as an output
+#if defined(BRAKE_RESISTOR_PIN_U8) && (BRAKE_RESISTOR_PIN_U8 >= 0)
+  pinMode(BRAKE_RESISTOR_PIN_U8, OUTPUT);   // Set GPIO as an output
   digitalWrite(BRAKE_RESISTOR_PIN_U8, LOW); // Turn the LED on
 #endif
 
@@ -2224,19 +2224,24 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
             cached_servosPosError_i32,
             stepper->getServosPosErrorChangeRateInStepsPerSecond(),
             changeVelocity, cached_currentSpeedInHz_i32,
-            ((float)cached_servosVoltage_i16) * 0.1f, current_time_us);
+            ((float)cached_servosVoltage_i16) * 0.1f, current_time_us,
+            cached_servoCycleCounter_u32);
       } else {
         brake_state = brakeController.simpleVoltageCheck(
             ((float)cached_servosVoltage_i16) * 0.1f, current_time_us,
-            cached_currentSpeedInHz_i32);
+            cached_currentSpeedInHz_i32, cached_servoCycleCounter_u32);
       }
 #else
       brake_state = brakeController.simpleVoltageCheck(
           ((float)cached_servosVoltage_i16) * 0.1f, current_time_us,
           cached_currentSpeedInHz_i32);
+
+      // brake_state = brakeController.simpleVoltageCheck(
+      //     ((float)cached_servosVoltage_i16) * 0.1f, current_time_us,
+      //     cached_currentSpeedInHz_i32, cached_servoCycleCounter_u32);
 #endif
 
-#ifdef BRAKE_RESISTOR_PIN_U8
+#if defined(BRAKE_RESISTOR_PIN_U8) && (BRAKE_RESISTOR_PIN_U8 >= 0)
       if (brake_state) {
         digitalWrite(BRAKE_RESISTOR_PIN_U8, HIGH);
       } else {

@@ -33,10 +33,10 @@ class PredictiveBrakeControllerV2 {
 public:
   // --- Hardware Configuration Constants ---
   static constexpr float DEFAULT_PSU_VOLTAGE_V = 36.0f;
-  // Trigger threshold: 2.0V above PSU voltage (e.g. 38.0V)
-  static constexpr float VOLTAGE_TRIGGER_OFFSET_V = 2.0f;
-  // Hard clamp threshold: if telemetry sees this, fire immediately
-  static constexpr float VOLTAGE_HARD_CLAMP_OFFSET_V = 2.5f; // e.g. 38.5V
+  // Trigger threshold: 3.5V above PSU voltage (e.g. 39.5V)
+  static constexpr float VOLTAGE_TRIGGER_OFFSET_V = 3.5f;
+  // Hard clamp threshold: if telemetry sees this, fire immediately (40.0V matches V1 proven threshold)
+  static constexpr float VOLTAGE_HARD_CLAMP_OFFSET_V = 4.0f; // e.g. 40.0V
   // Servo hardware overvoltage fault boundary
   static constexpr float SERVO_OVERVOLTAGE_TRIP_V = 45.0f;
 
@@ -73,6 +73,9 @@ private:
   float voltageBusEstimated_V = DEFAULT_PSU_VOLTAGE_V;
   bool isBaselineInitialized_b = false;
 
+  // Servo telemetry packet freshness tracking
+  uint32_t lastServoCycleCounter_u32 = 0xFFFFFFFF;
+
   // Tracking Error history
   float prevError_fl32 = 0.0f;
   uint32_t prevTimeUs_u32 = 0;
@@ -97,7 +100,7 @@ private:
   /**
    * @brief Updates the 10W resistor thermal energy accumulator
    */
-  void updateThermalModel(bool isMosfetActive, float dt_s) {
+  void updateThermalModel(bool isMosfetActive, float dt_s, uint32_t currentTimeUs_u32) {
     if (isMosfetActive) {
       float powerIn_W = (voltageBusEstimated_V * voltageBusEstimated_V) / RESISTOR_OHMS;
       accumulatedEnergyJoules_fl32 += (powerIn_W - RESISTOR_COOLING_POWER_W) * dt_s;
@@ -112,14 +115,13 @@ private:
     // Check for thermal trip
     if (accumulatedEnergyJoules_fl32 >= RESISTOR_MAX_ENERGY_JOULES && !isInThermalLockout_b) {
       isInThermalLockout_b = true;
-      lockoutStartTimeUs_u32 = micros();
+      lockoutStartTimeUs_u32 = currentTimeUs_u32;
       isPulseActive_b = false;
     }
 
-    // Check for recovery from thermal lockout
+    // Check for recovery from thermal lockout (uses passed-in timestamp, no micros() flash call)
     if (isInThermalLockout_b) {
-      uint32_t now = micros();
-      bool timeCooled = (now - lockoutStartTimeUs_u32) > THERMAL_COOLDOWN_TIME_US;
+      bool timeCooled = (currentTimeUs_u32 - lockoutStartTimeUs_u32) > THERMAL_COOLDOWN_TIME_US;
       bool energyCooled = (accumulatedEnergyJoules_fl32 <= RESISTOR_RECOVERY_ENERGY_JOULES);
       if (timeCooled && energyCooled) {
         isInThermalLockout_b = false;
@@ -143,8 +145,11 @@ public:
     lockoutStartTimeUs_u32 = 0;
     voltagePsu_V = DEFAULT_PSU_VOLTAGE_V;
     voltageBusEstimated_V = DEFAULT_PSU_VOLTAGE_V;
+    isBaselineInitialized_b = false;
+    lastServoCycleCounter_u32 = 0xFFFFFFFF;
     historyWriteIdx_u8 = 0;
     prevError_fl32 = 0.0f;
+    prevTimeUs_u32 = 0;
     for (uint8_t i = 0; i < TELEMETRY_HISTORY_SIZE; i++) {
       busVoltageHistory_fl32[i] = DEFAULT_PSU_VOLTAGE_V;
     }
@@ -159,11 +164,19 @@ public:
   }
 
   /**
-   * @brief Low-frequency telemetry synchronization (called from Modbus)
+   * @brief Low-frequency telemetry synchronization (called from Modbus or Update)
    */
-  void updateTelemetryVoltage(float telemetryVoltage_fl32, int32_t currentSpeedHz_i32) {
+  void updateTelemetryVoltage(float telemetryVoltage_fl32, int32_t currentSpeedHz_i32, uint32_t servoCycleCounter_u32 = 0) {
     if (telemetryVoltage_fl32 < 16.0f || telemetryVoltage_fl32 > 65.0f) {
       return;
+    }
+
+    // Freshness check: only execute when a fresh Modbus telemetry packet has arrived
+    if (servoCycleCounter_u32 != 0) {
+      if (servoCycleCounter_u32 == lastServoCycleCounter_u32) {
+        return;
+      }
+      lastServoCycleCounter_u32 = servoCycleCounter_u32;
     }
 
     // When pedal is at rest, smoothly track the nominal resting PSU voltage
@@ -181,28 +194,22 @@ public:
       }
     }
 
-    // Smith Observer delay compensation
-    uint8_t delayedIdx = (historyWriteIdx_u8 - 80) & (TELEMETRY_HISTORY_SIZE - 1);
-    float historicalEstimatedVoltage = busVoltageHistory_fl32[delayedIdx];
-    float observationError = telemetryVoltage_fl32 - historicalEstimatedVoltage;
+    // Synchronize model with fresh telemetry
+    voltageBusEstimated_V = telemetryVoltage_fl32;
 
-    voltageBusEstimated_V += 0.05f * observationError;
-    if (voltageBusEstimated_V < voltagePsu_V) {
-      voltageBusEstimated_V = voltagePsu_V;
-    }
-
-    // Reality check: If telemetry reports higher voltage, pull model up
-    if (telemetryVoltage_fl32 > voltageBusEstimated_V) {
-      voltageBusEstimated_V = telemetryVoltage_fl32;
+    // Hard upper sanity cap to prevent any numerical explosion
+    if (voltageBusEstimated_V > 70.0f) {
+      voltageBusEstimated_V = 70.0f;
     }
   }
 
   /**
-   * @brief Fallback voltage check (reactive mode)
+   * @brief Fallback voltage check (reactive mode with Schmitt trigger hysteresis)
    */
   bool simpleVoltageCheck(float servoVoltage_fl32,
                           uint32_t currentTimeUs_u32 = 0,
-                          int32_t currentSpeedInHz_i32 = 0) {
+                          int32_t currentSpeedInHz_i32 = 0,
+                          uint32_t servoCycleCounter_u32 = 0) {
     if (currentTimeUs_u32 == 0) {
       currentTimeUs_u32 = micros();
     }
@@ -216,48 +223,66 @@ public:
     }
     prevTimeUs_u32 = currentTimeUs_u32;
 
-    updateTelemetryVoltage(servoVoltage_fl32, currentSpeedInHz_i32);
-    updateThermalModel(isPulseActive_b, dt_s);
+    // Freshness check: only update resting PSU baseline when fresh telemetry arrives
+    bool isNewTelemetrySample_b = false;
+    if (servoCycleCounter_u32 != 0 && servoCycleCounter_u32 != lastServoCycleCounter_u32) {
+      lastServoCycleCounter_u32 = servoCycleCounter_u32;
+      isNewTelemetrySample_b = true;
+    }
+
+    if (isNewTelemetrySample_b && abs(currentSpeedInHz_i32) < 500 && servoVoltage_fl32 >= 16.0f && servoVoltage_fl32 <= 65.0f && !isPulseActive_b) {
+      if (!isBaselineInitialized_b) {
+        voltagePsu_V = servoVoltage_fl32;
+        voltageBusEstimated_V = servoVoltage_fl32;
+        isBaselineInitialized_b = true;
+      } else if (servoVoltage_fl32 < voltagePsu_V) {
+        voltagePsu_V = 0.95f * voltagePsu_V + 0.05f * servoVoltage_fl32;
+      } else {
+        voltagePsu_V = 0.999f * voltagePsu_V + 0.001f * servoVoltage_fl32;
+      }
+    }
+
+    voltageBusEstimated_V = servoVoltage_fl32;
+    updateThermalModel(isPulseActive_b, dt_s, currentTimeUs_u32);
 
     if (isInThermalLockout_b) {
       isPulseActive_b = false;
       return false;
     }
 
-    float triggerLimit_V = voltagePsu_V + VOLTAGE_HARD_CLAMP_OFFSET_V; // 38.5V
-    float cutoffLimit_V = voltagePsu_V + 1.2f;
+    float triggerLimit_V = voltagePsu_V + VOLTAGE_HARD_CLAMP_OFFSET_V; // 40.0V
+    float cutoffLimit_V = voltagePsu_V + 1.5f;
 
+    // Schmitt trigger hysteresis with switching protections
     if (servoVoltage_fl32 >= triggerLimit_V && !isPulseActive_b) {
       if ((currentTimeUs_u32 - lastPulseEndTimeUs_u32) >= MIN_OFF_BLANKING_US) {
         isPulseActive_b = true;
         pulseStartTimeUs_u32 = currentTimeUs_u32;
-        plannedPulseDurationUs_u32 = 2000; // 2.0 ms pulse
       }
-    }
-
-    if (isPulseActive_b) {
-      uint32_t onDurationUs = currentTimeUs_u32 - pulseStartTimeUs_u32;
-      if (onDurationUs >= plannedPulseDurationUs_u32 || 
-          (servoVoltage_fl32 <= cutoffLimit_V && onDurationUs >= MIN_ON_PULSE_US)) {
+    } else if (servoVoltage_fl32 <= cutoffLimit_V && isPulseActive_b) {
+      if ((currentTimeUs_u32 - pulseStartTimeUs_u32) >= MIN_ON_PULSE_US) {
         isPulseActive_b = false;
         lastPulseEndTimeUs_u32 = currentTimeUs_u32;
       }
     }
+
+    // Hardware safety: max continuous on-time enforcement (80 ms)
+    if (isPulseActive_b && ((currentTimeUs_u32 - pulseStartTimeUs_u32) > 80000)) {
+      isPulseActive_b = false;
+      lastPulseEndTimeUs_u32 = currentTimeUs_u32;
+      isInThermalLockout_b = true;
+      lockoutStartTimeUs_u32 = currentTimeUs_u32;
+    }
+
+    // Keep history ring buffer updated
+    busVoltageHistory_fl32[historyWriteIdx_u8] = voltageBusEstimated_V;
+    historyWriteIdx_u8 = (historyWriteIdx_u8 + 1) & (TELEMETRY_HISTORY_SIZE - 1);
 
     return isPulseActive_b;
   }
 
   /**
    * @brief Fast 4000 Hz Predictive & Reactive Hybrid Controller (Called from Main.cpp)
-   * 
-   * @param servoPositionError_i32 Current servo tracking error in steps
-   * @param servoPositionErrorChangeRateInStepsPerSecond_fl32 Rate of error change (dError/dt)
-   * @param forceVelEst_fl32 Force velocity (dF/dt) from load cell Kalman filter
-   * @param currentSpeedInHz_i32 Motor step frequency from FastAccelStepper
-   * @param servoVoltage_fl32 Bus voltage from cyclic telemetry
-   * @param currentTimeUs_u32 Current timestamp in microseconds
-   * @param pedalForceKg_fl32 Applied pedal force in kg (optional)
-   * @return true if braking resistor MOSFET must be ON, false if OFF
    */
   bool Update(int32_t servoPositionError_i32,
               float servoPositionErrorChangeRateInStepsPerSecond_fl32,
@@ -265,6 +290,7 @@ public:
               int32_t currentSpeedInHz_i32,
               float servoVoltage_fl32, 
               uint32_t currentTimeUs_u32,
+              uint32_t servoCycleCounter_u32 = 0,
               float pedalForceKg_fl32 = 0.0f) {
     if (!isInitialized_b) {
       prevError_fl32 = (float)servoPositionError_i32;
@@ -283,8 +309,8 @@ public:
     float dt_s = (float)dt_us * 1e-6f;
     prevTimeUs_u32 = currentTimeUs_u32;
 
-    // 1. Sync Modbus telemetry
-    updateTelemetryVoltage(servoVoltage_fl32, currentSpeedInHz_i32);
+    // 1. Sync Modbus telemetry (gated by cycle counter)
+    updateTelemetryVoltage(servoVoltage_fl32, currentSpeedInHz_i32, servoCycleCounter_u32);
 
     // 2. Tracking Error Dynamics & Time-To-Zero (TTZ) Analysis
     float currentError_fl32 = (float)servoPositionError_i32;
@@ -326,7 +352,8 @@ public:
     }
 
     // 4. Bus Voltage State Prediction
-    float dU_pred_free_V = ((P_catchup_regen_W - QUIESCENT_POWER_W) / (BUS_CAPACITANCE_F * voltageBusEstimated_V)) * dt_s;
+    float safeBusV = fmaxf(voltageBusEstimated_V, 16.0f);
+    float dU_pred_free_V = ((P_catchup_regen_W - QUIESCENT_POWER_W) / (BUS_CAPACITANCE_F * safeBusV)) * dt_s;
     float U_pred_free_V = voltageBusEstimated_V + dU_pred_free_V;
     if (U_pred_free_V < voltagePsu_V) {
       U_pred_free_V = voltagePsu_V;
@@ -337,7 +364,7 @@ public:
     float U_hard_clamp_V = voltagePsu_V + VOLTAGE_HARD_CLAMP_OFFSET_V; // 38.5V
 
     // 5. Thermal Accumulator Update
-    updateThermalModel(isPulseActive_b, dt_s);
+    updateThermalModel(isPulseActive_b, dt_s, currentTimeUs_u32);
 
     // 6. Dual-Trigger Firing Logic
     if (isInThermalLockout_b) {
@@ -420,7 +447,7 @@ public:
                                 ? ((voltageBusEstimated_V * voltageBusEstimated_V) / RESISTOR_OHMS) 
                                 : 0.0f;
     float dU_actual_V = ((P_catchup_regen_W - P_resistor_actual_W - QUIESCENT_POWER_W) / 
-                        (BUS_CAPACITANCE_F * voltageBusEstimated_V)) * dt_s;
+                        (BUS_CAPACITANCE_F * safeBusV)) * dt_s;
     voltageBusEstimated_V += dU_actual_V;
     if (voltageBusEstimated_V < voltagePsu_V) {
       voltageBusEstimated_V = voltagePsu_V;
