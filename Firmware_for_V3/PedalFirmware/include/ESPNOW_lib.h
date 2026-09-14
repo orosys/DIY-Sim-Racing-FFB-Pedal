@@ -553,7 +553,13 @@ void ESPNow_initialize()
   DAP_config_st dap_config_espnow_init_st = global_dap_config_class.getConfig();
   
   WiFi.mode(WIFI_MODE_STA);
+  #ifdef BLUETOOTH_GAMEPAD
+  // ESP32 Wi-Fi/BLE coexistence requires modem sleep; disabling it makes
+  // esp_bt_controller_enable() abort in coex_core_enable().
+  WiFi.setSleep(WIFI_PS_MIN_MODEM);
+  #else
   WiFi.setSleep(false);
+  #endif
   Serial.println("Initializing ESPNow, please wait");
   // Serial.print("Current MAC Address:  ");
   // Serial.println(WiFi.macAddress());
