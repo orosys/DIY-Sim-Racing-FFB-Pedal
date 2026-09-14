@@ -3156,11 +3156,13 @@ void IRAM_ATTR_FLAG serialCommunicationTaskRx(void *pvParameters) {
               }
             }
 
+#ifdef ESPNOW_Enable
             if (received_action.payloadPedalAction_st.systemAction_u8 ==
                 (uint8_t)PedalSystemAction::CLEAR_ASSIGNMENT) {
               ActiveSerial->println("Clear assignment received via USB");
               g_assignmentClear_b = true;
             }
+#endif
 
             // Send action to pedalUpdateTask via Queue
             xQueueSend(s_actionCommandQueue, &received_action, (TickType_t)0);
