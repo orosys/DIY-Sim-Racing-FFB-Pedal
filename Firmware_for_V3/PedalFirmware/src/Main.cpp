@@ -1649,8 +1649,8 @@ void IRAM_ATTR pedalUpdateTask( void * pvParameters )
     //fill the header
     dap_state_basic_st_lcl_pedalUpdateTask.payLoadHeader_.payloadType = DAP_PAYLOAD_TYPE_STATE_BASIC;
     dap_state_basic_st_lcl_pedalUpdateTask.payLoadHeader_.version = DAP_VERSION_CONFIG;
+    dap_state_basic_st_lcl_pedalUpdateTask.payLoadHeader_.PedalTag = dap_config_pedalUpdateTask_st.payLoadPedalConfig_.pedal_type;
     dap_state_basic_st_lcl_pedalUpdateTask.payloadFooter_.checkSum = checksumCalculator((uint8_t*)(&(dap_state_basic_st_lcl_pedalUpdateTask.payLoadHeader_)), sizeof(dap_state_basic_st_lcl_pedalUpdateTask.payLoadHeader_) + sizeof(dap_state_basic_st_lcl_pedalUpdateTask.payloadPedalState_Basic_));
-    dap_state_basic_st_lcl_pedalUpdateTask.payLoadHeader_.PedalTag = dap_config_pedalUpdateTask_st.payLoadPedalConfig_.pedal_type;        
     
     
 
@@ -2649,6 +2649,13 @@ void ESPNOW_SyncTask( void * pvParameters )
       }
       if(ESPNow_config_request)
       {
+        // EEPROM/runtime updates can leave an old header or checksum in the config.
+        espnow_dap_config_st.payLoadHeader_.payloadType = DAP_PAYLOAD_TYPE_CONFIG;
+        espnow_dap_config_st.payLoadHeader_.version = DAP_VERSION_CONFIG;
+        espnow_dap_config_st.payLoadHeader_.PedalTag = espnow_dap_config_st.payLoadPedalConfig_.pedal_type;
+        espnow_dap_config_st.payloadFooter_.checkSum = checksumCalculator(
+          (uint8_t*)&espnow_dap_config_st.payLoadHeader_,
+          sizeof(espnow_dap_config_st.payLoadHeader_) + sizeof(espnow_dap_config_st.payLoadPedalConfig_));
         ESPNow.send_message(broadcast_mac,(uint8_t *) & espnow_dap_config_st, sizeof(espnow_dap_config_st));
         ESPNow_config_request=false;
       }
@@ -2824,5 +2831,4 @@ void ESPNOW_SyncTask( void * pvParameters )
 
 }
 #endif
-
 

@@ -1,0 +1,135 @@
+diff --git a/Firmware_for_V3/SimHubPlugin/DIYFFBPedal.cs b/Firmware_for_V3/SimHubPlugin/DIYFFBPedal.cs
+index ae24822a725dbd08aaf4f631152eb32804dbbb84..f191cb53330ccdd354d113490bdaeb6e4e0d4790 100644
+--- a/Firmware_for_V3/SimHubPlugin/DIYFFBPedal.cs
++++ b/Firmware_for_V3/SimHubPlugin/DIYFFBPedal.cs
+@@ -1409,6 +1409,7 @@ namespace User.PluginSdkDemo
+                 
+                 
+ 
++                wpfHandle.closeSharedConnections();
+                 for (uint pedalIdx = 0; pedalIdx < 3; pedalIdx++)
+                 {
+                     wpfHandle.closeSerialAndStopReadCallback(pedalIdx);
+@@ -1870,4 +1871,4 @@ namespace User.PluginSdkDemo
+ 
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/Firmware_for_V3/SimHubPlugin/UICallback/AutoConnectTimer.cs b/Firmware_for_V3/SimHubPlugin/UICallback/AutoConnectTimer.cs
+index b2bf8105f54ae6c2cd54f0f988a8cc43901600aa..1d15238ecb9a610434df48aa3a94eb41a2a6ef07 100644
+--- a/Firmware_for_V3/SimHubPlugin/UICallback/AutoConnectTimer.cs
++++ b/Firmware_for_V3/SimHubPlugin/UICallback/AutoConnectTimer.cs
+@@ -38,13 +38,17 @@ namespace User.PluginSdkDemo
+             Plugin._calculations.BridgeConnetingString = tmp;
+             for (uint pedal_idex = 0; pedal_idex < 3; pedal_idex++)
+             {
+-                if (Pedal_wireless_connection_update_b[pedal_idex])
++                // Retry a lost startup config reply on the next 5-second tick.
++                // A USB reconnect must not be required to request it again.
++                bool needsConfig = Pedal_wireless_connection_update_b[pedal_idex]
++                    || !Plugin.PedalConfigRead_b[pedal_idex];
++                Pedal_wireless_connection_update_b[pedal_idex] = false;
++                if (needsConfig && Plugin.Settings.reading_config == 1
++                    && Plugin.Settings.Pedal_ESPNow_Sync_flag[pedal_idex]
++                    && Plugin.ESPsync_serialPort.IsOpen
++                    && Plugin._calculations.PedalAvailability[pedal_idex])
+                 {
+-                    Pedal_wireless_connection_update_b[pedal_idex] = false;
+-                    if (Plugin.Settings.reading_config == 1)
+-                    {
+-                        Reading_config_auto(pedal_idex);
+-                    }
++                    Reading_config_auto(pedal_idex);
+                 }
+             }
+ 
+@@ -139,6 +143,12 @@ namespace User.PluginSdkDemo
+ 
+                 for (uint pedalIdx = 0; pedalIdx < 3; pedalIdx++)
+                 {
++                    // Opening a USB-UART port can reset an ESP32 and trigger homing.
++                    // Wireless pedals use the bridge even when their USB cable is plugged in.
++                    if (Plugin.Settings.Pedal_ESPNow_Sync_flag[pedalIdx])
++                    {
++                        continue;
++                    }
+                     if (Plugin.Settings.auto_connect_flag[pedalIdx] == 1)
+                     {
+ 
+diff --git a/Firmware_for_V3/SimHubPlugin/UICallback/others.cs b/Firmware_for_V3/SimHubPlugin/UICallback/others.cs
+index 0980cb8eeabfe50d63a7c61bc443206336b67a89..779d7333ef5d5977f4be6ad30baef44e822966fd 100644
+--- a/Firmware_for_V3/SimHubPlugin/UICallback/others.cs
++++ b/Firmware_for_V3/SimHubPlugin/UICallback/others.cs
+@@ -631,7 +631,7 @@ namespace User.PluginSdkDemo
+         unsafe public void Reading_config_auto(uint i)
+         {
+             // compute checksum
+-            DAP_action_st tmp;
++            DAP_action_st tmp = new DAP_action_st();
+             tmp.payloadPedalAction_.returnPedalConfig_u8 = 1;
+             tmp.payloadHeader_.version = (byte)Constants.pedalConfigPayload_version;
+             tmp.payloadHeader_.payloadType = (byte)Constants.pedalActionPayload_type;
+@@ -777,6 +777,9 @@ namespace User.PluginSdkDemo
+                 {
+                     try
+                     {
++                        // Set control lines before opening, including after an S3 setting change.
++                        Plugin._serialPort[pedalIdx].RtsEnable = false;
++                        Plugin._serialPort[pedalIdx].DtrEnable = Plugin.Settings.USING_ESP32S3[pedalIdx];
+                         Plugin._serialPort[pedalIdx].Open();
+ 
+                         // ESP32 S3
+@@ -789,12 +792,6 @@ namespace User.PluginSdkDemo
+                         */
+                         //
+ 
+-                        if (Plugin.Settings.USING_ESP32S3[pedalIdx] == true)
+-                        {
+-                            // ESP32 S3
+-                            Plugin._serialPort[pedalIdx].RtsEnable = false;
+-                            Plugin._serialPort[pedalIdx].DtrEnable = true;
+-                        }
+ 
+ 
+ 
+@@ -850,13 +847,7 @@ namespace User.PluginSdkDemo
+             {
+                 pedal_serial_read_timer[pedalIdx].Stop();
+                 pedal_serial_read_timer[pedalIdx].Dispose();
+-            }
+-            connect_timer.Dispose();
+-            connect_timer.Stop();
+-            if (ESP_host_serial_timer != null)
+-            {
+-                ESP_host_serial_timer.Stop();
+-                ESP_host_serial_timer.Dispose();
++                pedal_serial_read_timer[pedalIdx] = null;
+             }
+             System.Threading.Thread.Sleep(300);
+ 
+@@ -878,6 +869,23 @@ namespace User.PluginSdkDemo
+                 Plugin._serialPort[pedalIdx].Close();
+                 Plugin.Settings.connect_status[pedalIdx] = 0;
+             }
++        }
++
++        // Shared wireless resources are closed only when the plugin shuts down.
++        public void closeSharedConnections()
++        {
++            if (connect_timer != null)
++            {
++                connect_timer.Stop();
++                connect_timer.Dispose();
++                connect_timer = null;
++            }
++            if (ESP_host_serial_timer != null)
++            {
++                ESP_host_serial_timer.Stop();
++                ESP_host_serial_timer.Dispose();
++                ESP_host_serial_timer = null;
++            }
+             if (Plugin.ESPsync_serialPort.IsOpen)
+             {
+                 Plugin.ESPsync_serialPort.DiscardInBuffer();
