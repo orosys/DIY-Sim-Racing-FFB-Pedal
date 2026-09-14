@@ -23,9 +23,9 @@ namespace DiyFfbPedal.UIFunction
             public string Format { get; set; } = "F2";
         }
 
-        private class TelemetryPoint
+        private struct TelemetryPoint
         {
-            public DateTime Timestamp;
+            public double TimeSec;
             public payloadPedalState_Extended State;
         }
 
@@ -61,17 +61,25 @@ namespace DiyFfbPedal.UIFunction
             new SignalDef { Id = "adm_acc", Name = "Virtual Accel", Subsystem = "Admittance Model", Unit = "m/s\u00B2", DefaultColor = Color.FromRgb(0x7C, 0x4D, 0xFF), Getter = s => s.admittance_virtualAcceleration_mps2, Format = "F2" }
         };
 
-        // Active signals list
+        // Active signals list & hardware-accelerated Path shapes
         private readonly HashSet<string> _activeSignalIds = new HashSet<string>();
-        private readonly Dictionary<string, Polyline> _signalPolylines = new Dictionary<string, Polyline>();
+        private readonly Dictionary<string, Path> _signalPaths = new Dictionary<string, Path>();
+        private readonly Dictionary<string, (TextBlock Val, TextBlock Range)> _legendBindings = new Dictionary<string, (TextBlock, TextBlock)>();
 
-        // Telemetry buffer
+        // High performance telemetry buffer (contiguous value type array)
         private readonly object _dataLock = new object();
-        private readonly List<TelemetryPoint> _points = new List<TelemetryPoint>();
-        private const int MAX_BUFFER_POINTS = 3000;
-        private DateTime _lastSampleTime = DateTime.MinValue;
+        private readonly List<TelemetryPoint> _points = new List<TelemetryPoint>(15000);
+        private const int MAX_BUFFER_POINTS = 12000; // 60s at 200 Hz
 
-        // Render timer
+        // Monotonic ESP32 hardware time tracking
+        private bool _firstPacket = true;
+        private uint _lastEspTimeUs = 0;
+        private uint _lastSampledEspTimeUs = 0;
+        private double _unwrappedTimeSec = 0.0;
+        private double _latestTimeSec = 0.0;
+        private double _pauseTimeSec = 0.0;
+
+        // Render timer & reference state
         private DispatcherTimer _renderTimer;
         private double _windowSeconds = 5.0;
         private bool _isPaused = false;
@@ -84,10 +92,35 @@ namespace DiyFfbPedal.UIFunction
         private double _packetRate = 0.0;
         private DateTime _lastPacketTime = DateTime.MinValue;
 
-        // Cached visible points for hover lookup
-        private List<TelemetryPoint> _cachedVisiblePoints = new List<TelemetryPoint>();
-        private readonly Dictionary<string, (double min, double max)> _cachedSignalRanges = new Dictionary<string, (double, double)>();
-        private DateTime _lastRenderNow = DateTime.UtcNow;
+        // Cached visible range and timestamps for instant O(1) hover lookups
+        private double _lastRenderRefTime = 0.0;
+        private double _lastRenderViewStart = 0.0;
+        private double _lastRenderViewEnd = 0.0;
+        private int _cachedStartIdx = 0;
+        private int _cachedEndIdx = 0;
+
+        // Reusable point list to avoid any GC heap allocations inside render loop
+        private readonly List<Point> _renderPoints = new List<Point>(1000);
+
+        // Pre-allocated gridline visuals (never destroyed/reallocated on tick)
+        private bool _gridInitialized = false;
+        private readonly Line[] _gridHLines = new Line[3];
+        private readonly Line[] _gridVLines = new Line[4];
+        private readonly TextBlock[] _gridTimeLabels = new TextBlock[4];
+
+        // Zoom & Pan state
+        private double _yViewMin = 0.0;
+        private double _yViewMax = 1.0;
+        private double _xViewOffsetSec = 0.0;
+        private bool _isZoomed = false;
+        private bool _isDraggingZoom = false;
+        private Point _dragStart = new Point(0, 0);
+        private bool _isBoxZoomMode = false;
+        private bool _isPanning = false;
+        private Point _panStartMouse = new Point(0, 0);
+        private double _panStartXOffset = 0.0;
+        private double _panStartYMin = 0.0;
+        private double _panStartYMax = 1.0;
 
         // References to SimHub plugin & parent UI
         public DIY_FFB_Pedal Plugin { get; set; }
@@ -147,7 +180,6 @@ namespace DiyFfbPedal.UIFunction
                 }
                 else
                 {
-                    // Only disable if trace file dump is NOT currently running
                     if (!ParentUI.Plugin._calculations.dumpPedalToResponseFile[pedalIndex])
                     {
                         config.payloadPedalConfig_.debug_flags_0 = (byte)(config.payloadPedalConfig_.debug_flags_0 & ~64);
@@ -164,7 +196,6 @@ namespace DiyFfbPedal.UIFunction
 
         private void InitControls()
         {
-            // Time window combo options
             cb_time_window.Items.Add("3s");
             cb_time_window.Items.Add("5s");
             cb_time_window.Items.Add("10s");
@@ -207,6 +238,28 @@ namespace DiyFfbPedal.UIFunction
             var itemClear = new MenuItem { Header = "Clear All Signals" };
             itemClear.Click += (s, e) => ClearAllSignals();
             plot_context_menu.Items.Add(itemClear);
+
+            plot_context_menu.Items.Add(new Separator());
+
+            var menuZoomXIn = new MenuItem { Header = "Zoom In X  (↔+)" };
+            menuZoomXIn.Click += (s, e) => ZoomX(0.75, (canvas_plot.ActualWidth > 0 ? canvas_plot.ActualWidth : 762) / 2.0);
+            plot_context_menu.Items.Add(menuZoomXIn);
+
+            var menuZoomXOut = new MenuItem { Header = "Zoom Out X (↔−)" };
+            menuZoomXOut.Click += (s, e) => ZoomX(1.33, (canvas_plot.ActualWidth > 0 ? canvas_plot.ActualWidth : 762) / 2.0);
+            plot_context_menu.Items.Add(menuZoomXOut);
+
+            var menuZoomYIn = new MenuItem { Header = "Zoom In Y  (↕+)" };
+            menuZoomYIn.Click += (s, e) => ZoomY(1.33, (canvas_plot.ActualHeight > 0 ? canvas_plot.ActualHeight : 578) / 2.0);
+            plot_context_menu.Items.Add(menuZoomYIn);
+
+            var menuZoomYOut = new MenuItem { Header = "Zoom Out Y (↕−)" };
+            menuZoomYOut.Click += (s, e) => ZoomY(0.75, (canvas_plot.ActualHeight > 0 ? canvas_plot.ActualHeight : 578) / 2.0);
+            plot_context_menu.Items.Add(menuZoomYOut);
+
+            var menuResetZoom = new MenuItem { Header = "Reset Zoom / Fit All (⟲)" };
+            menuResetZoom.Click += (s, e) => ResetZoom();
+            plot_context_menu.Items.Add(menuResetZoom);
         }
 
         private void Plot_context_menu_Opened(object sender, RoutedEventArgs e)
@@ -217,9 +270,9 @@ namespace DiyFfbPedal.UIFunction
                 {
                     foreach (var subItem in subMenu.Items)
                     {
-                        if (subItem is MenuItem checkItem && checkItem.Tag is string sigId)
+                        if (subItem is MenuItem mi && mi.Tag is string sigId)
                         {
-                            checkItem.IsChecked = _activeSignalIds.Contains(sigId);
+                            mi.IsChecked = _activeSignalIds.Contains(sigId);
                         }
                     }
                 }
@@ -274,7 +327,8 @@ namespace DiyFfbPedal.UIFunction
         private void RebuildPolylinesAndLegends()
         {
             canvas_plot.Children.Clear();
-            _signalPolylines.Clear();
+            _signalPaths.Clear();
+            _legendBindings.Clear();
             panel_legends.Children.Clear();
 
             tb_active_count.Text = $"({_activeSignalIds.Count} active)";
@@ -285,8 +339,7 @@ namespace DiyFfbPedal.UIFunction
                 var sig = AllSignals.FirstOrDefault(s => s.Id == sigId);
                 if (sig == null) continue;
 
-                // Create Polyline
-                var poly = new Polyline
+                var path = new Path
                 {
                     Stroke = new SolidColorBrush(sig.DefaultColor),
                     StrokeThickness = 2.0,
@@ -294,10 +347,9 @@ namespace DiyFfbPedal.UIFunction
                     SnapsToDevicePixels = true,
                     IsHitTestVisible = false
                 };
-                _signalPolylines[sigId] = poly;
-                canvas_plot.Children.Add(poly);
+                _signalPaths[sigId] = path;
+                canvas_plot.Children.Add(path);
 
-                // Create Legend Badge
                 var legendBorder = new Border
                 {
                     Background = new SolidColorBrush(Color.FromRgb(0x28, 0x28, 0x28)),
@@ -379,6 +431,8 @@ namespace DiyFfbPedal.UIFunction
 
                 legendBorder.Child = sp;
                 panel_legends.Children.Add(legendBorder);
+
+                _legendBindings[sigId] = (tbVal, tbRange);
             }
         }
 
@@ -399,21 +453,51 @@ namespace DiyFfbPedal.UIFunction
             _lastPacketTime = now;
             _packetCounter++;
 
-            // Throttle queue insertion to 100 Hz max (every 10ms) to avoid queue explosion while retaining full responsiveness
-            if ((now - _lastSampleTime).TotalMilliseconds >= 9.0 || _points.Count == 0)
+            uint espUs = packet.payloadPedalExtendedState_.timeInUs_u32;
+
+            lock (_dataLock)
             {
-                _lastSampleTime = now;
-                lock (_dataLock)
+                if (_firstPacket)
                 {
+                    _firstPacket = false;
+                    _lastEspTimeUs = espUs;
+                    _lastSampledEspTimeUs = espUs;
+                    _unwrappedTimeSec = 0.0;
+                    _latestTimeSec = 0.0;
+
                     _points.Add(new TelemetryPoint
                     {
-                        Timestamp = now,
+                        TimeSec = 0.0,
+                        State = packet.payloadPedalExtendedState_
+                    });
+                    return;
+                }
+
+                // Compute elapsed microseconds with automatic 32-bit unsigned rollover handling
+                uint diffUs = espUs - _lastEspTimeUs;
+                if (diffUs > 5000000) // Discontinuity / reconnect (> 5s gap)
+                {
+                    diffUs = 5000;
+                }
+                _unwrappedTimeSec += diffUs / 1000000.0;
+                _lastEspTimeUs = espUs;
+                _latestTimeSec = _unwrappedTimeSec;
+
+                // Subsample at 200 Hz (every 5000 µs = 5ms) for microsecond accuracy without queue explosion
+                uint sampleDiffUs = espUs - _lastSampledEspTimeUs;
+                if (sampleDiffUs >= 5000 || sampleDiffUs > 5000000)
+                {
+                    _lastSampledEspTimeUs = espUs;
+                    _points.Add(new TelemetryPoint
+                    {
+                        TimeSec = _unwrappedTimeSec,
                         State = packet.payloadPedalExtendedState_
                     });
 
-                    if (_points.Count > MAX_BUFFER_POINTS)
+                    // Bulk prune once every ~2.5 seconds (500 samples) instead of shifting memory every frame
+                    if (_points.Count > MAX_BUFFER_POINTS + 500)
                     {
-                        _points.RemoveRange(0, _points.Count - MAX_BUFFER_POINTS);
+                        _points.RemoveRange(0, 500);
                     }
                 }
             }
@@ -421,23 +505,26 @@ namespace DiyFfbPedal.UIFunction
 
         private void RenderTimer_Tick(object sender, EventArgs e)
         {
-            DateTime now = DateTime.UtcNow;
-            _lastRenderNow = now;
-
             // Update Stream Status & Rate
-            TimeSpan rateDiff = now - _lastRateCheck;
+            TimeSpan rateDiff = DateTime.UtcNow - _lastRateCheck;
             if (rateDiff.TotalSeconds >= 1.0)
             {
                 _packetRate = _packetCounter / rateDiff.TotalSeconds;
                 _packetCounter = 0;
-                _lastRateCheck = now;
+                _lastRateCheck = DateTime.UtcNow;
             }
 
-            if ((now - _lastPacketTime).TotalSeconds < 1.5 && _packetRate > 0)
+            if (!_isPaused && (DateTime.UtcNow - _lastPacketTime).TotalSeconds < 1.5 && _packetRate > 0)
             {
                 ellipse_stream_indicator.Fill = new SolidColorBrush(Color.FromRgb(0x00, 0xE6, 0x76));
                 tb_stream_status.Text = $"● {_packetRate:F0} Hz";
                 tb_stream_status.Foreground = new SolidColorBrush(Color.FromRgb(0x00, 0xE6, 0x76));
+            }
+            else if (_isPaused)
+            {
+                ellipse_stream_indicator.Fill = new SolidColorBrush(Color.FromRgb(0xFF, 0xD7, 0x00));
+                tb_stream_status.Text = "❚❚ Paused";
+                tb_stream_status.Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0xD7, 0x00));
             }
             else
             {
@@ -446,175 +533,363 @@ namespace DiyFfbPedal.UIFunction
                 tb_stream_status.Foreground = new SolidColorBrush(Color.FromRgb(0x9E, 0x9E, 0x9E));
             }
 
-            if (_isPaused) return;
-
-            // Prune points outside window
-            DateTime cutoff = now.AddSeconds(-_windowSeconds);
-            List<TelemetryPoint> visiblePoints;
-            lock (_dataLock)
-            {
-                while (_points.Count > 1 && _points[1].Timestamp < cutoff)
-                {
-                    _points.RemoveAt(0);
-                }
-                visiblePoints = new List<TelemetryPoint>(_points);
-            }
-
-            _cachedVisiblePoints = visiblePoints;
-
-            double width = canvas_plot.ActualWidth > 0 ? canvas_plot.ActualWidth : 714;
+            double width = canvas_plot.ActualWidth > 0 ? canvas_plot.ActualWidth : 762;
             double height = canvas_plot.ActualHeight > 0 ? canvas_plot.ActualHeight : 578;
 
             DrawGridlines(width, height);
 
-            if (visiblePoints.Count == 0 || _activeSignalIds.Count == 0) return;
+            if (_activeSignalIds.Count == 0) return;
 
-            // Render each active polyline with high performance (pixel-decimated points)
-            foreach (var sigId in _activeSignalIds)
+            lock (_dataLock)
             {
-                if (!_signalPolylines.TryGetValue(sigId, out var poly)) continue;
-                var sig = AllSignals.FirstOrDefault(s => s.Id == sigId);
-                if (sig == null) continue;
+                int ptCount = _points.Count;
+                if (ptCount == 0) return;
 
-                double minVal = double.MaxValue;
-                double maxVal = double.MinValue;
-                double lastVal = 0.0;
+                double refTime = _isPaused ? _pauseTimeSec : _latestTimeSec;
+                double viewEndTime = refTime - _xViewOffsetSec;
+                double viewStartTime = viewEndTime - _windowSeconds;
 
-                for (int i = 0; i < visiblePoints.Count; i++)
+                _lastRenderRefTime = refTime;
+                _lastRenderViewStart = viewStartTime;
+                _lastRenderViewEnd = viewEndTime;
+
+                // Binary search for visible window range [startIdx, endIdx]
+                int startIdx = FindFirstIndexAtOrAfter(viewStartTime);
+                int endIdx = FindLastIndexAtOrBefore(viewEndTime);
+
+                _cachedStartIdx = startIdx;
+                _cachedEndIdx = endIdx;
+
+                if (startIdx > endIdx || startIdx >= ptCount) return;
+
+                double invWindow = 1.0 / _windowSeconds;
+                double ySpan = (_yViewMax > _yViewMin) ? (_yViewMax - _yViewMin) : 1.0;
+                double plotH = height - 24.0;
+                double plotBaseY = height - 12.0;
+
+                // Render each active signal with GPU-accelerated StreamGeometry
+                foreach (var sigId in _activeSignalIds)
                 {
-                    double v = sig.Getter(visiblePoints[i].State);
-                    if (v < minVal) minVal = v;
-                    if (v > maxVal) maxVal = v;
-                    lastVal = v;
-                }
+                    if (!_signalPaths.TryGetValue(sigId, out var path)) continue;
+                    var sig = AllSignals.FirstOrDefault(s => s.Id == sigId);
+                    if (sig == null) continue;
 
-                if (minVal == double.MaxValue) { minVal = 0; maxVal = 1; }
-                if (Math.Abs(maxVal - minVal) < 1e-6)
-                {
-                    maxVal += 1.0;
-                    minVal -= 1.0;
-                }
+                    double minVal = double.MaxValue;
+                    double maxVal = double.MinValue;
+                    double lastVal = 0.0;
 
-                _cachedSignalRanges[sigId] = (minVal, maxVal);
-
-                // Pixel-decimated point generation to guarantee 0 render lag
-                PointCollection points = new PointCollection();
-                double lastX = -999.0;
-
-                for (int i = 0; i < visiblePoints.Count; i++)
-                {
-                    var pt = visiblePoints[i];
-                    double age = (now - pt.Timestamp).TotalSeconds;
-                    if (age < 0) age = 0;
-                    double x = width * (1.0 - (age / _windowSeconds));
-                    x = Math.Max(0.0, Math.Min(width, x));
-
-                    // Only add point if it is at least 1.5px apart or is the last point
-                    if (i == visiblePoints.Count - 1 || Math.Abs(x - lastX) >= 1.5)
+                    for (int i = startIdx; i <= endIdx; i++)
                     {
-                        lastX = x;
-                        double v = sig.Getter(pt.State);
-                        double normY = _autoScale ? ((v - minVal) / (maxVal - minVal)) : Math.Max(0.0, Math.Min(1.0, v / 100.0));
-                        double y = (height - 12.0) - (normY * (height - 24.0));
-                        points.Add(new Point(x, y));
+                        double v = sig.Getter(_points[i].State);
+                        if (v < minVal) minVal = v;
+                        if (v > maxVal) maxVal = v;
+                        lastVal = v;
                     }
+
+                    if (minVal == double.MaxValue) { minVal = 0; maxVal = 1; }
+                    if (Math.Abs(maxVal - minVal) < 1e-6)
+                    {
+                        maxVal += 1.0;
+                        minVal -= 1.0;
+                    }
+
+                    double valSpan = maxVal - minVal;
+
+                    // Pixel-decimated point generation into reusable list
+                    _renderPoints.Clear();
+                    double lastX = -999.0;
+
+                    for (int i = startIdx; i <= endIdx; i++)
+                    {
+                        var pt = _points[i];
+                        double normX = 1.0 - ((viewEndTime - pt.TimeSec) * invWindow);
+                        double x = width * normX;
+
+                        if (i == endIdx || Math.Abs(x - lastX) >= 1.5)
+                        {
+                            lastX = x;
+                            double v = sig.Getter(pt.State);
+                            double normY_raw = _autoScale ? ((v - minVal) / valSpan) : Math.Max(0.0, Math.Min(1.0, v / 100.0));
+                            double normY_zoomed = (normY_raw - _yViewMin) / ySpan;
+                            double y = plotBaseY - (normY_zoomed * plotH);
+                            _renderPoints.Add(new Point(x, y));
+                        }
+                    }
+
+                    if (_renderPoints.Count > 0)
+                    {
+                        var geom = new StreamGeometry();
+                        using (var ctx = geom.Open())
+                        {
+                            ctx.BeginFigure(_renderPoints[0], false, false);
+                            for (int p = 1; p < _renderPoints.Count; p++)
+                            {
+                                ctx.LineTo(_renderPoints[p], true, false);
+                            }
+                        }
+                        geom.Freeze();
+                        path.Data = geom;
+                    }
+                    else
+                    {
+                        path.Data = null;
+                    }
+
+                    // Direct O(1) Legend Update
+                    UpdateLegendDisplay(sigId, lastVal, minVal, maxVal, sig);
                 }
-
-                poly.Points = points;
-
-                // Update Legend Values
-                UpdateLegendDisplay(sigId, lastVal, minVal, maxVal, sig);
             }
+        }
+
+        private int FindFirstIndexAtOrAfter(double targetTime)
+        {
+            int low = 0;
+            int high = _points.Count - 1;
+            int result = _points.Count;
+
+            while (low <= high)
+            {
+                int mid = (low + high) >> 1;
+                if (_points[mid].TimeSec >= targetTime)
+                {
+                    result = mid;
+                    high = mid - 1;
+                }
+                else
+                {
+                    low = mid + 1;
+                }
+            }
+            return Math.Max(0, result > 0 ? result - 1 : 0);
+        }
+
+        private int FindLastIndexAtOrBefore(double targetTime)
+        {
+            int low = 0;
+            int high = _points.Count - 1;
+            int result = -1;
+
+            while (low <= high)
+            {
+                int mid = (low + high) >> 1;
+                if (_points[mid].TimeSec <= targetTime)
+                {
+                    result = mid;
+                    low = mid + 1;
+                }
+                else
+                {
+                    high = mid - 1;
+                }
+            }
+            return result == -1 ? _points.Count - 1 : Math.Min(_points.Count - 1, result + 1);
         }
 
         private void UpdateLegendDisplay(string sigId, double current, double min, double max, SignalDef sig)
         {
-            foreach (var child in panel_legends.Children)
+            if (_legendBindings.TryGetValue(sigId, out var pair))
             {
-                if (child is Border b && (string)b.Tag == sigId && b.Child is StackPanel sp)
-                {
-                    foreach (var elem in sp.Children)
-                    {
-                        if (elem is TextBlock tb)
-                        {
-                            if (tb.Name == "val_" + sigId)
-                            {
-                                tb.Text = $"{current.ToString(sig.Format)} {sig.Unit}";
-                            }
-                            else if (tb.Name == "range_" + sigId)
-                            {
-                                tb.Text = $"[{min.ToString(sig.Format)} / {max.ToString(sig.Format)}]";
-                            }
-                        }
-                    }
-                    break;
-                }
+                pair.Val.Text = $"{current.ToString(sig.Format)} {sig.Unit}";
+                pair.Range.Text = $"[{min.ToString(sig.Format)} / {max.ToString(sig.Format)}]";
             }
         }
 
         private void DrawGridlines(double width, double height)
         {
-            canvas_grid.Children.Clear();
-
-            // Horizontal gridlines (25%, 50%, 75%)
-            for (int i = 1; i <= 3; i++)
+            if (!_gridInitialized)
             {
-                double y = (height / 4.0) * i;
-                var line = new Line
+                _gridInitialized = true;
+                canvas_grid.Children.Clear();
+
+                // 3 Horizontal lines
+                for (int i = 0; i < 3; i++)
                 {
-                    X1 = 0,
-                    Y1 = y,
-                    X2 = width,
-                    Y2 = y,
-                    Stroke = new SolidColorBrush(Color.FromRgb(0x28, 0x28, 0x28)),
-                    StrokeThickness = 1,
-                    StrokeDashArray = new DoubleCollection { 4, 4 }
-                };
-                canvas_grid.Children.Add(line);
+                    var line = new Line
+                    {
+                        X1 = 0,
+                        X2 = width,
+                        Stroke = new SolidColorBrush(Color.FromRgb(0x28, 0x28, 0x28)),
+                        StrokeThickness = 1,
+                        StrokeDashArray = new DoubleCollection { 4, 4 }
+                    };
+                    _gridHLines[i] = line;
+                    canvas_grid.Children.Add(line);
+                }
+
+                // 4 Vertical lines + 4 Time labels
+                for (int i = 0; i < 4; i++)
+                {
+                    var line = new Line
+                    {
+                        Y1 = 0,
+                        Y2 = height,
+                        Stroke = new SolidColorBrush(Color.FromRgb(0x22, 0x22, 0x22)),
+                        StrokeThickness = 1
+                    };
+                    _gridVLines[i] = line;
+                    canvas_grid.Children.Add(line);
+
+                    var tb = new TextBlock
+                    {
+                        Foreground = new SolidColorBrush(Color.FromRgb(0x55, 0x55, 0x55)),
+                        FontSize = 9
+                    };
+                    Canvas.SetBottom(tb, 4);
+                    _gridTimeLabels[i] = tb;
+                    canvas_grid.Children.Add(tb);
+                }
             }
 
-            // Vertical time gridlines
-            int divisions = 5;
-            for (int i = 1; i < divisions; i++)
+            // Update horizontal line positions
+            for (int i = 0; i < 3; i++)
             {
-                double x = (width / divisions) * i;
-                var line = new Line
-                {
-                    X1 = x,
-                    Y1 = 0,
-                    X2 = x,
-                    Y2 = height,
-                    Stroke = new SolidColorBrush(Color.FromRgb(0x22, 0x22, 0x22)),
-                    StrokeThickness = 1
-                };
-                canvas_grid.Children.Add(line);
+                double y = (height / 4.0) * (i + 1);
+                var line = _gridHLines[i];
+                line.X2 = width;
+                line.Y1 = y;
+                line.Y2 = y;
+            }
 
-                double sec = _windowSeconds * (1.0 - ((double)i / divisions));
-                var tb = new TextBlock
-                {
-                    Text = $"-{sec:F0}s",
-                    Foreground = new SolidColorBrush(Color.FromRgb(0x55, 0x55, 0x55)),
-                    FontSize = 9
-                };
+            // Update vertical line and label positions
+            int divisions = 5;
+            for (int i = 0; i < 4; i++)
+            {
+                int divIdx = i + 1;
+                double x = (width / divisions) * divIdx;
+
+                var line = _gridVLines[i];
+                line.X1 = x;
+                line.X2 = x;
+                line.Y2 = height;
+
+                double sec = _xViewOffsetSec + _windowSeconds * (1.0 - ((double)divIdx / divisions));
+                var tb = _gridTimeLabels[i];
+                tb.Text = sec < 10.0 ? $"-{sec:F2}s" : $"-{sec:F1}s";
                 Canvas.SetLeft(tb, x + 3);
-                Canvas.SetBottom(tb, 4);
-                canvas_grid.Children.Add(tb);
             }
         }
 
-        // ==================== MOUSE HOVER DATA TIP & CROSSHAIR ====================
+        // ==================== MOUSE INTERACTION, HOVER DATA TIP, ZOOM & PAN ====================
 
-        private void Canvas_plot_MouseMove(object sender, MouseEventArgs e)
+        private void Canvas_plot_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (_cachedVisiblePoints == null || _cachedVisiblePoints.Count == 0 || _activeSignalIds.Count == 0)
+            Point pos = e.GetPosition(canvas_plot);
+
+            // Double-click resets Zoom and Pan to fit all
+            if (e.ClickCount == 2)
             {
+                ResetZoom();
+                return;
+            }
+
+            bool isCtrl = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
+            bool isShift = Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift);
+
+            // Pan with Strg (Ctrl) + mouse drag OR Middle Mouse button
+            if (e.ChangedButton == MouseButton.Middle || (e.ChangedButton == MouseButton.Left && isCtrl))
+            {
+                _isPanning = true;
+                _isDraggingZoom = false;
+                _panStartMouse = pos;
+                _panStartXOffset = _xViewOffsetSec;
+                _panStartYMin = _yViewMin;
+                _panStartYMax = _yViewMax;
+                canvas_plot.CaptureMouse();
+                canvas_plot.Cursor = Cursors.SizeAll;
+                HideDataTip();
+
+                if (!_isPaused)
+                {
+                    BtnLivePause_Click(null, null);
+                }
+                return;
+            }
+
+            // Zoom with Shift + mouse drag OR when [⊞ Box] mode button is toggled active
+            if (e.ChangedButton == MouseButton.Left && (isShift || _isBoxZoomMode))
+            {
+                _isDraggingZoom = true;
+                _isPanning = false;
+                _dragStart = pos;
+                canvas_plot.CaptureMouse();
+                canvas_plot.Cursor = Cursors.Cross;
                 HideDataTip();
                 return;
             }
 
+            // Normal Left Drag without Shift/Ctrl: also Pan for intuitive direct manipulation
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                _isPanning = true;
+                _isDraggingZoom = false;
+                _panStartMouse = pos;
+                _panStartXOffset = _xViewOffsetSec;
+                _panStartYMin = _yViewMin;
+                _panStartYMax = _yViewMax;
+                canvas_plot.CaptureMouse();
+                canvas_plot.Cursor = Cursors.SizeAll;
+                HideDataTip();
+
+                if (!_isPaused)
+                {
+                    BtnLivePause_Click(null, null);
+                }
+            }
+        }
+
+        private void Canvas_plot_MouseMove(object sender, MouseEventArgs e)
+        {
             Point pos = e.GetPosition(canvas_plot);
-            double width = canvas_plot.ActualWidth > 0 ? canvas_plot.ActualWidth : 714;
+            double width = canvas_plot.ActualWidth > 0 ? canvas_plot.ActualWidth : 762;
             double height = canvas_plot.ActualHeight > 0 ? canvas_plot.ActualHeight : 578;
+
+            // 1. Handle Panning (Strg/Ctrl + Drag or Left Drag)
+            if (_isPanning)
+            {
+                HideDataTip();
+                double dx = pos.X - _panStartMouse.X;
+                double dy = pos.Y - _panStartMouse.Y;
+
+                // Horizontal Pan: dragging right reveals earlier points from the past
+                double dt = (dx / width) * _windowSeconds;
+                _xViewOffsetSec = Math.Max(0.0, _panStartXOffset + dt);
+
+                // Vertical Pan: dragging shifts the normalized Y range
+                double span = _panStartYMax - _panStartYMin;
+                double dNormY = (dy / (height - 24.0)) * span;
+                _yViewMin = _panStartYMin + dNormY;
+                _yViewMax = _panStartYMax + dNormY;
+
+                _isZoomed = true;
+                UpdateResetZoomButton();
+                return;
+            }
+
+            // 2. Handle Regional Zoom Box (Shift + Drag)
+            if (_isDraggingZoom)
+            {
+                HideDataTip();
+                double left = Math.Max(0.0, Math.Min(width, Math.Min(_dragStart.X, pos.X)));
+                double top = Math.Max(0.0, Math.Min(height, Math.Min(_dragStart.Y, pos.Y)));
+                double right = Math.Max(0.0, Math.Min(width, Math.Max(_dragStart.X, pos.X)));
+                double bottom = Math.Max(0.0, Math.Min(height, Math.Max(_dragStart.Y, pos.Y)));
+
+                rect_zoom_selection.Margin = new Thickness(left, top, 0, 0);
+                rect_zoom_selection.Width = Math.Max(0.0, right - left);
+                rect_zoom_selection.Height = Math.Max(0.0, bottom - top);
+                rect_zoom_selection.Visibility = Visibility.Visible;
+                return;
+            }
+
+            // Update hover cursor based on modifier key
+            bool isCtrl = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
+            canvas_plot.Cursor = isCtrl ? Cursors.SizeAll : Cursors.Cross;
+
+            if (_activeSignalIds.Count == 0)
+            {
+                HideDataTip();
+                return;
+            }
 
             if (pos.X < 0 || pos.X > width || pos.Y < 0 || pos.Y > height)
             {
@@ -622,24 +897,49 @@ namespace DiyFfbPedal.UIFunction
                 return;
             }
 
-            // Calculate target age from mouse X
-            double targetAgeSec = (1.0 - pos.X / width) * _windowSeconds;
-            DateTime targetTime = _lastRenderNow.AddSeconds(-targetAgeSec);
+            // Target time corresponding to cursor X position
+            double normX = Math.Max(0.0, Math.Min(1.0, pos.X / width));
+            double targetTime = _lastRenderViewStart + normX * _windowSeconds;
 
-            // Find closest sample point
-            TelemetryPoint closest = null;
-            double minDiff = double.MaxValue;
-            for (int i = 0; i < _cachedVisiblePoints.Count; i++)
+            TelemetryPoint closest = default;
+            bool found = false;
+
+            lock (_dataLock)
             {
-                double diff = Math.Abs((_cachedVisiblePoints[i].Timestamp - targetTime).TotalSeconds);
-                if (diff < minDiff)
+                if (_points.Count > 0 && _cachedStartIdx <= _cachedEndIdx && _cachedStartIdx < _points.Count)
                 {
-                    minDiff = diff;
-                    closest = _cachedVisiblePoints[i];
+                    int start = Math.Max(0, _cachedStartIdx);
+                    int end = Math.Min(_points.Count - 1, _cachedEndIdx);
+
+                    // Binary search for closest point to targetTime
+                    int low = start;
+                    int high = end;
+                    double minDiff = double.MaxValue;
+
+                    while (low <= high)
+                    {
+                        int mid = (low + high) >> 1;
+                        double diff = Math.Abs(_points[mid].TimeSec - targetTime);
+                        if (diff < minDiff)
+                        {
+                            minDiff = diff;
+                            closest = _points[mid];
+                            found = true;
+                        }
+
+                        if (_points[mid].TimeSec < targetTime)
+                        {
+                            low = mid + 1;
+                        }
+                        else
+                        {
+                            high = mid - 1;
+                        }
+                    }
                 }
             }
 
-            if (closest == null)
+            if (!found)
             {
                 HideDataTip();
                 return;
@@ -652,9 +952,10 @@ namespace DiyFfbPedal.UIFunction
             line_crosshair.Y2 = height;
             line_crosshair.Visibility = Visibility.Visible;
 
-            // Populate Data Tip Card
-            double actualAge = (_lastRenderNow - closest.Timestamp).TotalSeconds;
-            tb_datatip_time.Text = $"Time: -{actualAge:F2}s";
+            // Display time offset relative to current render reference (fixed and rock-solid when paused)
+            double actualAge = _lastRenderRefTime - closest.TimeSec;
+            if (actualAge < 0) actualAge = 0;
+            tb_datatip_time.Text = actualAge < 10.0 ? $"Time: -{actualAge:F2}s" : $"Time: -{actualAge:F1}s";
 
             sp_datatip_items.Children.Clear();
             foreach (var sigId in _activeSignalIds)
@@ -697,13 +998,53 @@ namespace DiyFfbPedal.UIFunction
             // Position Data Tip Card smoothly avoiding edges
             card_datatip.Visibility = Visibility.Visible;
             double tipX = pos.X + 14;
-            if (tipX + 160 > width)
+            if (tipX + 175 > width)
             {
-                tipX = pos.X - 170;
+                tipX = pos.X - 185;
             }
             double tipY = Math.Max(10, Math.Min(pos.Y - 20, height - 140));
 
             card_datatip.Margin = new Thickness(tipX, tipY, 0, 0);
+        }
+
+        private void Canvas_plot_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (_isPanning)
+            {
+                _isPanning = false;
+                canvas_plot.ReleaseMouseCapture();
+                canvas_plot.Cursor = Cursors.Cross;
+            }
+
+            if (_isDraggingZoom)
+            {
+                _isDraggingZoom = false;
+                canvas_plot.ReleaseMouseCapture();
+                rect_zoom_selection.Visibility = Visibility.Collapsed;
+
+                Point end = e.GetPosition(canvas_plot);
+                double w = Math.Abs(end.X - _dragStart.X);
+                double h = Math.Abs(end.Y - _dragStart.Y);
+
+                if (w >= 8 && h >= 8)
+                {
+                    ApplyRegionalZoom(_dragStart, end);
+                }
+            }
+        }
+
+        private void Canvas_plot_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            Point pos = e.GetPosition(canvas_plot);
+            if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
+            {
+                ZoomY(e.Delta > 0 ? 1.25 : 0.8, pos.Y);
+            }
+            else
+            {
+                ZoomX(e.Delta > 0 ? 0.8 : 1.25, pos.X);
+            }
+            e.Handled = true;
         }
 
         private void Canvas_plot_MouseLeave(object sender, MouseEventArgs e)
@@ -715,6 +1056,169 @@ namespace DiyFfbPedal.UIFunction
         {
             if (line_crosshair != null) line_crosshair.Visibility = Visibility.Collapsed;
             if (card_datatip != null) card_datatip.Visibility = Visibility.Collapsed;
+        }
+
+        // ==================== ZOOM CONTROLS ====================
+
+        private void BtnZoomXIn_Click(object sender, RoutedEventArgs e)
+        {
+            ZoomX(0.75, (canvas_plot.ActualWidth > 0 ? canvas_plot.ActualWidth : 762) / 2.0);
+        }
+
+        private void BtnZoomXOut_Click(object sender, RoutedEventArgs e)
+        {
+            ZoomX(1.33, (canvas_plot.ActualWidth > 0 ? canvas_plot.ActualWidth : 762) / 2.0);
+        }
+
+        private void BtnZoomYIn_Click(object sender, RoutedEventArgs e)
+        {
+            ZoomY(1.33, (canvas_plot.ActualHeight > 0 ? canvas_plot.ActualHeight : 578) / 2.0);
+        }
+
+        private void BtnZoomYOut_Click(object sender, RoutedEventArgs e)
+        {
+            ZoomY(0.75, (canvas_plot.ActualHeight > 0 ? canvas_plot.ActualHeight : 578) / 2.0);
+        }
+
+        private void BtnZoomBox_Click(object sender, RoutedEventArgs e)
+        {
+            _isBoxZoomMode = !_isBoxZoomMode;
+            if (_isBoxZoomMode)
+            {
+                btn_zoom_box.Background = new SolidColorBrush(Color.FromArgb(0x40, 0x00, 0xE5, 0xFF));
+                btn_zoom_box.BorderBrush = new SolidColorBrush(Color.FromRgb(0x00, 0xE5, 0xFF));
+                btn_zoom_box.Foreground = Brushes.White;
+            }
+            else
+            {
+                btn_zoom_box.Background = new SolidColorBrush(Color.FromRgb(0x2A, 0x2A, 0x2A));
+                btn_zoom_box.BorderBrush = new SolidColorBrush(Color.FromRgb(0x44, 0x44, 0x44));
+                btn_zoom_box.Foreground = new SolidColorBrush(Color.FromRgb(0xD0, 0xD0, 0xD0));
+            }
+        }
+
+        private void BtnResetZoom_Click(object sender, RoutedEventArgs e)
+        {
+            ResetZoom();
+        }
+
+        public void ResetZoom()
+        {
+            _yViewMin = 0.0;
+            _yViewMax = 1.0;
+            _xViewOffsetSec = 0.0;
+            _isPanning = false;
+            _isDraggingZoom = false;
+            if (rect_zoom_selection != null) rect_zoom_selection.Visibility = Visibility.Collapsed;
+            if (cb_time_window.SelectedItem is string item)
+            {
+                string s = item.Replace("s", "");
+                if (double.TryParse(s, out double sec)) _windowSeconds = sec;
+            }
+            else
+            {
+                _windowSeconds = 5.0;
+            }
+            _isZoomed = false;
+            _isBoxZoomMode = false;
+            btn_zoom_box.Background = new SolidColorBrush(Color.FromRgb(0x2A, 0x2A, 0x2A));
+            btn_zoom_box.BorderBrush = new SolidColorBrush(Color.FromRgb(0x44, 0x44, 0x44));
+            btn_zoom_box.Foreground = new SolidColorBrush(Color.FromRgb(0xD0, 0xD0, 0xD0));
+            chk_auto_scale.IsChecked = true;
+            _autoScale = true;
+            UpdateResetZoomButton();
+        }
+
+        private void ZoomX(double factor, double cursorX)
+        {
+            _isZoomed = true;
+            double width = canvas_plot.ActualWidth > 0 ? canvas_plot.ActualWidth : 762;
+            double normX = Math.Max(0.0, Math.Min(1.0, cursorX / width));
+            double cursorAge = _xViewOffsetSec + (1.0 - normX) * _windowSeconds;
+
+            double newWindow = Math.Max(0.05, Math.Min(120.0, _windowSeconds * factor));
+            _windowSeconds = newWindow;
+            _xViewOffsetSec = Math.Max(0.0, cursorAge - (1.0 - normX) * _windowSeconds);
+
+            if (_xViewOffsetSec > 0.001 && !_isPaused)
+            {
+                BtnLivePause_Click(null, null);
+            }
+            UpdateResetZoomButton();
+        }
+
+        private void ZoomY(double factor, double cursorY)
+        {
+            _isZoomed = true;
+            double height = canvas_plot.ActualHeight > 0 ? canvas_plot.ActualHeight : 578;
+            double normY = Math.Max(0.0, Math.Min(1.0, ((height - 12.0) - cursorY) / (height - 24.0)));
+            double currentCenter = _yViewMin + normY * (_yViewMax - _yViewMin);
+            double currentSpan = _yViewMax - _yViewMin;
+            double newSpan = Math.Max(0.01, Math.Min(20.0, currentSpan / factor));
+
+            _yViewMin = currentCenter - normY * newSpan;
+            _yViewMax = currentCenter + (1.0 - normY) * newSpan;
+
+            UpdateResetZoomButton();
+        }
+
+        private void ApplyRegionalZoom(Point p1, Point p2)
+        {
+            double width = canvas_plot.ActualWidth > 0 ? canvas_plot.ActualWidth : 762;
+            double height = canvas_plot.ActualHeight > 0 ? canvas_plot.ActualHeight : 578;
+
+            double x1 = Math.Min(p1.X, p2.X);
+            double x2 = Math.Max(p1.X, p2.X);
+            double y1 = Math.Min(p1.Y, p2.Y);
+            double y2 = Math.Max(p1.Y, p2.Y);
+
+            double normX1 = Math.Max(0.0, Math.Min(1.0, x1 / width));
+            double normX2 = Math.Max(0.0, Math.Min(1.0, x2 / width));
+            if (normX2 - normX1 < 0.01) return;
+
+            double ageRight = _xViewOffsetSec + (1.0 - normX2) * _windowSeconds;
+            double ageLeft = _xViewOffsetSec + (1.0 - normX1) * _windowSeconds;
+            double newWindow = Math.Max(0.05, ageLeft - ageRight);
+
+            _xViewOffsetSec = Math.Max(0.0, ageRight);
+            _windowSeconds = newWindow;
+
+            double normYBottom = Math.Max(0.0, Math.Min(1.0, ((height - 12.0) - y2) / (height - 24.0)));
+            double normYTop = Math.Max(0.0, Math.Min(1.0, ((height - 12.0) - y1) / (height - 24.0)));
+            if (normYTop - normYBottom < 0.01) return;
+
+            double currentYSpan = _yViewMax - _yViewMin;
+            double newYMin = _yViewMin + normYBottom * currentYSpan;
+            double newYMax = _yViewMin + normYTop * currentYSpan;
+
+            _yViewMin = newYMin;
+            _yViewMax = newYMax;
+            _isZoomed = true;
+
+            if (!_isPaused)
+            {
+                BtnLivePause_Click(null, null);
+            }
+
+            UpdateResetZoomButton();
+        }
+
+        private void UpdateResetZoomButton()
+        {
+            if (btn_reset_zoom == null) return;
+            bool active = _isZoomed || Math.Abs(_yViewMin) > 0.001 || Math.Abs(_yViewMax - 1.0) > 0.001 || _xViewOffsetSec > 0.001;
+            if (active)
+            {
+                btn_reset_zoom.BorderBrush = new SolidColorBrush(Color.FromRgb(0x00, 0xE5, 0xFF));
+                btn_reset_zoom.Foreground = new SolidColorBrush(Color.FromRgb(0x00, 0xE5, 0xFF));
+                btn_reset_zoom.FontWeight = FontWeights.Bold;
+            }
+            else
+            {
+                btn_reset_zoom.BorderBrush = new SolidColorBrush(Color.FromRgb(0x44, 0x44, 0x44));
+                btn_reset_zoom.Foreground = new SolidColorBrush(Color.FromRgb(0xD0, 0xD0, 0xD0));
+                btn_reset_zoom.FontWeight = FontWeights.Normal;
+            }
         }
 
         // ==================== PEDAL CONTROLS ====================
@@ -732,6 +1236,14 @@ namespace DiyFfbPedal.UIFunction
                     lock (_dataLock)
                     {
                         _points.Clear();
+                        _firstPacket = true;
+                        _unwrappedTimeSec = 0.0;
+                        _latestTimeSec = 0.0;
+                        _pauseTimeSec = 0.0;
+                    }
+                    foreach (var path in _signalPaths.Values)
+                    {
+                        path.Data = null;
                     }
                     UpdatePedalButtonStyles();
                 }
@@ -769,6 +1281,7 @@ namespace DiyFfbPedal.UIFunction
             _isPaused = !_isPaused;
             if (_isPaused)
             {
+                _pauseTimeSec = _latestTimeSec;
                 btn_live_pause.Content = "▶ Live";
                 btn_live_pause.Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0xD7, 0x00));
             }
@@ -784,10 +1297,14 @@ namespace DiyFfbPedal.UIFunction
             lock (_dataLock)
             {
                 _points.Clear();
+                _firstPacket = true;
+                _unwrappedTimeSec = 0.0;
+                _latestTimeSec = 0.0;
+                _pauseTimeSec = 0.0;
             }
-            foreach (var poly in _signalPolylines.Values)
+            foreach (var path in _signalPaths.Values)
             {
-                poly.Points.Clear();
+                path.Data = null;
             }
             HideDataTip();
         }
