@@ -501,6 +501,19 @@ namespace DiyFfbPedal
 
                                     string tmp = bridge_state.payloadBridgeState_.unassignedPedalCount + " unassigned pedals founded!";
                                     ToastNotification("New Pedal Detected", tmp);
+
+                                    Application.Current?.Dispatcher?.InvokeAsync(() =>
+                                    {
+                                        if (!DiyFfbPedal.UIFunction.AssignmentConfigurationWindow.IsOpen)
+                                        {
+                                            var sideWindow = new DiyFfbPedal.UIFunction.AssignmentConfigurationWindow(Plugin);
+                                            double screenWidth = SystemParameters.PrimaryScreenWidth;
+                                            double screenHeight = SystemParameters.PrimaryScreenHeight;
+                                            sideWindow.Left = screenWidth / 2 - sideWindow.Width / 2;
+                                            sideWindow.Top = screenHeight / 2 - sideWindow.Height / 2;
+                                            sideWindow.Show();
+                                        }
+                                    });
                                 }
                                 Plugin._calculations.unassignedPedalCount = bridge_state.payloadBridgeState_.unassignedPedalCount;
 

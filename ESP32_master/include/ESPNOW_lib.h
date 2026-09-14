@@ -14,15 +14,11 @@
 #define ESPNOW_LOG_MAGIC_KEY_2_U8 0x97
 #define ESPNOW_ASSIGNMENT_MAGIC_KEY_U8 0x99
 #define MAX_CAPACITY_OF_SCAN_PEDAL_U8 3
-#define TIMEOUT_OF_UNASSIGNED_SCAN_U32 1000
-uint8_t g_espMaster_au8[] = {0x36, 0x33, 0x33, 0x33, 0x33, 0x31};
-uint8_t g_pedalMac_aau8[3][6] = {
-    {0x36, 0x33, 0x33, 0x33, 0x33, 0x32},
-    {0x36, 0x33, 0x33, 0x33, 0x33, 0x34},
-    {0x36, 0x33, 0x33, 0x33, 0x33, 0x33}
-};
+#define TIMEOUT_OF_UNASSIGNED_SCAN_U32 5000
+uint8_t g_espMaster_au8[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+uint8_t g_pedalMac_aau8[3][6] = {0};
 uint8_t g_broadcastMac_au8[]={0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-uint8_t g_espHost_au8[] = {0x36, 0x33, 0x33, 0x33, 0x33, 0x35};
+uint8_t g_espHost_au8[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 uint8_t g_espMac_au8[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 uint8_t* g_recvMac_pu8;
 uint16_t g_espNowSend_u16=0;
@@ -53,6 +49,9 @@ uint8_t g_pedalStatus_u8=0;
 bool g_espNowPairingStatus_b = false;
 bool g_updatePairingToEeprom_b = false;
 #define WIFI_CH_EEPROM_MAGIC 0xA6
+#ifndef EEPROM_offset
+#define EEPROM_offset 15
+#endif
 #define WIFI_CH_EEPROM_OFFSET 60
 struct WifiChannelConfig_t {
   uint8_t magic_u8;
@@ -175,8 +174,7 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int da
     if(structChecker)
     
 {
-      int connectedPedalNumber=dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[0]+dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[1]+dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[2];
-      int maxScanAllowance=MAX_CAPACITY_OF_SCAN_PEDAL_U8-connectedPedalNumber;
+      int maxScanAllowance = MAX_CAPACITY_OF_SCAN_PEDAL_U8;
 
       bool found = false;
       for (UnassignedPeer_t &peer : g_unassignedPeersList) 
@@ -196,9 +194,9 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int da
           UnassignedPeer_t newPeer;
           memcpy(newPeer.mac, esp_now_info->src_addr, 6);
           newPeer.lastSeen = millis();
-          newPeer.peerAdded = false;
+          newPeer.peerAdded = true;
           g_unassignedPeersList.push_back(newPeer);
-          //ESPNow.add_peer(esp_now_info->src_addr);
+          ESPNow.add_peer(esp_now_info->src_addr);
         }
 
       }
@@ -399,17 +397,9 @@ void espNowInitialize()
     ActiveSerial->println("[L]Initializing Wifi."); 
     delay(1000);
     WiFi.macAddress(g_espMac_au8); 
-    ActiveSerial->printf("[L]Device Mac: %02X:%02X:%02X:%02X:%02X:%02X\n", g_espMac_au8[0], g_espMac_au8[1], g_espMac_au8[2], g_espMac_au8[3], g_espMac_au8[4], g_espMac_au8[5]);
-    
-    //ActiveSerial->print("Current MAC Address:  ");  
-    //ActiveSerial->println(WiFi.macAddress());
-    #ifndef ESPNow_Pairing_function
-      ActiveSerial->println("Overwriting Mac address");
-      esp_wifi_set_mac(WIFI_IF_STA, &g_espHost_au8[0]);
-      delay(300);
-      ActiveSerial->print("[L]Modified MAC Address:  ");  
-      ActiveSerial->println(WiFi.macAddress());
-    #endif
+    memcpy(g_espHost_au8, g_espMac_au8, 6);
+    ActiveSerial->printf("[L]Bridge Factory Hardware Mac: %02X:%02X:%02X:%02X:%02X:%02X\n", g_espMac_au8[0], g_espMac_au8[1], g_espMac_au8[2], g_espMac_au8[3], g_espMac_au8[4], g_espMac_au8[5]);
+
     ActiveSerial->println("[L]Initializing ESP-NOW");
     ESPNow.init();
     delay(3000);
@@ -424,74 +414,33 @@ void espNowInitialize()
       ActiveSerial->println("[L]Setting Wifi strength to 8.5dbm ");
       #endif
     #endif
-    //reading from eeprom
-    #ifdef ESPNow_Pairing_function
+
+    // Read paired pedal hardware MACs from EEPROM
     EspPairingReg_t ESP_pairing_reg_local;
     EEPROM.get(EEPROM_offset, ESP_pairing_reg_local);
-    memcpy(&g_espPairingReg_st, &ESP_pairing_reg_local,sizeof(EspPairingReg_t));
-    //g_espPairingReg_st=ESP_pairing_reg_local;
-    //EEPROM.get(EEPROM_offset, g_espPairingReg_st);
-    ActiveSerial->print("[L]");
-    for(int i=0;i<4;i++)
-    { 
-      if(g_espPairingReg_st.pairStatus_au8[i]==1)
-      {
-        ActiveSerial->print("Paired Device #");
-        ActiveSerial->print(i);
-        //ActiveSerial->print(" Pair: ");
-        //ActiveSerial->print(g_espPairingReg_st.pairStatus_au8[i]);
-        ActiveSerial->printf(" Mac: %02X:%02X:%02X:%02X:%02X:%02X\n", g_espPairingReg_st.pairMac_aau8[i][0], g_espPairingReg_st.pairMac_aau8[i][1], g_espPairingReg_st.pairMac_aau8[i][2], g_espPairingReg_st.pairMac_aau8[i][3], g_espPairingReg_st.pairMac_aau8[i][4], g_espPairingReg_st.pairMac_aau8[i][5]);
-      }           
-    }
-    
-    for(int i=0; i<4;i++)
+    memcpy(&g_espPairingReg_st, &ESP_pairing_reg_local, sizeof(EspPairingReg_t));
+    for (int i = 0; i < 3; i++)
     {
-      if(g_espPairingReg_st.pairStatus_au8[i]==1)
+      if (g_espPairingReg_st.pairStatus_au8[i] == 1)
       {
-        if(i==0)
-        {
-          if(macCheck(g_espPairingReg_st.pairMac_aau8[0],g_espPairingReg_st.pairMac_aau8[1])||macCheck(g_espPairingReg_st.pairMac_aau8[0],g_espPairingReg_st.pairMac_aau8[2]))
-          {
-            ActiveSerial->println("[L]Clutch mac address is same with others, no clutch reading will apply");
-          }
-          else
-          {
-            memcpy(&g_pedalMac_aau8[0],&g_espPairingReg_st.pairMac_aau8[i],6);
-          }
-          
-        }
-        if(i==1)
-        {
-          memcpy(&g_pedalMac_aau8[1],&g_espPairingReg_st.pairMac_aau8[i],6);          
-        }
-        if(i==2)
-        {
-          if(macCheck(g_espPairingReg_st.pairMac_aau8[1],g_espPairingReg_st.pairMac_aau8[2]))
-          {
-            ActiveSerial->println("[L]Throttle mac address is same with Brake, no Throttle reading will apply");
-          }
-          else
-          {
-            memcpy(&g_pedalMac_aau8[2],&g_espPairingReg_st.pairMac_aau8[i],6);
-          }          
-        }        
-        if(i==3)
-        {
-          memcpy(&g_espHost_au8,&g_espPairingReg_st.pairMac_aau8[i],6);
-        }        
+        memcpy(g_pedalMac_aau8[i], g_espPairingReg_st.pairMac_aau8[i], 6);
+        ActiveSerial->printf("[L]Paired Pedal #%d Mac: %02X:%02X:%02X:%02X:%02X:%02X\n", i, g_pedalMac_aau8[i][0], g_pedalMac_aau8[i][1], g_pedalMac_aau8[i][2], g_pedalMac_aau8[i][3], g_pedalMac_aau8[i][4], g_pedalMac_aau8[i][5]);
+      }
+      else
+      {
+        memset(g_pedalMac_aau8[i], 0, 6);
       }
     }
-    #endif
-    bool addPeerCHecker= true;
-    //ActiveSerial->printf("[L]BRK Mac: %02X:%02X:%02X:%02X:%02X:%02X\n", g_pedalMac_aau8[1][0], g_pedalMac_aau8[1][1], g_pedalMac_aau8[1][2], g_pedalMac_aau8[1][3], g_pedalMac_aau8[1][4], g_pedalMac_aau8[1][5]);
-    if(ESPNow.add_peer(g_pedalMac_aau8[1])!= ESP_OK) addPeerCHecker=false;
-    //ActiveSerial->printf("[L]GAS Mac: %02X:%02X:%02X:%02X:%02X:%02X\n", g_pedalMac_aau8[2][0], g_pedalMac_aau8[2][1], g_pedalMac_aau8[2][2], g_pedalMac_aau8[2][3], g_pedalMac_aau8[2][4], g_pedalMac_aau8[2][5]);
-    if(ESPNow.add_peer(g_pedalMac_aau8[2])!= ESP_OK) addPeerCHecker=false;
-    //ActiveSerial->printf("[L]CLU Mac: %02X:%02X:%02X:%02X:%02X:%02X\n", g_pedalMac_aau8[0][0], g_pedalMac_aau8[0][1], g_pedalMac_aau8[0][2], g_pedalMac_aau8[0][3], g_pedalMac_aau8[0][4], g_pedalMac_aau8[0][5]);
-    if(ESPNow.add_peer(g_pedalMac_aau8[0])!= ESP_OK) addPeerCHecker=false;    
-    //ActiveSerial->printf("[L]HOST Mac: %02X:%02X:%02X:%02X:%02X:%02X\n", g_espHost_au8[0], g_espHost_au8[1], g_espHost_au8[2], g_espHost_au8[3], g_espHost_au8[4], g_espHost_au8[5]); 
-    if(ESPNow.add_peer(g_espHost_au8)!= ESP_OK) addPeerCHecker=false;
-    if(ESPNow.add_peer(g_broadcastMac_au8)!= ESP_OK) addPeerCHecker=false;
+
+    bool addPeerCHecker = true;
+    for (int i = 0; i < 3; i++)
+    {
+      if (g_espPairingReg_st.pairStatus_au8[i] == 1)
+      {
+        if (ESPNow.add_peer(g_pedalMac_aau8[i]) != ESP_OK) addPeerCHecker = false;
+      }
+    }
+    if (ESPNow.add_peer(g_broadcastMac_au8) != ESP_OK) addPeerCHecker = false;
     if(addPeerCHecker) ActiveSerial->println("[L]Peers added successfully.");
     ESPNow.reg_recv_cb(onRecv);
     ESPNow.reg_send_cb(onSent);

@@ -397,6 +397,25 @@ void loop()
   delay(10000);
 }
 
+inline void syncPairingTableToPedals()
+{
+  DapAssignmentReg_t pairSync = {};
+  pairSync.payloadType_u8 = DAP_PAYLOAD_TYPE_ASSIGNMENT_U8;
+  pairSync.magicKey_u8 = ESPNOW_ASSIGNMENT_MAGIC_KEY_U8;
+  pairSync.isAdvancedPaired_u8 = 1;
+  for (int p = 0; p < 4; p++) {
+    pairSync.pairStatus_au8[p] = g_espPairingReg_st.pairStatus_au8[p];
+    memcpy(pairSync.pairedMac_aau8[p], g_espPairingReg_st.pairMac_aau8[p], 6);
+  }
+  for (int p = 0; p < 3; p++) {
+    if (g_espPairingReg_st.pairStatus_au8[p] == 1) {
+      pairSync.deviceId_u8 = p;
+      pairSync.crc_u16 = checksumCalculator((uint8_t*)(&pairSync), sizeof(DapAssignmentReg_t) - sizeof(uint16_t));
+      ESPNow.send_message(g_pedalMac_aau8[p], (uint8_t*)&pairSync, sizeof(DapAssignmentReg_t));
+    }
+  }
+}
+
 void espNowCommunicationTxTask( void * pvParameters )
 {
   for(;;)
@@ -511,6 +530,26 @@ void espNowCommunicationTxTask( void * pvParameters )
           }
         }
       #endif
+      // 1 Hz sync beacon broadcast
+      static unsigned long s_lastWifiBeacon_ms = 0;
+      if (millis() - s_lastWifiBeacon_ms >= 400)
+      {
+        s_lastWifiBeacon_ms = millis();
+        DapWifiChannel_t beacon = {};
+        beacon.payloadHeader_st.startOfFrame0_u8 = SOF_BYTE_0_U8;
+        beacon.payloadHeader_st.startOfFrame1_u8 = SOF_BYTE_1_U8;
+        beacon.payloadHeader_st.payloadType_u8 = DAP_PAYLOAD_TYPE_WIFI_CHANNEL_U8;
+        beacon.payloadHeader_st.version_u8 = DAP_VERSION_CONFIG_U8;
+        beacon.payloadHeader_st.pedalTag_u8 = 3;
+        beacon.payloadWifiChannel_st.command_u8 = WIFI_CH_CMD_BEACON;
+        beacon.payloadWifiChannel_st.currentChannel_u8 = g_currentWifiChannel_u8;
+        beacon.payloadWifiChannel_st.recommendedChannel_u8 = g_currentWifiChannel_u8;
+        beacon.payloadFooter_st.enfOfFrame0_u8 = EOF_BYTE_0_U8;
+        beacon.payloadFooter_st.enfOfFrame1_u8 = EOF_BYTE_1_U8;
+        beacon.payloadFooter_st.checkSum_u16 = checksumCalculator((uint8_t*)(&(beacon.payloadHeader_st)), sizeof(beacon.payloadHeader_st) + sizeof(beacon.payloadWifiChannel_st));
+        ESPNow.send_message(g_broadcastMac_au8, (uint8_t*)&beacon, sizeof(DapWifiChannel_t));
+      }
+
       for(int i=0;i<3;i++)
       {
         if(configUpdateAvailable[i])
@@ -559,6 +598,9 @@ void espNowCommunicationTxTask( void * pvParameters )
                 ESPNow.send_message(g_pedalMac_aau8[0],(uint8_t *) &dap_actions_st[i],sizeof(DapActions_t));
                 break;
               case PEDAL_ID_BRAKE:
+                if (dap_actions_st[i].payloadPedalAction_st.rudderAction_u8 != 0) {
+                  syncPairingTableToPedals();
+                }
                 ESPNow.send_message(g_pedalMac_aau8[1],(uint8_t *) &dap_actions_st[i],sizeof(DapActions_t));
                 break;
               case PEDAL_ID_THROTTLE:
@@ -571,33 +613,68 @@ void espNowCommunicationTxTask( void * pvParameters )
         }
 
         // --- ADDED: Forward Servo Config to Pedals ---
-        for(int i=0; i<3; i++)
+        for(int s=0; s<3; s++)
         {
-          if(update_servo_config[i])
+          if(update_servo_config[s])
           {
-            update_servo_config[i] = false;
-            if(dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[i]==1)
+            update_servo_config[s] = false;
+            if(dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[s]==1)
             {
-              switch (i)
+              switch (s)
               {
-                case PEDAL_ID_CLUTCH:   ESPNow.send_message(g_pedalMac_aau8[0],(uint8_t *) &dap_servo_config_st[i],sizeof(DAP_servo_config_st_t)); break;
-                case PEDAL_ID_BRAKE:    ESPNow.send_message(g_pedalMac_aau8[1],(uint8_t *) &dap_servo_config_st[i],sizeof(DAP_servo_config_st_t)); break;
-                case PEDAL_ID_THROTTLE: ESPNow.send_message(g_pedalMac_aau8[2],(uint8_t *) &dap_servo_config_st[i],sizeof(DAP_servo_config_st_t)); break;
+                case PEDAL_ID_CLUTCH:   ESPNow.send_message(g_pedalMac_aau8[0],(uint8_t *) &dap_servo_config_st[s],sizeof(DAP_servo_config_st_t)); break;
+                case PEDAL_ID_BRAKE:    ESPNow.send_message(g_pedalMac_aau8[1],(uint8_t *) &dap_servo_config_st[s],sizeof(DAP_servo_config_st_t)); break;
+                case PEDAL_ID_THROTTLE: ESPNow.send_message(g_pedalMac_aau8[2],(uint8_t *) &dap_servo_config_st[s],sizeof(DAP_servo_config_st_t)); break;
               }
             }
           }
         }
 
-        if(g_sendAssignment_ab[i])
+      }
+
+      std::vector<decltype(g_unassignedPeersList.begin())> toErase;
+      for(int a=0; a<MAX_CAPACITY_OF_SCAN_PEDAL_U8; a++)
+      {
+        if(g_sendAssignment_ab[a])
         {
-          g_sendAssignment_ab[i]=false;
-          esp_err_t err;
-          auto it = g_unassignedPeersList.begin();
-          std::advance(it, i);
-          err = ESPNow.send_message(it->mac, (uint8_t *)&dap_actionassignment_st[i], sizeof(DapActions_t));
-          ActiveSerial->printf("[L]Send assignment to pedal: %0.2X:%0.2X:%0.2X:%0.2X:%0.2X:%0.2X, result: ", it->mac[0], it->mac[1], it->mac[2], it->mac[3], it->mac[4], it->mac[5]);
-          ActiveSerial->println(esp_err_to_name(err));
+          g_sendAssignment_ab[a] = false;
+          if (a < g_unassignedPeersList.size())
+          {
+            auto it = g_unassignedPeersList.begin();
+            std::advance(it, a);
+            uint8_t sysAction = dap_actionassignment_st[a].payloadPedalAction_st.systemAction_u8;
+            uint8_t targetRole = 255;
+            if (sysAction == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_0) targetRole = 0;
+            else if (sysAction == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_1) targetRole = 1;
+            else if (sysAction == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_2) targetRole = 2;
+
+            if (targetRole < 3)
+            {
+              memcpy(g_pedalMac_aau8[targetRole], it->mac, 6);
+              memcpy(g_espPairingReg_st.pairMac_aau8[targetRole], it->mac, 6);
+              g_espPairingReg_st.pairStatus_au8[targetRole] = 1;
+              memcpy(g_espPairingReg_st.pairMac_aau8[3], g_espMac_au8, 6);
+              g_espPairingReg_st.pairStatus_au8[3] = 1;
+              EEPROM.put(EEPROM_offset, g_espPairingReg_st);
+              EEPROM.commit();
+              ESPNow.add_peer(it->mac);
+
+              toErase.push_back(it);
+            }
+
+            esp_err_t err = ESPNow.send_message(it->mac, (uint8_t *)&dap_actionassignment_st[a], sizeof(DapActions_t));
+            ActiveSerial->printf("[L]Send assignment to pedal: %02X:%02X:%02X:%02X:%02X:%02X, result: %s\n",
+                                 it->mac[0], it->mac[1], it->mac[2], it->mac[3], it->mac[4], it->mac[5], esp_err_to_name(err));
+          }
         }
+      }
+      for (auto it : toErase)
+      {
+        g_unassignedPeersList.erase(it);
+      }
+      if (!toErase.empty())
+      {
+        syncPairingTableToPedals();
       }
     
       //forward the basic wifi info for pedals
@@ -751,15 +828,21 @@ void handleWifiSetChannelRequest(uint8_t newChannel, bool isHid) {
   fwd.payloadFooter_st.enfOfFrame1_u8 = EOF_BYTE_1_U8;
   fwd.payloadFooter_st.checkSum_u16 = checksumCalculator((uint8_t*)(&(fwd.payloadHeader_st)), sizeof(fwd.payloadHeader_st) + sizeof(fwd.payloadWifiChannel_st));
 
-  for (int k = 0; k < 5; k++) {
+  // Staggered multi-unicast to paired pedals and broadcast over ~200ms
+  for (int k = 0; k < 4; k++) {
+    for (int p = 0; p < 3; p++) {
+      if (g_espPairingReg_st.pairStatus_au8[p] == 1) {
+        ESPNow.send_message(g_pedalMac_aau8[p], (uint8_t*)&fwd, sizeof(DapWifiChannel_t));
+      }
+    }
     ESPNow.send_message(g_broadcastMac_au8, (uint8_t*)&fwd, sizeof(DapWifiChannel_t));
-    delay(15);
+    delay(50);
   }
 
   saveWifiChannelToEeprom(newChannel);
   g_currentWifiChannel_u8 = newChannel;
 
-  delay(50);
+  delay(20);
   esp_wifi_set_channel(newChannel, WIFI_SECOND_CHAN_NONE);
 
   fwd.payloadWifiChannel_st.command_u8 = WIFI_CH_CMD_SET_ACK;
@@ -978,6 +1061,17 @@ void serialCommunicationRxTask( void * pvParameters)
                   //forward to pedal
                   memcpy(&dap_actions_st[pedalIdx], &dap_actions_st_local, sizeof(DapActions_t));
                   dap_action_update[pedalIdx] = true;
+                  if (dap_actions_st_local.payloadPedalAction_st.systemAction_u8 == (uint8_t)PedalSystemAction::CLEAR_ASSIGNMENT)
+                  {
+                    g_espPairingReg_st.pairStatus_au8[pedalIdx] = 0;
+                    memset(g_espPairingReg_st.pairMac_aau8[pedalIdx], 0, 6);
+                    EEPROM.put(EEPROM_offset, g_espPairingReg_st);
+                    EEPROM.commit();
+                    ESPNow.remove_peer(g_pedalMac_aau8[pedalIdx]);
+                    memset(g_pedalMac_aau8[pedalIdx], 0, 6);
+                    ActiveSerial->printf("[L]Cleared pairing for pedal %d\n", pedalIdx);
+                    syncPairingTableToPedals();
+                  }
                 }
                 if (pedalIdx == PEDAL_ID_TEMP_1 || pedalIdx == PEDAL_ID_TEMP_2 || pedalIdx == PEDAL_ID_TEMP_3)
                 {
@@ -2069,6 +2163,17 @@ void hidCommunicaitonRxTask(void *pvParameters)
             //forward to pedal
               memcpy(&dap_actions_st[pedalIdx], &tinyusbJoystick_.tmpAction[i], sizeof(DapActions_t));
               dap_action_update[pedalIdx] = true;
+              if (tinyusbJoystick_.tmpAction[i].payloadPedalAction_st.systemAction_u8 == (uint8_t)PedalSystemAction::CLEAR_ASSIGNMENT)
+              {
+                g_espPairingReg_st.pairStatus_au8[pedalIdx] = 0;
+                memset(g_espPairingReg_st.pairMac_aau8[pedalIdx], 0, 6);
+                EEPROM.put(EEPROM_offset, g_espPairingReg_st);
+                EEPROM.commit();
+                ESPNow.remove_peer(g_pedalMac_aau8[pedalIdx]);
+                memset(g_pedalMac_aau8[pedalIdx], 0, 6);
+                ActiveSerial->printf("[L]Cleared pairing for pedal %d\n", pedalIdx);
+                syncPairingTableToPedals();
+              }
             }
             if (pedalIdx == PEDAL_ID_TEMP_1 || pedalIdx == PEDAL_ID_TEMP_2 || pedalIdx == PEDAL_ID_TEMP_3)
             {

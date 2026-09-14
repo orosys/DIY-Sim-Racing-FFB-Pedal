@@ -52,16 +52,10 @@ inline void saveWifiChannelToEeprom(uint8_t ch) {
 #define ESPNOW_LOG_MAGIC_KEY_2_U8 0x97
 #define ESPNOW_ASSIGNMENT_MAGIC_KEY_U8 0x99
 
-uint8_t g_espMaster_au8[] = {0x36, 0x33, 0x33, 0x33, 0x33, 0x31};
-//uint8_t esp_master[] = {0xdc, 0xda, 0x0c, 0x22, 0x8f, 0xd8}; // S3
-//uint8_t esp_master[] = {0x48, 0x27, 0xe2, 0x59, 0x48, 0xc0}; // S2 mini
-uint8_t g_pedalMac_aau8[3][6] = {
-    {0x36, 0x33, 0x33, 0x33, 0x33, 0x32},
-    {0x36, 0x33, 0x33, 0x33, 0x33, 0x34},
-    {0x36, 0x33, 0x33, 0x33, 0x33, 0x33}
-};
+uint8_t g_espMaster_au8[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+uint8_t g_pedalMac_aau8[3][6] = {0};
 uint8_t g_broadcastMac_au8[]={0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-uint8_t g_espHost_au8[] = {0x36, 0x33, 0x33, 0x33, 0x33, 0x35};
+uint8_t g_espHost_au8[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 uint8_t g_espMac_au8[6] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 uint8_t g_recvMac_au8[6] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 uint16_t g_espNowSend_u16=0;
@@ -118,7 +112,32 @@ volatile uint32_t g_espnowBasicStateStarvedCount_u32 = 0;
 volatile uint32_t g_lastEspnowDiagLogTime_u32 = 0;
 static volatile uint32_t s_espnowNoMemBackoffUntil_ms = 0;
 
-inline void checkWifiChannelHunting() {}
+volatile uint32_t g_lastMasterHeartbeat_ms = 0;
+volatile bool g_saveWifiChannelDeferred_b = false;
+
+inline void checkWifiChannelHunting()
+{
+  // Only hunt if pedal is paired to a bridge
+  if (g_dapAssignmentReg_st.isAdvancedPaired_u8 != 1 || g_dapAssignmentReg_st.pairStatus_au8[3] != 1)
+  {
+    return;
+  }
+
+  uint32_t now_ms = millis();
+  // If disconnected from bridge for > 3500ms, cycle all channels 1-13 (prioritizing 1, 6, 11)
+  if ((now_ms - g_lastMasterHeartbeat_ms > 3500) && (now_ms - g_lastEspnowRecvTime_u32 > 3500))
+  {
+    static const uint8_t huntChannels[] = {1, 6, 11, 2, 3, 4, 5, 7, 8, 9, 10, 12, 13};
+    static uint8_t huntIdx = 0;
+    static uint32_t lastHuntDwell_ms = 0;
+    if (now_ms - lastHuntDwell_ms > 300)
+    {
+      lastHuntDwell_ms = now_ms;
+      huntIdx = (huntIdx + 1) % 13;
+      esp_wifi_set_channel(huntChannels[huntIdx], WIFI_SECOND_CHAN_NONE);
+    }
+  }
+}
 
 inline bool isEspnowBusy()
 {
@@ -392,10 +411,18 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int da
   if(g_espNowStatus_b)
   {
     //rudder message
-    bool isRudderSender = macCheck(g_recvMac_au8, (uint8_t *)esp_now_info->src_addr) ||
+    bool isRecvMacValid = false;
+    for (int m = 0; m < 6; m++) {
+      if (g_recvMac_au8[m] != 0) { isRecvMacValid = true; break; }
+    }
+    bool isRudderSender = (isRecvMacValid && macCheck(g_recvMac_au8, (uint8_t *)esp_now_info->src_addr)) ||
                           macCheck(g_pedalMac_aau8[0], (uint8_t *)esp_now_info->src_addr) ||
                           macCheck(g_pedalMac_aau8[1], (uint8_t *)esp_now_info->src_addr) ||
                           macCheck(g_pedalMac_aau8[2], (uint8_t *)esp_now_info->src_addr);
+    if (!isRudderSender && (dap_calculationVariables_st.rudderStatus_b || dap_calculationVariables_st.helicopterRudderStatus_b))
+    {
+      isRudderSender = true;
+    }
     if(isRudderSender)
     {
       if(data_len==sizeof(DapRudder_t))
@@ -453,8 +480,16 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int da
 
       }
     }
-    if(macCheck(g_espHost_au8,(uint8_t *)esp_now_info->src_addr))
+    bool isHostSender = macCheck(g_espHost_au8, (uint8_t *)esp_now_info->src_addr);
+    bool isUnassigned = (s_localPedalType_u8 == PEDAL_ID_UNKNOWN || g_dapAssignmentReg_st.deviceId_u8 == PEDAL_ID_UNKNOWN || g_dapAssignmentReg_st.isAdvancedPaired_u8 != 1);
+    bool isBridgeLost = (millis() - g_lastMasterHeartbeat_ms > 5000);
+
+    if (isHostSender || isUnassigned || isBridgeLost)
     {
+      if (isHostSender)
+      {
+        g_lastMasterHeartbeat_ms = millis();
+      }
       
       if (data_len == sizeof(DapConfig_t))
       {
@@ -588,18 +623,33 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int da
             if (dap_actions_st.payloadPedalAction_st.systemAction_u8 == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_0 && commandForAssignment_b)
             {
               g_dapAssignmentReg_st.deviceId_u8 = PEDAL_ID_CLUTCH;
+              g_dapAssignmentReg_st.isAdvancedPaired_u8 = 1;
+              g_dapAssignmentReg_st.pairStatus_au8[3] = 1;
+              memcpy(g_dapAssignmentReg_st.pairedMac_aau8[3], esp_now_info->src_addr, 6);
+              memcpy(g_espHost_au8, esp_now_info->src_addr, 6);
+              safeRegisterEspNowPeer(g_espHost_au8);
               g_assignmentUpdate_b = true;
               g_assignmentUpdateBuzzer_b = true;
             }
             if (dap_actions_st.payloadPedalAction_st.systemAction_u8 == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_1 && commandForAssignment_b)
             {
               g_dapAssignmentReg_st.deviceId_u8 = PEDAL_ID_BRAKE;
+              g_dapAssignmentReg_st.isAdvancedPaired_u8 = 1;
+              g_dapAssignmentReg_st.pairStatus_au8[3] = 1;
+              memcpy(g_dapAssignmentReg_st.pairedMac_aau8[3], esp_now_info->src_addr, 6);
+              memcpy(g_espHost_au8, esp_now_info->src_addr, 6);
+              safeRegisterEspNowPeer(g_espHost_au8);
               g_assignmentUpdate_b = true;
               g_assignmentUpdateBuzzer_b = true;
             }
             if (dap_actions_st.payloadPedalAction_st.systemAction_u8 == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_2 && commandForAssignment_b)
             {
               g_dapAssignmentReg_st.deviceId_u8 = PEDAL_ID_THROTTLE;
+              g_dapAssignmentReg_st.isAdvancedPaired_u8 = 1;
+              g_dapAssignmentReg_st.pairStatus_au8[3] = 1;
+              memcpy(g_dapAssignmentReg_st.pairedMac_aau8[3], esp_now_info->src_addr, 6);
+              memcpy(g_espHost_au8, esp_now_info->src_addr, 6);
+              safeRegisterEspNowPeer(g_espHost_au8);
               g_assignmentUpdate_b = true;
               g_assignmentUpdateBuzzer_b = true;
             }
@@ -676,11 +726,28 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int da
               g_getRudderAction_b = true;
               if (rudderAct == (uint8_t)RudderAction::RUDDER_THROTTLE_AND_CLUTCH)
               {
-                if (dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8 == 2)
+                if (dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8 == PEDAL_ID_THROTTLE)
                 {
-                  // Recv_mac=Clu_mac;
                   memcpy(g_recvMac_au8, g_pedalMac_aau8[0], 6);
-                  // ESPNow.add_peer(Recv_mac);
+                  safeRegisterEspNowPeer(g_recvMac_au8);
+                }
+                else if (dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8 == PEDAL_ID_CLUTCH)
+                {
+                  memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
+                  safeRegisterEspNowPeer(g_recvMac_au8);
+                }
+              }
+              else if (rudderAct == (uint8_t)RudderAction::RUDDER_THROTTLE_AND_BRAKE)
+              {
+                if (dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8 == PEDAL_ID_THROTTLE)
+                {
+                  memcpy(g_recvMac_au8, g_pedalMac_aau8[1], 6);
+                  safeRegisterEspNowPeer(g_recvMac_au8);
+                }
+                else if (dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8 == PEDAL_ID_BRAKE)
+                {
+                  memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
+                  safeRegisterEspNowPeer(g_recvMac_au8);
                 }
               }
               if (dap_calculationVariables_st.rudderStatus_b == false)
@@ -708,10 +775,28 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int da
               g_getHeliRudderAction_b = true;
               if (rudderAct == (uint8_t)RudderAction::HELIRUDDER_THROTTLE_AND_CLUTCH)
               {
-                if (dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8 == 2)
+                if (dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8 == PEDAL_ID_THROTTLE)
                 {
                   memcpy(g_recvMac_au8, g_pedalMac_aau8[0], 6);
-                  // ESPNow.add_peer(Recv_mac);
+                  safeRegisterEspNowPeer(g_recvMac_au8);
+                }
+                else if (dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8 == PEDAL_ID_CLUTCH)
+                {
+                  memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
+                  safeRegisterEspNowPeer(g_recvMac_au8);
+                }
+              }
+              else if (rudderAct == (uint8_t)RudderAction::HELIRUDDER_THROTTLE_AND_BRAKE)
+              {
+                if (dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8 == PEDAL_ID_THROTTLE)
+                {
+                  memcpy(g_recvMac_au8, g_pedalMac_aau8[1], 6);
+                  safeRegisterEspNowPeer(g_recvMac_au8);
+                }
+                else if (dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8 == PEDAL_ID_BRAKE)
+                {
+                  memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
+                  safeRegisterEspNowPeer(g_recvMac_au8);
                 }
               }
               if (dap_calculationVariables_st.helicopterRudderStatus_b == false)
@@ -790,8 +875,9 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int da
                                                 sizeof(wifiChPacket.payloadHeader_st) + sizeof(wifiChPacket.payloadWifiChannel_st));
           if (crc == wifiChPacket.payloadFooter_st.checkSum_u16)
           {
-            if (wifiChPacket.payloadWifiChannel_st.command_u8 == WIFI_CH_CMD_SET_REQ)
+            if (wifiChPacket.payloadWifiChannel_st.command_u8 == WIFI_CH_CMD_SET_REQ && (isHostSender || isUnassigned || isBridgeLost))
             {
+              if (isHostSender) g_lastMasterHeartbeat_ms = millis();
               uint8_t newCh = wifiChPacket.payloadWifiChannel_st.currentChannel_u8;
               if (newCh < 1 || newCh > 14) {
                 newCh = wifiChPacket.payloadWifiChannel_st.recommendedChannel_u8;
@@ -799,15 +885,70 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int da
               if (newCh >= 1 && newCh <= 14)
               {
                 g_currentWifiChannel_u8 = newCh;
-                saveWifiChannelToEeprom(newCh);
                 esp_wifi_set_channel(newCh, WIFI_SECOND_CHAN_NONE);
-                ActiveSerial->printf("Switched Wi-Fi channel to %d via ESP-NOW\n", newCh);
+                g_saveWifiChannelDeferred_b = true;
+                ActiveSerial->printf("Switched Wi-Fi channel to %d via ESP-NOW SET_REQ\n", newCh);
+              }
+            }
+            if (wifiChPacket.payloadWifiChannel_st.command_u8 == WIFI_CH_CMD_BEACON && isHostSender)
+            {
+              g_lastMasterHeartbeat_ms = millis();
+              uint8_t beaconCh = wifiChPacket.payloadWifiChannel_st.currentChannel_u8;
+              if (beaconCh >= 1 && beaconCh <= 14 && beaconCh != g_currentWifiChannel_u8)
+              {
+                g_currentWifiChannel_u8 = beaconCh;
+                esp_wifi_set_channel(beaconCh, WIFI_SECOND_CHAN_NONE);
+                g_saveWifiChannelDeferred_b = true;
+                ActiveSerial->printf("Wi-Fi channel synced to %d via Bridge Beacon\n", beaconCh);
               }
             }
           }
         }
       }
       
+      if (data_len == sizeof(DapAssignmentReg_t))
+      {
+        DapAssignmentReg_t incomingReg;
+        memcpy(&incomingReg, data, sizeof(DapAssignmentReg_t));
+        if (incomingReg.payloadType_u8 == DAP_PAYLOAD_TYPE_ASSIGNMENT_U8 &&
+            incomingReg.magicKey_u8 == ESPNOW_ASSIGNMENT_MAGIC_KEY_U8)
+        {
+          uint16_t crc = checksumCalculator_u16((uint8_t *)(&incomingReg), sizeof(DapAssignmentReg_t) - sizeof(uint16_t));
+          if (crc == incomingReg.crc_u16)
+          {
+            g_lastMasterHeartbeat_ms = millis();
+            for (int p = 0; p < 3; p++)
+            {
+              g_dapAssignmentReg_st.pairStatus_au8[p] = incomingReg.pairStatus_au8[p];
+              if (incomingReg.pairStatus_au8[p] == 1)
+              {
+                memcpy(g_dapAssignmentReg_st.pairedMac_aau8[p], incomingReg.pairedMac_aau8[p], 6);
+                memcpy(g_pedalMac_aau8[p], incomingReg.pairedMac_aau8[p], 6);
+                safeRegisterEspNowPeer(g_pedalMac_aau8[p]);
+              }
+            }
+            if (incomingReg.pairStatus_au8[3] == 1)
+            {
+              g_dapAssignmentReg_st.pairStatus_au8[3] = 1;
+              memcpy(g_dapAssignmentReg_st.pairedMac_aau8[3], incomingReg.pairedMac_aau8[3], 6);
+              memcpy(g_espHost_au8, incomingReg.pairedMac_aau8[3], 6);
+              safeRegisterEspNowPeer(g_espHost_au8);
+            }
+            if (s_localPedalType_u8 == PEDAL_ID_THROTTLE && g_dapAssignmentReg_st.pairStatus_au8[1] == 1)
+            {
+              memcpy(g_recvMac_au8, g_pedalMac_aau8[1], 6);
+              safeRegisterEspNowPeer(g_recvMac_au8);
+            }
+            else if (s_localPedalType_u8 == PEDAL_ID_BRAKE && g_dapAssignmentReg_st.pairStatus_au8[2] == 1)
+            {
+              memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
+              safeRegisterEspNowPeer(g_recvMac_au8);
+            }
+            g_assignmentUpdate_b = true;
+          }
+        }
+      }
+
       if(data_len==sizeof(DAP_servo_config_st))
       {
         DAP_servo_config_st received_servo_config;
@@ -881,26 +1022,7 @@ void espNowInitialize()
   // ActiveSerial->println(WiFi.macAddress());
   WiFi.macAddress(g_espMac_au8);
   ActiveSerial->printf("Device Mac: %02X:%02X:%02X:%02X:%02X:%02X\n", g_espMac_au8[0], g_espMac_au8[1], g_espMac_au8[2], g_espMac_au8[3], g_espMac_au8[4], g_espMac_au8[5]);
-  #ifndef ESPNow_Pairing_function
-    switch (dap_config_espnow_init_st.payloadPedalConfig_st.pedalType_u8)
-    {
-    case PEDAL_ID_CLUTCH:
-      esp_wifi_set_mac(WIFI_IF_STA, &g_pedalMac_aau8[0][0]);
-      break;
-    case PEDAL_ID_BRAKE:
-      esp_wifi_set_mac(WIFI_IF_STA, &g_pedalMac_aau8[1][0]);
-      break;  
-    case PEDAL_ID_THROTTLE:
-      esp_wifi_set_mac(WIFI_IF_STA, &g_pedalMac_aau8[2][0]);
-      break;         
-    default:
-      ActiveSerial->println("Mac address overwrite failed, no pedal role assignment.");
-      break;
-    }
-    delay(300);
-    ActiveSerial->print("Overwrite MAC Address:  ");
-    ActiveSerial->println(WiFi.macAddress());
-  #endif
+  // Retain factory eFuse Hardware MAC (no overwrite)
   ActiveSerial->println("Initializing ESP-NOW");
   ESPNow.init();
   #ifndef ESPNOW_WIFI_CHANNEL
@@ -960,23 +1082,19 @@ void espNowInitialize()
     }
     #endif
 
-    if (dap_config_espnow_init_st.payloadPedalConfig_st.pedalType_u8 == PEDAL_ID_BRAKE || dap_config_espnow_init_st.payloadPedalConfig_st.pedalType_u8 == PEDAL_ID_CLUTCH)
-    {
-      memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
-      ESPNow.add_peer(g_recvMac_au8);
+    bool isRecvValid = false;
+    for (int m = 0; m < 6; m++) {
+      if (g_recvMac_au8[m] != 0) { isRecvValid = true; break; }
     }
-
-    if (dap_config_espnow_init_st.payloadPedalConfig_st.pedalType_u8 == PEDAL_ID_THROTTLE)
-    {
-      memcpy(g_recvMac_au8, g_pedalMac_aau8[1], 6);
-      ESPNow.add_peer(g_pedalMac_aau8[1]);
-      ESPNow.add_peer(g_pedalMac_aau8[0]);
+    if (isRecvValid) {
+      safeRegisterEspNowPeer(g_recvMac_au8);
     }
-    bool peerAddingChecker=true;
-    if(ESPNow.add_peer(g_espMaster_au8)!= ESP_OK) peerAddingChecker=false;
-    if(ESPNow.add_peer(g_broadcastMac_au8)!= ESP_OK) peerAddingChecker=false;
-    if(ESPNow.add_peer(g_espHost_au8)!= ESP_OK) peerAddingChecker=false;
-    if(peerAddingChecker) ActiveSerial->println("Sucess to add peers");
+    for (int p = 0; p < 3; p++) {
+      safeRegisterEspNowPeer(g_pedalMac_aau8[p]);
+    }
+    safeRegisterEspNowPeer(g_espHost_au8);
+    ESPNow.add_peer(g_broadcastMac_au8);
+    ActiveSerial->println("Sucess to add peers");
 
     ESPNow.reg_recv_cb(onRecv);
     ESPNow.reg_send_cb(onSent);
@@ -1029,6 +1147,33 @@ void softwareAssignmentInitialize()
     {
       tmp.payloadPedalConfig_st.pedalType_u8 = g_dapAssignmentReg_st.deviceId_u8;
       s_localPedalType_u8 = g_dapAssignmentReg_st.deviceId_u8;
+
+      if (g_dapAssignmentReg_st.isAdvancedPaired_u8 == 1 && g_dapAssignmentReg_st.pairStatus_au8[3] == 1)
+      {
+        memcpy(g_espHost_au8, g_dapAssignmentReg_st.pairedMac_aau8[3], 6);
+        safeRegisterEspNowPeer(g_espHost_au8);
+        ActiveSerial->printf("Loaded Paired Bridge Hardware MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
+                             g_espHost_au8[0], g_espHost_au8[1], g_espHost_au8[2],
+                             g_espHost_au8[3], g_espHost_au8[4], g_espHost_au8[5]);
+      }
+      for (int p = 0; p < 3; p++)
+      {
+        if (g_dapAssignmentReg_st.pairStatus_au8[p] == 1)
+        {
+          memcpy(g_pedalMac_aau8[p], g_dapAssignmentReg_st.pairedMac_aau8[p], 6);
+          safeRegisterEspNowPeer(g_pedalMac_aau8[p]);
+        }
+      }
+      if (s_localPedalType_u8 == PEDAL_ID_THROTTLE && g_dapAssignmentReg_st.pairStatus_au8[1] == 1)
+      {
+        memcpy(g_recvMac_au8, g_pedalMac_aau8[1], 6);
+        safeRegisterEspNowPeer(g_recvMac_au8);
+      }
+      else if (s_localPedalType_u8 == PEDAL_ID_BRAKE && g_dapAssignmentReg_st.pairStatus_au8[2] == 1)
+      {
+        memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
+        safeRegisterEspNowPeer(g_recvMac_au8);
+      }
     }
     else
     {
@@ -1093,6 +1238,9 @@ void clearAssignmentToEeprom()
   g_dapAssignmentReg_st.magicKey_u8 = 0;
   g_dapAssignmentReg_st.payloadType_u8 = 0;
   g_dapAssignmentReg_st.deviceId_u8 = 99;
+  g_dapAssignmentReg_st.isAdvancedPaired_u8 = 0;
+  memset(g_dapAssignmentReg_st.pairStatus_au8, 0, sizeof(g_dapAssignmentReg_st.pairStatus_au8));
+  memset(g_dapAssignmentReg_st.pairedMac_aau8, 0, sizeof(g_dapAssignmentReg_st.pairedMac_aau8));
   // refill the crc
   g_dapAssignmentReg_st.crc_u16 = 0;
   // write assignment to eeprom

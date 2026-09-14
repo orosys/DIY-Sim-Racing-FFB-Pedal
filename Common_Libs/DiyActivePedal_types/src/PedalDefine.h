@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #define DAP_VERSION_CONFIG_U8 173U
 
 // define the payload types
@@ -16,6 +16,7 @@
 #define WIFI_CH_CMD_SCAN_RES 2U
 #define WIFI_CH_CMD_SET_REQ  3U
 #define WIFI_CH_CMD_SET_ACK  4U
+#define WIFI_CH_CMD_BEACON   5U
 #define DAP_PAYLOAD_TYPE_BRIDGE_STATE_U8 210U
 #define DAP_PAYLOAD_TYPE_ACTION_OTA_U8 220U
 #define DAP_PAYLOAD_TYPE_ESPNOW_LOG_U8 225U

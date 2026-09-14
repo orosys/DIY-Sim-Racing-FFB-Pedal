@@ -3156,6 +3156,12 @@ void IRAM_ATTR_FLAG serialCommunicationTaskRx(void *pvParameters) {
               }
             }
 
+            if (received_action.payloadPedalAction_st.systemAction_u8 ==
+                (uint8_t)PedalSystemAction::CLEAR_ASSIGNMENT) {
+              ActiveSerial->println("Clear assignment received via USB");
+              g_assignmentClear_b = true;
+            }
+
             // Send action to pedalUpdateTask via Queue
             xQueueSend(s_actionCommandQueue, &received_action, (TickType_t)0);
             // trigger return pedal position
@@ -3865,72 +3871,7 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
                 espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8);
             ActiveSerial->println(" timeout.");
             Buzzer.single_beep_tone(700, 100);
-            if (g_updatePairingToEeprom_b) {
-              EEPROM.put(EEPROM_OFFSET_U32, g_espPairingReg_st);
-              EEPROM.commit();
-              g_updatePairingToEeprom_b = false;
-              // list eeprom
-              EspPairingReg_t ESP_pairing_reg_local;
-              EEPROM.get(EEPROM_OFFSET_U32, ESP_pairing_reg_local);
-              for (int i = 0; i < 4; i++) {
-                if (ESP_pairing_reg_local.pairStatus_au8[i] == 1) {
-                  ActiveSerial->print("#");
-                  ActiveSerial->print(i);
-                  ActiveSerial->print("Pair: ");
-                  ActiveSerial->print(ESP_pairing_reg_local.pairStatus_au8[i]);
-                  ActiveSerial->printf(
-                      " Mac: %02X:%02X:%02X:%02X:%02X:%02X\n",
-                      ESP_pairing_reg_local.pairMac_aau8[i][0],
-                      ESP_pairing_reg_local.pairMac_aau8[i][1],
-                      ESP_pairing_reg_local.pairMac_aau8[i][2],
-                      ESP_pairing_reg_local.pairMac_aau8[i][3],
-                      ESP_pairing_reg_local.pairMac_aau8[i][4],
-                      ESP_pairing_reg_local.pairMac_aau8[i][5]);
-                }
-              }
-              // adding peer
-
-              for (int i = 0; i < 4; i++) {
-                if (g_espPairingReg_st.pairStatus_au8[i] == 1) {
-                  if (i == 0) {
-                    ESPNow.remove_peer(g_pedalMac_aau8[0]);
-                    memcpy(&g_pedalMac_aau8[0],
-                           &g_espPairingReg_st.pairMac_aau8[i], 6);
-                    delay(100);
-                    ESPNow.add_peer(g_pedalMac_aau8[0]);
-                  }
-                  if (i == 1) {
-                    ESPNow.remove_peer(g_pedalMac_aau8[1]);
-                    memcpy(&g_pedalMac_aau8[1],
-                           &g_espPairingReg_st.pairMac_aau8[i], 6);
-                    delay(100);
-                    ESPNow.add_peer(g_pedalMac_aau8[1]);
-                  }
-                  if (i == 2) {
-                    ESPNow.remove_peer(g_pedalMac_aau8[2]);
-                    memcpy(&g_pedalMac_aau8[2],
-                           &g_espPairingReg_st.pairMac_aau8[i], 6);
-                    delay(100);
-                    ESPNow.add_peer(g_pedalMac_aau8[2]);
-                  }
-                  if (i == 3) {
-                    ESPNow.remove_peer(g_espHost_au8);
-                    memcpy(&g_espHost_au8, &g_espPairingReg_st.pairMac_aau8[i],
-                           6);
-                    delay(100);
-                    ESPNow.add_peer(g_espHost_au8);
-                  }
-                  if (espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8 ==
-                      1) {
-                    memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
-                  }
-                  if (espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8 ==
-                      2) {
-                    memcpy(g_recvMac_au8, g_pedalMac_aau8[1], 6);
-                  }
-                }
-              }
-            }
+            g_updatePairingToEeprom_b = false;
           }
         }
 #endif
@@ -3950,7 +3891,8 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
 
         profiler_espNow.start(2);
         // assignment request packet send out
-        if (assignmentUpdatePacketSend_b && noAssignmentStatus) {
+        bool isBridgeLostLong = (g_dapAssignmentReg_st.isAdvancedPaired_u8 == 1 && (millis() - g_lastMasterHeartbeat_ms > 5000));
+        if (assignmentUpdatePacketSend_b && (noAssignmentStatus || isBridgeLostLong)) {
           // ActiveSerial->println("Send out assignment request");
           assignmentUpdatePacketSend_b = false;
           DapAssignmentBroadcast_t dap_assignmentBoardcast_st;
@@ -4301,6 +4243,16 @@ void miscTask(void *pvParameters) {
     global_dap_config_class.getConfig(&misc_dap_config_st, 500);
 
 #ifdef ESPNOW_Enable
+    checkWifiChannelHunting();
+
+    if (g_saveWifiChannelDeferred_b) {
+      if (dap_calculationVariables_st.currentPedalPosition_u32 == 0) {
+        saveWifiChannelToEeprom(g_currentWifiChannel_u8);
+        g_saveWifiChannelDeferred_b = false;
+        ActiveSerial->printf("Saved Wi-Fi channel %d to EEPROM (pedal idle)\n", g_currentWifiChannel_u8);
+      }
+    }
+
     // software assignment
     if (g_assignmentUpdate_b) {
       g_assignmentUpdate_b = false;
