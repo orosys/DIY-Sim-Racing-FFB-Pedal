@@ -206,18 +206,31 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int da
   //only recieve the package from registed mac address
   if(macCheck((uint8_t*)esp_now_info->src_addr, g_pedalMac_aau8[0])||macCheck((uint8_t*)esp_now_info->src_addr, g_pedalMac_aau8[1])||macCheck((uint8_t*)esp_now_info->src_addr, g_pedalMac_aau8[2]))
   {
-    if(esp_now_info->rx_ctrl != NULL){
-      if(macCheck((uint8_t*)esp_now_info->src_addr, g_pedalMac_aau8[0])){
+    uint8_t actual_pedal_tag = 255; // Standardwert (ungültig)
+
+    // MAC überprüfen und actual_pedal_tag IMMER zuweisen
+    if(macCheck((uint8_t*)esp_now_info->src_addr, g_pedalMac_aau8[0])){
+      actual_pedal_tag = 0;
+      if(esp_now_info->rx_ctrl != NULL){ // rx_ctrl separat behandeln
         g_rssi_ai32[0] = esp_now_info->rx_ctrl->rssi;
         g_rssiDisplay_i32 = g_rssi_ai32[0];
-      } else if(macCheck((uint8_t*)esp_now_info->src_addr, g_pedalMac_aau8[1])){
+      }
+    } else if(macCheck((uint8_t*)esp_now_info->src_addr, g_pedalMac_aau8[1])){
+      actual_pedal_tag = 1;
+      if(esp_now_info->rx_ctrl != NULL){
         g_rssi_ai32[1] = esp_now_info->rx_ctrl->rssi;
         g_rssiDisplay_i32 = g_rssi_ai32[1];
-      } else if(macCheck((uint8_t*)esp_now_info->src_addr, g_pedalMac_aau8[2])){
+      }
+    } else if(macCheck((uint8_t*)esp_now_info->src_addr, g_pedalMac_aau8[2])){
+      actual_pedal_tag = 2;
+      if(esp_now_info->rx_ctrl != NULL){
         g_rssi_ai32[2] = esp_now_info->rx_ctrl->rssi;
         g_rssiDisplay_i32 = g_rssi_ai32[2];
       }
     }
+
+    //ActiveSerial->printf("Message received from pedal: %d, overwritten to: %d\n", actual_pedal_tag, actual_pedal_tag); 
+
     if(data[0]==DAP_PAYLOAD_TYPE_ESPNOW_LOG_U8 && data[1]==ESPNOW_LOG_MAGIC_KEY_U8 && data[2]==ESPNOW_LOG_MAGIC_KEY_2_U8)
     {
 
@@ -252,9 +265,16 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int da
       
       //fill the joystick value
       if(structChecker){
-        uint8_t pedalTag=dap_state_basic_st_lcl.payloadHeader_st.pedalTag_u8;
+        // Nutze den aus der MAC-Adresse abgeleiteten Tag
+        uint8_t pedalTag = actual_pedal_tag;
+
         if(pedalTag < 3){
-          memcpy(&dap_state_basic_st[pedalTag], data, sizeof(DapStateBasic_t));
+          // 1. Überschreibe den Tag NUR in der lokalen Kopie
+          dap_state_basic_st_lcl.payloadHeader_st.pedalTag_u8 = pedalTag;
+
+          // 2. Kopiere die modifizierte lokale Kopie ins globale Array
+          memcpy(&dap_state_basic_st[pedalTag], &dap_state_basic_st_lcl, sizeof(DapStateBasic_t));
+
           g_updateBasicState_ab[pedalTag]=true;
           g_pedalLastUpdate_au32[pedalTag]=millis();
           if(dap_state_basic_st_lcl.payloadPedalStateBasic_st.errorCode_u8!=0) g_espNowError_ab[pedalTag]=true;
@@ -297,8 +317,12 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int da
       uint16_t crcChecker = checksumCalculator((uint8_t*)(&(dap_state_extend_st_lcl.payloadHeader_st)), sizeof(dap_state_extend_st_lcl.payloadHeader_st) + sizeof(dap_state_extend_st_lcl.payloadPedalStateExtended_st));
       if(crcChecker!=dap_state_extend_st_lcl.payloadFooter_st.checkSum_u16) structChecker=false;
       if(structChecker){
+        uint8_t pedalTag = actual_pedal_tag; // Auch hier den verifizierten Tag erzwingen
         if(pedalTag < 3){
           memcpy(&dap_state_extended_st[pedalTag], data, sizeof(DapStateExtended_t));
+          dap_state_extend_st_lcl.payloadHeader_st.pedalTag_u8 = pedalTag;
+          dap_state_extended_st[pedalTag].payloadHeader_st.pedalTag_u8 = pedalTag;
+
           g_updateExtendState_ab[pedalTag]=true;
         }
       }
@@ -308,15 +332,23 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int da
     if(data_len==sizeof(DapConfig_t))
     {
       memcpy(&dap_config_st_Temp, data, sizeof(DapConfig_t));
-      if(dap_config_st_Temp.payloadPedalConfig_st.pedalType_u8 < 3){
-        g_espNowRequestConfig_ab[dap_config_st_Temp.payloadPedalConfig_st.pedalType_u8]=true;
-        if(dap_config_st_Temp.payloadPedalConfig_st.pedalType_u8==0){
+      
+      uint8_t pedalTag = actual_pedal_tag; // Verifizierten Tag aus der MAC-Adresse nutzen
+      
+      if(pedalTag < 3){
+        // Überschreibe den Tag im Header und den Typ in der Konfiguration zwingend
+        dap_config_st_Temp.payloadHeader_st.pedalTag_u8 = pedalTag;
+        dap_config_st_Temp.payloadPedalConfig_st.pedalType_u8 = pedalTag;
+        
+        g_espNowRequestConfig_ab[pedalTag]=true;
+        
+        if(pedalTag==0){
           memcpy(&dap_config_st_Clu, &dap_config_st_Temp, sizeof(DapConfig_t));
         }
-        if(dap_config_st_Temp.payloadPedalConfig_st.pedalType_u8==1){
+        else if(pedalTag==1){
           memcpy(&dap_config_st_Brk, &dap_config_st_Temp, sizeof(DapConfig_t));
         }
-        if(dap_config_st_Temp.payloadPedalConfig_st.pedalType_u8==2){
+        else if(pedalTag==2){
           memcpy(&dap_config_st_Gas, &dap_config_st_Temp, sizeof(DapConfig_t));
         }
       }
@@ -332,8 +364,9 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int da
       uint16_t crcChecker = checksumCalculator((uint8_t*)(&(received_servo_config.payloadHeader_st)), sizeof(received_servo_config.payloadHeader_st) + sizeof(received_servo_config.payloadServoConfig_st));
       if(crcChecker!=received_servo_config.payloadFooter_st.checkSum_u16) structChecker=false;
       if(structChecker){
-        uint8_t pedalTag = received_servo_config.payloadHeader_st.pedalTag_u8;
+        uint8_t pedalTag = actual_pedal_tag; // Verifizierten Tag erzwingen
         if(pedalTag < 3){
+          received_servo_config.payloadHeader_st.pedalTag_u8 = pedalTag;
           memcpy(&dap_servo_config_response_st[pedalTag], &received_servo_config, sizeof(DAP_servo_config_st_t));
           send_servo_config_to_host[pedalTag] = true;
         }

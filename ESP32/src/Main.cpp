@@ -3788,6 +3788,11 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
         espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8 =
             s_localPedalType_u8;
       }
+
+      // overwrite for debug pruposes
+      // espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8 =
+      // PEDAL_ID_BRAKE;
+
       if (espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8 ==
               PEDAL_ID_UNKNOWN ||
           espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8 > 2) {
@@ -3808,8 +3813,8 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
         basic_state_send_b = true;
         basic_state_update_last = millis();
       }
-      if (espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8 ==
-          PEDAL_ID_UNKNOWN) {
+      if (espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8 >
+          2) { // HIER GEÄNDERT!
         noAssignmentStatus = true;
       } else {
         noAssignmentStatus = false;
@@ -3972,8 +3977,19 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
                               (uint8_t *)&dap_assignmentBoardcast_st,
                               sizeof(DapAssignmentBroadcast_t));
         }
+
+        static uint32_t counter_cycle_2 = 0;
+        counter_cycle_2++;
+        if (counter_cycle_2 % 100 == 0) {
+          ActiveSerial->printf(
+              "basic_state_send_b: %d, !noAssignmentStatus: %d\n",
+              basic_state_send_b, !noAssignmentStatus);
+          counter_cycle_2 = 0;
+        }
+
         // basic state packet send out
         if (basic_state_send_b && !noAssignmentStatus) {
+
           if (!isEspnowBusy()) {
             // update pedal states
             DapStateBasic_t dap_state_basic_st_lcl;
@@ -3984,6 +4000,12 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
             if (s_espnowStateQueue != NULL &&
                 xQueuePeek(s_espnowStateQueue, &statePkg, 0) == pdTRUE) {
               dap_state_basic_st_lcl = statePkg.basic_st;
+
+              // FIX: Erzwinge den korrekten Tag, falls er im Main-Task noch 4
+              // war!
+              dap_state_basic_st_lcl.payloadHeader_st.pedalTag_u8 =
+                  espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8;
+
               dap_state_basic_st_lcl.payloadFooter_st
                   .checkSum_u16 = checksumCalculator_u16(
                   (uint8_t *)(&(dap_state_basic_st_lcl.payloadHeader_st)),
@@ -4027,6 +4049,12 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
           if (s_espnowStateQueue != NULL &&
               xQueuePeek(s_espnowStateQueue, &statePkg, 0) == pdTRUE) {
             dap_state_extended_st_espNow = statePkg.extended_st;
+
+            // FIX: Erzwinge den korrekten Tag, falls er im Main-Task noch 4
+            // war!
+            dap_state_extended_st_espNow.payloadHeader_st.pedalTag_u8 =
+                espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8;
+
             dap_state_extended_st_espNow.payloadFooter_st.checkSum_u16 =
                 checksumCalculator_u16(
                     (uint8_t *)(&(

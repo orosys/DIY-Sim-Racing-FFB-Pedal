@@ -95,13 +95,13 @@ unsigned long g_rudderInitializedTime_u32 = 0;
 // with a spurious 0 (=CLUTCH) before espNowInitialize() loads the real
 // assignment from EEPROM.
 DapAssignmentReg_t g_dapAssignmentReg_st = {
-    .payloadType_u8      = 0,
-    .magicKey_u8         = 0,
+    .payloadType_u8 = 0,
+    .magicKey_u8 = 0,
     .isAdvancedPaired_u8 = 0,
-    .deviceId_u8         = PEDAL_ID_UNKNOWN,  // 4 — not < 3, so no spurious override
-    .pairStatus_au8      = {0, 0, 0, 0},
-    .pairedMac_aau8      = {{0},{0},{0},{0}},
-    .crc_u16             = 0,
+    .deviceId_u8 = PEDAL_ID_UNKNOWN, // 4 — not < 3, so no spurious override
+    .pairStatus_au8 = {0, 0, 0, 0},
+    .pairedMac_aau8 = {{0}, {0}, {0}, {0}},
+    .crc_u16 = 0,
 };
 DapRudder_t g_dapRudderReceiving_st;
 DapRudder_t g_dapRudderSending_st;
@@ -578,709 +578,717 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data,
         // commands regardless of the pedalTag, so that the bridge can assign it
         // even when it has never been assigned before (e.g. after a clear or
         // first boot).
-        if (s_localPedalType_u8 == PEDAL_ID_UNKNOWN ||
-            dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8 ==
-                PEDAL_ID_UNKNOWN) {
+        // An unassigned pedal must always accept assignment commands
+        if (s_localPedalType_u8 > 2 ||
+            dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8 >
+                2) { // BEIDES GEÄNDERT!
           commandForAssignment_b = true;
-        }
-
-        if (dap_actions_st.payloadHeader_st.pedalTag_u8 ==
-                dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8 ||
-            commandForAssignment_b) {
-          bool structChecker = true;
-          uint16_t crc;
-          if (dap_actions_st.payloadHeader_st.payloadType_u8 !=
-              DAP_PAYLOAD_TYPE_ACTION_U8) {
-            structChecker = false;
-            if (g_espNowErrorCode_u8 == 0) {
-              g_espNowErrorCode_u8 = 111;
-            }
-          }
-          if (dap_actions_st.payloadHeader_st.version_u8 !=
-              DAP_VERSION_CONFIG_U8) {
-            structChecker = false;
-            if (g_espNowErrorCode_u8 == 0) {
-              g_espNowErrorCode_u8 = 112;
-            }
-          }
-          crc = checksumCalculator_u16(
-              (uint8_t *)(&(dap_actions_st.payloadHeader_st)),
-              sizeof(dap_actions_st.payloadHeader_st) +
-                  sizeof(dap_actions_st.payloadPedalAction_st));
-          if (crc != dap_actions_st.payloadFooter_st.checkSum_u16) {
-            structChecker = false;
-            if (g_espNowErrorCode_u8 == 0) {
-              g_espNowErrorCode_u8 = 113;
-            }
-          }
-
-          if (structChecker == true) {
-
-            // 2= restart pedal
-            if (dap_actions_st.payloadPedalAction_st.systemAction_u8 ==
-                (uint8_t)PedalSystemAction::PEDAL_RESTART) {
-              g_espNowRestart_b = true;
-            }
-            // 3= Wifi OTA
-            if (dap_actions_st.payloadPedalAction_st.systemAction_u8 ==
-                (uint8_t)PedalSystemAction::ENABLE_OTA) {
-              g_espNowOtaEnable_b = true;
-            }
-            // 5= Boot into download mode
-            if (dap_actions_st.payloadPedalAction_st.systemAction_u8 ==
-                (uint8_t)PedalSystemAction::ESP_BOOT_INTO_DOWNLOAD_MODE) {
-              g_espNowBootIntoDownloadMode_b = true;
-            }
-            if (dap_actions_st.payloadPedalAction_st.systemAction_u8 ==
-                (uint8_t)PedalSystemAction::PRINT_PEDAL_INFO) {
-              g_printPedalInfo_b = true;
-            }
-            if (dap_actions_st.payloadPedalAction_st.systemAction_u8 ==
-                (uint8_t)PedalSystemAction::WAKEUP_PEDAL) {
-              if (g_pedalOperationalState_u8 ==
-                  (uint8_t)PEDAL_STATE_STANDBY_WAITING_FOR_WAKEUP_E) {
-                g_pedalOperationalState_u8 = (uint8_t)PEDAL_STATE_HOMING_E;
-              }
-            }
-            if (dap_actions_st.payloadPedalAction_st.systemAction_u8 ==
-                    (uint8_t)PedalSystemAction::SET_ASSIGNMENT_0 &&
-                commandForAssignment_b) {
-              g_dapAssignmentReg_st.deviceId_u8 = PEDAL_ID_CLUTCH;
-              g_dapAssignmentReg_st.isAdvancedPaired_u8 = 1;
-              g_dapAssignmentReg_st.pairStatus_au8[3] = 1;
-              memcpy(g_dapAssignmentReg_st.pairedMac_aau8[3],
-                     esp_now_info->src_addr, 6);
-              memcpy(g_espHost_au8, esp_now_info->src_addr, 6);
-              safeRegisterEspNowPeer(g_espHost_au8);
-              g_assignmentUpdate_b = true;
-              g_assignmentUpdateBuzzer_b = true;
-              ActiveSerial->println("Pedal: set assignment to Clutch");
-            }
-            if (dap_actions_st.payloadPedalAction_st.systemAction_u8 ==
-                    (uint8_t)PedalSystemAction::SET_ASSIGNMENT_1 &&
-                commandForAssignment_b) {
-              g_dapAssignmentReg_st.deviceId_u8 = PEDAL_ID_BRAKE;
-              g_dapAssignmentReg_st.isAdvancedPaired_u8 = 1;
-              g_dapAssignmentReg_st.pairStatus_au8[3] = 1;
-              memcpy(g_dapAssignmentReg_st.pairedMac_aau8[3],
-                     esp_now_info->src_addr, 6);
-              memcpy(g_espHost_au8, esp_now_info->src_addr, 6);
-              safeRegisterEspNowPeer(g_espHost_au8);
-              g_assignmentUpdate_b = true;
-              g_assignmentUpdateBuzzer_b = true;
-              ActiveSerial->println("Pedal: set assignment to Brake");
-            }
-            if (dap_actions_st.payloadPedalAction_st.systemAction_u8 ==
-                    (uint8_t)PedalSystemAction::SET_ASSIGNMENT_2 &&
-                commandForAssignment_b) {
-              g_dapAssignmentReg_st.deviceId_u8 = PEDAL_ID_THROTTLE;
-              g_dapAssignmentReg_st.isAdvancedPaired_u8 = 1;
-              g_dapAssignmentReg_st.pairStatus_au8[3] = 1;
-              memcpy(g_dapAssignmentReg_st.pairedMac_aau8[3],
-                     esp_now_info->src_addr, 6);
-              memcpy(g_espHost_au8, esp_now_info->src_addr, 6);
-              safeRegisterEspNowPeer(g_espHost_au8);
-              g_assignmentUpdate_b = true;
-              g_assignmentUpdateBuzzer_b = true;
-              ActiveSerial->println("Pedal: set assignment to Throttle");
-            }
-            if (dap_actions_st.payloadPedalAction_st.systemAction_u8 ==
-                (uint8_t)PedalSystemAction::ASSIGNMENT_CHECK_BEEP) {
-              g_assignmentUpdateBuzzer_b = true;
-            }
-            if (dap_actions_st.payloadPedalAction_st.systemAction_u8 ==
-                    (uint8_t)PedalSystemAction::CLEAR_ASSIGNMENT &&
-                !commandForAssignment_b) {
-              g_assignmentClear_b = true;
-            }
-            // trigger ABS effect
-            if (dap_actions_st.payloadPedalAction_st.triggerAbs_u8 > 0) {
-              absOscillation.trigger();
-              if (dap_actions_st.payloadPedalAction_st.triggerAbs_u8 > 1) {
-                dap_calculationVariables_st.trackCondition_u8 =
-                    dap_actions_st.payloadPedalAction_st.triggerAbs_u8 - 1;
-              } else {
-                dap_calculationVariables_st.trackCondition_u8 =
-                    dap_actions_st.payloadPedalAction_st.triggerAbs_u8 = 0;
-              }
-            }
-            // RPM effect
-            g_rpmOscillation_st.rpmValue_fl32 =
-                dap_actions_st.payloadPedalAction_st.rpm_u8;
-            // G force effect
-            g_gForceEffect_st.gValue_fl32 =
-                dap_actions_st.payloadPedalAction_st.gValue_u8 - 128;
-            // wheel slip
-            if (dap_actions_st.payloadPedalAction_st.wheelSlip_u8) {
-              g_wsOscillation_st.trigger();
-            }
-            // Road impact && Rudder_t G impact
-            if (dap_calculationVariables_st.rudderStatus_b == false) {
-              g_roadImpactEffect_st.roadImpactValue_u8 =
-                  dap_actions_st.payloadPedalAction_st.impactValue_u8;
-            } else {
-              g_rudderGForce_st.gValue_u8 =
-                  dap_actions_st.payloadPedalAction_st.impactValue_u8;
-            }
-            // trigger system identification
-            // if
-            // (dap_actions_st.payloadPedalAction_st.startSystemIdentification_u8)
-            // {
-            //   systemIdentificationMode_b = true;
-            // }
-            // trigger Custom effect effect 1
-            if (dap_actions_st.payloadPedalAction_st.triggerCv1_u8)
-              g_customVibration1_st.trigger();
-            // trigger Custom effect effect 2
-            if (dap_actions_st.payloadPedalAction_st.triggerCv2_u8)
-              g_customVibration2_st.trigger();
-            // trigger Custom effect effect 3
-            if (dap_actions_st.payloadPedalAction_st.triggerCv3_u8)
-              g_customVibration3_st.trigger();
-            // trigger Custom effect effect 4
-            if (dap_actions_st.payloadPedalAction_st.triggerCv4_u8)
-              g_customVibration4_st.trigger();
-            // trigger return pedal position
-            if (dap_actions_st.payloadPedalAction_st.returnPedalConfig_u8) {
-              g_espNowConfigRequest_b = true;
-              /*
-              DapConfig_t * dap_config_st_local_ptr;
-              dap_config_st_local_ptr = &dap_config_st;
-              //uint16_t crc =
-              checksumCalculator((uint8_t*)(&(dap_config_st.payloadHeader_st)),
-              sizeof(dap_config_st.payloadHeader_st) +
-              sizeof(dap_config_st.payloadPedalConfig_st)); crc =
-              checksumCalculator((uint8_t*)(&(dap_config_st.payloadHeader_st)),
-              sizeof(dap_config_st.payloadHeader_st) +
-              sizeof(dap_config_st.payloadPedalConfig_st));
-              dap_config_st_local_ptr->payloadFooter_st.checkSum_u16 = crc;
-              ActiveSerial->write((char*)dap_config_st_local_ptr,
-              sizeof(DapConfig_t)); ActiveSerial->print("\r\n");
-              */
-            }
-            uint8_t rudderAct =
-                dap_actions_st.payloadPedalAction_st.rudderAction_u8;
-            if (rudderAct == (uint8_t)RudderAction::RUDDER_THROTTLE_AND_BRAKE ||
-                rudderAct ==
-                    (uint8_t)RudderAction::RUDDER_THROTTLE_AND_CLUTCH) {
-              g_getRudderAction_b = true;
-              if (rudderAct ==
-                  (uint8_t)RudderAction::RUDDER_THROTTLE_AND_CLUTCH) {
-                if (dap_config_espnow_recv_st.payloadPedalConfig_st
-                        .pedalType_u8 == PEDAL_ID_THROTTLE) {
-                  memcpy(g_recvMac_au8, g_pedalMac_aau8[0], 6);
-                  safeRegisterEspNowPeer(g_recvMac_au8);
-                } else if (dap_config_espnow_recv_st.payloadPedalConfig_st
-                               .pedalType_u8 == PEDAL_ID_CLUTCH) {
-                  memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
-                  safeRegisterEspNowPeer(g_recvMac_au8);
                 }
-              } else if (rudderAct ==
-                         (uint8_t)RudderAction::RUDDER_THROTTLE_AND_BRAKE) {
-                if (dap_config_espnow_recv_st.payloadPedalConfig_st
-                        .pedalType_u8 == PEDAL_ID_THROTTLE) {
-                  memcpy(g_recvMac_au8, g_pedalMac_aau8[1], 6);
-                  safeRegisterEspNowPeer(g_recvMac_au8);
-                } else if (dap_config_espnow_recv_st.payloadPedalConfig_st
-                               .pedalType_u8 == PEDAL_ID_BRAKE) {
-                  memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
-                  safeRegisterEspNowPeer(g_recvMac_au8);
+
+          if (dap_actions_st.payloadHeader_st.pedalTag_u8 ==
+                  dap_config_espnow_recv_st.payloadPedalConfig_st
+                      .pedalType_u8 ||
+              commandForAssignment_b) {
+            bool structChecker = true;
+            uint16_t crc;
+            if (dap_actions_st.payloadHeader_st.payloadType_u8 !=
+                DAP_PAYLOAD_TYPE_ACTION_U8) {
+              structChecker = false;
+              if (g_espNowErrorCode_u8 == 0) {
+                g_espNowErrorCode_u8 = 111;
+              }
+            }
+            if (dap_actions_st.payloadHeader_st.version_u8 !=
+                DAP_VERSION_CONFIG_U8) {
+              structChecker = false;
+              if (g_espNowErrorCode_u8 == 0) {
+                g_espNowErrorCode_u8 = 112;
+              }
+            }
+            crc = checksumCalculator_u16(
+                (uint8_t *)(&(dap_actions_st.payloadHeader_st)),
+                sizeof(dap_actions_st.payloadHeader_st) +
+                    sizeof(dap_actions_st.payloadPedalAction_st));
+            if (crc != dap_actions_st.payloadFooter_st.checkSum_u16) {
+              structChecker = false;
+              if (g_espNowErrorCode_u8 == 0) {
+                g_espNowErrorCode_u8 = 113;
+              }
+            }
+
+            if (structChecker == true) {
+
+              // 2= restart pedal
+              if (dap_actions_st.payloadPedalAction_st.systemAction_u8 ==
+                  (uint8_t)PedalSystemAction::PEDAL_RESTART) {
+                g_espNowRestart_b = true;
+              }
+              // 3= Wifi OTA
+              if (dap_actions_st.payloadPedalAction_st.systemAction_u8 ==
+                  (uint8_t)PedalSystemAction::ENABLE_OTA) {
+                g_espNowOtaEnable_b = true;
+              }
+              // 5= Boot into download mode
+              if (dap_actions_st.payloadPedalAction_st.systemAction_u8 ==
+                  (uint8_t)PedalSystemAction::ESP_BOOT_INTO_DOWNLOAD_MODE) {
+                g_espNowBootIntoDownloadMode_b = true;
+              }
+              if (dap_actions_st.payloadPedalAction_st.systemAction_u8 ==
+                  (uint8_t)PedalSystemAction::PRINT_PEDAL_INFO) {
+                g_printPedalInfo_b = true;
+              }
+              if (dap_actions_st.payloadPedalAction_st.systemAction_u8 ==
+                  (uint8_t)PedalSystemAction::WAKEUP_PEDAL) {
+                if (g_pedalOperationalState_u8 ==
+                    (uint8_t)PEDAL_STATE_STANDBY_WAITING_FOR_WAKEUP_E) {
+                  g_pedalOperationalState_u8 = (uint8_t)PEDAL_STATE_HOMING_E;
                 }
               }
+              if (dap_actions_st.payloadPedalAction_st.systemAction_u8 ==
+                      (uint8_t)PedalSystemAction::SET_ASSIGNMENT_0 &&
+                  commandForAssignment_b) {
+                g_dapAssignmentReg_st.deviceId_u8 = PEDAL_ID_CLUTCH;
+                g_dapAssignmentReg_st.isAdvancedPaired_u8 = 1;
+                g_dapAssignmentReg_st.pairStatus_au8[3] = 1;
+                memcpy(g_dapAssignmentReg_st.pairedMac_aau8[3],
+                       esp_now_info->src_addr, 6);
+                memcpy(g_espHost_au8, esp_now_info->src_addr, 6);
+                safeRegisterEspNowPeer(g_espHost_au8);
+                g_assignmentUpdate_b = true;
+                g_assignmentUpdateBuzzer_b = true;
+                ActiveSerial->println("Pedal: set assignment to Clutch");
+              }
+              if (dap_actions_st.payloadPedalAction_st.systemAction_u8 ==
+                      (uint8_t)PedalSystemAction::SET_ASSIGNMENT_1 &&
+                  commandForAssignment_b) {
+                g_dapAssignmentReg_st.deviceId_u8 = PEDAL_ID_BRAKE;
+                g_dapAssignmentReg_st.isAdvancedPaired_u8 = 1;
+                g_dapAssignmentReg_st.pairStatus_au8[3] = 1;
+                memcpy(g_dapAssignmentReg_st.pairedMac_aau8[3],
+                       esp_now_info->src_addr, 6);
+                memcpy(g_espHost_au8, esp_now_info->src_addr, 6);
+                safeRegisterEspNowPeer(g_espHost_au8);
+                g_assignmentUpdate_b = true;
+                g_assignmentUpdateBuzzer_b = true;
+                ActiveSerial->println("Pedal: set assignment to Brake");
+              }
+              if (dap_actions_st.payloadPedalAction_st.systemAction_u8 ==
+                      (uint8_t)PedalSystemAction::SET_ASSIGNMENT_2 &&
+                  commandForAssignment_b) {
+                g_dapAssignmentReg_st.deviceId_u8 = PEDAL_ID_THROTTLE;
+                g_dapAssignmentReg_st.isAdvancedPaired_u8 = 1;
+                g_dapAssignmentReg_st.pairStatus_au8[3] = 1;
+                memcpy(g_dapAssignmentReg_st.pairedMac_aau8[3],
+                       esp_now_info->src_addr, 6);
+                memcpy(g_espHost_au8, esp_now_info->src_addr, 6);
+                safeRegisterEspNowPeer(g_espHost_au8);
+                g_assignmentUpdate_b = true;
+                g_assignmentUpdateBuzzer_b = true;
+                ActiveSerial->println("Pedal: set assignment to Throttle");
+              }
+              if (dap_actions_st.payloadPedalAction_st.systemAction_u8 ==
+                  (uint8_t)PedalSystemAction::ASSIGNMENT_CHECK_BEEP) {
+                g_assignmentUpdateBuzzer_b = true;
+              }
+              if (dap_actions_st.payloadPedalAction_st.systemAction_u8 ==
+                      (uint8_t)PedalSystemAction::CLEAR_ASSIGNMENT &&
+                  !commandForAssignment_b) {
+                g_assignmentClear_b = true;
+              }
+              // trigger ABS effect
+              if (dap_actions_st.payloadPedalAction_st.triggerAbs_u8 > 0) {
+                absOscillation.trigger();
+                if (dap_actions_st.payloadPedalAction_st.triggerAbs_u8 > 1) {
+                  dap_calculationVariables_st.trackCondition_u8 =
+                      dap_actions_st.payloadPedalAction_st.triggerAbs_u8 - 1;
+                } else {
+                  dap_calculationVariables_st.trackCondition_u8 =
+                      dap_actions_st.payloadPedalAction_st.triggerAbs_u8 = 0;
+                }
+              }
+              // RPM effect
+              g_rpmOscillation_st.rpmValue_fl32 =
+                  dap_actions_st.payloadPedalAction_st.rpm_u8;
+              // G force effect
+              g_gForceEffect_st.gValue_fl32 =
+                  dap_actions_st.payloadPedalAction_st.gValue_u8 - 128;
+              // wheel slip
+              if (dap_actions_st.payloadPedalAction_st.wheelSlip_u8) {
+                g_wsOscillation_st.trigger();
+              }
+              // Road impact && Rudder_t G impact
               if (dap_calculationVariables_st.rudderStatus_b == false) {
-                dap_calculationVariables_st.rudderStatus_b = true;
-                dap_calculationVariables_st.helicopterRudderStatus_b = false;
-                // ActiveSerial->println("Rudder_t on");
-                // ActiveSerial->print("status:");
-                // ActiveSerial->println(dap_calculationVariables_st.rudderStatus_b);
+                g_roadImpactEffect_st.roadImpactValue_u8 =
+                    dap_actions_st.payloadPedalAction_st.impactValue_u8;
               } else {
-                dap_calculationVariables_st.rudderStatus_b = false;
-                dap_calculationVariables_st.helicopterRudderStatus_b = false;
-                moveSlowlyToPosition_b = true;
-                ResetRudderStrategyState();
-                // ActiveSerial->println("Rudder_t off");
-                // ActiveSerial->print("status:");
-                // ActiveSerial->println(dap_calculationVariables_st.rudderStatus_b);
+                g_rudderGForce_st.gValue_u8 =
+                    dap_actions_st.payloadPedalAction_st.impactValue_u8;
               }
-            } else if (rudderAct ==
-                           (uint8_t)
-                               RudderAction::HELIRUDDER_THROTTLE_AND_BRAKE ||
-                       rudderAct ==
-                           (uint8_t)
-                               RudderAction::HELIRUDDER_THROTTLE_AND_CLUTCH) {
-              g_getHeliRudderAction_b = true;
+              // trigger system identification
+              // if
+              // (dap_actions_st.payloadPedalAction_st.startSystemIdentification_u8)
+              // {
+              //   systemIdentificationMode_b = true;
+              // }
+              // trigger Custom effect effect 1
+              if (dap_actions_st.payloadPedalAction_st.triggerCv1_u8)
+                g_customVibration1_st.trigger();
+              // trigger Custom effect effect 2
+              if (dap_actions_st.payloadPedalAction_st.triggerCv2_u8)
+                g_customVibration2_st.trigger();
+              // trigger Custom effect effect 3
+              if (dap_actions_st.payloadPedalAction_st.triggerCv3_u8)
+                g_customVibration3_st.trigger();
+              // trigger Custom effect effect 4
+              if (dap_actions_st.payloadPedalAction_st.triggerCv4_u8)
+                g_customVibration4_st.trigger();
+              // trigger return pedal position
+              if (dap_actions_st.payloadPedalAction_st.returnPedalConfig_u8) {
+                g_espNowConfigRequest_b = true;
+                /*
+                DapConfig_t * dap_config_st_local_ptr;
+                dap_config_st_local_ptr = &dap_config_st;
+                //uint16_t crc =
+                checksumCalculator((uint8_t*)(&(dap_config_st.payloadHeader_st)),
+                sizeof(dap_config_st.payloadHeader_st) +
+                sizeof(dap_config_st.payloadPedalConfig_st)); crc =
+                checksumCalculator((uint8_t*)(&(dap_config_st.payloadHeader_st)),
+                sizeof(dap_config_st.payloadHeader_st) +
+                sizeof(dap_config_st.payloadPedalConfig_st));
+                dap_config_st_local_ptr->payloadFooter_st.checkSum_u16 = crc;
+                ActiveSerial->write((char*)dap_config_st_local_ptr,
+                sizeof(DapConfig_t)); ActiveSerial->print("\r\n");
+                */
+              }
+              uint8_t rudderAct =
+                  dap_actions_st.payloadPedalAction_st.rudderAction_u8;
               if (rudderAct ==
-                  (uint8_t)RudderAction::HELIRUDDER_THROTTLE_AND_CLUTCH) {
-                if (dap_config_espnow_recv_st.payloadPedalConfig_st
-                        .pedalType_u8 == PEDAL_ID_THROTTLE) {
-                  memcpy(g_recvMac_au8, g_pedalMac_aau8[0], 6);
-                  safeRegisterEspNowPeer(g_recvMac_au8);
-                } else if (dap_config_espnow_recv_st.payloadPedalConfig_st
-                               .pedalType_u8 == PEDAL_ID_CLUTCH) {
-                  memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
-                  safeRegisterEspNowPeer(g_recvMac_au8);
+                      (uint8_t)RudderAction::RUDDER_THROTTLE_AND_BRAKE ||
+                  rudderAct ==
+                      (uint8_t)RudderAction::RUDDER_THROTTLE_AND_CLUTCH) {
+                g_getRudderAction_b = true;
+                if (rudderAct ==
+                    (uint8_t)RudderAction::RUDDER_THROTTLE_AND_CLUTCH) {
+                  if (dap_config_espnow_recv_st.payloadPedalConfig_st
+                          .pedalType_u8 == PEDAL_ID_THROTTLE) {
+                    memcpy(g_recvMac_au8, g_pedalMac_aau8[0], 6);
+                    safeRegisterEspNowPeer(g_recvMac_au8);
+                  } else if (dap_config_espnow_recv_st.payloadPedalConfig_st
+                                 .pedalType_u8 == PEDAL_ID_CLUTCH) {
+                    memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
+                    safeRegisterEspNowPeer(g_recvMac_au8);
+                  }
+                } else if (rudderAct ==
+                           (uint8_t)RudderAction::RUDDER_THROTTLE_AND_BRAKE) {
+                  if (dap_config_espnow_recv_st.payloadPedalConfig_st
+                          .pedalType_u8 == PEDAL_ID_THROTTLE) {
+                    memcpy(g_recvMac_au8, g_pedalMac_aau8[1], 6);
+                    safeRegisterEspNowPeer(g_recvMac_au8);
+                  } else if (dap_config_espnow_recv_st.payloadPedalConfig_st
+                                 .pedalType_u8 == PEDAL_ID_BRAKE) {
+                    memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
+                    safeRegisterEspNowPeer(g_recvMac_au8);
+                  }
+                }
+                if (dap_calculationVariables_st.rudderStatus_b == false) {
+                  dap_calculationVariables_st.rudderStatus_b = true;
+                  dap_calculationVariables_st.helicopterRudderStatus_b = false;
+                  // ActiveSerial->println("Rudder_t on");
+                  // ActiveSerial->print("status:");
+                  // ActiveSerial->println(dap_calculationVariables_st.rudderStatus_b);
+                } else {
+                  dap_calculationVariables_st.rudderStatus_b = false;
+                  dap_calculationVariables_st.helicopterRudderStatus_b = false;
+                  moveSlowlyToPosition_b = true;
+                  ResetRudderStrategyState();
+                  // ActiveSerial->println("Rudder_t off");
+                  // ActiveSerial->print("status:");
+                  // ActiveSerial->println(dap_calculationVariables_st.rudderStatus_b);
                 }
               } else if (rudderAct ==
-                         (uint8_t)RudderAction::HELIRUDDER_THROTTLE_AND_BRAKE) {
-                if (dap_config_espnow_recv_st.payloadPedalConfig_st
-                        .pedalType_u8 == PEDAL_ID_THROTTLE) {
-                  memcpy(g_recvMac_au8, g_pedalMac_aau8[1], 6);
-                  safeRegisterEspNowPeer(g_recvMac_au8);
-                } else if (dap_config_espnow_recv_st.payloadPedalConfig_st
-                               .pedalType_u8 == PEDAL_ID_BRAKE) {
-                  memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
-                  safeRegisterEspNowPeer(g_recvMac_au8);
+                             (uint8_t)
+                                 RudderAction::HELIRUDDER_THROTTLE_AND_BRAKE ||
+                         rudderAct ==
+                             (uint8_t)
+                                 RudderAction::HELIRUDDER_THROTTLE_AND_CLUTCH) {
+                g_getHeliRudderAction_b = true;
+                if (rudderAct ==
+                    (uint8_t)RudderAction::HELIRUDDER_THROTTLE_AND_CLUTCH) {
+                  if (dap_config_espnow_recv_st.payloadPedalConfig_st
+                          .pedalType_u8 == PEDAL_ID_THROTTLE) {
+                    memcpy(g_recvMac_au8, g_pedalMac_aau8[0], 6);
+                    safeRegisterEspNowPeer(g_recvMac_au8);
+                  } else if (dap_config_espnow_recv_st.payloadPedalConfig_st
+                                 .pedalType_u8 == PEDAL_ID_CLUTCH) {
+                    memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
+                    safeRegisterEspNowPeer(g_recvMac_au8);
+                  }
+                } else if (rudderAct ==
+                           (uint8_t)
+                               RudderAction::HELIRUDDER_THROTTLE_AND_BRAKE) {
+                  if (dap_config_espnow_recv_st.payloadPedalConfig_st
+                          .pedalType_u8 == PEDAL_ID_THROTTLE) {
+                    memcpy(g_recvMac_au8, g_pedalMac_aau8[1], 6);
+                    safeRegisterEspNowPeer(g_recvMac_au8);
+                  } else if (dap_config_espnow_recv_st.payloadPedalConfig_st
+                                 .pedalType_u8 == PEDAL_ID_BRAKE) {
+                    memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
+                    safeRegisterEspNowPeer(g_recvMac_au8);
+                  }
                 }
-              }
-              if (dap_calculationVariables_st.helicopterRudderStatus_b ==
-                  false) {
-                dap_calculationVariables_st.helicopterRudderStatus_b = true;
+                if (dap_calculationVariables_st.helicopterRudderStatus_b ==
+                    false) {
+                  dap_calculationVariables_st.helicopterRudderStatus_b = true;
+                  dap_calculationVariables_st.rudderStatus_b = false;
+                  // ActiveSerial->println("Rudder_t on");
+                  // ActiveSerial->print("status:");
+                  // ActiveSerial->println(dap_calculationVariables_st.rudderStatus_b);
+                } else {
+                  dap_calculationVariables_st.helicopterRudderStatus_b = false;
+                  dap_calculationVariables_st.rudderStatus_b = false;
+                  moveSlowlyToPosition_b = true;
+                  ResetRudderStrategyState();
+                  // ActiveSerial->println("Rudder_t off");
+                  // ActiveSerial->print("status:");
+                  // ActiveSerial->println(dap_calculationVariables_st.rudderStatus_b);
+                }
+              } else if (rudderAct ==
+                         (uint8_t)RudderAction::RUDDER_CLEAR_RUDDER_STATUS) {
                 dap_calculationVariables_st.rudderStatus_b = false;
-                // ActiveSerial->println("Rudder_t on");
-                // ActiveSerial->print("status:");
-                // ActiveSerial->println(dap_calculationVariables_st.rudderStatus_b);
-              } else {
                 dap_calculationVariables_st.helicopterRudderStatus_b = false;
-                dap_calculationVariables_st.rudderStatus_b = false;
+                dap_calculationVariables_st.rudderBrakeStatus_b = false;
                 moveSlowlyToPosition_b = true;
                 ResetRudderStrategyState();
-                // ActiveSerial->println("Rudder_t off");
-                // ActiveSerial->print("status:");
-                // ActiveSerial->println(dap_calculationVariables_st.rudderStatus_b);
+                // ActiveSerial->println("Rudder_t Status Clear");
               }
-            } else if (rudderAct ==
-                       (uint8_t)RudderAction::RUDDER_CLEAR_RUDDER_STATUS) {
-              dap_calculationVariables_st.rudderStatus_b = false;
-              dap_calculationVariables_st.helicopterRudderStatus_b = false;
-              dap_calculationVariables_st.rudderBrakeStatus_b = false;
-              moveSlowlyToPosition_b = true;
-              ResetRudderStrategyState();
-              // ActiveSerial->println("Rudder_t Status Clear");
-            }
 
-            uint8_t brakeAct =
-                dap_actions_st.payloadPedalAction_st.rudderBrakeAction_u8;
-            if (brakeAct == 1) {
-              g_getRudderAction_b = true;
-              if (dap_calculationVariables_st.rudderBrakeStatus_b == false &&
-                  (dap_calculationVariables_st.rudderStatus_b == true ||
-                   dap_calculationVariables_st.helicopterRudderStatus_b ==
-                       true)) {
-                dap_calculationVariables_st.rudderBrakeStatus_b = true;
-              } else {
+              uint8_t brakeAct =
+                  dap_actions_st.payloadPedalAction_st.rudderBrakeAction_u8;
+              if (brakeAct == 1) {
+                g_getRudderAction_b = true;
+                if (dap_calculationVariables_st.rudderBrakeStatus_b == false &&
+                    (dap_calculationVariables_st.rudderStatus_b == true ||
+                     dap_calculationVariables_st.helicopterRudderStatus_b ==
+                         true)) {
+                  dap_calculationVariables_st.rudderBrakeStatus_b = true;
+                } else {
+                  dap_calculationVariables_st.rudderBrakeStatus_b = false;
+                }
+              } else if (brakeAct == 2) {
+                g_getRudderAction_b = true;
+                if (dap_calculationVariables_st.rudderStatus_b == true ||
+                    dap_calculationVariables_st.helicopterRudderStatus_b ==
+                        true) {
+                  dap_calculationVariables_st.rudderBrakeStatus_b = true;
+                }
+              } else if (brakeAct == 3) {
+                g_getRudderAction_b = true;
                 dap_calculationVariables_st.rudderBrakeStatus_b = false;
               }
-            } else if (brakeAct == 2) {
-              g_getRudderAction_b = true;
-              if (dap_calculationVariables_st.rudderStatus_b == true ||
-                  dap_calculationVariables_st.helicopterRudderStatus_b ==
-                      true) {
-                dap_calculationVariables_st.rudderBrakeStatus_b = true;
-              }
-            } else if (brakeAct == 3) {
-              g_getRudderAction_b = true;
-              dap_calculationVariables_st.rudderBrakeStatus_b = false;
             }
           }
         }
-      }
-      if (data_len == sizeof(DapActionOta_t)) {
-        memcpy(&dap_action_ota_st, data, sizeof(DapActionOta_t));
-        g_otaUpdateAction_b = true;
-      }
+        if (data_len == sizeof(DapActionOta_t)) {
+          memcpy(&dap_action_ota_st, data, sizeof(DapActionOta_t));
+          g_otaUpdateAction_b = true;
+        }
 
-      if (data_len == sizeof(DapWifiChannel_t)) {
-        DapWifiChannel_t wifiChPacket;
-        memcpy(&wifiChPacket, data, sizeof(DapWifiChannel_t));
-        if (wifiChPacket.payloadHeader_st.payloadType_u8 ==
-                DAP_PAYLOAD_TYPE_WIFI_CHANNEL_U8 &&
-            wifiChPacket.payloadHeader_st.version_u8 == DAP_VERSION_CONFIG_U8) {
-          uint16_t crc = checksumCalculator_u16(
-              (uint8_t *)(&(wifiChPacket.payloadHeader_st)),
-              sizeof(wifiChPacket.payloadHeader_st) +
-                  sizeof(wifiChPacket.payloadWifiChannel_st));
-          if (crc == wifiChPacket.payloadFooter_st.checkSum_u16) {
-            if (wifiChPacket.payloadWifiChannel_st.command_u8 ==
-                    WIFI_CH_CMD_SET_REQ &&
-                (isHostSender || isUnassigned || isBridgeLost)) {
-              if (isHostSender)
+        if (data_len == sizeof(DapWifiChannel_t)) {
+          DapWifiChannel_t wifiChPacket;
+          memcpy(&wifiChPacket, data, sizeof(DapWifiChannel_t));
+          if (wifiChPacket.payloadHeader_st.payloadType_u8 ==
+                  DAP_PAYLOAD_TYPE_WIFI_CHANNEL_U8 &&
+              wifiChPacket.payloadHeader_st.version_u8 ==
+                  DAP_VERSION_CONFIG_U8) {
+            uint16_t crc = checksumCalculator_u16(
+                (uint8_t *)(&(wifiChPacket.payloadHeader_st)),
+                sizeof(wifiChPacket.payloadHeader_st) +
+                    sizeof(wifiChPacket.payloadWifiChannel_st));
+            if (crc == wifiChPacket.payloadFooter_st.checkSum_u16) {
+              if (wifiChPacket.payloadWifiChannel_st.command_u8 ==
+                      WIFI_CH_CMD_SET_REQ &&
+                  (isHostSender || isUnassigned || isBridgeLost)) {
+                if (isHostSender)
+                  g_lastMasterHeartbeat_ms = millis();
+                uint8_t newCh =
+                    wifiChPacket.payloadWifiChannel_st.currentChannel_u8;
+                if (newCh < 1 || newCh > 14) {
+                  newCh =
+                      wifiChPacket.payloadWifiChannel_st.recommendedChannel_u8;
+                }
+                if (newCh >= 1 && newCh <= 14) {
+                  g_currentWifiChannel_u8 = newCh;
+                  esp_wifi_set_channel(newCh, WIFI_SECOND_CHAN_NONE);
+                  g_saveWifiChannelDeferred_b = true;
+                  ActiveSerial->printf(
+                      "Switched Wi-Fi channel to %d via ESP-NOW SET_REQ\n",
+                      newCh);
+                }
+              }
+              if (wifiChPacket.payloadWifiChannel_st.command_u8 ==
+                      WIFI_CH_CMD_BEACON &&
+                  isHostSender) {
                 g_lastMasterHeartbeat_ms = millis();
-              uint8_t newCh =
-                  wifiChPacket.payloadWifiChannel_st.currentChannel_u8;
-              if (newCh < 1 || newCh > 14) {
-                newCh =
-                    wifiChPacket.payloadWifiChannel_st.recommendedChannel_u8;
-              }
-              if (newCh >= 1 && newCh <= 14) {
-                g_currentWifiChannel_u8 = newCh;
-                esp_wifi_set_channel(newCh, WIFI_SECOND_CHAN_NONE);
-                g_saveWifiChannelDeferred_b = true;
-                ActiveSerial->printf(
-                    "Switched Wi-Fi channel to %d via ESP-NOW SET_REQ\n",
-                    newCh);
+                uint8_t beaconCh =
+                    wifiChPacket.payloadWifiChannel_st.currentChannel_u8;
+                if (beaconCh >= 1 && beaconCh <= 14 &&
+                    beaconCh != g_currentWifiChannel_u8) {
+                  g_currentWifiChannel_u8 = beaconCh;
+                  esp_wifi_set_channel(beaconCh, WIFI_SECOND_CHAN_NONE);
+                  g_saveWifiChannelDeferred_b = true;
+                  ActiveSerial->printf(
+                      "Wi-Fi channel synced to %d via Bridge Beacon\n",
+                      beaconCh);
+                }
               }
             }
-            if (wifiChPacket.payloadWifiChannel_st.command_u8 ==
-                    WIFI_CH_CMD_BEACON &&
-                isHostSender) {
+          }
+        }
+
+        if (data_len == sizeof(DapAssignmentReg_t)) {
+          DapAssignmentReg_t incomingReg;
+          memcpy(&incomingReg, data, sizeof(DapAssignmentReg_t));
+          if (incomingReg.payloadType_u8 == DAP_PAYLOAD_TYPE_ASSIGNMENT_U8 &&
+              incomingReg.magicKey_u8 == ESPNOW_ASSIGNMENT_MAGIC_KEY_U8) {
+            uint16_t crc = checksumCalculator_u16((uint8_t *)(&incomingReg),
+                                                  sizeof(DapAssignmentReg_t) -
+                                                      sizeof(uint16_t));
+            if (crc == incomingReg.crc_u16) {
               g_lastMasterHeartbeat_ms = millis();
-              uint8_t beaconCh =
-                  wifiChPacket.payloadWifiChannel_st.currentChannel_u8;
-              if (beaconCh >= 1 && beaconCh <= 14 &&
-                  beaconCh != g_currentWifiChannel_u8) {
-                g_currentWifiChannel_u8 = beaconCh;
-                esp_wifi_set_channel(beaconCh, WIFI_SECOND_CHAN_NONE);
-                g_saveWifiChannelDeferred_b = true;
-                ActiveSerial->printf(
-                    "Wi-Fi channel synced to %d via Bridge Beacon\n", beaconCh);
+              for (int p = 0; p < 3; p++) {
+                g_dapAssignmentReg_st.pairStatus_au8[p] =
+                    incomingReg.pairStatus_au8[p];
+                if (incomingReg.pairStatus_au8[p] == 1) {
+                  memcpy(g_dapAssignmentReg_st.pairedMac_aau8[p],
+                         incomingReg.pairedMac_aau8[p], 6);
+                  memcpy(g_pedalMac_aau8[p], incomingReg.pairedMac_aau8[p], 6);
+                  safeRegisterEspNowPeer(g_pedalMac_aau8[p]);
+                }
               }
+              if (incomingReg.pairStatus_au8[3] == 1) {
+                g_dapAssignmentReg_st.pairStatus_au8[3] = 1;
+                memcpy(g_dapAssignmentReg_st.pairedMac_aau8[3],
+                       incomingReg.pairedMac_aau8[3], 6);
+                memcpy(g_espHost_au8, incomingReg.pairedMac_aau8[3], 6);
+                safeRegisterEspNowPeer(g_espHost_au8);
+              }
+              if (s_localPedalType_u8 == PEDAL_ID_THROTTLE &&
+                  g_dapAssignmentReg_st.pairStatus_au8[1] == 1) {
+                memcpy(g_recvMac_au8, g_pedalMac_aau8[1], 6);
+                safeRegisterEspNowPeer(g_recvMac_au8);
+              } else if (s_localPedalType_u8 == PEDAL_ID_BRAKE &&
+                         g_dapAssignmentReg_st.pairStatus_au8[2] == 1) {
+                memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
+                safeRegisterEspNowPeer(g_recvMac_au8);
+              }
+              g_assignmentUpdate_b = true;
             }
           }
         }
-      }
 
-      if (data_len == sizeof(DapAssignmentReg_t)) {
-        DapAssignmentReg_t incomingReg;
-        memcpy(&incomingReg, data, sizeof(DapAssignmentReg_t));
-        if (incomingReg.payloadType_u8 == DAP_PAYLOAD_TYPE_ASSIGNMENT_U8 &&
-            incomingReg.magicKey_u8 == ESPNOW_ASSIGNMENT_MAGIC_KEY_U8) {
-          uint16_t crc = checksumCalculator_u16((uint8_t *)(&incomingReg),
-                                                sizeof(DapAssignmentReg_t) -
-                                                    sizeof(uint16_t));
-          if (crc == incomingReg.crc_u16) {
-            g_lastMasterHeartbeat_ms = millis();
-            for (int p = 0; p < 3; p++) {
-              g_dapAssignmentReg_st.pairStatus_au8[p] =
-                  incomingReg.pairStatus_au8[p];
-              if (incomingReg.pairStatus_au8[p] == 1) {
-                memcpy(g_dapAssignmentReg_st.pairedMac_aau8[p],
-                       incomingReg.pairedMac_aau8[p], 6);
-                memcpy(g_pedalMac_aau8[p], incomingReg.pairedMac_aau8[p], 6);
-                safeRegisterEspNowPeer(g_pedalMac_aau8[p]);
-              }
+        if (data_len == sizeof(DAP_servo_config_st)) {
+          DAP_servo_config_st received_servo_config;
+          memcpy(&received_servo_config, data, sizeof(DAP_servo_config_st));
+
+          bool structChecker = true;
+          if (received_servo_config.payloadHeader_st.payloadType_u8 !=
+              DAP_PAYLOAD_TYPE_SERVO_CONFIG_U8)
+            structChecker = false;
+          if (received_servo_config.payloadHeader_st.version_u8 !=
+              DAP_VERSION_CONFIG_U8)
+            structChecker = false;
+
+          uint16_t crc = checksumCalculator_u16(
+              (uint8_t *)(&(received_servo_config.payloadHeader_st)),
+              sizeof(received_servo_config.payloadHeader_st) +
+                  sizeof(received_servo_config.payloadServoConfig_st));
+          if (crc != received_servo_config.payloadFooter_st.checkSum_u16)
+            structChecker = false;
+
+          if (structChecker == true) {
+            if (s_servoConfigRxQueue != NULL) {
+              xQueueSend(s_servoConfigRxQueue, &received_servo_config,
+                         (TickType_t)0);
             }
-            if (incomingReg.pairStatus_au8[3] == 1) {
-              g_dapAssignmentReg_st.pairStatus_au8[3] = 1;
-              memcpy(g_dapAssignmentReg_st.pairedMac_aau8[3],
-                     incomingReg.pairedMac_aau8[3], 6);
-              memcpy(g_espHost_au8, incomingReg.pairedMac_aau8[3], 6);
-              safeRegisterEspNowPeer(g_espHost_au8);
-            }
-            if (s_localPedalType_u8 == PEDAL_ID_THROTTLE &&
-                g_dapAssignmentReg_st.pairStatus_au8[1] == 1) {
-              memcpy(g_recvMac_au8, g_pedalMac_aau8[1], 6);
-              safeRegisterEspNowPeer(g_recvMac_au8);
-            } else if (s_localPedalType_u8 == PEDAL_ID_BRAKE &&
-                       g_dapAssignmentReg_st.pairStatus_au8[2] == 1) {
-              memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
-              safeRegisterEspNowPeer(g_recvMac_au8);
-            }
-            g_assignmentUpdate_b = true;
-          }
-        }
-      }
-
-      if (data_len == sizeof(DAP_servo_config_st)) {
-        DAP_servo_config_st received_servo_config;
-        memcpy(&received_servo_config, data, sizeof(DAP_servo_config_st));
-
-        bool structChecker = true;
-        if (received_servo_config.payloadHeader_st.payloadType_u8 !=
-            DAP_PAYLOAD_TYPE_SERVO_CONFIG_U8)
-          structChecker = false;
-        if (received_servo_config.payloadHeader_st.version_u8 !=
-            DAP_VERSION_CONFIG_U8)
-          structChecker = false;
-
-        uint16_t crc = checksumCalculator_u16(
-            (uint8_t *)(&(received_servo_config.payloadHeader_st)),
-            sizeof(received_servo_config.payloadHeader_st) +
-                sizeof(received_servo_config.payloadServoConfig_st));
-        if (crc != received_servo_config.payloadFooter_st.checkSum_u16)
-          structChecker = false;
-
-        if (structChecker == true) {
-          if (s_servoConfigRxQueue != NULL) {
-            xQueueSend(s_servoConfigRxQueue, &received_servo_config,
-                       (TickType_t)0);
           }
         }
       }
     }
   }
-}
-void onSent(const esp_now_send_info_t *tx_info, esp_now_send_status_t status) {
-  g_lastEspnowOnSentTime_u32 = millis();
-  g_espnowTxInFlight_b = false;
-  if (status != ESP_NOW_SEND_SUCCESS) {
-    g_espnowSendFailCount_u32 = g_espnowSendFailCount_u32 + 1;
+  void onSent(const esp_now_send_info_t *tx_info,
+              esp_now_send_status_t status) {
+    g_lastEspnowOnSentTime_u32 = millis();
+    g_espnowTxInFlight_b = false;
+    if (status != ESP_NOW_SEND_SUCCESS) {
+      g_espnowSendFailCount_u32 = g_espnowSendFailCount_u32 + 1;
+    }
   }
-}
 
-inline uint32_t getEspnowSendLatency() {
-  uint32_t latency = millis() - g_lastEspnowSendTime_u32;
-  uint32_t onSentAgo = millis() - g_lastEspnowOnSentTime_u32;
-  if (latency < onSentAgo) {
-    return latency;
+  inline uint32_t getEspnowSendLatency() {
+    uint32_t latency = millis() - g_lastEspnowSendTime_u32;
+    uint32_t onSentAgo = millis() - g_lastEspnowOnSentTime_u32;
+    if (latency < onSentAgo) {
+      return latency;
+    }
+    return 0;
   }
-  return 0;
-}
 
-inline bool checkEspnowConnection() {
-  if (millis() - g_lastEspnowRecvTime_u32 > 1000) {
-    g_isEspnowConnected_b = false;
+  inline bool checkEspnowConnection() {
+    if (millis() - g_lastEspnowRecvTime_u32 > 1000) {
+      g_isEspnowConnected_b = false;
+    }
+    return g_isEspnowConnected_b;
   }
-  return g_isEspnowConnected_b;
-}
 
-void espNowInitialize() {
-  DapConfig_t dap_config_espnow_init_st;
-  global_dap_config_class.getConfig(&dap_config_espnow_init_st, 500);
-  s_localPedalType_u8 =
-      dap_config_espnow_init_st.payloadPedalConfig_st.pedalType_u8;
-  WiFi.mode(WIFI_MODE_STA);
-  WiFi.setSleep(false);
-  delay(1000);
-  ActiveSerial->println("Initializing Wifi, please wait");
-  // ActiveSerial->print("Current MAC Address:  ");
-  // ActiveSerial->println(WiFi.macAddress());
-  WiFi.macAddress(g_espMac_au8);
-  ActiveSerial->printf("Device Mac: %02X:%02X:%02X:%02X:%02X:%02X\n",
-                       g_espMac_au8[0], g_espMac_au8[1], g_espMac_au8[2],
-                       g_espMac_au8[3], g_espMac_au8[4], g_espMac_au8[5]);
-  // Retain factory eFuse Hardware MAC (no overwrite)
-  ActiveSerial->println("Initializing ESP-NOW");
-  ESPNow.init();
+  void espNowInitialize() {
+    DapConfig_t dap_config_espnow_init_st;
+    global_dap_config_class.getConfig(&dap_config_espnow_init_st, 500);
+    s_localPedalType_u8 =
+        dap_config_espnow_init_st.payloadPedalConfig_st.pedalType_u8;
+    WiFi.mode(WIFI_MODE_STA);
+    WiFi.setSleep(false);
+    delay(1000);
+    ActiveSerial->println("Initializing Wifi, please wait");
+    // ActiveSerial->print("Current MAC Address:  ");
+    // ActiveSerial->println(WiFi.macAddress());
+    WiFi.macAddress(g_espMac_au8);
+    ActiveSerial->printf("Device Mac: %02X:%02X:%02X:%02X:%02X:%02X\n",
+                         g_espMac_au8[0], g_espMac_au8[1], g_espMac_au8[2],
+                         g_espMac_au8[3], g_espMac_au8[4], g_espMac_au8[5]);
+    // Retain factory eFuse Hardware MAC (no overwrite)
+    ActiveSerial->println("Initializing ESP-NOW");
+    ESPNow.init();
 #ifndef ESPNOW_WIFI_CHANNEL
 #define ESPNOW_WIFI_CHANNEL 11
 #endif
-  g_currentWifiChannel_u8 = loadWifiChannelFromEeprom();
-  ActiveSerial->printf("ESP-NOW Channel loaded from EEPROM: %d\n",
-                       g_currentWifiChannel_u8);
-  esp_wifi_set_channel(g_currentWifiChannel_u8, WIFI_SECOND_CHAN_NONE);
-  delay(3000);
+    g_currentWifiChannel_u8 = loadWifiChannelFromEeprom();
+    ActiveSerial->printf("ESP-NOW Channel loaded from EEPROM: %d\n",
+                         g_currentWifiChannel_u8);
+    esp_wifi_set_channel(g_currentWifiChannel_u8, WIFI_SECOND_CHAN_NONE);
+    delay(3000);
 #ifdef ESPNow_S3
-  esp_wifi_config_espnow_rate(WIFI_IF_STA, WIFI_PHY_RATE_11M_L);
+    esp_wifi_config_espnow_rate(WIFI_IF_STA, WIFI_PHY_RATE_11M_L);
 #ifdef LOWER_WIFI_TRANSMISSION_POWER
-  esp_wifi_set_max_tx_power(WIFI_POWER_8_5dBm);
+    esp_wifi_set_max_tx_power(WIFI_POWER_8_5dBm);
 #endif
 #endif
 #ifdef ESPNow_ESP32
-  esp_wifi_config_espnow_rate(WIFI_IF_STA, WIFI_PHY_RATE_11M_L);
+    esp_wifi_config_espnow_rate(WIFI_IF_STA, WIFI_PHY_RATE_11M_L);
 #endif
 #ifdef ESPNow_Pairing_function
-  EspPairingReg_t ESP_pairing_reg_local;
-  EEPROM.get(EEPROM_offset, ESP_pairing_reg_local);
-  memcpy(&g_espPairingReg_st, &ESP_pairing_reg_local, sizeof(EspPairingReg_t));
-  // g_espPairingReg_st=ESP_pairing_reg_local;
-  //  EEPROM.get(EEPROM_offset, g_espPairingReg_st);
-  for (int i = 0; i < 4; i++) {
-    if (g_espPairingReg_st.pairStatus_au8[i] == 1) {
-      ActiveSerial->print("Paired Device #");
-      ActiveSerial->print(i);
-      // ActiveSerial->print(" Pair: ");
-      // ActiveSerial->print(g_espPairingReg_st.pairStatus_au8[i]);
-      ActiveSerial->printf(" Mac: %02X:%02X:%02X:%02X:%02X:%02X\n",
-                           g_espPairingReg_st.pairMac_aau8[i][0],
-                           g_espPairingReg_st.pairMac_aau8[i][1],
-                           g_espPairingReg_st.pairMac_aau8[i][2],
-                           g_espPairingReg_st.pairMac_aau8[i][3],
-                           g_espPairingReg_st.pairMac_aau8[i][4],
-                           g_espPairingReg_st.pairMac_aau8[i][5]);
-    }
-  }
-  for (int i = 0; i < 4; i++) {
-    if (g_espPairingReg_st.pairStatus_au8[i] == 1) {
-      if (i == 0) {
-        memcpy(&g_pedalMac_aau8[0], &g_espPairingReg_st.pairMac_aau8[i], 6);
-      }
-      if (i == 1) {
-        memcpy(&g_pedalMac_aau8[1], &g_espPairingReg_st.pairMac_aau8[i], 6);
-      }
-      if (i == 2) {
-        memcpy(&g_pedalMac_aau8[2], &g_espPairingReg_st.pairMac_aau8[i], 6);
-      }
-      if (i == 3) {
-        memcpy(&g_espHost_au8, &g_espPairingReg_st.pairMac_aau8[i], 6);
+    EspPairingReg_t ESP_pairing_reg_local;
+    EEPROM.get(EEPROM_offset, ESP_pairing_reg_local);
+    memcpy(&g_espPairingReg_st, &ESP_pairing_reg_local,
+           sizeof(EspPairingReg_t));
+    // g_espPairingReg_st=ESP_pairing_reg_local;
+    //  EEPROM.get(EEPROM_offset, g_espPairingReg_st);
+    for (int i = 0; i < 4; i++) {
+      if (g_espPairingReg_st.pairStatus_au8[i] == 1) {
+        ActiveSerial->print("Paired Device #");
+        ActiveSerial->print(i);
+        // ActiveSerial->print(" Pair: ");
+        // ActiveSerial->print(g_espPairingReg_st.pairStatus_au8[i]);
+        ActiveSerial->printf(" Mac: %02X:%02X:%02X:%02X:%02X:%02X\n",
+                             g_espPairingReg_st.pairMac_aau8[i][0],
+                             g_espPairingReg_st.pairMac_aau8[i][1],
+                             g_espPairingReg_st.pairMac_aau8[i][2],
+                             g_espPairingReg_st.pairMac_aau8[i][3],
+                             g_espPairingReg_st.pairMac_aau8[i][4],
+                             g_espPairingReg_st.pairMac_aau8[i][5]);
       }
     }
-  }
-#endif
-
-  bool isRecvValid = false;
-  for (int m = 0; m < 6; m++) {
-    if (g_recvMac_au8[m] != 0) {
-      isRecvValid = true;
-      break;
-    }
-  }
-  if (isRecvValid) {
-    safeRegisterEspNowPeer(g_recvMac_au8);
-  }
-  for (int p = 0; p < 3; p++) {
-    safeRegisterEspNowPeer(g_pedalMac_aau8[p]);
-  }
-  safeRegisterEspNowPeer(g_espHost_au8);
-  ESPNow.add_peer(g_broadcastMac_au8);
-  ActiveSerial->println("Sucess to add peers");
-
-  ESPNow.reg_recv_cb(onRecv);
-  ESPNow.reg_send_cb(onSent);
-  // rssi calculate
-  g_espNowInitialStatus_b = true;
-  g_espNowStatus_b = true;
-  ActiveSerial->println("ESPNow Initialized");
-}
-
-void sendESPNOWLog(const char *log, ...) {
-  uint8_t buffer[250];
-  uint8_t payloadType = DAP_PAYLOAD_TYPE_ESPNOW_LOG_U8;
-  char textBuf[240];
-  va_list args;
-  va_start(args, log);
-  int len = vsnprintf(textBuf, sizeof(textBuf), log, args);
-  va_end(args);
-  if (len <= 0)
-    return;
-  if (len > 240)
-    len = 240;
-  buffer[0] = payloadType;
-  buffer[1] = ESPNOW_LOG_MAGIC_KEY_U8;
-  buffer[2] = ESPNOW_LOG_MAGIC_KEY_2_U8;
-  buffer[3] = (uint8_t)len;
-  memcpy(&buffer[4], textBuf, len);
-  espnowSendWrapper(g_broadcastMac_au8, (uint8_t *)buffer, 4 + len);
-}
-
-void softwareAssignmentInitialize() {
-  DapAssignmentReg_t dap_assignement_reg_local;
-  EEPROM.get(ASSIGNMENT_EEPROM_OFFSET_U32, dap_assignement_reg_local);
-  bool structChecker = true;
-  uint16_t crc =
-      checksumCalculator_u16((uint8_t *)(&dap_assignement_reg_local),
-                             sizeof(DapAssignmentReg_t) - sizeof(uint16_t));
-  if (dap_assignement_reg_local.payloadType_u8 !=
-      DAP_PAYLOAD_TYPE_ASSIGNMENT_U8)
-    structChecker = false;
-  if (dap_assignement_reg_local.magicKey_u8 != ESPNOW_ASSIGNMENT_MAGIC_KEY_U8)
-    structChecker = false;
-  if (crc != dap_assignement_reg_local.crc_u16)
-    structChecker = false;
-  if (dap_assignement_reg_local.crc_u16 != crc)
-    structChecker = false;
-  DapConfig_t tmp;
-  global_dap_config_class.getConfig(&tmp, 500);
-  if (structChecker) {
-    memcpy(&g_dapAssignmentReg_st, &dap_assignement_reg_local,
-           sizeof(DapAssignmentReg_t));
-    g_deviceIdStructChecker_b = true;
-    ActiveSerial->print("Overwritting pedal assignment: ");
-    ActiveSerial->println(dap_assignement_reg_local.deviceId_u8);
-
-    if (g_dapAssignmentReg_st.deviceId_u8 == PEDAL_ID_CLUTCH ||
-        g_dapAssignmentReg_st.deviceId_u8 == PEDAL_ID_BRAKE ||
-        g_dapAssignmentReg_st.deviceId_u8 == PEDAL_ID_THROTTLE) {
-      tmp.payloadPedalConfig_st.pedalType_u8 =
-          g_dapAssignmentReg_st.deviceId_u8;
-      s_localPedalType_u8 = g_dapAssignmentReg_st.deviceId_u8;
-
-      if (g_dapAssignmentReg_st.isAdvancedPaired_u8 == 1 &&
-          g_dapAssignmentReg_st.pairStatus_au8[3] == 1) {
-        memcpy(g_espHost_au8, g_dapAssignmentReg_st.pairedMac_aau8[3], 6);
-        safeRegisterEspNowPeer(g_espHost_au8);
-        ActiveSerial->printf("Loaded Paired Bridge Hardware MAC: "
-                             "%02X:%02X:%02X:%02X:%02X:%02X\n",
-                             g_espHost_au8[0], g_espHost_au8[1],
-                             g_espHost_au8[2], g_espHost_au8[3],
-                             g_espHost_au8[4], g_espHost_au8[5]);
-      }
-      for (int p = 0; p < 3; p++) {
-        if (g_dapAssignmentReg_st.pairStatus_au8[p] == 1) {
-          memcpy(g_pedalMac_aau8[p], g_dapAssignmentReg_st.pairedMac_aau8[p],
-                 6);
-          safeRegisterEspNowPeer(g_pedalMac_aau8[p]);
+    for (int i = 0; i < 4; i++) {
+      if (g_espPairingReg_st.pairStatus_au8[i] == 1) {
+        if (i == 0) {
+          memcpy(&g_pedalMac_aau8[0], &g_espPairingReg_st.pairMac_aau8[i], 6);
+        }
+        if (i == 1) {
+          memcpy(&g_pedalMac_aau8[1], &g_espPairingReg_st.pairMac_aau8[i], 6);
+        }
+        if (i == 2) {
+          memcpy(&g_pedalMac_aau8[2], &g_espPairingReg_st.pairMac_aau8[i], 6);
+        }
+        if (i == 3) {
+          memcpy(&g_espHost_au8, &g_espPairingReg_st.pairMac_aau8[i], 6);
         }
       }
-      if (s_localPedalType_u8 == PEDAL_ID_THROTTLE &&
-          g_dapAssignmentReg_st.pairStatus_au8[1] == 1) {
-        memcpy(g_recvMac_au8, g_pedalMac_aau8[1], 6);
-        safeRegisterEspNowPeer(g_recvMac_au8);
-      } else if (s_localPedalType_u8 == PEDAL_ID_BRAKE &&
-                 g_dapAssignmentReg_st.pairStatus_au8[2] == 1) {
-        memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
-        safeRegisterEspNowPeer(g_recvMac_au8);
+    }
+#endif
+
+    bool isRecvValid = false;
+    for (int m = 0; m < 6; m++) {
+      if (g_recvMac_au8[m] != 0) {
+        isRecvValid = true;
+        break;
       }
+    }
+    if (isRecvValid) {
+      safeRegisterEspNowPeer(g_recvMac_au8);
+    }
+    for (int p = 0; p < 3; p++) {
+      safeRegisterEspNowPeer(g_pedalMac_aau8[p]);
+    }
+    safeRegisterEspNowPeer(g_espHost_au8);
+    ESPNow.add_peer(g_broadcastMac_au8);
+    ActiveSerial->println("Sucess to add peers");
+
+    ESPNow.reg_recv_cb(onRecv);
+    ESPNow.reg_send_cb(onSent);
+    // rssi calculate
+    g_espNowInitialStatus_b = true;
+    g_espNowStatus_b = true;
+    ActiveSerial->println("ESPNow Initialized");
+  }
+
+  void sendESPNOWLog(const char *log, ...) {
+    uint8_t buffer[250];
+    uint8_t payloadType = DAP_PAYLOAD_TYPE_ESPNOW_LOG_U8;
+    char textBuf[240];
+    va_list args;
+    va_start(args, log);
+    int len = vsnprintf(textBuf, sizeof(textBuf), log, args);
+    va_end(args);
+    if (len <= 0)
+      return;
+    if (len > 240)
+      len = 240;
+    buffer[0] = payloadType;
+    buffer[1] = ESPNOW_LOG_MAGIC_KEY_U8;
+    buffer[2] = ESPNOW_LOG_MAGIC_KEY_2_U8;
+    buffer[3] = (uint8_t)len;
+    memcpy(&buffer[4], textBuf, len);
+    espnowSendWrapper(g_broadcastMac_au8, (uint8_t *)buffer, 4 + len);
+  }
+
+  void softwareAssignmentInitialize() {
+    DapAssignmentReg_t dap_assignement_reg_local;
+    EEPROM.get(ASSIGNMENT_EEPROM_OFFSET_U32, dap_assignement_reg_local);
+    bool structChecker = true;
+    uint16_t crc =
+        checksumCalculator_u16((uint8_t *)(&dap_assignement_reg_local),
+                               sizeof(DapAssignmentReg_t) - sizeof(uint16_t));
+    if (dap_assignement_reg_local.payloadType_u8 !=
+        DAP_PAYLOAD_TYPE_ASSIGNMENT_U8)
+      structChecker = false;
+    if (dap_assignement_reg_local.magicKey_u8 != ESPNOW_ASSIGNMENT_MAGIC_KEY_U8)
+      structChecker = false;
+    if (crc != dap_assignement_reg_local.crc_u16)
+      structChecker = false;
+    if (dap_assignement_reg_local.crc_u16 != crc)
+      structChecker = false;
+    DapConfig_t tmp;
+    global_dap_config_class.getConfig(&tmp, 500);
+    if (structChecker) {
+      memcpy(&g_dapAssignmentReg_st, &dap_assignement_reg_local,
+             sizeof(DapAssignmentReg_t));
+      g_deviceIdStructChecker_b = true;
+      ActiveSerial->print("Overwritting pedal assignment: ");
+      ActiveSerial->println(dap_assignement_reg_local.deviceId_u8);
+
+      if (g_dapAssignmentReg_st.deviceId_u8 == PEDAL_ID_CLUTCH ||
+          g_dapAssignmentReg_st.deviceId_u8 == PEDAL_ID_BRAKE ||
+          g_dapAssignmentReg_st.deviceId_u8 == PEDAL_ID_THROTTLE) {
+        tmp.payloadPedalConfig_st.pedalType_u8 =
+            g_dapAssignmentReg_st.deviceId_u8;
+        s_localPedalType_u8 = g_dapAssignmentReg_st.deviceId_u8;
+
+        if (g_dapAssignmentReg_st.isAdvancedPaired_u8 == 1 &&
+            g_dapAssignmentReg_st.pairStatus_au8[3] == 1) {
+          memcpy(g_espHost_au8, g_dapAssignmentReg_st.pairedMac_aau8[3], 6);
+          safeRegisterEspNowPeer(g_espHost_au8);
+          ActiveSerial->printf("Loaded Paired Bridge Hardware MAC: "
+                               "%02X:%02X:%02X:%02X:%02X:%02X\n",
+                               g_espHost_au8[0], g_espHost_au8[1],
+                               g_espHost_au8[2], g_espHost_au8[3],
+                               g_espHost_au8[4], g_espHost_au8[5]);
+        }
+        for (int p = 0; p < 3; p++) {
+          if (g_dapAssignmentReg_st.pairStatus_au8[p] == 1) {
+            memcpy(g_pedalMac_aau8[p], g_dapAssignmentReg_st.pairedMac_aau8[p],
+                   6);
+            safeRegisterEspNowPeer(g_pedalMac_aau8[p]);
+          }
+        }
+        if (s_localPedalType_u8 == PEDAL_ID_THROTTLE &&
+            g_dapAssignmentReg_st.pairStatus_au8[1] == 1) {
+          memcpy(g_recvMac_au8, g_pedalMac_aau8[1], 6);
+          safeRegisterEspNowPeer(g_recvMac_au8);
+        } else if (s_localPedalType_u8 == PEDAL_ID_BRAKE &&
+                   g_dapAssignmentReg_st.pairStatus_au8[2] == 1) {
+          memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
+          safeRegisterEspNowPeer(g_recvMac_au8);
+        }
+      } else {
+        tmp.payloadPedalConfig_st.pedalType_u8 = PEDAL_ID_UNKNOWN;
+      }
+
     } else {
       tmp.payloadPedalConfig_st.pedalType_u8 = PEDAL_ID_UNKNOWN;
+      ActiveSerial->println("Assignment error:");
+      ActiveSerial->print("Payload type expect:");
+      ActiveSerial->print(DAP_PAYLOAD_TYPE_ASSIGNMENT_U8);
+      ActiveSerial->print(" Payload type get:");
+      ActiveSerial->println(dap_assignement_reg_local.payloadType_u8);
+      ActiveSerial->print("Magic key expect:");
+      ActiveSerial->print(ESPNOW_ASSIGNMENT_MAGIC_KEY_U8);
+      ActiveSerial->print(" Magic key get:");
+      ActiveSerial->println(dap_assignement_reg_local.magicKey_u8);
+      ActiveSerial->print("crc expect:");
+      ActiveSerial->print(crc);
+      ActiveSerial->print(" crc get:");
+      ActiveSerial->println(dap_assignement_reg_local.crc_u16);
+      ActiveSerial->print("Pedal ID get:");
+      ActiveSerial->println(dap_assignement_reg_local.deviceId_u8);
     }
+    configDataPackage_t configPackage_st;
+    configPackage_st.config_st = tmp;
+    xQueueSend(s_configUpdateAvailableQueue, &configPackage_st, portMAX_DELAY);
+    delay(1000); // delay for writting config into global
+  }
 
-  } else {
-    tmp.payloadPedalConfig_st.pedalType_u8 = PEDAL_ID_UNKNOWN;
-    ActiveSerial->println("Assignment error:");
-    ActiveSerial->print("Payload type expect:");
-    ActiveSerial->print(DAP_PAYLOAD_TYPE_ASSIGNMENT_U8);
-    ActiveSerial->print(" Payload type get:");
-    ActiveSerial->println(dap_assignement_reg_local.payloadType_u8);
-    ActiveSerial->print("Magic key expect:");
-    ActiveSerial->print(ESPNOW_ASSIGNMENT_MAGIC_KEY_U8);
-    ActiveSerial->print(" Magic key get:");
-    ActiveSerial->println(dap_assignement_reg_local.magicKey_u8);
-    ActiveSerial->print("crc expect:");
-    ActiveSerial->print(crc);
+  void writeAssignmentToEeprom() {
+    ActiveSerial->println("Writting assignment to eeprom.");
+    g_dapAssignmentReg_st.magicKey_u8 = ESPNOW_ASSIGNMENT_MAGIC_KEY_U8;
+    g_dapAssignmentReg_st.payloadType_u8 = DAP_PAYLOAD_TYPE_ASSIGNMENT_U8;
+    // refill the crc
+    g_dapAssignmentReg_st.crc_u16 =
+        checksumCalculator_u16((uint8_t *)(&g_dapAssignmentReg_st),
+                               sizeof(DapAssignmentReg_t) - sizeof(uint16_t));
+    // write assignment to eeprom
+    EEPROM.put(ASSIGNMENT_EEPROM_OFFSET_U32, g_dapAssignmentReg_st);
+    EEPROM.commit();
+    delay(1000);
+    // check the data inside of eeprom
+    DapAssignmentReg_t dap_assignement_reg_local;
+    EEPROM.get(ASSIGNMENT_EEPROM_OFFSET_U32, dap_assignement_reg_local);
+    // list those assignment
+    ActiveSerial->println("check the assignment in eeprom");
+    ActiveSerial->print("Assignment expected:");
+    ActiveSerial->print(g_dapAssignmentReg_st.deviceId_u8);
+    ActiveSerial->print(" Assignment get:");
+    ActiveSerial->println(dap_assignement_reg_local.deviceId_u8);
+    ActiveSerial->print("crc expected:");
+    ActiveSerial->print(g_dapAssignmentReg_st.crc_u16);
     ActiveSerial->print(" crc get:");
     ActiveSerial->println(dap_assignement_reg_local.crc_u16);
-    ActiveSerial->print("Pedal ID get:");
-    ActiveSerial->println(dap_assignement_reg_local.deviceId_u8);
   }
-  configDataPackage_t configPackage_st;
-  configPackage_st.config_st = tmp;
-  xQueueSend(s_configUpdateAvailableQueue, &configPackage_st, portMAX_DELAY);
-  delay(1000); // delay for writting config into global
-}
-
-void writeAssignmentToEeprom() {
-  ActiveSerial->println("Writting assignment to eeprom.");
-  g_dapAssignmentReg_st.magicKey_u8 = ESPNOW_ASSIGNMENT_MAGIC_KEY_U8;
-  g_dapAssignmentReg_st.payloadType_u8 = DAP_PAYLOAD_TYPE_ASSIGNMENT_U8;
-  // refill the crc
-  g_dapAssignmentReg_st.crc_u16 =
-      checksumCalculator_u16((uint8_t *)(&g_dapAssignmentReg_st),
-                             sizeof(DapAssignmentReg_t) - sizeof(uint16_t));
-  // write assignment to eeprom
-  EEPROM.put(ASSIGNMENT_EEPROM_OFFSET_U32, g_dapAssignmentReg_st);
-  EEPROM.commit();
-  delay(1000);
-  // check the data inside of eeprom
-  DapAssignmentReg_t dap_assignement_reg_local;
-  EEPROM.get(ASSIGNMENT_EEPROM_OFFSET_U32, dap_assignement_reg_local);
-  // list those assignment
-  ActiveSerial->println("check the assignment in eeprom");
-  ActiveSerial->print("Assignment expected:");
-  ActiveSerial->print(g_dapAssignmentReg_st.deviceId_u8);
-  ActiveSerial->print(" Assignment get:");
-  ActiveSerial->println(dap_assignement_reg_local.deviceId_u8);
-  ActiveSerial->print("crc expected:");
-  ActiveSerial->print(g_dapAssignmentReg_st.crc_u16);
-  ActiveSerial->print(" crc get:");
-  ActiveSerial->println(dap_assignement_reg_local.crc_u16);
-}
-void clearAssignmentToEeprom() {
-  ActiveSerial->println("clear assignment from eeprom.");
-  g_dapAssignmentReg_st.magicKey_u8 = 0;
-  g_dapAssignmentReg_st.payloadType_u8 = 0;
-  g_dapAssignmentReg_st.deviceId_u8 = 99;
-  g_dapAssignmentReg_st.isAdvancedPaired_u8 = 0;
-  memset(g_dapAssignmentReg_st.pairStatus_au8, 0,
-         sizeof(g_dapAssignmentReg_st.pairStatus_au8));
-  memset(g_dapAssignmentReg_st.pairedMac_aau8, 0,
-         sizeof(g_dapAssignmentReg_st.pairedMac_aau8));
-  // refill the crc
-  g_dapAssignmentReg_st.crc_u16 = 0;
-  // write assignment to eeprom
-  EEPROM.put(ASSIGNMENT_EEPROM_OFFSET_U32, g_dapAssignmentReg_st);
-  EEPROM.commit();
-  delay(1000);
-}
+  void clearAssignmentToEeprom() {
+    ActiveSerial->println("clear assignment from eeprom.");
+    g_dapAssignmentReg_st.magicKey_u8 = 0;
+    g_dapAssignmentReg_st.payloadType_u8 = 0;
+    g_dapAssignmentReg_st.deviceId_u8 = 99;
+    g_dapAssignmentReg_st.isAdvancedPaired_u8 = 0;
+    memset(g_dapAssignmentReg_st.pairStatus_au8, 0,
+           sizeof(g_dapAssignmentReg_st.pairStatus_au8));
+    memset(g_dapAssignmentReg_st.pairedMac_aau8, 0,
+           sizeof(g_dapAssignmentReg_st.pairedMac_aau8));
+    // refill the crc
+    g_dapAssignmentReg_st.crc_u16 = 0;
+    // write assignment to eeprom
+    EEPROM.put(ASSIGNMENT_EEPROM_OFFSET_U32, g_dapAssignmentReg_st);
+    EEPROM.commit();
+    delay(1000);
+  }
 #else
 static const bool IS_ESPNOW_ENABLED = false;
 static uint8_t g_espNowErrorCode_u8 = 0;
