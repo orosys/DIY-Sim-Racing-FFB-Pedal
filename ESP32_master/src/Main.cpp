@@ -2350,6 +2350,11 @@ void hidCommunicaitonTxTask(void *pvParameters)
           if(g_updateBasicState_ab[i])
           {
             g_updateBasicState_ab[i]=false;
+
+            if(isBridgeInDebugMode_b) {
+              tinyusbJoystick_.printf("BasicState gesendet - Tag: %d", dap_state_basic_st[i].payloadHeader_st.pedalTag_u8);
+            }
+            
             tinyusbJoystick_.sendData((uint8_t*)&dap_state_basic_st[i], sizeof(DapStateBasic_t));
             if(dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[dap_state_basic_st[i].payloadHeader_st.pedalTag_u8]==0)
             {

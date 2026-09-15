@@ -342,14 +342,16 @@ void IRAM_ATTR_FLAG configHandlingTask(void *pvParameters) {
     if (xQueueReceive(s_configUpdateAvailableQueue, &configPackage_st,
                       portMAX_DELAY) == pdPASS) {
 #ifdef ESPNOW_Enable
-      if (configPackage_st.config_st.payloadPedalConfig_st.pedalType_u8 >= 3) {
-        if (s_localPedalType_u8 < 3) {
-          configPackage_st.config_st.payloadPedalConfig_st.pedalType_u8 =
-              s_localPedalType_u8;
-        } else if (g_dapAssignmentReg_st.deviceId_u8 < 3) {
-          configPackage_st.config_st.payloadPedalConfig_st.pedalType_u8 =
-              g_dapAssignmentReg_st.deviceId_u8;
-        }
+      // Always enforce the locally stored assignment over what an incoming
+      // config packet says. The bridge may send an outdated pedalType (e.g.
+      // Clutch=0) which would silently overwrite the EEPROM-loaded Brake/
+      // Throttle role. s_localPedalType_u8 is authoritative when valid (<3).
+      if (s_localPedalType_u8 < 3) {
+        configPackage_st.config_st.payloadPedalConfig_st.pedalType_u8 =
+            s_localPedalType_u8;
+      } else if (g_dapAssignmentReg_st.deviceId_u8 < 3) {
+        configPackage_st.config_st.payloadPedalConfig_st.pedalType_u8 =
+            g_dapAssignmentReg_st.deviceId_u8;
       }
 #endif
       global_dap_config_class.setConfig(configPackage_st.config_st);
@@ -1047,6 +1049,32 @@ void setup() {
     ActiveSerial->println("Updating pedal config from EEPROM");
     // global_dap_config_class.setConfig(dap_config_st_local);
     dap_config_st_local = dap_config_st_eeprom;
+
+#if defined(PEDAL_SOFTWARE_ASSIGNMENT) && defined(ESPNOW_Enable)
+    // Re-apply the assignment-register override: the line above clobbered the
+    // pedalType_u8 that was set from the assignment EEPROM at early boot.
+    // The software assignment register is authoritative over the main config.
+    if (dap_assignement_reg_local.payloadType_u8 ==
+            DAP_PAYLOAD_TYPE_ASSIGNMENT_U8 &&
+        dap_assignement_reg_local.magicKey_u8 ==
+            ESPNOW_ASSIGNMENT_MAGIC_KEY_U8 &&
+        crcAssign == dap_assignement_reg_local.crc_u16) {
+      if (dap_assignement_reg_local.deviceId_u8 == PEDAL_ID_CLUTCH ||
+          dap_assignement_reg_local.deviceId_u8 == PEDAL_ID_BRAKE ||
+          dap_assignement_reg_local.deviceId_u8 == PEDAL_ID_THROTTLE) {
+        dap_config_st_local.payloadPedalConfig_st.pedalType_u8 =
+            dap_assignement_reg_local.deviceId_u8;
+        ActiveSerial->printf(
+            "Assignment register re-applied pedalType=%d after EEPROM load\n",
+            dap_assignement_reg_local.deviceId_u8);
+      }
+    }
+    // Write the corrected config back to the config class so that all tasks
+    // that call global_dap_config_class.getConfig() (e.g. pedalUpdateTask,
+    // espNowInitialize) see the correct pedalType from the start.
+    global_dap_config_class.setConfig(dap_config_st_local);
+#endif
+
     configDataPackage_t configPackage_st;
     configPackage_st.config_st = dap_config_st_local;
     // xQueueSend(configUpdateAvailableQueue, &configPackage_st, portMAX_DELAY);
@@ -2541,7 +2569,8 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
         }
         if (dap_calculationVariables_st.rudderStatus_b &&
             !dap_calculationVariables_st.rudderBrakeStatus_b) {
-          // Symmetrical Yaw Mapping around 50% (neutral position anchored at 50%)
+          // Symmetrical Yaw Mapping around 50% (neutral position anchored at
+          // 50%)
           float yawFrac = constrain(pedalArcPercentage_fl32, 0.0f, 1.0f);
           if (yawFrac >= 0.5f) {
             joystickNormalizedToInt32_eval = forceCurve.EvalJoystickCubicSpline(
@@ -3759,6 +3788,11 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
         espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8 =
             s_localPedalType_u8;
       }
+
+      // overwrite for debug pruposes
+      // espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8 =
+      // PEDAL_ID_BRAKE;
+
       if (espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8 ==
               PEDAL_ID_UNKNOWN ||
           espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8 > 2) {
@@ -3779,8 +3813,8 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
         basic_state_send_b = true;
         basic_state_update_last = millis();
       }
-      if (espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8 ==
-          PEDAL_ID_UNKNOWN) {
+      if (espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8 >
+          2) { // HIER GEÄNDERT!
         noAssignmentStatus = true;
       } else {
         noAssignmentStatus = false;
@@ -3796,7 +3830,7 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
       // entend state send out interval
       if ((millis() - extend_state_update_last > extendStateUpdateInterval) &&
           (espnow_dap_config_st.payloadPedalConfig_st.debugFlags0_u8 &
-              DEBUG_INFO_0_STATE_EXTENDED_INFO_STRUCT_U8)) {
+           DEBUG_INFO_0_STATE_EXTENDED_INFO_STRUCT_U8)) {
         extend_state_send_b = true;
         extend_state_update_last = millis();
       }
@@ -3893,9 +3927,26 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
 
         profiler_espNow.start(2);
         // assignment request packet send out
-        bool isBridgeLostLong = (g_dapAssignmentReg_st.isAdvancedPaired_u8 == 1 && (millis() - g_lastMasterHeartbeat_ms > 5000));
-        if (assignmentUpdatePacketSend_b && (noAssignmentStatus || isBridgeLostLong)) {
-          // ActiveSerial->println("Send out assignment request");
+        bool isBridgeLostLong =
+            (g_dapAssignmentReg_st.isAdvancedPaired_u8 == 1 &&
+             (millis() - g_lastMasterHeartbeat_ms > 5000));
+        // Startup broadcast: only fire for truly unassigned pedals.
+        // A pedal with a valid paired assignment already stored in EEPROM
+        // must NOT broadcast here, because the bridge auto-assigns the first
+        // empty slot (Clutch = 0) on every restart, overwriting the stored
+        // role. Assigned pedals are rediscovered by the bridge via the
+        // DapStateBasic_t state packets sent every ~7 ms, and fall back to
+        // isBridgeLostLong after 5 s if the bridge does not respond.
+        bool bridgeNeverHeard = (g_lastMasterHeartbeat_ms == 0);
+        bool hasPairedAssignment =
+            (g_dapAssignmentReg_st.isAdvancedPaired_u8 == 1 &&
+             g_dapAssignmentReg_st.deviceId_u8 < 3);
+        bool isStartupBroadcastWindow =
+            (millis() < 30000) && bridgeNeverHeard && !hasPairedAssignment;
+        if (assignmentUpdatePacketSend_b &&
+            (noAssignmentStatus || isBridgeLostLong ||
+             isStartupBroadcastWindow)) {
+          ActiveSerial->println("Send out assignment request");
           assignmentUpdatePacketSend_b = false;
           DapAssignmentBroadcast_t dap_assignmentBoardcast_st;
           dap_assignmentBoardcast_st.payloadHeader_st.startOfFrame0_u8 =
@@ -3926,8 +3977,19 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
                               (uint8_t *)&dap_assignmentBoardcast_st,
                               sizeof(DapAssignmentBroadcast_t));
         }
+
+        static uint32_t counter_cycle_2 = 0;
+        counter_cycle_2++;
+        if (counter_cycle_2 % 100 == 0) {
+          ActiveSerial->printf(
+              "basic_state_send_b: %d, !noAssignmentStatus: %d\n",
+              basic_state_send_b, !noAssignmentStatus);
+          counter_cycle_2 = 0;
+        }
+
         // basic state packet send out
         if (basic_state_send_b && !noAssignmentStatus) {
+
           if (!isEspnowBusy()) {
             // update pedal states
             DapStateBasic_t dap_state_basic_st_lcl;
@@ -3938,6 +4000,12 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
             if (s_espnowStateQueue != NULL &&
                 xQueuePeek(s_espnowStateQueue, &statePkg, 0) == pdTRUE) {
               dap_state_basic_st_lcl = statePkg.basic_st;
+
+              // FIX: Erzwinge den korrekten Tag, falls er im Main-Task noch 4
+              // war!
+              dap_state_basic_st_lcl.payloadHeader_st.pedalTag_u8 =
+                  espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8;
+
               dap_state_basic_st_lcl.payloadFooter_st
                   .checkSum_u16 = checksumCalculator_u16(
                   (uint8_t *)(&(dap_state_basic_st_lcl.payloadHeader_st)),
@@ -3946,6 +4014,17 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
               esp_err_t res = espnowSendWrapper(
                   g_broadcastMac_au8, (uint8_t *)&dap_state_basic_st_lcl,
                   sizeof(dap_state_basic_st_lcl));
+
+              static uint32_t counter_cycle = 0;
+              counter_cycle++;
+              if (counter_cycle % 100 == 0) {
+                ActiveSerial->printf(
+                    "Pedal: send out basic struct via ESP now, "
+                    "pedalType_u8:%d\n",
+                    dap_state_basic_st_lcl.payloadHeader_st.pedalTag_u8);
+                counter_cycle = 0;
+              }
+
               if (res == ESP_OK) {
                 packetSentThisCycle = true;
               }
@@ -3970,6 +4049,12 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
           if (s_espnowStateQueue != NULL &&
               xQueuePeek(s_espnowStateQueue, &statePkg, 0) == pdTRUE) {
             dap_state_extended_st_espNow = statePkg.extended_st;
+
+            // FIX: Erzwinge den korrekten Tag, falls er im Main-Task noch 4
+            // war!
+            dap_state_extended_st_espNow.payloadHeader_st.pedalTag_u8 =
+                espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8;
+
             dap_state_extended_st_espNow.payloadFooter_st.checkSum_u16 =
                 checksumCalculator_u16(
                     (uint8_t *)(&(
@@ -4002,6 +4087,7 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
               EOF_BYTE_1_U8;
           dap_config_st_local_ptr->payloadHeader_st.pedalTag_u8 =
               dap_config_st_local_ptr->payloadPedalConfig_st.pedalType_u8;
+
           uint16_t crc = 0;
           crc = checksumCalculator_u16(
               (uint8_t *)(&(espnow_dap_config_st.payloadHeader_st)),
@@ -4251,7 +4337,8 @@ void miscTask(void *pvParameters) {
       if (dap_calculationVariables_st.currentPedalPosition_u32 == 0) {
         saveWifiChannelToEeprom(g_currentWifiChannel_u8);
         g_saveWifiChannelDeferred_b = false;
-        ActiveSerial->printf("Saved Wi-Fi channel %d to EEPROM (pedal idle)\n", g_currentWifiChannel_u8);
+        ActiveSerial->printf("Saved Wi-Fi channel %d to EEPROM (pedal idle)\n",
+                             g_currentWifiChannel_u8);
       }
     }
 
