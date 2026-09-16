@@ -85,24 +85,7 @@ bool g_getRudderAction_b = false;
 bool g_getHeliRudderAction_b = false;
 bool g_printPedalInfo_b = false;
 bool g_configUpdateBuzzer_b = false;
-bool g_assignmentUpdateBuzzer_b = false;
-bool g_assignmentUpdate_b = false;
-bool g_assignmentClear_b = false;
-bool g_deviceIdStructChecker_b = false;
 unsigned long g_rudderInitializedTime_u32 = 0;
-// Initialize deviceId_u8 to PEDAL_ID_UNKNOWN (4) so that configHandlingTask's
-// "else if (g_dapAssignmentReg_st.deviceId_u8 < 3)" fallback does NOT fire
-// with a spurious 0 (=CLUTCH) before espNowInitialize() loads the real
-// assignment from EEPROM.
-DapAssignmentReg_t g_dapAssignmentReg_st = {
-    .payloadType_u8 = 0,
-    .magicKey_u8 = 0,
-    .isAdvancedPaired_u8 = 0,
-    .deviceId_u8 = PEDAL_ID_UNKNOWN, // 4 — not < 3, so no spurious override
-    .pairStatus_au8 = {0, 0, 0, 0},
-    .pairedMac_aau8 = {{0}, {0}, {0}, {0}},
-    .crc_u16 = 0,
-};
 DapRudder_t g_dapRudderReceiving_st;
 DapRudder_t g_dapRudderSending_st;
 extern QueueHandle_t s_servoConfigRxQueue;
@@ -127,9 +110,15 @@ volatile uint32_t g_lastMasterHeartbeat_ms = 0;
 volatile bool g_saveWifiChannelDeferred_b = false;
 
 inline void checkWifiChannelHunting() {
-  // Only hunt if pedal is paired to a bridge
-  if (g_dapAssignmentReg_st.isAdvancedPaired_u8 != 1 ||
-      g_dapAssignmentReg_st.pairStatus_au8[3] != 1) {
+  // Only hunt if pedal is paired to a bridge (host MAC is known)
+  bool hasHost = false;
+  for (int i = 0; i < 6; i++) {
+    if (g_espHost_au8[i] != 0) {
+      hasHost = true;
+      break;
+    }
+  }
+  if (!hasHost) {
     return;
   }
 
@@ -494,10 +483,7 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data,
     }
     bool isHostSender =
         macCheck(g_espHost_au8, (uint8_t *)esp_now_info->src_addr);
-    bool isUnassigned =
-        (s_localPedalType_u8 == PEDAL_ID_UNKNOWN ||
-         g_dapAssignmentReg_st.deviceId_u8 == PEDAL_ID_UNKNOWN ||
-         g_dapAssignmentReg_st.isAdvancedPaired_u8 != 1);
+    bool isUnassigned = (s_localPedalType_u8 == PEDAL_ID_UNKNOWN);
     bool isBridgeLost = (millis() - g_lastMasterHeartbeat_ms > 5000);
 
     if (isHostSender || isUnassigned || isBridgeLost) {
@@ -547,8 +533,10 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data,
             // ActiveSerial->println("Updating pedal config");
             configDataPackage_t configPackage_st;
             configPackage_st.config_st = dap_config_espnow_recv_st;
-            if (dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8 <
-                3) {
+            if (dap_config_espnow_recv_st.payloadHeader_st.storeToEeprom_u8 ==
+                    1 ||
+                dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8 <
+                    3) {
               s_localPedalType_u8 =
                   dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8;
             }
@@ -568,27 +556,9 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data,
         memcpy(&dap_actions_st, data, sizeof(DapActions_t));
         // ActiveSerial->readBytes((char*)&dap_actions_st,
         // sizeof(DapActions_t));
-        bool commandForAssignment_b = false;
-        if (dap_actions_st.payloadHeader_st.pedalTag_u8 == PEDAL_ID_TEMP_1 ||
-            dap_actions_st.payloadHeader_st.pedalTag_u8 == PEDAL_ID_TEMP_2 ||
-            dap_actions_st.payloadHeader_st.pedalTag_u8 == PEDAL_ID_TEMP_3) {
-          commandForAssignment_b = true;
-        }
-        // An unassigned pedal (PEDAL_ID_UNKNOWN) must always accept assignment
-        // commands regardless of the pedalTag, so that the bridge can assign it
-        // even when it has never been assigned before (e.g. after a clear or
-        // first boot).
-        // An unassigned pedal must always accept assignment commands
-        if (s_localPedalType_u8 > 2 ||
-            dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8 >
-                2) { // BEIDES GEÄNDERT!
-          commandForAssignment_b = true;
-                }
 
-          if (dap_actions_st.payloadHeader_st.pedalTag_u8 ==
-                  dap_config_espnow_recv_st.payloadPedalConfig_st
-                      .pedalType_u8 ||
-              commandForAssignment_b) {
+        if (dap_actions_st.payloadHeader_st.pedalTag_u8 ==
+            dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8) {
             bool structChecker = true;
             uint16_t crc;
             if (dap_actions_st.payloadHeader_st.payloadType_u8 !=
@@ -644,57 +614,7 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data,
                   g_pedalOperationalState_u8 = (uint8_t)PEDAL_STATE_HOMING_E;
                 }
               }
-              if (dap_actions_st.payloadPedalAction_st.systemAction_u8 ==
-                      (uint8_t)PedalSystemAction::SET_ASSIGNMENT_0 &&
-                  commandForAssignment_b) {
-                g_dapAssignmentReg_st.deviceId_u8 = PEDAL_ID_CLUTCH;
-                g_dapAssignmentReg_st.isAdvancedPaired_u8 = 1;
-                g_dapAssignmentReg_st.pairStatus_au8[3] = 1;
-                memcpy(g_dapAssignmentReg_st.pairedMac_aau8[3],
-                       esp_now_info->src_addr, 6);
-                memcpy(g_espHost_au8, esp_now_info->src_addr, 6);
-                safeRegisterEspNowPeer(g_espHost_au8);
-                g_assignmentUpdate_b = true;
-                g_assignmentUpdateBuzzer_b = true;
-                ActiveSerial->println("Pedal: set assignment to Clutch");
-              }
-              if (dap_actions_st.payloadPedalAction_st.systemAction_u8 ==
-                      (uint8_t)PedalSystemAction::SET_ASSIGNMENT_1 &&
-                  commandForAssignment_b) {
-                g_dapAssignmentReg_st.deviceId_u8 = PEDAL_ID_BRAKE;
-                g_dapAssignmentReg_st.isAdvancedPaired_u8 = 1;
-                g_dapAssignmentReg_st.pairStatus_au8[3] = 1;
-                memcpy(g_dapAssignmentReg_st.pairedMac_aau8[3],
-                       esp_now_info->src_addr, 6);
-                memcpy(g_espHost_au8, esp_now_info->src_addr, 6);
-                safeRegisterEspNowPeer(g_espHost_au8);
-                g_assignmentUpdate_b = true;
-                g_assignmentUpdateBuzzer_b = true;
-                ActiveSerial->println("Pedal: set assignment to Brake");
-              }
-              if (dap_actions_st.payloadPedalAction_st.systemAction_u8 ==
-                      (uint8_t)PedalSystemAction::SET_ASSIGNMENT_2 &&
-                  commandForAssignment_b) {
-                g_dapAssignmentReg_st.deviceId_u8 = PEDAL_ID_THROTTLE;
-                g_dapAssignmentReg_st.isAdvancedPaired_u8 = 1;
-                g_dapAssignmentReg_st.pairStatus_au8[3] = 1;
-                memcpy(g_dapAssignmentReg_st.pairedMac_aau8[3],
-                       esp_now_info->src_addr, 6);
-                memcpy(g_espHost_au8, esp_now_info->src_addr, 6);
-                safeRegisterEspNowPeer(g_espHost_au8);
-                g_assignmentUpdate_b = true;
-                g_assignmentUpdateBuzzer_b = true;
-                ActiveSerial->println("Pedal: set assignment to Throttle");
-              }
-              if (dap_actions_st.payloadPedalAction_st.systemAction_u8 ==
-                  (uint8_t)PedalSystemAction::ASSIGNMENT_CHECK_BEEP) {
-                g_assignmentUpdateBuzzer_b = true;
-              }
-              if (dap_actions_st.payloadPedalAction_st.systemAction_u8 ==
-                      (uint8_t)PedalSystemAction::CLEAR_ASSIGNMENT &&
-                  !commandForAssignment_b) {
-                g_assignmentClear_b = true;
-              }
+
               // trigger ABS effect
               if (dap_actions_st.payloadPedalAction_st.triggerAbs_u8 > 0) {
                 absOscillation.trigger();
@@ -956,32 +876,24 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data,
             if (crc == incomingReg.crc_u16) {
               g_lastMasterHeartbeat_ms = millis();
               for (int p = 0; p < 3; p++) {
-                g_dapAssignmentReg_st.pairStatus_au8[p] =
-                    incomingReg.pairStatus_au8[p];
                 if (incomingReg.pairStatus_au8[p] == 1) {
-                  memcpy(g_dapAssignmentReg_st.pairedMac_aau8[p],
-                         incomingReg.pairedMac_aau8[p], 6);
                   memcpy(g_pedalMac_aau8[p], incomingReg.pairedMac_aau8[p], 6);
                   safeRegisterEspNowPeer(g_pedalMac_aau8[p]);
                 }
               }
               if (incomingReg.pairStatus_au8[3] == 1) {
-                g_dapAssignmentReg_st.pairStatus_au8[3] = 1;
-                memcpy(g_dapAssignmentReg_st.pairedMac_aau8[3],
-                       incomingReg.pairedMac_aau8[3], 6);
                 memcpy(g_espHost_au8, incomingReg.pairedMac_aau8[3], 6);
                 safeRegisterEspNowPeer(g_espHost_au8);
               }
               if (s_localPedalType_u8 == PEDAL_ID_THROTTLE &&
-                  g_dapAssignmentReg_st.pairStatus_au8[1] == 1) {
+                  incomingReg.pairStatus_au8[1] == 1) {
                 memcpy(g_recvMac_au8, g_pedalMac_aau8[1], 6);
                 safeRegisterEspNowPeer(g_recvMac_au8);
               } else if (s_localPedalType_u8 == PEDAL_ID_BRAKE &&
-                         g_dapAssignmentReg_st.pairStatus_au8[2] == 1) {
+                         incomingReg.pairStatus_au8[2] == 1) {
                 memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
                 safeRegisterEspNowPeer(g_recvMac_au8);
               }
-              g_assignmentUpdate_b = true;
             }
           }
         }
@@ -1160,135 +1072,6 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data,
     espnowSendWrapper(g_broadcastMac_au8, (uint8_t *)buffer, 4 + len);
   }
 
-  void softwareAssignmentInitialize() {
-    DapAssignmentReg_t dap_assignement_reg_local;
-    EEPROM.get(ASSIGNMENT_EEPROM_OFFSET_U32, dap_assignement_reg_local);
-    bool structChecker = true;
-    uint16_t crc =
-        checksumCalculator_u16((uint8_t *)(&dap_assignement_reg_local),
-                               sizeof(DapAssignmentReg_t) - sizeof(uint16_t));
-    if (dap_assignement_reg_local.payloadType_u8 !=
-        DAP_PAYLOAD_TYPE_ASSIGNMENT_U8)
-      structChecker = false;
-    if (dap_assignement_reg_local.magicKey_u8 != ESPNOW_ASSIGNMENT_MAGIC_KEY_U8)
-      structChecker = false;
-    if (crc != dap_assignement_reg_local.crc_u16)
-      structChecker = false;
-    if (dap_assignement_reg_local.crc_u16 != crc)
-      structChecker = false;
-    DapConfig_t tmp;
-    global_dap_config_class.getConfig(&tmp, 500);
-    if (structChecker) {
-      memcpy(&g_dapAssignmentReg_st, &dap_assignement_reg_local,
-             sizeof(DapAssignmentReg_t));
-      g_deviceIdStructChecker_b = true;
-      ActiveSerial->print("Overwritting pedal assignment: ");
-      ActiveSerial->println(dap_assignement_reg_local.deviceId_u8);
-
-      if (g_dapAssignmentReg_st.deviceId_u8 == PEDAL_ID_CLUTCH ||
-          g_dapAssignmentReg_st.deviceId_u8 == PEDAL_ID_BRAKE ||
-          g_dapAssignmentReg_st.deviceId_u8 == PEDAL_ID_THROTTLE) {
-        tmp.payloadPedalConfig_st.pedalType_u8 =
-            g_dapAssignmentReg_st.deviceId_u8;
-        s_localPedalType_u8 = g_dapAssignmentReg_st.deviceId_u8;
-
-        if (g_dapAssignmentReg_st.isAdvancedPaired_u8 == 1 &&
-            g_dapAssignmentReg_st.pairStatus_au8[3] == 1) {
-          memcpy(g_espHost_au8, g_dapAssignmentReg_st.pairedMac_aau8[3], 6);
-          safeRegisterEspNowPeer(g_espHost_au8);
-          ActiveSerial->printf("Loaded Paired Bridge Hardware MAC: "
-                               "%02X:%02X:%02X:%02X:%02X:%02X\n",
-                               g_espHost_au8[0], g_espHost_au8[1],
-                               g_espHost_au8[2], g_espHost_au8[3],
-                               g_espHost_au8[4], g_espHost_au8[5]);
-        }
-        for (int p = 0; p < 3; p++) {
-          if (g_dapAssignmentReg_st.pairStatus_au8[p] == 1) {
-            memcpy(g_pedalMac_aau8[p], g_dapAssignmentReg_st.pairedMac_aau8[p],
-                   6);
-            safeRegisterEspNowPeer(g_pedalMac_aau8[p]);
-          }
-        }
-        if (s_localPedalType_u8 == PEDAL_ID_THROTTLE &&
-            g_dapAssignmentReg_st.pairStatus_au8[1] == 1) {
-          memcpy(g_recvMac_au8, g_pedalMac_aau8[1], 6);
-          safeRegisterEspNowPeer(g_recvMac_au8);
-        } else if (s_localPedalType_u8 == PEDAL_ID_BRAKE &&
-                   g_dapAssignmentReg_st.pairStatus_au8[2] == 1) {
-          memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
-          safeRegisterEspNowPeer(g_recvMac_au8);
-        }
-      } else {
-        tmp.payloadPedalConfig_st.pedalType_u8 = PEDAL_ID_UNKNOWN;
-      }
-
-    } else {
-      tmp.payloadPedalConfig_st.pedalType_u8 = PEDAL_ID_UNKNOWN;
-      ActiveSerial->println("Assignment error:");
-      ActiveSerial->print("Payload type expect:");
-      ActiveSerial->print(DAP_PAYLOAD_TYPE_ASSIGNMENT_U8);
-      ActiveSerial->print(" Payload type get:");
-      ActiveSerial->println(dap_assignement_reg_local.payloadType_u8);
-      ActiveSerial->print("Magic key expect:");
-      ActiveSerial->print(ESPNOW_ASSIGNMENT_MAGIC_KEY_U8);
-      ActiveSerial->print(" Magic key get:");
-      ActiveSerial->println(dap_assignement_reg_local.magicKey_u8);
-      ActiveSerial->print("crc expect:");
-      ActiveSerial->print(crc);
-      ActiveSerial->print(" crc get:");
-      ActiveSerial->println(dap_assignement_reg_local.crc_u16);
-      ActiveSerial->print("Pedal ID get:");
-      ActiveSerial->println(dap_assignement_reg_local.deviceId_u8);
-    }
-    configDataPackage_t configPackage_st;
-    configPackage_st.config_st = tmp;
-    xQueueSend(s_configUpdateAvailableQueue, &configPackage_st, portMAX_DELAY);
-    delay(1000); // delay for writting config into global
-  }
-
-  void writeAssignmentToEeprom() {
-    ActiveSerial->println("Writting assignment to eeprom.");
-    g_dapAssignmentReg_st.magicKey_u8 = ESPNOW_ASSIGNMENT_MAGIC_KEY_U8;
-    g_dapAssignmentReg_st.payloadType_u8 = DAP_PAYLOAD_TYPE_ASSIGNMENT_U8;
-    // refill the crc
-    g_dapAssignmentReg_st.crc_u16 =
-        checksumCalculator_u16((uint8_t *)(&g_dapAssignmentReg_st),
-                               sizeof(DapAssignmentReg_t) - sizeof(uint16_t));
-    // write assignment to eeprom
-    EEPROM.put(ASSIGNMENT_EEPROM_OFFSET_U32, g_dapAssignmentReg_st);
-    EEPROM.commit();
-    delay(1000);
-    // check the data inside of eeprom
-    DapAssignmentReg_t dap_assignement_reg_local;
-    EEPROM.get(ASSIGNMENT_EEPROM_OFFSET_U32, dap_assignement_reg_local);
-    // list those assignment
-    ActiveSerial->println("check the assignment in eeprom");
-    ActiveSerial->print("Assignment expected:");
-    ActiveSerial->print(g_dapAssignmentReg_st.deviceId_u8);
-    ActiveSerial->print(" Assignment get:");
-    ActiveSerial->println(dap_assignement_reg_local.deviceId_u8);
-    ActiveSerial->print("crc expected:");
-    ActiveSerial->print(g_dapAssignmentReg_st.crc_u16);
-    ActiveSerial->print(" crc get:");
-    ActiveSerial->println(dap_assignement_reg_local.crc_u16);
-  }
-  void clearAssignmentToEeprom() {
-    ActiveSerial->println("clear assignment from eeprom.");
-    g_dapAssignmentReg_st.magicKey_u8 = 0;
-    g_dapAssignmentReg_st.payloadType_u8 = 0;
-    g_dapAssignmentReg_st.deviceId_u8 = 99;
-    g_dapAssignmentReg_st.isAdvancedPaired_u8 = 0;
-    memset(g_dapAssignmentReg_st.pairStatus_au8, 0,
-           sizeof(g_dapAssignmentReg_st.pairStatus_au8));
-    memset(g_dapAssignmentReg_st.pairedMac_aau8, 0,
-           sizeof(g_dapAssignmentReg_st.pairedMac_aau8));
-    // refill the crc
-    g_dapAssignmentReg_st.crc_u16 = 0;
-    // write assignment to eeprom
-    EEPROM.put(ASSIGNMENT_EEPROM_OFFSET_U32, g_dapAssignmentReg_st);
-    EEPROM.commit();
-    delay(1000);
-  }
 #else
 static const bool IS_ESPNOW_ENABLED = false;
 static uint8_t g_espNowErrorCode_u8 = 0;
@@ -1299,11 +1082,7 @@ static bool g_espNowRudderUpdate_b = false;
 static bool g_espNowRestart_b = false;
 static bool g_espNowOtaEnable_b = false;
 static bool g_printPedalInfo_b = false;
-static bool g_assignmentUpdate_b = false;
-static bool g_assignmentClear_b = false;
 static bool g_configUpdateBuzzer_b = false;
-static bool g_assignmentUpdateBuzzer_b = false;
-static bool g_deviceIdStructChecker_b = false;
 static unsigned long g_rudderInitializedTime_u32 = 0;
 static bool g_isEspnowConnected_b = false;
 static uint32_t g_lastEspnowRecvTime_u32 = 0;
@@ -1331,8 +1110,5 @@ inline esp_err_t espnowSendWrapper(const uint8_t *targetMac,
 inline void espNowInitialize() {}
 inline void sendESPNOWLog(const char *log, ...) {}
 inline void ESPNow_Joystick_Broadcast(int32_t controllerValue) {}
-inline void writeAssignmentToEeprom() {}
-inline void clearAssignmentToEeprom() {}
-inline void softwareAssignmentInitialize() {}
 inline void checkWifiChannelHunting() {}
 #endif
