@@ -109,33 +109,34 @@ typedef struct EspPairingReg_t
   uint8_t pairMac_aau8[4][6];
 } EspPairingReg_t;
 
-struct UnassignedPeer_t 
-
-{
-  uint8_t mac[6];
-  unsigned long lastSeen; 
-  bool peerAdded;
-};
-
 typedef struct EspNowMessage_t
 {
   char text_ac[240];
 } EspNowMessage_t;
 
 EspPairingReg_t g_espPairingReg_st;
-std::list<UnassignedPeer_t> g_unassignedPeersList;
 
 void espNowPairingCallback(const uint8_t *mac_addr, const uint8_t *data, int data_len)
 {
-
   if(data_len==sizeof(DapEspPairing_t))
   {
     memcpy(&dap_esppairing_st, data , sizeof(DapEspPairing_t));
     //pedal reg
     if(dap_esppairing_st.payloadEspnowInfo_st.deviceId_u8==0||dap_esppairing_st.payloadEspnowInfo_st.deviceId_u8==1||dap_esppairing_st.payloadEspnowInfo_st.deviceId_u8==2)
     {
-      memcpy(&g_espPairingReg_st.pairMac_aau8[dap_esppairing_st.payloadEspnowInfo_st.deviceId_u8], mac_addr , 6);
-      g_espPairingReg_st.pairStatus_au8[dap_esppairing_st.payloadEspnowInfo_st.deviceId_u8]=1;
+      uint8_t devId = dap_esppairing_st.payloadEspnowInfo_st.deviceId_u8;
+      memcpy(g_pedalMac_aau8[devId], mac_addr, 6);
+      if(!esp_now_is_peer_exist(mac_addr))
+      {
+        esp_now_peer_info_t peerInfo = {};
+        memcpy(peerInfo.peer_addr, mac_addr, 6);
+        peerInfo.channel = 0;
+        peerInfo.ifidx = WIFI_IF_STA;
+        peerInfo.encrypt = false;
+        esp_now_add_peer(&peerInfo);
+      }
+      memcpy(&g_espPairingReg_st.pairMac_aau8[devId], mac_addr , 6);
+      g_espPairingReg_st.pairStatus_au8[devId]=1;
       g_updatePairingToEeprom_b = true;
     }
     //bridge and analog device
@@ -146,88 +147,130 @@ void espNowPairingCallback(const uint8_t *mac_addr, const uint8_t *data, int dat
       g_updatePairingToEeprom_b = true;
     }
   }
-
-
 }
 
 void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int data_len)
 {
-  //only get mac in pairing
   if(g_espNowPairingAction_b)
   {
     espNowPairingCallback(esp_now_info->src_addr, data, data_len);
   }
 
-  //assignment request handling
-  if(data_len==sizeof(DapAssignmentBroadcast_t) && 
-  memcmp(esp_now_info->src_addr,g_pedalMac_aau8[0],6)!=0 &&
-  memcmp(esp_now_info->src_addr,g_pedalMac_aau8[1],6)!=0 &&
-  memcmp(esp_now_info->src_addr,g_pedalMac_aau8[2],6)!=0)
-  {
-    DapAssignmentBroadcast_t dap_assignmentboardcast_st_lcl;
-    memcpy(&dap_assignmentboardcast_st_lcl, data, sizeof(DapAssignmentBroadcast_t));
-    bool structChecker=true;
-    if(dap_assignmentboardcast_st_lcl.payloadHeader_st.version_u8!=DAP_VERSION_CONFIG_U8) structChecker=false;
-    if(dap_assignmentboardcast_st_lcl.payloadHeader_st.payloadType_u8!=DAP_PAYLOAD_TYPE_ASSIGNMENT_U8) structChecker=false;
-    uint16_t crcChecker = checksumCalculator((uint8_t*)(&(dap_assignmentboardcast_st_lcl.payloadHeader_st)), sizeof(dap_assignmentboardcast_st_lcl.payloadHeader_st) + sizeof(dap_assignmentboardcast_st_lcl.payloadAssignmentRequest_st));
-    if(crcChecker!=dap_assignmentboardcast_st_lcl.payloadFooter_st.checkSum_u16) structChecker=false;
-    if(structChecker)
-    
-{
-      int maxScanAllowance = MAX_CAPACITY_OF_SCAN_PEDAL_U8;
+  uint8_t actual_pedal_tag = 255; // Standardwert (ungültig)
 
-      bool found = false;
-      for (UnassignedPeer_t &peer : g_unassignedPeersList) 
-      {
-        if (memcmp(peer.mac, esp_now_info->src_addr, 6) == 0) 
-        {
-          peer.lastSeen = millis();
-          found = true;
-          break;
-        }
-      }
-      if (!found) 
-      {
-        //ActiveSerial->println("[L]get assignment request");
-        if (g_unassignedPeersList.size() < maxScanAllowance) 
-        {
-          UnassignedPeer_t newPeer;
-          memcpy(newPeer.mac, esp_now_info->src_addr, 6);
-          newPeer.lastSeen = millis();
-          newPeer.peerAdded = true;
-          g_unassignedPeersList.push_back(newPeer);
-          ESPNow.add_peer(esp_now_info->src_addr);
-        }
-
-      }
+  // 1. MAC-Prüfung gegen aktuell im RAM gespeicherte MACs
+  if(macCheck((uint8_t*)esp_now_info->src_addr, g_pedalMac_aau8[0])){
+    actual_pedal_tag = 0;
+    if(esp_now_info->rx_ctrl != NULL){
+      g_rssi_ai32[0] = esp_now_info->rx_ctrl->rssi;
+      g_rssiDisplay_i32 = g_rssi_ai32[0];
     }
-
+  } else if(macCheck((uint8_t*)esp_now_info->src_addr, g_pedalMac_aau8[1])){
+    actual_pedal_tag = 1;
+    if(esp_now_info->rx_ctrl != NULL){
+      g_rssi_ai32[1] = esp_now_info->rx_ctrl->rssi;
+      g_rssiDisplay_i32 = g_rssi_ai32[1];
+    }
+  } else if(macCheck((uint8_t*)esp_now_info->src_addr, g_pedalMac_aau8[2])){
+    actual_pedal_tag = 2;
+    if(esp_now_info->rx_ctrl != NULL){
+      g_rssi_ai32[2] = esp_now_info->rx_ctrl->rssi;
+      g_rssiDisplay_i32 = g_rssi_ai32[2];
+    }
   }
-  //only recieve the package from registed mac address
-  if(macCheck((uint8_t*)esp_now_info->src_addr, g_pedalMac_aau8[0])||macCheck((uint8_t*)esp_now_info->src_addr, g_pedalMac_aau8[1])||macCheck((uint8_t*)esp_now_info->src_addr, g_pedalMac_aau8[2]))
-  {
-    uint8_t actual_pedal_tag = 255; // Standardwert (ungültig)
 
-    // MAC überprüfen und actual_pedal_tag IMMER zuweisen
-    if(macCheck((uint8_t*)esp_now_info->src_addr, g_pedalMac_aau8[0])){
-      actual_pedal_tag = 0;
-      if(esp_now_info->rx_ctrl != NULL){ // rx_ctrl separat behandeln
-        g_rssi_ai32[0] = esp_now_info->rx_ctrl->rssi;
-        g_rssiDisplay_i32 = g_rssi_ai32[0];
-      }
-    } else if(macCheck((uint8_t*)esp_now_info->src_addr, g_pedalMac_aau8[1])){
-      actual_pedal_tag = 1;
-      if(esp_now_info->rx_ctrl != NULL){
-        g_rssi_ai32[1] = esp_now_info->rx_ctrl->rssi;
-        g_rssiDisplay_i32 = g_rssi_ai32[1];
-      }
-    } else if(macCheck((uint8_t*)esp_now_info->src_addr, g_pedalMac_aau8[2])){
-      actual_pedal_tag = 2;
-      if(esp_now_info->rx_ctrl != NULL){
-        g_rssi_ai32[2] = esp_now_info->rx_ctrl->rssi;
-        g_rssiDisplay_i32 = g_rssi_ai32[2];
+  // 2. Auto-Discovery: Falls Absender-MAC der Bridge noch unbekannt ist (actual_pedal_tag == 255)
+  if(actual_pedal_tag == 255)
+  {
+    // Auto-Discovery im Pairing-Modus
+    if(g_espNowPairingAction_b && data_len == sizeof(DapEspPairing_t))
+    {
+      if(dap_esppairing_st.payloadEspnowInfo_st.deviceId_u8 < 3)
+      {
+        actual_pedal_tag = dap_esppairing_st.payloadEspnowInfo_st.deviceId_u8;
+        memcpy(g_pedalMac_aau8[actual_pedal_tag], esp_now_info->src_addr, 6);
+        if(!esp_now_is_peer_exist(esp_now_info->src_addr))
+        {
+          esp_now_peer_info_t peerInfo = {};
+          memcpy(peerInfo.peer_addr, esp_now_info->src_addr, 6);
+          peerInfo.channel = 0;
+          peerInfo.ifidx = WIFI_IF_STA;
+          peerInfo.encrypt = false;
+          esp_now_add_peer(&peerInfo);
+        }
+        if(esp_now_info->rx_ctrl != NULL){
+          g_rssi_ai32[actual_pedal_tag] = esp_now_info->rx_ctrl->rssi;
+          g_rssiDisplay_i32 = g_rssi_ai32[actual_pedal_tag];
+        }
       }
     }
+    // Auto-Discovery via normales DapStateBasic_t Telemetrie-Paket
+    else if(data_len == sizeof(DapStateBasic_t))
+    {
+      const DapStateBasic_t *st_cand = (const DapStateBasic_t *)data;
+      if(st_cand->payloadHeader_st.version_u8 == DAP_VERSION_CONFIG_U8 &&
+         st_cand->payloadHeader_st.payloadType_u8 == DAP_PAYLOAD_TYPE_STATE_BASIC_U8)
+      {
+        uint16_t crcChecker = checksumCalculator((uint8_t*)(&(st_cand->payloadHeader_st)),
+            sizeof(st_cand->payloadHeader_st) + sizeof(st_cand->payloadPedalStateBasic_st));
+        if(crcChecker == st_cand->payloadFooter_st.checkSum_u16)
+        {
+          if (st_cand->payloadHeader_st.pedalTag_u8 < 3)
+          {
+            uint8_t discTag = st_cand->payloadHeader_st.pedalTag_u8;
+            // Dynamisch im RAM merken
+            memcpy(g_pedalMac_aau8[discTag], esp_now_info->src_addr, 6);
+            if(!esp_now_is_peer_exist(esp_now_info->src_addr))
+            {
+              esp_now_peer_info_t peerInfo = {};
+              memcpy(peerInfo.peer_addr, esp_now_info->src_addr, 6);
+              peerInfo.channel = 0;
+              peerInfo.ifidx = WIFI_IF_STA;
+              peerInfo.encrypt = false;
+              esp_now_add_peer(&peerInfo);
+            }
+            actual_pedal_tag = discTag;
+            if(esp_now_info->rx_ctrl != NULL){
+              g_rssi_ai32[discTag] = esp_now_info->rx_ctrl->rssi;
+              g_rssiDisplay_i32 = g_rssi_ai32[discTag];
+            }
+          }
+          else
+          {
+            // Unassigned / unknown pedal (pedalTag >= 3)
+            // Register into slot 5..7 (PEDAL_ID_TEMP_1..3)
+            int freeSlot = -1;
+            for (int p = 5; p < 8; p++) {
+              if (macCheck((uint8_t*)esp_now_info->src_addr, g_pedalMac_aau8[p])) {
+                freeSlot = p;
+                break;
+              }
+              if (freeSlot == -1 && g_pedalMac_aau8[p][0] == 0 && g_pedalMac_aau8[p][1] == 0 && g_pedalMac_aau8[p][2] == 0) {
+                freeSlot = p;
+              }
+            }
+            if (freeSlot != -1) {
+              memcpy(g_pedalMac_aau8[freeSlot], esp_now_info->src_addr, 6);
+              if(!esp_now_is_peer_exist(esp_now_info->src_addr))
+              {
+                esp_now_peer_info_t peerInfo = {};
+                memcpy(peerInfo.peer_addr, esp_now_info->src_addr, 6);
+                peerInfo.channel = 0;
+                peerInfo.ifidx = WIFI_IF_STA;
+                peerInfo.encrypt = false;
+                esp_now_add_peer(&peerInfo);
+              }
+              actual_pedal_tag = freeSlot;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // 3. Nur Pakete mit gültigem / gelerntem actual_pedal_tag (< 3) verarbeiten
+  if(actual_pedal_tag < 3)
+  {
 
     //ActiveSerial->printf("Message received from pedal: %d, overwritten to: %d\n", actual_pedal_tag, actual_pedal_tag); 
 
@@ -344,12 +387,15 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int da
         
         if(pedalTag==0){
           memcpy(&dap_config_st_Clu, &dap_config_st_Temp, sizeof(DapConfig_t));
+          memcpy(&dap_config_st[0], &dap_config_st_Temp, sizeof(DapConfig_t));
         }
         else if(pedalTag==1){
           memcpy(&dap_config_st_Brk, &dap_config_st_Temp, sizeof(DapConfig_t));
+          memcpy(&dap_config_st[1], &dap_config_st_Temp, sizeof(DapConfig_t));
         }
         else if(pedalTag==2){
           memcpy(&dap_config_st_Gas, &dap_config_st_Temp, sizeof(DapConfig_t));
+          memcpy(&dap_config_st[2], &dap_config_st_Temp, sizeof(DapConfig_t));
         }
       }
     }
@@ -503,30 +549,4 @@ void printStructHex(DapBridgeState_t* s)
 }
 
 
-void checkAndRemoveTimeoutUnassignedPedal() 
-{
-  unsigned long currentTime = millis();
-  auto it = g_unassignedPeersList.begin();
-  while (it != g_unassignedPeersList.end())
-  { 
-    if (currentTime - it->lastSeen > TIMEOUT_OF_UNASSIGNED_SCAN_U32) 
-    {
-      ActiveSerial->println("[L]Unassigned pedal timeout and removed");
-      uint8_t mac[6]={0};
-      memcpy(mac, it->mac, 6);
-      it = g_unassignedPeersList.erase(it);
-      ActiveSerial->print("[L]List size AFTER removal: ");
-      ActiveSerial->println(g_unassignedPeersList.size());
-      esp_err_t result = esp_now_del_peer(mac);
-      if (result == ESP_OK) 
-      {
-        ActiveSerial->println("[L]ESPNow peer removed successfully.");
-      } 
-      else 
-      {
-        ActiveSerial->println("[L]Failed to remove ESPNow peer.");
-      }
-    } 
-    else ++it;
-  }
-}
+

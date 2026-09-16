@@ -403,12 +403,27 @@ inline void syncPairingTableToPedals()
   pairSync.payloadType_u8 = DAP_PAYLOAD_TYPE_ASSIGNMENT_U8;
   pairSync.magicKey_u8 = ESPNOW_ASSIGNMENT_MAGIC_KEY_U8;
   pairSync.isAdvancedPaired_u8 = 1;
-  for (int p = 0; p < 4; p++) {
-    pairSync.pairStatus_au8[p] = g_espPairingReg_st.pairStatus_au8[p];
-    memcpy(pairSync.pairedMac_aau8[p], g_espPairingReg_st.pairMac_aau8[p], 6);
-  }
   for (int p = 0; p < 3; p++) {
-    if (g_espPairingReg_st.pairStatus_au8[p] == 1) {
+    bool hasMac = false;
+    for (int b = 0; b < 6; b++) {
+      if (g_pedalMac_aau8[p][b] != 0) {
+        hasMac = true;
+        break;
+      }
+    }
+    if (hasMac) {
+      pairSync.pairStatus_au8[p] = 1;
+      memcpy(pairSync.pairedMac_aau8[p], g_pedalMac_aau8[p], 6);
+    } else {
+      pairSync.pairStatus_au8[p] = 0;
+      memset(pairSync.pairedMac_aau8[p], 0, 6);
+    }
+  }
+  pairSync.pairStatus_au8[3] = 1;
+  memcpy(pairSync.pairedMac_aau8[3], g_espMac_au8, 6);
+
+  for (int p = 0; p < 3; p++) {
+    if (pairSync.pairStatus_au8[p] == 1) {
       pairSync.deviceId_u8 = p;
       pairSync.crc_u16 = checksumCalculator((uint8_t*)(&pairSync), sizeof(DapAssignmentReg_t) - sizeof(uint16_t));
       ESPNow.send_message(g_pedalMac_aau8[p], (uint8_t*)&pairSync, sizeof(DapAssignmentReg_t));
@@ -632,50 +647,7 @@ void espNowCommunicationTxTask( void * pvParameters )
 
       }
 
-      std::vector<decltype(g_unassignedPeersList.begin())> toErase;
-      for(int a=0; a<MAX_CAPACITY_OF_SCAN_PEDAL_U8; a++)
-      {
-        if(g_sendAssignment_ab[a])
-        {
-          g_sendAssignment_ab[a] = false;
-          if (a < g_unassignedPeersList.size())
-          {
-            auto it = g_unassignedPeersList.begin();
-            std::advance(it, a);
-            uint8_t sysAction = dap_actionassignment_st[a].payloadPedalAction_st.systemAction_u8;
-            uint8_t targetRole = 255;
-            if (sysAction == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_0) targetRole = 0;
-            else if (sysAction == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_1) targetRole = 1;
-            else if (sysAction == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_2) targetRole = 2;
 
-            if (targetRole < 3)
-            {
-              memcpy(g_pedalMac_aau8[targetRole], it->mac, 6);
-              memcpy(g_espPairingReg_st.pairMac_aau8[targetRole], it->mac, 6);
-              g_espPairingReg_st.pairStatus_au8[targetRole] = 1;
-              memcpy(g_espPairingReg_st.pairMac_aau8[3], g_espMac_au8, 6);
-              g_espPairingReg_st.pairStatus_au8[3] = 1;
-              EEPROM.put(EEPROM_offset, g_espPairingReg_st);
-              EEPROM.commit();
-              ESPNow.add_peer(it->mac);
-
-              toErase.push_back(it);
-            }
-
-            esp_err_t err = ESPNow.send_message(it->mac, (uint8_t *)&dap_actionassignment_st[a], sizeof(DapActions_t));
-            ActiveSerial->printf("[L]Send assignment to pedal: %02X:%02X:%02X:%02X:%02X:%02X, result: %s\n",
-                                 it->mac[0], it->mac[1], it->mac[2], it->mac[3], it->mac[4], it->mac[5], esp_err_to_name(err));
-          }
-        }
-      }
-      for (auto it : toErase)
-      {
-        g_unassignedPeersList.erase(it);
-      }
-      if (!toErase.empty())
-      {
-        syncPairingTableToPedals();
-      }
     
       //forward the basic wifi info for pedals
       if(g_pedalOtaAction_b)
@@ -701,6 +673,118 @@ void espNowCommunicationTxTask( void * pvParameters )
   }
 }
 
+
+void clearPedalAssignmentConfig(uint8_t targetIdx)
+{
+  if (targetIdx > 2) return;
+  uint8_t targetMac[6] = {0};
+  bool hasMac = false;
+  for (int b = 0; b < 6; b++) {
+    if (g_pedalMac_aau8[targetIdx][b] != 0) {
+      hasMac = true;
+      break;
+    }
+  }
+  if (!hasMac) return;
+  memcpy(targetMac, g_pedalMac_aau8[targetIdx], 6);
+
+  // Send config push setting role to PEDAL_ID_UNKNOWN (4) and storeToEeprom_u8 = 1
+  DapConfig_t cfg = dap_config_st[targetIdx];
+  cfg.payloadPedalConfig_st.pedalType_u8 = 4; // PEDAL_ID_UNKNOWN
+  cfg.payloadHeader_st.storeToEeprom_u8 = 1;
+  cfg.payloadFooter_st.checkSum_u16 = checksumCalculator((uint8_t*)&cfg, sizeof(DapConfig_t) - sizeof(uint16_t));
+
+  for (int retry = 0; retry < 3; retry++) {
+    ESPNow.send_message(targetMac, (uint8_t*)&cfg, sizeof(DapConfig_t));
+    delay(20);
+  }
+
+  // Clear pairing in EEPROM & RAM
+  g_espPairingReg_st.pairStatus_au8[targetIdx] = 0;
+  memset(g_espPairingReg_st.pairMac_aau8[targetIdx], 0, 6);
+  EEPROM.put(EEPROM_offset, g_espPairingReg_st);
+  EEPROM.commit();
+  memset(g_pedalMac_aau8[targetIdx], 0, 6);
+
+  ActiveSerial->printf("[L]Cleared assignment and pushed UNASSIGNED config to pedal %d\n", targetIdx);
+  syncPairingTableToPedals();
+}
+
+void pushPedalAssignmentConfig(uint8_t sourceTag, uint8_t newRole)
+{
+  if (newRole > 2) {
+    ActiveSerial->printf("[L]pushPedalAssignmentConfig: invalid target role %d\n", newRole);
+    return;
+  }
+  if (sourceTag > 7) {
+    ActiveSerial->printf("[L]pushPedalAssignmentConfig: invalid source tag %d\n", sourceTag);
+    return;
+  }
+
+  uint8_t targetMac[6] = {0};
+  bool foundMac = false;
+
+  // Prüfe ob Quell-MAC in g_pedalMac_aau8 liegt
+  for (int b = 0; b < 6; b++) {
+    if (g_pedalMac_aau8[sourceTag][b] != 0) {
+      foundMac = true;
+      break;
+    }
+  }
+  if (foundMac) {
+    memcpy(targetMac, g_pedalMac_aau8[sourceTag], 6);
+  } else {
+    ActiveSerial->printf("[L]pushPedalAssignmentConfig: No MAC known for tag %d\n", sourceTag);
+    return;
+  }
+
+  // 1. Hole gecachte Config für dieses Pedal
+  DapConfig_t cfg = dap_config_st[sourceTag];
+
+  // 2. pedalType_u8 auf neue Rolle setzen
+  cfg.payloadPedalConfig_st.pedalType_u8 = newRole;
+
+  // 3. storeToEeprom_u8 = 1 setzen
+  cfg.payloadHeader_st.storeToEeprom_u8 = 1;
+
+  // 4. CRC neu berechnen
+  cfg.payloadFooter_st.checkSum_u16 = checksumCalculator((uint8_t*)&cfg, sizeof(DapConfig_t) - sizeof(uint16_t));
+
+  // 5. Per ESP-NOW direkt an die MAC-Adresse des Pedals senden
+  if (!esp_now_is_peer_exist(targetMac)) {
+    esp_now_peer_info_t peerInfo = {};
+    memcpy(peerInfo.peer_addr, targetMac, 6);
+    peerInfo.channel = 0;
+    peerInfo.ifidx = WIFI_IF_STA;
+    peerInfo.encrypt = false;
+    esp_now_add_peer(&peerInfo);
+  }
+
+  for (int retry = 0; retry < 3; retry++) {
+    ESPNow.send_message(targetMac, (uint8_t*)&cfg, sizeof(DapConfig_t));
+    delay(20);
+  }
+  ActiveSerial->printf("[L]Config-Push assignment sent to pedal: %02X:%02X:%02X:%02X:%02X:%02X, new role: %d\n",
+                       targetMac[0], targetMac[1], targetMac[2], targetMac[3], targetMac[4], targetMac[5], newRole);
+
+  // Bridge merkt sich die MAC-Adresse im RAM & EEPROM
+  if (sourceTag != newRole) {
+    memcpy(g_pedalMac_aau8[newRole], targetMac, 6);
+    memset(g_pedalMac_aau8[sourceTag], 0, 6);
+
+    memcpy(g_espPairingReg_st.pairMac_aau8[newRole], targetMac, 6);
+    g_espPairingReg_st.pairStatus_au8[newRole] = 1;
+    EEPROM.put(EEPROM_offset, g_espPairingReg_st);
+    EEPROM.commit();
+
+    if (newRole == 0) dap_config_st_Clu = cfg;
+    else if (newRole == 1) dap_config_st_Brk = cfg;
+    else if (newRole == 2) dap_config_st_Gas = cfg;
+    dap_config_st[newRole] = cfg;
+
+    syncPairingTableToPedals();
+  }
+}
 
 //serial communication recieve task
 bool PedalUpdateIntervalPrint_b=false;
@@ -1056,30 +1140,22 @@ void serialCommunicationRxTask( void * pvParameters)
               {
                 
                 int pedalIdx = dap_actions_st_local.payloadHeader_st.pedalTag_u8;
-                if(pedalIdx == PEDAL_ID_CLUTCH || pedalIdx == PEDAL_ID_BRAKE || pedalIdx == PEDAL_ID_THROTTLE)
+                uint8_t sysAction = dap_actions_st_local.payloadPedalAction_st.systemAction_u8;
+                if (sysAction == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_0) {
+                  pushPedalAssignmentConfig(pedalIdx, 0);
+                } else if (sysAction == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_1) {
+                  pushPedalAssignmentConfig(pedalIdx, 1);
+                } else if (sysAction == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_2) {
+                  pushPedalAssignmentConfig(pedalIdx, 2);
+                } else if(pedalIdx == PEDAL_ID_CLUTCH || pedalIdx == PEDAL_ID_BRAKE || pedalIdx == PEDAL_ID_THROTTLE)
                 {
                   //forward to pedal
                   memcpy(&dap_actions_st[pedalIdx], &dap_actions_st_local, sizeof(DapActions_t));
                   dap_action_update[pedalIdx] = true;
                   if (dap_actions_st_local.payloadPedalAction_st.systemAction_u8 == (uint8_t)PedalSystemAction::CLEAR_ASSIGNMENT)
                   {
-                    g_espPairingReg_st.pairStatus_au8[pedalIdx] = 0;
-                    memset(g_espPairingReg_st.pairMac_aau8[pedalIdx], 0, 6);
-                    EEPROM.put(EEPROM_offset, g_espPairingReg_st);
-                    EEPROM.commit();
-                    ESPNow.remove_peer(g_pedalMac_aau8[pedalIdx]);
-                    memset(g_pedalMac_aau8[pedalIdx], 0, 6);
-                    ActiveSerial->printf("[L]Cleared pairing for pedal %d\n", pedalIdx);
-                    syncPairingTableToPedals();
+                    clearPedalAssignmentConfig(pedalIdx);
                   }
-                }
-                if (pedalIdx == PEDAL_ID_TEMP_1 || pedalIdx == PEDAL_ID_TEMP_2 || pedalIdx == PEDAL_ID_TEMP_3)
-                {
-                  //make those assignement action to pedal with specific mac address
-                  int tempIdx = pedalIdx - PEDAL_ID_TEMP_1;
-                  memcpy(&dap_actionassignment_st[tempIdx], &dap_actions_st_local, sizeof(DapActions_t));
-                  g_sendAssignment_ab[tempIdx] = true;
-                  //dap_action_update[pedalIdx] = true;
                 }
               }
             #endif
@@ -1485,7 +1561,6 @@ void serialCommunicationTxTask( void * pvParameters)
           dap_bridge_state_st.payloadFooter_st.enfOfFrame0_u8 = EOF_BYTE_0_U8;
           dap_bridge_state_st.payloadFooter_st.enfOfFrame1_u8 = EOF_BYTE_1_U8;
           int rssi_filter_value=constrain(rssi_filter.process(g_rssiDisplay_i32),-100,0) ;
-          dap_bridge_state_st.payloadBridgeState_st.unassignedPedalCount_u8=(byte)g_unassignedPeersList.size();
           dap_bridge_state_st.payloadHeader_st.pedalTag_u8=5; //5 means bridge
           dap_bridge_state_st.payloadHeader_st.payloadType_u8=DAP_PAYLOAD_TYPE_BRIDGE_STATE_U8;
           dap_bridge_state_st.payloadHeader_st.version_u8=DAP_VERSION_CONFIG_U8;
@@ -1495,12 +1570,25 @@ void serialCommunicationTxTask( void * pvParameters)
           dap_bridge_state_st.payloadBridgeState_st.bridgeFirmwareVersion_au8[0]=versionMajor;
           dap_bridge_state_st.payloadBridgeState_st.bridgeFirmwareVersion_au8[1]=versionMinor;
           dap_bridge_state_st.payloadBridgeState_st.bridgeFirmwareVersion_au8[2]=versionPatch;
-          int indexMac = 0;
-          for (UnassignedPeer_t &item : g_unassignedPeersList) 
-          {
-            memcpy(&dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8[indexMac], item.mac,6);
-            indexMac=indexMac+6;
+          uint8_t unassignedCount = 0;
+          memset(dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8, 0, sizeof(dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8));
+          for (int p = 5; p < 8; p++) {
+            bool hasMac = false;
+            for (int b = 0; b < 6; b++) {
+              if (g_pedalMac_aau8[p][b] != 0) {
+                hasMac = true;
+                break;
+              }
+            }
+            if (hasMac) {
+              unassignedCount++;
+              int offset = (p - 5) * 6;
+              if (offset + 6 <= sizeof(dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8)) {
+                memcpy(&dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8[offset], g_pedalMac_aau8[p], 6);
+              }
+            }
           }
+          dap_bridge_state_st.payloadBridgeState_st.unassignedPedalCount_u8 = unassignedCount;
           //CRC check should be in the final
           crc = checksumCalculator((uint8_t*)(&(dap_bridge_state_st.payloadHeader_st)), sizeof(dap_bridge_state_st.payloadHeader_st) + sizeof(dap_bridge_state_st.payloadBridgeState_st));
           dap_bridge_state_st.payloadFooter_st.checkSum_u16=crc;
@@ -2041,69 +2129,11 @@ void fanatecUpdateTask(void * pvParameters)
 
 void miscTask(void *pvParameters)
 {
-  unsigned long unassignedPedalScan_Last=0;
-  bool unassignedPedalScan_b= false;
-  int unassignedScanInterval=100;
-  int unassignedPedalCount_Last=0;
   for (;;)
   {
     if (ulTaskNotifyTake(pdTRUE, portMAX_DELAY) > 0)
     {
-      if (millis() - unassignedPedalScan_Last > unassignedScanInterval)
-      {
-        unassignedPedalScan_b=true;
-        unassignedPedalScan_Last=millis();
-      }
-
-      if(unassignedPedalScan_b && g_unassignedPeersList.size()>0)
-      {
-        checkAndRemoveTimeoutUnassignedPedal();
-        unassignedPedalScan_b=false;
-      }
-
-      if (g_unassignedPeersList.size() != unassignedPedalCount_Last)
-      {
-        unassignedPedalCount_Last = g_unassignedPeersList.size();
-        if(g_unassignedPeersList.size()>0)
-        {
-          ActiveSerial->printf("[L]Found %d Unconfigured Pedals", unassignedPedalCount_Last);
-          ActiveSerial->println("");
-          #ifdef USB_JOYSTICK
-            tinyusbJoystick_.printf("Found %d Unconfigured Pedals", unassignedPedalCount_Last);
-          #endif
-          for (UnassignedPeer_t &item : g_unassignedPeersList) 
-          {
-            if(!item.peerAdded)
-            {
-              esp_now_peer_info_t peerInfo = {};
-              memcpy(peerInfo.peer_addr, item.mac, 6);
-              peerInfo.channel = 0; 
-              peerInfo.ifidx = WIFI_IF_STA; 
-              peerInfo.encrypt = false; 
-              esp_err_t result = esp_now_add_peer(&peerInfo);
-
-              if (result == ESP_OK) 
-              {
-                ActiveSerial->println("[L]SUCCESS: ESPNow peer added.");
-              } 
-              else if (result == ESP_ERR_ESPNOW_EXIST) 
-              {
-                ActiveSerial->println("[L]Peer already exists. No action taken.");
-              }
-              else 
-              {
-                ActiveSerial->print("[L]FAIL: esp_now_add_peer failed! Error Code: ");
-                ActiveSerial->println(result);
-              }
-              item.peerAdded=true;
-            }
-          }
-
-        }
-
-
-
-      }
+      // Background misc tasks
     }
   }
 }
@@ -2158,30 +2188,22 @@ void hidCommunicaitonRxTask(void *pvParameters)
             //ActiveSerial->printf("[L]Get action for pedal: %d time: %lu\n", i, millis()-action_Last);
             //action_Last=millis();
             int pedalIdx = tinyusbJoystick_.tmpAction[i].payloadHeader_st.pedalTag_u8;
-            if(pedalIdx == PEDAL_ID_CLUTCH || pedalIdx == PEDAL_ID_BRAKE || pedalIdx == PEDAL_ID_THROTTLE)
+            uint8_t sysAction = tinyusbJoystick_.tmpAction[i].payloadPedalAction_st.systemAction_u8;
+            if (sysAction == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_0) {
+              pushPedalAssignmentConfig(pedalIdx, 0);
+            } else if (sysAction == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_1) {
+              pushPedalAssignmentConfig(pedalIdx, 1);
+            } else if (sysAction == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_2) {
+              pushPedalAssignmentConfig(pedalIdx, 2);
+            } else if(pedalIdx == PEDAL_ID_CLUTCH || pedalIdx == PEDAL_ID_BRAKE || pedalIdx == PEDAL_ID_THROTTLE)
             {
             //forward to pedal
               memcpy(&dap_actions_st[pedalIdx], &tinyusbJoystick_.tmpAction[i], sizeof(DapActions_t));
               dap_action_update[pedalIdx] = true;
               if (tinyusbJoystick_.tmpAction[i].payloadPedalAction_st.systemAction_u8 == (uint8_t)PedalSystemAction::CLEAR_ASSIGNMENT)
               {
-                g_espPairingReg_st.pairStatus_au8[pedalIdx] = 0;
-                memset(g_espPairingReg_st.pairMac_aau8[pedalIdx], 0, 6);
-                EEPROM.put(EEPROM_offset, g_espPairingReg_st);
-                EEPROM.commit();
-                ESPNow.remove_peer(g_pedalMac_aau8[pedalIdx]);
-                memset(g_pedalMac_aau8[pedalIdx], 0, 6);
-                ActiveSerial->printf("[L]Cleared pairing for pedal %d\n", pedalIdx);
-                syncPairingTableToPedals();
+                clearPedalAssignmentConfig(pedalIdx);
               }
-            }
-            if (pedalIdx == PEDAL_ID_TEMP_1 || pedalIdx == PEDAL_ID_TEMP_2 || pedalIdx == PEDAL_ID_TEMP_3)
-            {
-              //make those assignement action to pedal with specific mac address
-              int tempIdx = pedalIdx - PEDAL_ID_TEMP_1;
-              memcpy(&dap_actionassignment_st[tempIdx], &tinyusbJoystick_.tmpAction[i], sizeof(DapActions_t));
-              g_sendAssignment_ab[tempIdx] = true;
-              //dap_action_update[pedalIdx] = true;
             }
             tinyusbJoystick_.isActionGet[i]=false;
           }
@@ -2438,7 +2460,6 @@ void hidCommunicaitonTxTask(void *pvParameters)
           dap_bridge_state_st.payloadFooter_st.enfOfFrame0_u8 = EOF_BYTE_0_U8;
           dap_bridge_state_st.payloadFooter_st.enfOfFrame1_u8 = EOF_BYTE_1_U8;
           int rssi_filter_value=constrain(rssi_filter.process(g_rssiDisplay_i32),-100,0) ;
-          dap_bridge_state_st.payloadBridgeState_st.unassignedPedalCount_u8=(byte)g_unassignedPeersList.size();
           dap_bridge_state_st.payloadHeader_st.pedalTag_u8=5; //5 means bridge
           dap_bridge_state_st.payloadHeader_st.payloadType_u8=DAP_PAYLOAD_TYPE_BRIDGE_STATE_U8;
           dap_bridge_state_st.payloadHeader_st.version_u8=DAP_VERSION_CONFIG_U8;
@@ -2448,12 +2469,25 @@ void hidCommunicaitonTxTask(void *pvParameters)
           dap_bridge_state_st.payloadBridgeState_st.bridgeFirmwareVersion_au8[0]=versionMajor;
           dap_bridge_state_st.payloadBridgeState_st.bridgeFirmwareVersion_au8[1]=versionMinor;
           dap_bridge_state_st.payloadBridgeState_st.bridgeFirmwareVersion_au8[2]=versionPatch;
-          int indexMac = 0;
-          for (UnassignedPeer_t &item : g_unassignedPeersList) 
-          {
-            memcpy(&dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8[indexMac], item.mac,6);
-            indexMac=indexMac+6;
+          uint8_t unassignedCount = 0;
+          memset(dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8, 0, sizeof(dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8));
+          for (int p = 5; p < 8; p++) {
+            bool hasMac = false;
+            for (int b = 0; b < 6; b++) {
+              if (g_pedalMac_aau8[p][b] != 0) {
+                hasMac = true;
+                break;
+              }
+            }
+            if (hasMac) {
+              unassignedCount++;
+              int offset = (p - 5) * 6;
+              if (offset + 6 <= sizeof(dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8)) {
+                memcpy(&dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8[offset], g_pedalMac_aau8[p], 6);
+              }
+            }
           }
+          dap_bridge_state_st.payloadBridgeState_st.unassignedPedalCount_u8 = unassignedCount;
           //CRC check should be in the final
           crc = checksumCalculator((uint8_t*)(&(dap_bridge_state_st.payloadHeader_st)), sizeof(dap_bridge_state_st.payloadHeader_st) + sizeof(dap_bridge_state_st.payloadBridgeState_st));
           dap_bridge_state_st.payloadFooter_st.checkSum_u16=crc;

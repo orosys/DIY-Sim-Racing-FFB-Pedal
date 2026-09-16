@@ -346,12 +346,12 @@ void IRAM_ATTR_FLAG configHandlingTask(void *pvParameters) {
       // config packet says. The bridge may send an outdated pedalType (e.g.
       // Clutch=0) which would silently overwrite the EEPROM-loaded Brake/
       // Throttle role. s_localPedalType_u8 is authoritative when valid (<3).
-      if (s_localPedalType_u8 < 3) {
+      if (configPackage_st.config_st.payloadHeader_st.storeToEeprom_u8 == 1) {
+        s_localPedalType_u8 =
+            configPackage_st.config_st.payloadPedalConfig_st.pedalType_u8;
+      } else if (s_localPedalType_u8 < 3) {
         configPackage_st.config_st.payloadPedalConfig_st.pedalType_u8 =
             s_localPedalType_u8;
-      } else if (g_dapAssignmentReg_st.deviceId_u8 < 3) {
-        configPackage_st.config_st.payloadPedalConfig_st.pedalType_u8 =
-            g_dapAssignmentReg_st.deviceId_u8;
       }
 #endif
       global_dap_config_class.setConfig(configPackage_st.config_st);
@@ -822,25 +822,7 @@ void setup() {
         dap_config_st_eeprom.payloadPedalConfig_st.pedalType_u8;
   }
 
-#if defined(PEDAL_SOFTWARE_ASSIGNMENT) && defined(ESPNOW_Enable)
-  DapAssignmentReg_t dap_assignement_reg_local;
-  EEPROM.get(ASSIGNMENT_EEPROM_OFFSET_U32, dap_assignement_reg_local);
-  uint16_t crcAssign =
-      checksumCalculator_u16((uint8_t *)(&dap_assignement_reg_local),
-                             sizeof(DapAssignmentReg_t) - sizeof(uint16_t));
-  if (dap_assignement_reg_local.payloadType_u8 ==
-          DAP_PAYLOAD_TYPE_ASSIGNMENT_U8 &&
-      dap_assignement_reg_local.magicKey_u8 == ESPNOW_ASSIGNMENT_MAGIC_KEY_U8 &&
-      crcAssign == dap_assignement_reg_local.crc_u16) {
 
-    if (dap_assignement_reg_local.deviceId_u8 == PEDAL_ID_CLUTCH ||
-        dap_assignement_reg_local.deviceId_u8 == PEDAL_ID_BRAKE ||
-        dap_assignement_reg_local.deviceId_u8 == PEDAL_ID_THROTTLE) {
-      dap_config_st_local.payloadPedalConfig_st.pedalType_u8 =
-          dap_assignement_reg_local.deviceId_u8;
-    }
-  }
-#endif
 
 #ifdef PEDAL_HARDWARE_ASSIGNMENT
   pinMode(CFG1_U8, INPUT_PULLUP);
@@ -1047,33 +1029,8 @@ void setup() {
   // if checks are successfull, overwrite global configuration struct
   if (structChecker == true) {
     ActiveSerial->println("Updating pedal config from EEPROM");
-    // global_dap_config_class.setConfig(dap_config_st_local);
     dap_config_st_local = dap_config_st_eeprom;
-
-#if defined(PEDAL_SOFTWARE_ASSIGNMENT) && defined(ESPNOW_Enable)
-    // Re-apply the assignment-register override: the line above clobbered the
-    // pedalType_u8 that was set from the assignment EEPROM at early boot.
-    // The software assignment register is authoritative over the main config.
-    if (dap_assignement_reg_local.payloadType_u8 ==
-            DAP_PAYLOAD_TYPE_ASSIGNMENT_U8 &&
-        dap_assignement_reg_local.magicKey_u8 ==
-            ESPNOW_ASSIGNMENT_MAGIC_KEY_U8 &&
-        crcAssign == dap_assignement_reg_local.crc_u16) {
-      if (dap_assignement_reg_local.deviceId_u8 == PEDAL_ID_CLUTCH ||
-          dap_assignement_reg_local.deviceId_u8 == PEDAL_ID_BRAKE ||
-          dap_assignement_reg_local.deviceId_u8 == PEDAL_ID_THROTTLE) {
-        dap_config_st_local.payloadPedalConfig_st.pedalType_u8 =
-            dap_assignement_reg_local.deviceId_u8;
-        ActiveSerial->printf(
-            "Assignment register re-applied pedalType=%d after EEPROM load\n",
-            dap_assignement_reg_local.deviceId_u8);
-      }
-    }
-    // Write the corrected config back to the config class so that all tasks
-    // that call global_dap_config_class.getConfig() (e.g. pedalUpdateTask,
-    // espNowInitialize) see the correct pedalType from the start.
     global_dap_config_class.setConfig(dap_config_st_local);
-#endif
 
     configDataPackage_t configPackage_st;
     configPackage_st.config_st = dap_config_st_local;
@@ -1340,18 +1297,7 @@ void setup() {
     ActiveSerial->println("Pedal Role Assignment:4, reading from CFG pins....");
 #endif
   }
-// enable software assignment reading
-#if defined(PEDAL_SOFTWARE_ASSIGNMENT) && defined(ESPNOW_Enable)
-  ActiveSerial->println("Starting software assignment");
-  softwareAssignmentInitialize();
-  // overwrite the pedal type with device ID
-  if (g_deviceIdStructChecker_b) {
-    dap_config_st_local.payloadPedalConfig_st.pedalType_u8 =
-        g_dapAssignmentReg_st.deviceId_u8;
-  } else {
-    dap_config_st_local.payloadPedalConfig_st.pedalType_u8 = PEDAL_ID_UNKNOWN;
-  }
-#endif
+
 #ifdef PEDAL_HARDWARE_ASSIGNMENT
   pinMode(CFG1_U8, INPUT_PULLUP);
   pinMode(CFG2_U8, INPUT_PULLUP);
@@ -3185,13 +3131,7 @@ void IRAM_ATTR_FLAG serialCommunicationTaskRx(void *pvParameters) {
               }
             }
 
-#ifdef ESPNOW_Enable
-            if (received_action.payloadPedalAction_st.systemAction_u8 ==
-                (uint8_t)PedalSystemAction::CLEAR_ASSIGNMENT) {
-              ActiveSerial->println("Clear assignment received via USB");
-              g_assignmentClear_b = true;
-            }
-#endif
+
 
             // Send action to pedalUpdateTask via Queue
             xQueueSend(s_actionCommandQueue, &received_action, (TickType_t)0);
@@ -3757,7 +3697,6 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
   uint joystickPacketInterval = 3;
   uint basicStateUpdateIntervalBase[3] = {8, 7, 6};
   uint extendStateUpdateInterval = 10;
-  uint assignmentPacketUpdateInterval = 100;
   bool Pairing_timeout_status = false;
   bool building_dap_esppairing_lcl = false;
   unsigned long Pairing_state_start;
@@ -3767,7 +3706,6 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
   unsigned long extend_state_update_last = 0;
   unsigned long rudderPacketsUpdateLast = 0;
   unsigned long joystickPacketsUpdateLast = 0;
-  unsigned long assignmentPacketUpdateLast = 0;
   uint32_t espNowTask_stackSizeIdx_u32 = 0;
 
   int error_count = 0;
@@ -3775,8 +3713,6 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
   int ESPNow_no_device_count = 0;
   bool basic_state_send_b = false;
   bool extend_state_send_b = false;
-  bool noAssignmentStatus = false;
-  bool assignmentUpdatePacketSend_b = false;
   uint8_t error_out;
 
   for (;;) {
@@ -3799,9 +3735,6 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
         if (s_localPedalType_u8 < 3) {
           espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8 =
               s_localPedalType_u8;
-        } else if (g_dapAssignmentReg_st.deviceId_u8 < 3) {
-          espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8 =
-              g_dapAssignmentReg_st.deviceId_u8;
         }
       }
       // basic state sendout interval
@@ -3813,12 +3746,7 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
         basic_state_send_b = true;
         basic_state_update_last = millis();
       }
-      if (espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8 >
-          2) { // HIER GEÄNDERT!
-        noAssignmentStatus = true;
-      } else {
-        noAssignmentStatus = false;
-      }
+
       // restart from espnow
       if (g_espNowRestart_b) {
         ActiveSerial->println("ESP restart by ESPnow request");
@@ -3834,11 +3762,7 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
         extend_state_send_b = true;
         extend_state_update_last = millis();
       }
-      if (millis() - assignmentPacketUpdateLast >
-          assignmentPacketUpdateInterval) {
-        assignmentUpdatePacketSend_b = true;
-        assignmentPacketUpdateLast = millis();
-      }
+
       // activate profiler depending on pedal config
       if (espnow_dap_config_st.payloadPedalConfig_st.debugFlags0_u8 &
           DEBUG_INFO_0_CYCLE_TIMER_U8) {
@@ -3926,69 +3850,9 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
         profiler_espNow.end(1);
 
         profiler_espNow.start(2);
-        // assignment request packet send out
-        bool isBridgeLostLong =
-            (g_dapAssignmentReg_st.isAdvancedPaired_u8 == 1 &&
-             (millis() - g_lastMasterHeartbeat_ms > 5000));
-        // Startup broadcast: only fire for truly unassigned pedals.
-        // A pedal with a valid paired assignment already stored in EEPROM
-        // must NOT broadcast here, because the bridge auto-assigns the first
-        // empty slot (Clutch = 0) on every restart, overwriting the stored
-        // role. Assigned pedals are rediscovered by the bridge via the
-        // DapStateBasic_t state packets sent every ~7 ms, and fall back to
-        // isBridgeLostLong after 5 s if the bridge does not respond.
-        bool bridgeNeverHeard = (g_lastMasterHeartbeat_ms == 0);
-        bool hasPairedAssignment =
-            (g_dapAssignmentReg_st.isAdvancedPaired_u8 == 1 &&
-             g_dapAssignmentReg_st.deviceId_u8 < 3);
-        bool isStartupBroadcastWindow =
-            (millis() < 30000) && bridgeNeverHeard && !hasPairedAssignment;
-        if (assignmentUpdatePacketSend_b &&
-            (noAssignmentStatus || isBridgeLostLong ||
-             isStartupBroadcastWindow)) {
-          ActiveSerial->println("Send out assignment request");
-          assignmentUpdatePacketSend_b = false;
-          DapAssignmentBroadcast_t dap_assignmentBoardcast_st;
-          dap_assignmentBoardcast_st.payloadHeader_st.startOfFrame0_u8 =
-              SOF_BYTE_0_U8;
-          dap_assignmentBoardcast_st.payloadHeader_st.startOfFrame1_u8 =
-              SOF_BYTE_1_U8;
-          dap_assignmentBoardcast_st.payloadHeader_st.version_u8 =
-              DAP_VERSION_CONFIG_U8;
-          dap_assignmentBoardcast_st.payloadHeader_st.payloadType_u8 =
-              DAP_PAYLOAD_TYPE_ASSIGNMENT_U8;
-          dap_assignmentBoardcast_st.payloadFooter_st.enfOfFrame0_u8 =
-              EOF_BYTE_0_U8;
-          dap_assignmentBoardcast_st.payloadFooter_st.enfOfFrame1_u8 =
-              EOF_BYTE_1_U8;
-          dap_assignmentBoardcast_st.payloadAssignmentRequest_st
-              .assignmentAction_u8 = 1;
-          memcpy(dap_assignmentBoardcast_st.payloadAssignmentRequest_st
-                     .macAddress_au8,
-                 g_espMac_au8, 6);
-          uint16_t crc = 0;
-          crc = checksumCalculator_u16(
-              (uint8_t *)(&(dap_assignmentBoardcast_st.payloadHeader_st)),
-              sizeof(dap_assignmentBoardcast_st.payloadHeader_st) +
-                  sizeof(
-                      dap_assignmentBoardcast_st.payloadAssignmentRequest_st));
-          dap_assignmentBoardcast_st.payloadFooter_st.checkSum_u16 = crc;
-          ESPNow.send_message(g_broadcastMac_au8,
-                              (uint8_t *)&dap_assignmentBoardcast_st,
-                              sizeof(DapAssignmentBroadcast_t));
-        }
-
-        static uint32_t counter_cycle_2 = 0;
-        counter_cycle_2++;
-        if (counter_cycle_2 % 100 == 0) {
-          ActiveSerial->printf(
-              "basic_state_send_b: %d, !noAssignmentStatus: %d\n",
-              basic_state_send_b, !noAssignmentStatus);
-          counter_cycle_2 = 0;
-        }
 
         // basic state packet send out
-        if (basic_state_send_b && !noAssignmentStatus) {
+        if (basic_state_send_b && (pedalId < 3 || pedalId == PEDAL_ID_UNKNOWN)) {
 
           if (!isEspnowBusy()) {
             // update pedal states
@@ -4037,7 +3901,7 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
 
         profiler_espNow.start(3);
 
-        if (extend_state_send_b && !noAssignmentStatus &&
+        if (extend_state_send_b && (pedalId < 3 || pedalId == PEDAL_ID_UNKNOWN) &&
             !packetSentThisCycle && !isEspnowBusy()) {
           // update pedal states
           DapStateExtended_t dap_state_extended_st_espNow;
@@ -4074,7 +3938,7 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
 
         profiler_espNow.end(3);
 
-        if (g_espNowConfigRequest_b && !noAssignmentStatus) {
+        if (g_espNowConfigRequest_b && (pedalId < 3 || pedalId == PEDAL_ID_UNKNOWN)) {
           DapConfig_t *dap_config_st_local_ptr;
           dap_config_st_local_ptr = &espnow_dap_config_st;
           dap_config_st_local_ptr->payloadHeader_st.startOfFrame0_u8 =
@@ -4104,14 +3968,14 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
           delay(2);
         }
 
-        if (g_espNowOtaEnable_b && !noAssignmentStatus) {
+        if (g_espNowOtaEnable_b) {
           ActiveSerial->println("Get OTA command");
           g_OTA_enable_b = true;
           g_OTA_enable_start = true;
           g_espNowOtaEnable_b = false;
         }
 
-        if (g_otaUpdateAction_b && !noAssignmentStatus) {
+        if (g_otaUpdateAction_b) {
           ActiveSerial->println("Starting Pedal OTA");
           buzzerBeepAction_b = true;
           g_OTA_enable_b = true;
@@ -4143,7 +4007,7 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
 #endif
         }
 
-        if (g_printPedalInfo_b && !noAssignmentStatus) {
+        if (g_printPedalInfo_b) {
           g_printPedalInfo_b = false;
           buzzerBeepAction_b = true;
           delay(100);
@@ -4163,15 +4027,15 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
           sendESPNOWLog(pedalInfoBuilder.logESPNOWString);
           ActiveSerial->println(pedalInfoBuilder.logESPNOWString);
         }
-        if (g_getRudderAction_b && !noAssignmentStatus) {
+        if (g_getRudderAction_b) {
           g_getRudderAction_b = false;
           Buzzer.single_beep_tone(700, 100);
         }
-        if (g_getHeliRudderAction_b && !noAssignmentStatus) {
+        if (g_getHeliRudderAction_b) {
           g_getHeliRudderAction_b = false;
           Buzzer.single_beep_tone(700, 100);
         }
-        if (g_espNowBootIntoDownloadMode_b && !noAssignmentStatus) {
+        if (g_espNowBootIntoDownloadMode_b) {
 #ifdef ESPNow_S3
           ActiveSerial->println("Restart into Download mode");
           Buzzer.single_beep_tone(700, 100);
@@ -4191,7 +4055,7 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
         }
         // send out rudder packet after rudder initialized
         if (millis() - rudderPacketsUpdateLast > rudderPacketInterval &&
-            !noAssignmentStatus) {
+            (pedalId < 3)) {
           if (dap_calculationVariables_st.rudderStatus_b ||
               dap_calculationVariables_st.helicopterRudderStatus_b) {
             if (!packetSentThisCycle && !isEspnowBusy()) {
@@ -4238,7 +4102,7 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
                 packetSentThisCycle = true;
               }
             }
-            if (g_espNowRudderUpdate_b && !noAssignmentStatus) {
+            if (g_espNowRudderUpdate_b) {
               // dap_calculationVariables_st.syncPedalPosition_u32=ESPNow_recieve;
               dap_calculationVariables_st.syncPedalPosition_u32 =
                   g_dapRudderReceiving_st.payloadRudderState_st
@@ -4258,8 +4122,7 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
 
         // Periodic diagnostic telemetry: Report RF health and heap to SimHub
         // every 60s
-        if (millis() - g_lastEspnowDiagLogTime_u32 > 60000 &&
-            !noAssignmentStatus) {
+        if (millis() - g_lastEspnowDiagLogTime_u32 > 60000) {
           g_lastEspnowDiagLogTime_u32 = millis();
           uint32_t freeHeap = esp_get_free_heap_size();
           uint32_t minHeap = esp_get_minimum_free_heap_size();
@@ -4342,32 +4205,12 @@ void miscTask(void *pvParameters) {
       }
     }
 
-    // software assignment
-    if (g_assignmentUpdate_b) {
-      g_assignmentUpdate_b = false;
-      writeAssignmentToEeprom();
-      delay(1000);
-      // restart after aassignment
-      ESP.restart();
-    }
-    if (g_assignmentClear_b) {
-      g_assignmentClear_b = false;
-      clearAssignmentToEeprom();
-      delay(1000);
-      // restart after aassignment
-      ESP.restart();
-    }
 #endif
 // make buzzer sound actions here
 #ifdef ESPNOW_Enable
     if (g_configUpdateBuzzer_b) {
       Buzzer.single_beep_tone(700, 50);
       g_configUpdateBuzzer_b = false;
-    }
-    if (g_assignmentUpdateBuzzer_b) {
-      ActiveSerial->println("Beep");
-      Buzzer.single_beep_tone(700, 50);
-      g_assignmentUpdateBuzzer_b = false;
     }
     if (buzzerBeepAction_b) {
       Buzzer.single_beep_tone(700, 50);
