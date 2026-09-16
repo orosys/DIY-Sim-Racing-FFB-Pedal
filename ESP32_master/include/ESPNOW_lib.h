@@ -250,6 +250,7 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int da
               }
             }
             if (freeSlot != -1) {
+              bool isNew = (g_pedalMac_aau8[freeSlot][0] == 0 && g_pedalMac_aau8[freeSlot][1] == 0 && g_pedalMac_aau8[freeSlot][2] == 0);
               memcpy(g_pedalMac_aau8[freeSlot], esp_now_info->src_addr, 6);
               if(!esp_now_is_peer_exist(esp_now_info->src_addr))
               {
@@ -259,6 +260,12 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int da
                 peerInfo.ifidx = WIFI_IF_STA;
                 peerInfo.encrypt = false;
                 esp_now_add_peer(&peerInfo);
+              }
+              if (isNew) {
+                ActiveSerial->printf("[L]Found Unassigned Pedal: %02X:%02X:%02X:%02X:%02X:%02X at slot %d\n",
+                                     esp_now_info->src_addr[0], esp_now_info->src_addr[1], esp_now_info->src_addr[2],
+                                     esp_now_info->src_addr[3], esp_now_info->src_addr[4], esp_now_info->src_addr[5],
+                                     freeSlot);
               }
               actual_pedal_tag = freeSlot;
             }

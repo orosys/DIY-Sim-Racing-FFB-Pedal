@@ -134,6 +134,107 @@ inline uint16_t checksumCalculator_u16(uint8_t *data_pu8, uint16_t length_u16) {
   return (uint16_t)(((sum2 % 255U) << 8) | (sum1 % 255U));
 }
 
+// Plausibility check for pedal configuration
+inline bool isPedalConfigPlausible(const DapConfig_t &config,
+                                   Stream *serial = nullptr) {
+  const PayloadPedalConfig_t &p = config.payloadPedalConfig_st;
+
+  // Spindle pitch: plausible between 1 mm and 20 mm (standard: 5 mm)
+  if (p.spindlePitch_mmPerRev_u8 < 1 || p.spindlePitch_mmPerRev_u8 > 20) {
+    if (serial)
+      serial->printf("Implausible spindle pitch: %u mm (expected 1-20)\n",
+                     p.spindlePitch_mmPerRev_u8);
+    return false;
+  }
+
+  // Pedal travel: plausible between 10 mm and 200 mm (standard: 100 mm)
+  if (p.lengthPedalTravel_i16 < 10 || p.lengthPedalTravel_i16 > 200) {
+    if (serial)
+      serial->printf("Implausible pedal travel: %d mm (expected 10-200)\n",
+                     p.lengthPedalTravel_i16);
+    return false;
+  }
+
+  // Pedal start & end positions in percent (0 - 100%)
+  if (p.pedalStartPosition_u8 >= 100 || p.pedalEndPosition_u8 > 100) {
+    if (serial)
+      serial->printf("Implausible pedal position bounds: start=%u%% end=%u%%\n",
+                     p.pedalStartPosition_u8, p.pedalEndPosition_u8);
+    return false;
+  }
+  if (p.pedalEndPosition_u8 <= p.pedalStartPosition_u8 ||
+      (p.pedalEndPosition_u8 - p.pedalStartPosition_u8) < 5) {
+    if (serial)
+      serial->printf(
+          "Implausible pedal travel delta: start=%u%% end=%u%% (delta < 5%%)\n",
+          p.pedalStartPosition_u8, p.pedalEndPosition_u8);
+    return false;
+  }
+
+  // Max force (kg) - positive number within safety bounds (e.g. 1 - 500 kg)
+  if (isnan(p.maxForce_fl32) || isinf(p.maxForce_fl32) ||
+      p.maxForce_fl32 < 1.0f || p.maxForce_fl32 > 500.0f) {
+    if (serial)
+      serial->printf("Implausible max force: %.2f kg (expected 1-500)\n",
+                     p.maxForce_fl32);
+    return false;
+  }
+
+  // Preload force (kg) - non-negative and strictly lower than max force
+  if (isnan(p.preloadForce_fl32) || isinf(p.preloadForce_fl32) ||
+      p.preloadForce_fl32 < 0.0f || p.preloadForce_fl32 >= p.maxForce_fl32) {
+    if (serial)
+      serial->printf("Implausible preload force: %.2f kg (max=%.2f)\n",
+                     p.preloadForce_fl32, p.maxForce_fl32);
+    return false;
+  }
+
+  // Loadcell rating
+  if (p.loadcellRating_u8 < 10) {
+    if (serial)
+      serial->printf("Implausible loadcell rating: %u (expected >= 10)\n",
+                     p.loadcellRating_u8);
+    return false;
+  }
+
+  // Geometry lengths in mm
+  if (p.lengthPedalA_i16 < 50 || p.lengthPedalA_i16 > 500) {
+    if (serial)
+      serial->printf("Implausible pedal length A: %d mm (expected 50-500)\n",
+                     p.lengthPedalA_i16);
+    return false;
+  }
+  if (p.lengthPedalB_i16 < 50 || p.lengthPedalB_i16 > 500) {
+    if (serial)
+      serial->printf("Implausible pedal length B: %d mm (expected 50-500)\n",
+                     p.lengthPedalB_i16);
+    return false;
+  }
+  if (p.lengthPedalCHorizontal_i16 < 50 || p.lengthPedalCHorizontal_i16 > 500) {
+    if (serial)
+      serial->printf(
+          "Implausible pedal length C horiz: %d mm (expected 50-500)\n",
+          p.lengthPedalCHorizontal_i16);
+    return false;
+  }
+  if (p.lengthPedalD_i16 < -300 || p.lengthPedalD_i16 > 300) {
+    if (serial)
+      serial->printf("Implausible pedal length D: %d mm (expected -300-300)\n",
+                     p.lengthPedalD_i16);
+    return false;
+  }
+
+  // Pedal role
+  if (p.pedalType_u8 > PEDAL_ID_UNKNOWN) {
+    if (serial)
+      serial->printf("Implausible pedal type: %u (expected <= %u)\n",
+                     p.pedalType_u8, PEDAL_ID_UNKNOWN);
+    return false;
+  }
+
+  return true;
+}
+
 unsigned long saveToEEPRomDuration = 0;
 
 bool splineDebug_b = false;
@@ -281,6 +382,9 @@ StepperWithLimits *stepper = NULL;
 #include "StepperMovementStrategy_Rudder.h"
 
 volatile bool moveSlowlyToPosition_b = true;
+bool g_assignmentClear_b = false;
+bool g_assignmentUpdate_b = false;
+uint8_t g_newAssignedRole_u8 = PEDAL_ID_UNKNOWN;
 /**********************************************************************************************/
 /*                                                                                            */
 /*                         OTA */
@@ -354,6 +458,19 @@ void IRAM_ATTR_FLAG configHandlingTask(void *pvParameters) {
             s_localPedalType_u8;
       }
 #endif
+
+      // Enforce plausibility of configuration
+      if (!isPedalConfigPlausible(configPackage_st.config_st, ActiveSerial)) {
+        ActiveSerial->println("Config handling task: implausible config "
+                              "received! Replacing with defaults.");
+        uint8_t role =
+            configPackage_st.config_st.payloadPedalConfig_st.pedalType_u8;
+        configPackage_st.config_st.initializeDefaults();
+        if (role <= PEDAL_ID_UNKNOWN) {
+          configPackage_st.config_st.payloadPedalConfig_st.pedalType_u8 = role;
+        }
+      }
+
       global_dap_config_class.setConfig(configPackage_st.config_st);
 
       ActiveSerial->println("Config update received: config handling task");
@@ -817,12 +934,18 @@ void setup() {
   if (earlyCrc != dap_config_st_eeprom.payloadFooter_st.checkSum_u16)
     earlyConfigValid_b = false;
 
+  if (earlyConfigValid_b && !isPedalConfigPlausible(dap_config_st_eeprom)) {
+    earlyConfigValid_b = false;
+  }
+
   if (earlyConfigValid_b) {
     dap_config_st_local.payloadPedalConfig_st.pedalType_u8 =
         dap_config_st_eeprom.payloadPedalConfig_st.pedalType_u8;
+  } else if (dap_config_st_eeprom.payloadPedalConfig_st.pedalType_u8 <=
+             PEDAL_ID_UNKNOWN) {
+    dap_config_st_local.payloadPedalConfig_st.pedalType_u8 =
+        dap_config_st_eeprom.payloadPedalConfig_st.pedalType_u8;
   }
-
-
 
 #ifdef PEDAL_HARDWARE_ASSIGNMENT
   pinMode(CFG1_U8, INPUT_PULLUP);
@@ -1026,6 +1149,14 @@ void setup() {
     ActiveSerial->println(dap_config_st_local.payloadFooter_st.checkSum_u16);*/
   }
 
+  // Plausibility check (spindle pitch, travel range, forces, geometry)
+  if (structChecker &&
+      !isPedalConfigPlausible(dap_config_st_eeprom, ActiveSerial)) {
+    ActiveSerial->println(
+        "EEPROM config failed plausibility check! Resetting to safe defaults.");
+    structChecker = false;
+  }
+
   // if checks are successfull, overwrite global configuration struct
   if (structChecker == true) {
     ActiveSerial->println("Updating pedal config from EEPROM");
@@ -1038,26 +1169,48 @@ void setup() {
 
   } else {
 
-    ActiveSerial->println("Couldn't load config from EPROM due to mismatch: ");
+    ActiveSerial->println(
+        "Couldn't load config from EEPROM due to mismatch or invalid values: ");
 
     ActiveSerial->print("Payload type expected: ");
     ActiveSerial->print(DAP_PAYLOAD_TYPE_CONFIG_U8);
     ActiveSerial->print(",   Payload type received: ");
-    ActiveSerial->println(dap_config_st_local.payloadHeader_st.payloadType_u8);
+    ActiveSerial->println(dap_config_st_eeprom.payloadHeader_st.payloadType_u8);
 
     ActiveSerial->print("Target version: ");
     ActiveSerial->print(DAP_VERSION_CONFIG_U8);
     ActiveSerial->print(",    Source version: ");
-    ActiveSerial->println(dap_config_st_local.payloadHeader_st.version_u8);
+    ActiveSerial->println(dap_config_st_eeprom.payloadHeader_st.version_u8);
 
     ActiveSerial->print("CRC expected: ");
     ActiveSerial->print(crc);
     ActiveSerial->print(",   CRC received: ");
-    ActiveSerial->println(dap_config_st_local.payloadFooter_st.checkSum_u16);
-    // if the config check all failed, reinitialzie _config_st
-    ActiveSerial->println("initialized config");
+    ActiveSerial->println(dap_config_st_eeprom.payloadFooter_st.checkSum_u16);
+
+    // Preserve pedal role if it was valid (e.g. 0=clutch, 1=brake, 2=gas,
+    // 4=unassigned)
+    uint8_t savedPedalType =
+        dap_config_st_local.payloadPedalConfig_st.pedalType_u8;
+    if (savedPedalType > PEDAL_ID_UNKNOWN &&
+        dap_config_st_eeprom.payloadPedalConfig_st.pedalType_u8 <=
+            PEDAL_ID_UNKNOWN) {
+      savedPedalType = dap_config_st_eeprom.payloadPedalConfig_st.pedalType_u8;
+    }
+
+    // if the config check failed or values were unplausible, reinitialize with
+    // safe default values
+    ActiveSerial->println("Initializing safe default configuration...");
     global_dap_config_class.initializedConfig();
     global_dap_config_class.getConfig(&dap_config_st_local, 500);
+
+    if (savedPedalType <= PEDAL_ID_UNKNOWN) {
+      dap_config_st_local.payloadPedalConfig_st.pedalType_u8 = savedPedalType;
+    }
+
+    // Store safe defaults to EEPROM to heal corrupted storage
+    global_dap_config_class.setConfig(dap_config_st_local);
+    global_dap_config_class.storeConfigToEeprom();
+    ActiveSerial->println("Safe default config successfully stored to EEPROM.");
   }
 
   ActiveSerial->println("Config sent successfully");
@@ -3024,7 +3177,8 @@ void IRAM_ATTR_FLAG serialCommunicationTaskRx(void *pvParameters) {
 
           if (calculated_crc != received_crc ||
               received_config.payloadHeader_st.version_u8 !=
-                  DAP_VERSION_CONFIG_U8) {
+                  DAP_VERSION_CONFIG_U8 ||
+              !isPedalConfigPlausible(received_config, ActiveSerial)) {
             structIsValid = false;
           } else {
             // --- VALID CONFIG PACKET ---
@@ -3130,8 +3284,6 @@ void IRAM_ATTR_FLAG serialCommunicationTaskRx(void *pvParameters) {
                 g_pedalOperationalState_u8 = (uint8_t)PEDAL_STATE_HOMING_E;
               }
             }
-
-
 
             // Send action to pedalUpdateTask via Queue
             xQueueSend(s_actionCommandQueue, &received_action, (TickType_t)0);
@@ -3852,7 +4004,8 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
         profiler_espNow.start(2);
 
         // basic state packet send out
-        if (basic_state_send_b && (pedalId < 3 || pedalId == PEDAL_ID_UNKNOWN)) {
+        if (basic_state_send_b &&
+            (pedalId < 3 || pedalId == PEDAL_ID_UNKNOWN)) {
 
           if (!isEspnowBusy()) {
             // update pedal states
@@ -3879,15 +4032,15 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
                   g_broadcastMac_au8, (uint8_t *)&dap_state_basic_st_lcl,
                   sizeof(dap_state_basic_st_lcl));
 
-              static uint32_t counter_cycle = 0;
-              counter_cycle++;
-              if (counter_cycle % 100 == 0) {
-                ActiveSerial->printf(
-                    "Pedal: send out basic struct via ESP now, "
-                    "pedalType_u8:%d\n",
-                    dap_state_basic_st_lcl.payloadHeader_st.pedalTag_u8);
-                counter_cycle = 0;
-              }
+              // static uint32_t counter_cycle = 0;
+              // counter_cycle++;
+              // if (counter_cycle % 100 == 0) {
+              //   ActiveSerial->printf(
+              //       "Pedal: send out basic struct via ESP now, "
+              //       "pedalType_u8:%d\n",
+              //       dap_state_basic_st_lcl.payloadHeader_st.pedalTag_u8);
+              //   counter_cycle = 0;
+              // }
 
               if (res == ESP_OK) {
                 packetSentThisCycle = true;
@@ -3901,7 +4054,8 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
 
         profiler_espNow.start(3);
 
-        if (extend_state_send_b && (pedalId < 3 || pedalId == PEDAL_ID_UNKNOWN) &&
+        if (extend_state_send_b &&
+            (pedalId < 3 || pedalId == PEDAL_ID_UNKNOWN) &&
             !packetSentThisCycle && !isEspnowBusy()) {
           // update pedal states
           DapStateExtended_t dap_state_extended_st_espNow;
@@ -3938,7 +4092,8 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
 
         profiler_espNow.end(3);
 
-        if (g_espNowConfigRequest_b && (pedalId < 3 || pedalId == PEDAL_ID_UNKNOWN)) {
+        if (g_espNowConfigRequest_b &&
+            (pedalId < 3 || pedalId == PEDAL_ID_UNKNOWN)) {
           DapConfig_t *dap_config_st_local_ptr;
           dap_config_st_local_ptr = &espnow_dap_config_st;
           dap_config_st_local_ptr->payloadHeader_st.startOfFrame0_u8 =
@@ -4208,6 +4363,48 @@ void miscTask(void *pvParameters) {
 #endif
 // make buzzer sound actions here
 #ifdef ESPNOW_Enable
+    if (g_assignmentClear_b) {
+      g_assignmentClear_b = false;
+      ActiveSerial->println("Processing CLEAR_ASSIGNMENT in miscTask...");
+      DapConfig_t myCfg;
+      if (global_dap_config_class.getConfig(&myCfg, 500)) {
+        myCfg.payloadPedalConfig_st.pedalType_u8 = PEDAL_ID_UNKNOWN;
+        myCfg.payloadHeader_st.storeToEeprom_u8 = 0;
+        uint16_t newCrc =
+            checksumCalculator_u16((uint8_t *)(&(myCfg.payloadHeader_st)),
+                                   sizeof(myCfg.payloadHeader_st) +
+                                       sizeof(myCfg.payloadPedalConfig_st));
+        myCfg.payloadFooter_st.checkSum_u16 = newCrc;
+        global_dap_config_class.setConfig(myCfg);
+        global_dap_config_class.storeConfigToEeprom();
+      }
+      Buzzer.single_beep_tone(1000, 100);
+      delay(300);
+      ESP.restart();
+    }
+
+    if (g_assignmentUpdate_b) {
+      g_assignmentUpdate_b = false;
+      ActiveSerial->printf(
+          "Processing SET_ASSIGNMENT to role %d in miscTask...\n",
+          g_newAssignedRole_u8);
+      DapConfig_t myCfg;
+      if (global_dap_config_class.getConfig(&myCfg, 500)) {
+        myCfg.payloadPedalConfig_st.pedalType_u8 = g_newAssignedRole_u8;
+        myCfg.payloadHeader_st.storeToEeprom_u8 = 0;
+        uint16_t newCrc =
+            checksumCalculator_u16((uint8_t *)(&(myCfg.payloadHeader_st)),
+                                   sizeof(myCfg.payloadHeader_st) +
+                                       sizeof(myCfg.payloadPedalConfig_st));
+        myCfg.payloadFooter_st.checkSum_u16 = newCrc;
+        global_dap_config_class.setConfig(myCfg);
+        global_dap_config_class.storeConfigToEeprom();
+      }
+      Buzzer.single_beep_tone(1500, 100);
+      delay(300);
+      ESP.restart();
+    }
+
     if (g_configUpdateBuzzer_b) {
       Buzzer.single_beep_tone(700, 50);
       g_configUpdateBuzzer_b = false;

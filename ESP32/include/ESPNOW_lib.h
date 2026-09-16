@@ -83,6 +83,10 @@ volatile bool g_heliRudderDeinitializing_b = false;
 bool g_espNowBootIntoDownloadMode_b = false;
 bool g_getRudderAction_b = false;
 bool g_getHeliRudderAction_b = false;
+extern bool g_assignmentClear_b;
+extern bool g_assignmentUpdate_b;
+extern uint8_t g_newAssignedRole_u8;
+extern bool buzzerBeepAction_b;
 bool g_printPedalInfo_b = false;
 bool g_configUpdateBuzzer_b = false;
 unsigned long g_rudderInitializedTime_u32 = 0;
@@ -362,6 +366,11 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data,
     return;
   }
 
+  // Ignore self loopback
+  if (macCheck(g_espMac_au8, (uint8_t *)esp_now_info->src_addr)) {
+    return;
+  }
+
   if (esp_now_info->rx_ctrl != NULL) {
     for (int i = 0; i < 3; i++) {
       if (macCheck((uint8_t *)esp_now_info->src_addr, g_pedalMac_aau8[i])) {
@@ -492,7 +501,14 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data,
       }
 
       if (data_len == sizeof(DapConfig_t)) {
-        if (esp_now_info->src_addr[5] == g_espHost_au8[5]) {
+        bool hasHost = false;
+        for (int i = 0; i < 6; i++) {
+          if (g_espHost_au8[i] != 0) {
+            hasHost = true;
+            break;
+          }
+        }
+        if (!hasHost || (esp_now_info->src_addr[5] == g_espHost_au8[5])) {
           // ActiveSerial->println("dap_config_st ESPNow recieved");
 
           bool structChecker = true;
@@ -527,9 +543,19 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data,
               g_espNowErrorCode_u8 = 103;
             }
           }
+          if (structChecker && !isPedalConfigPlausible(dap_config_espnow_recv_st)) {
+            structChecker = false;
+            if (g_espNowErrorCode_u8 == 0) {
+              g_espNowErrorCode_u8 = 104;
+            }
+          }
 
           // if checks are successfull, overwrite global configuration struct
           if (structChecker == true) {
+            if (!hasHost || !macCheck(g_espHost_au8, (uint8_t *)esp_now_info->src_addr)) {
+              memcpy(g_espHost_au8, esp_now_info->src_addr, 6);
+              safeRegisterEspNowPeer(g_espHost_au8);
+            }
             // ActiveSerial->println("Updating pedal config");
             configDataPackage_t configPackage_st;
             configPackage_st.config_st = dap_config_espnow_recv_st;
@@ -557,36 +583,60 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data,
         // ActiveSerial->readBytes((char*)&dap_actions_st,
         // sizeof(DapActions_t));
 
-        if (dap_actions_st.payloadHeader_st.pedalTag_u8 ==
-            dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8) {
-            bool structChecker = true;
-            uint16_t crc;
-            if (dap_actions_st.payloadHeader_st.payloadType_u8 !=
-                DAP_PAYLOAD_TYPE_ACTION_U8) {
-              structChecker = false;
-              if (g_espNowErrorCode_u8 == 0) {
-                g_espNowErrorCode_u8 = 111;
-              }
+        uint8_t incomingTag = dap_actions_st.payloadHeader_st.pedalTag_u8;
+        uint8_t myTag = dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8;
+        uint8_t sysAct = dap_actions_st.payloadPedalAction_st.systemAction_u8;
+
+        bool isAssignmentAction = (sysAct == (uint8_t)PedalSystemAction::CLEAR_ASSIGNMENT ||
+                                   sysAct == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_0 ||
+                                   sysAct == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_1 ||
+                                   sysAct == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_2 ||
+                                   sysAct == (uint8_t)PedalSystemAction::ASSIGNMENT_CHECK_BEEP);
+
+        if (dap_actions_st.payloadHeader_st.payloadType_u8 ==
+                DAP_PAYLOAD_TYPE_ACTION_U8 &&
+            (incomingTag == myTag || (myTag == PEDAL_ID_UNKNOWN && isAssignmentAction))) {
+          bool structChecker = true;
+          uint16_t crc;
+          if (dap_actions_st.payloadHeader_st.version_u8 !=
+              DAP_VERSION_CONFIG_U8) {
+            structChecker = false;
+            if (g_espNowErrorCode_u8 == 0) {
+              g_espNowErrorCode_u8 = 112;
             }
-            if (dap_actions_st.payloadHeader_st.version_u8 !=
-                DAP_VERSION_CONFIG_U8) {
-              structChecker = false;
-              if (g_espNowErrorCode_u8 == 0) {
-                g_espNowErrorCode_u8 = 112;
-              }
+          }
+          crc = checksumCalculator_u16(
+              (uint8_t *)(&(dap_actions_st.payloadHeader_st)),
+              sizeof(dap_actions_st.payloadHeader_st) +
+                  sizeof(dap_actions_st.payloadPedalAction_st));
+          if (crc != dap_actions_st.payloadFooter_st.checkSum_u16) {
+            structChecker = false;
+            if (g_espNowErrorCode_u8 == 0) {
+              g_espNowErrorCode_u8 = 113;
             }
-            crc = checksumCalculator_u16(
-                (uint8_t *)(&(dap_actions_st.payloadHeader_st)),
-                sizeof(dap_actions_st.payloadHeader_st) +
-                    sizeof(dap_actions_st.payloadPedalAction_st));
-            if (crc != dap_actions_st.payloadFooter_st.checkSum_u16) {
-              structChecker = false;
-              if (g_espNowErrorCode_u8 == 0) {
-                g_espNowErrorCode_u8 = 113;
-              }
-            }
+          }
 
             if (structChecker == true) {
+
+              // Software assignment actions (clean, no config overwriting)
+              if (sysAct == (uint8_t)PedalSystemAction::CLEAR_ASSIGNMENT) {
+                g_assignmentClear_b = true;
+              }
+              if (sysAct == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_0) {
+                g_newAssignedRole_u8 = 0;
+                g_assignmentUpdate_b = true;
+              }
+              if (sysAct == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_1) {
+                g_newAssignedRole_u8 = 1;
+                g_assignmentUpdate_b = true;
+              }
+              if (sysAct == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_2) {
+                g_newAssignedRole_u8 = 2;
+                g_assignmentUpdate_b = true;
+              }
+              if (sysAct == (uint8_t)PedalSystemAction::ASSIGNMENT_CHECK_BEEP) {
+                buzzerBeepAction_b = true;
+              }
 
               // 2= restart pedal
               if (dap_actions_st.payloadPedalAction_st.systemAction_u8 ==

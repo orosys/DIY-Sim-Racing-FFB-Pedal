@@ -674,7 +674,7 @@ void espNowCommunicationTxTask( void * pvParameters )
 }
 
 
-void clearPedalAssignmentConfig(uint8_t targetIdx)
+void clearPedalAssignmentAction(uint8_t targetIdx, const DapActions_t &action)
 {
   if (targetIdx > 2) return;
   uint8_t targetMac[6] = {0};
@@ -688,14 +688,9 @@ void clearPedalAssignmentConfig(uint8_t targetIdx)
   if (!hasMac) return;
   memcpy(targetMac, g_pedalMac_aau8[targetIdx], 6);
 
-  // Send config push setting role to PEDAL_ID_UNKNOWN (4) and storeToEeprom_u8 = 1
-  DapConfig_t cfg = dap_config_st[targetIdx];
-  cfg.payloadPedalConfig_st.pedalType_u8 = 4; // PEDAL_ID_UNKNOWN
-  cfg.payloadHeader_st.storeToEeprom_u8 = 1;
-  cfg.payloadFooter_st.checkSum_u16 = checksumCalculator((uint8_t*)&cfg, sizeof(DapConfig_t) - sizeof(uint16_t));
-
+  // Send action directly to the pedal via ESP-NOW
   for (int retry = 0; retry < 3; retry++) {
-    ESPNow.send_message(targetMac, (uint8_t*)&cfg, sizeof(DapConfig_t));
+    ESPNow.send_message(targetMac, (uint8_t*)&action, sizeof(DapActions_t));
     delay(20);
   }
 
@@ -706,18 +701,18 @@ void clearPedalAssignmentConfig(uint8_t targetIdx)
   EEPROM.commit();
   memset(g_pedalMac_aau8[targetIdx], 0, 6);
 
-  ActiveSerial->printf("[L]Cleared assignment and pushed UNASSIGNED config to pedal %d\n", targetIdx);
+  ActiveSerial->printf("[L]Cleared assignment for pedal %d and sent CLEAR_ASSIGNMENT action\n", targetIdx);
   syncPairingTableToPedals();
 }
 
-void pushPedalAssignmentConfig(uint8_t sourceTag, uint8_t newRole)
+void pushPedalAssignmentAction(uint8_t sourceTag, uint8_t newRole, const DapActions_t &action)
 {
   if (newRole > 2) {
-    ActiveSerial->printf("[L]pushPedalAssignmentConfig: invalid target role %d\n", newRole);
+    ActiveSerial->printf("[L]pushPedalAssignmentAction: invalid target role %d\n", newRole);
     return;
   }
   if (sourceTag > 7) {
-    ActiveSerial->printf("[L]pushPedalAssignmentConfig: invalid source tag %d\n", sourceTag);
+    ActiveSerial->printf("[L]pushPedalAssignmentAction: invalid source tag %d\n", sourceTag);
     return;
   }
 
@@ -734,23 +729,11 @@ void pushPedalAssignmentConfig(uint8_t sourceTag, uint8_t newRole)
   if (foundMac) {
     memcpy(targetMac, g_pedalMac_aau8[sourceTag], 6);
   } else {
-    ActiveSerial->printf("[L]pushPedalAssignmentConfig: No MAC known for tag %d\n", sourceTag);
+    ActiveSerial->printf("[L]pushPedalAssignmentAction: No MAC known for tag %d\n", sourceTag);
     return;
   }
 
-  // 1. Hole gecachte Config für dieses Pedal
-  DapConfig_t cfg = dap_config_st[sourceTag];
-
-  // 2. pedalType_u8 auf neue Rolle setzen
-  cfg.payloadPedalConfig_st.pedalType_u8 = newRole;
-
-  // 3. storeToEeprom_u8 = 1 setzen
-  cfg.payloadHeader_st.storeToEeprom_u8 = 1;
-
-  // 4. CRC neu berechnen
-  cfg.payloadFooter_st.checkSum_u16 = checksumCalculator((uint8_t*)&cfg, sizeof(DapConfig_t) - sizeof(uint16_t));
-
-  // 5. Per ESP-NOW direkt an die MAC-Adresse des Pedals senden
+  // Per ESP-NOW direkt an die MAC-Adresse des Pedals senden
   if (!esp_now_is_peer_exist(targetMac)) {
     esp_now_peer_info_t peerInfo = {};
     memcpy(peerInfo.peer_addr, targetMac, 6);
@@ -761,26 +744,23 @@ void pushPedalAssignmentConfig(uint8_t sourceTag, uint8_t newRole)
   }
 
   for (int retry = 0; retry < 3; retry++) {
-    ESPNow.send_message(targetMac, (uint8_t*)&cfg, sizeof(DapConfig_t));
+    ESPNow.send_message(targetMac, (uint8_t*)&action, sizeof(DapActions_t));
     delay(20);
   }
-  ActiveSerial->printf("[L]Config-Push assignment sent to pedal: %02X:%02X:%02X:%02X:%02X:%02X, new role: %d\n",
+  ActiveSerial->printf("[L]Assignment action sent to pedal: %02X:%02X:%02X:%02X:%02X:%02X, new role: %d\n",
                        targetMac[0], targetMac[1], targetMac[2], targetMac[3], targetMac[4], targetMac[5], newRole);
 
   // Bridge merkt sich die MAC-Adresse im RAM & EEPROM
   if (sourceTag != newRole) {
     memcpy(g_pedalMac_aau8[newRole], targetMac, 6);
-    memset(g_pedalMac_aau8[sourceTag], 0, 6);
+    if (sourceTag >= 3) {
+      memset(g_pedalMac_aau8[sourceTag], 0, 6);
+    }
 
     memcpy(g_espPairingReg_st.pairMac_aau8[newRole], targetMac, 6);
     g_espPairingReg_st.pairStatus_au8[newRole] = 1;
     EEPROM.put(EEPROM_offset, g_espPairingReg_st);
     EEPROM.commit();
-
-    if (newRole == 0) dap_config_st_Clu = cfg;
-    else if (newRole == 1) dap_config_st_Brk = cfg;
-    else if (newRole == 2) dap_config_st_Gas = cfg;
-    dap_config_st[newRole] = cfg;
 
     syncPairingTableToPedals();
   }
@@ -1142,20 +1122,22 @@ void serialCommunicationRxTask( void * pvParameters)
                 int pedalIdx = dap_actions_st_local.payloadHeader_st.pedalTag_u8;
                 uint8_t sysAction = dap_actions_st_local.payloadPedalAction_st.systemAction_u8;
                 if (sysAction == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_0) {
-                  pushPedalAssignmentConfig(pedalIdx, 0);
+                  pushPedalAssignmentAction(pedalIdx, 0, dap_actions_st_local);
                 } else if (sysAction == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_1) {
-                  pushPedalAssignmentConfig(pedalIdx, 1);
+                  pushPedalAssignmentAction(pedalIdx, 1, dap_actions_st_local);
                 } else if (sysAction == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_2) {
-                  pushPedalAssignmentConfig(pedalIdx, 2);
+                  pushPedalAssignmentAction(pedalIdx, 2, dap_actions_st_local);
+                } else if (sysAction == (uint8_t)PedalSystemAction::CLEAR_ASSIGNMENT) {
+                  clearPedalAssignmentAction(pedalIdx, dap_actions_st_local);
+                } else if (sysAction == (uint8_t)PedalSystemAction::ASSIGNMENT_CHECK_BEEP) {
+                  if (pedalIdx >= 0 && pedalIdx < 8 && g_pedalMac_aau8[pedalIdx][0] != 0) {
+                    ESPNow.send_message(g_pedalMac_aau8[pedalIdx], (uint8_t*)&dap_actions_st_local, sizeof(DapActions_t));
+                  }
                 } else if(pedalIdx == PEDAL_ID_CLUTCH || pedalIdx == PEDAL_ID_BRAKE || pedalIdx == PEDAL_ID_THROTTLE)
                 {
                   //forward to pedal
                   memcpy(&dap_actions_st[pedalIdx], &dap_actions_st_local, sizeof(DapActions_t));
                   dap_action_update[pedalIdx] = true;
-                  if (dap_actions_st_local.payloadPedalAction_st.systemAction_u8 == (uint8_t)PedalSystemAction::CLEAR_ASSIGNMENT)
-                  {
-                    clearPedalAssignmentConfig(pedalIdx);
-                  }
                 }
               }
             #endif
@@ -2190,20 +2172,22 @@ void hidCommunicaitonRxTask(void *pvParameters)
             int pedalIdx = tinyusbJoystick_.tmpAction[i].payloadHeader_st.pedalTag_u8;
             uint8_t sysAction = tinyusbJoystick_.tmpAction[i].payloadPedalAction_st.systemAction_u8;
             if (sysAction == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_0) {
-              pushPedalAssignmentConfig(pedalIdx, 0);
+              pushPedalAssignmentAction(pedalIdx, 0, tinyusbJoystick_.tmpAction[i]);
             } else if (sysAction == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_1) {
-              pushPedalAssignmentConfig(pedalIdx, 1);
+              pushPedalAssignmentAction(pedalIdx, 1, tinyusbJoystick_.tmpAction[i]);
             } else if (sysAction == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_2) {
-              pushPedalAssignmentConfig(pedalIdx, 2);
+              pushPedalAssignmentAction(pedalIdx, 2, tinyusbJoystick_.tmpAction[i]);
+            } else if (sysAction == (uint8_t)PedalSystemAction::CLEAR_ASSIGNMENT) {
+              clearPedalAssignmentAction(pedalIdx, tinyusbJoystick_.tmpAction[i]);
+            } else if (sysAction == (uint8_t)PedalSystemAction::ASSIGNMENT_CHECK_BEEP) {
+              if (pedalIdx >= 0 && pedalIdx < 8 && g_pedalMac_aau8[pedalIdx][0] != 0) {
+                ESPNow.send_message(g_pedalMac_aau8[pedalIdx], (uint8_t*)&tinyusbJoystick_.tmpAction[i], sizeof(DapActions_t));
+              }
             } else if(pedalIdx == PEDAL_ID_CLUTCH || pedalIdx == PEDAL_ID_BRAKE || pedalIdx == PEDAL_ID_THROTTLE)
             {
-            //forward to pedal
+              //forward to pedal
               memcpy(&dap_actions_st[pedalIdx], &tinyusbJoystick_.tmpAction[i], sizeof(DapActions_t));
               dap_action_update[pedalIdx] = true;
-              if (tinyusbJoystick_.tmpAction[i].payloadPedalAction_st.systemAction_u8 == (uint8_t)PedalSystemAction::CLEAR_ASSIGNMENT)
-              {
-                clearPedalAssignmentConfig(pedalIdx);
-              }
             }
             tinyusbJoystick_.isActionGet[i]=false;
           }
