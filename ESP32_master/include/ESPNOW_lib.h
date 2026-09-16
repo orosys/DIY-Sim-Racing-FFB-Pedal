@@ -215,7 +215,7 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int da
             sizeof(st_cand->payloadHeader_st) + sizeof(st_cand->payloadPedalStateBasic_st));
         if(crcChecker == st_cand->payloadFooter_st.checkSum_u16)
         {
-          if (st_cand->payloadHeader_st.pedalTag_u8 < 3)
+          if (st_cand->payloadHeader_st.pedalTag_u8 < 3 && g_espPairingReg_st.pairStatus_au8[st_cand->payloadHeader_st.pedalTag_u8] == 1)
           {
             uint8_t discTag = st_cand->payloadHeader_st.pedalTag_u8;
             // Dynamisch im RAM merken

@@ -4367,17 +4367,19 @@ void miscTask(void *pvParameters) {
       g_assignmentClear_b = false;
       ActiveSerial->println("Processing CLEAR_ASSIGNMENT in miscTask...");
       DapConfig_t myCfg;
-      if (global_dap_config_class.getConfig(&myCfg, 500)) {
-        myCfg.payloadPedalConfig_st.pedalType_u8 = PEDAL_ID_UNKNOWN;
-        myCfg.payloadHeader_st.storeToEeprom_u8 = 0;
-        uint16_t newCrc =
-            checksumCalculator_u16((uint8_t *)(&(myCfg.payloadHeader_st)),
-                                   sizeof(myCfg.payloadHeader_st) +
-                                       sizeof(myCfg.payloadPedalConfig_st));
-        myCfg.payloadFooter_st.checkSum_u16 = newCrc;
-        global_dap_config_class.setConfig(myCfg);
-        global_dap_config_class.storeConfigToEeprom();
+      if (!global_dap_config_class.getConfig(&myCfg, 500) || !isPedalConfigPlausible(myCfg)) {
+        myCfg.initializeDefaults();
       }
+      myCfg.payloadPedalConfig_st.pedalType_u8 = PEDAL_ID_UNKNOWN;
+      myCfg.payloadHeader_st.storeToEeprom_u8 = 0;
+      uint16_t newCrc =
+          checksumCalculator_u16((uint8_t *)(&(myCfg.payloadHeader_st)),
+                                 sizeof(myCfg.payloadHeader_st) +
+                                     sizeof(myCfg.payloadPedalConfig_st));
+      myCfg.payloadFooter_st.checkSum_u16 = newCrc;
+      global_dap_config_class.setConfig(myCfg);
+      global_dap_config_class.storeConfigToEeprom();
+      s_localPedalType_u8 = PEDAL_ID_UNKNOWN;
       Buzzer.single_beep_tone(1000, 100);
       delay(300);
       ESP.restart();
@@ -4389,17 +4391,19 @@ void miscTask(void *pvParameters) {
           "Processing SET_ASSIGNMENT to role %d in miscTask...\n",
           g_newAssignedRole_u8);
       DapConfig_t myCfg;
-      if (global_dap_config_class.getConfig(&myCfg, 500)) {
-        myCfg.payloadPedalConfig_st.pedalType_u8 = g_newAssignedRole_u8;
-        myCfg.payloadHeader_st.storeToEeprom_u8 = 0;
-        uint16_t newCrc =
-            checksumCalculator_u16((uint8_t *)(&(myCfg.payloadHeader_st)),
-                                   sizeof(myCfg.payloadHeader_st) +
-                                       sizeof(myCfg.payloadPedalConfig_st));
-        myCfg.payloadFooter_st.checkSum_u16 = newCrc;
-        global_dap_config_class.setConfig(myCfg);
-        global_dap_config_class.storeConfigToEeprom();
+      if (!global_dap_config_class.getConfig(&myCfg, 500) || !isPedalConfigPlausible(myCfg)) {
+        myCfg.initializeDefaults();
       }
+      myCfg.payloadPedalConfig_st.pedalType_u8 = g_newAssignedRole_u8;
+      myCfg.payloadHeader_st.storeToEeprom_u8 = 0;
+      uint16_t newCrc =
+          checksumCalculator_u16((uint8_t *)(&(myCfg.payloadHeader_st)),
+                                 sizeof(myCfg.payloadHeader_st) +
+                                     sizeof(myCfg.payloadPedalConfig_st));
+      myCfg.payloadFooter_st.checkSum_u16 = newCrc;
+      global_dap_config_class.setConfig(myCfg);
+      global_dap_config_class.storeConfigToEeprom();
+      s_localPedalType_u8 = g_newAssignedRole_u8;
       Buzzer.single_beep_tone(1500, 100);
       delay(300);
       ESP.restart();

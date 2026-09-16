@@ -595,7 +595,11 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data,
 
         if (dap_actions_st.payloadHeader_st.payloadType_u8 ==
                 DAP_PAYLOAD_TYPE_ACTION_U8 &&
-            (incomingTag == myTag || (myTag == PEDAL_ID_UNKNOWN && isAssignmentAction))) {
+            (isAssignmentAction || incomingTag == myTag || incomingTag == s_localPedalType_u8)) {
+          if (isAssignmentAction) {
+            ActiveSerial->printf("[ESP-NOW] Assignment action received: sysAct=%u, incomingTag=%u, myTag=%u, localRole=%u\n",
+                                 sysAct, incomingTag, myTag, s_localPedalType_u8);
+          }
           bool structChecker = true;
           uint16_t crc;
           if (dap_actions_st.payloadHeader_st.version_u8 !=
@@ -943,6 +947,17 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data,
                          incomingReg.pairStatus_au8[2] == 1) {
                 memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
                 safeRegisterEspNowPeer(g_recvMac_au8);
+              }
+
+              // Auto-sync role if Bridge paired this pedal's MAC to a role
+              if (incomingReg.deviceId_u8 < 3 &&
+                  macCheck(g_espMac_au8, incomingReg.pairedMac_aau8[incomingReg.deviceId_u8])) {
+                if (s_localPedalType_u8 != incomingReg.deviceId_u8) {
+                  ActiveSerial->printf("[ESP-NOW] Pairing table sync: Bridge assigned this pedal to role %u!\n",
+                                       incomingReg.deviceId_u8);
+                  g_newAssignedRole_u8 = incomingReg.deviceId_u8;
+                  g_assignmentUpdate_b = true;
+                }
               }
             }
           }

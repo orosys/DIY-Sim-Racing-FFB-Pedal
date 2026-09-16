@@ -685,13 +685,33 @@ void clearPedalAssignmentAction(uint8_t targetIdx, const DapActions_t &action)
       break;
     }
   }
-  if (!hasMac) return;
-  memcpy(targetMac, g_pedalMac_aau8[targetIdx], 6);
+  if (!hasMac) {
+    for (int b = 0; b < 6; b++) {
+      if (g_espPairingReg_st.pairMac_aau8[targetIdx][b] != 0) {
+        hasMac = true;
+        break;
+      }
+    }
+    if (hasMac) {
+      memcpy(targetMac, g_espPairingReg_st.pairMac_aau8[targetIdx], 6);
+    }
+  } else {
+    memcpy(targetMac, g_pedalMac_aau8[targetIdx], 6);
+  }
 
-  // Send action directly to the pedal via ESP-NOW
-  for (int retry = 0; retry < 3; retry++) {
-    ESPNow.send_message(targetMac, (uint8_t*)&action, sizeof(DapActions_t));
-    delay(20);
+  if (hasMac) {
+    if (!esp_now_is_peer_exist(targetMac)) {
+      esp_now_peer_info_t peerInfo = {};
+      memcpy(peerInfo.peer_addr, targetMac, 6);
+      peerInfo.channel = 0;
+      peerInfo.ifidx = WIFI_IF_STA;
+      peerInfo.encrypt = false;
+      esp_now_add_peer(&peerInfo);
+    }
+    for (int retry = 0; retry < 5; retry++) {
+      ESPNow.send_message(targetMac, (uint8_t*)&action, sizeof(DapActions_t));
+      delay(20);
+    }
   }
 
   // Clear pairing in EEPROM & RAM
@@ -700,6 +720,7 @@ void clearPedalAssignmentAction(uint8_t targetIdx, const DapActions_t &action)
   EEPROM.put(EEPROM_offset, g_espPairingReg_st);
   EEPROM.commit();
   memset(g_pedalMac_aau8[targetIdx], 0, 6);
+  dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[targetIdx] = 0;
 
   ActiveSerial->printf("[L]Cleared assignment for pedal %d and sent CLEAR_ASSIGNMENT action\n", targetIdx);
   syncPairingTableToPedals();

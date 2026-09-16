@@ -535,7 +535,7 @@ namespace DiyFfbPedal.UIFunction
                     action.payloadHeader_.PedalTag = row.RoleTag;
                     action.payloadPedalAction_.system_action_u8 = (byte)PedalSystemAction.CLEAR_ASSIGNMENT;
 
-                    Plugin.SendPedalAction(action, row.RoleTag);
+                    Plugin.SendPedalActionWireless(action, row.RoleTag);
 
                     if (row.RoleTag < 3 && Plugin.Settings?.AssignedPedalMac != null && Plugin.Settings.AssignedPedalMac.Length > row.RoleTag)
                     {
