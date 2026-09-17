@@ -404,7 +404,11 @@ void StepperWithLimits::findMinMaxSensorless(DapConfig_t dap_config_st) {
     // Return home
     // moveToPosWithSpeed(0, endstopApproachingSpeed_fl32);
     // moveSlowlyToPos(0);
-    moveToPosWithSpeedBlocking(0, endstopApproachingSpeed_fl32);
+    float initialPositionApproachingSpeedInMmPerSecond_fl32 = 50.0f;
+    float initialPositionApproachSpeed_fl32 =
+        initialPositionApproachingSpeedInMmPerSecond_fl32 / spindlePitch *
+        stepsPerMotorRev_u32;
+    moveToPosWithSpeedBlocking(0, initialPositionApproachSpeed_fl32);
 
     ActiveSerial->printf("Max endstop reached: %d\n", _endstopLimitMax);
   }
