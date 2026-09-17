@@ -1436,7 +1436,7 @@ namespace DiyFfbPedal
 
             }
 
-            DAP_action_st tmp;
+            DAP_action_st tmp = default;
             tmp.payloadHeader_.version = (byte)Constants.pedalConfigPayload_version;
             tmp.payloadHeader_.payloadType = (byte)Constants.pedalActionPayload_type;
             tmp.payloadPedalAction_.system_action_u8 = (byte)PedalSystemAction.PRINT_PEDAL_INFO;

@@ -613,7 +613,8 @@ void espNowCommunicationTxTask( void * pvParameters )
                 ESPNow.send_message(g_pedalMac_aau8[0],(uint8_t *) &dap_actions_st[i],sizeof(DapActions_t));
                 break;
               case PEDAL_ID_BRAKE:
-                if (dap_actions_st[i].payloadPedalAction_st.rudderAction_u8 != 0) {
+                if (dap_actions_st[i].payloadPedalAction_st.rudderAction_u8 != 0 &&
+                    dap_actions_st[i].payloadPedalAction_st.systemAction_u8 == 0) {
                   syncPairingTableToPedals();
                 }
                 ESPNow.send_message(g_pedalMac_aau8[1],(uint8_t *) &dap_actions_st[i],sizeof(DapActions_t));

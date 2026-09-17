@@ -3610,11 +3610,11 @@ void IRAM_ATTR_FLAG serialCommunicationTaskTx(void *pvParameters) {
         }
         if (hasHost) {
           safeRegisterEspNowPeer(g_espHost_au8);
-          ESPNow.send_message(g_espHost_au8, (uint8_t *)&resp,
-                              sizeof(DAP_servo_config_st_t));
+          espnowSendWrapper(g_espHost_au8, (uint8_t *)&resp,
+                            sizeof(DAP_servo_config_st_t));
         } else {
-          ESPNow.send_message(g_broadcastMac_au8, (uint8_t *)&resp,
-                              sizeof(DAP_servo_config_st_t));
+          espnowSendWrapper(g_broadcastMac_au8, (uint8_t *)&resp,
+                            sizeof(DAP_servo_config_st_t));
         }
 #endif
       }
@@ -4194,19 +4194,18 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
           }
           if (hasHost) {
             safeRegisterEspNowPeer(g_espHost_au8);
-            ESPNow.send_message(g_espHost_au8,
-                                (uint8_t *)&espnow_dap_config_st,
-                                sizeof(espnow_dap_config_st));
+            espnowSendWrapper(g_espHost_au8,
+                              (uint8_t *)&espnow_dap_config_st,
+                              sizeof(espnow_dap_config_st));
           } else {
-            ESPNow.send_message(g_broadcastMac_au8,
-                                (uint8_t *)&espnow_dap_config_st,
-                                sizeof(espnow_dap_config_st));
+            espnowSendWrapper(g_broadcastMac_au8,
+                              (uint8_t *)&espnow_dap_config_st,
+                              sizeof(espnow_dap_config_st));
           }
           g_espNowConfigRequest_b = false;
           sendESPNOWLog("Pedal:%d Config returned by user request, CRC:%d",
                         espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8,
                         crc);
-          delay(2);
         }
 
         if (g_espNowOtaEnable_b) {
@@ -4248,10 +4247,10 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
 #endif
         }
 
+        static bool s_printEspnowInfoPending = false;
         if (g_printPedalInfo_b) {
           g_printPedalInfo_b = false;
           buzzerBeepAction_b = true;
-          delay(100);
           pedalInfoBuilder.BuildInfoString(
               espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8,
               CONTROL_BOARD, loadcell->getBiasEstimate(),
@@ -4259,14 +4258,18 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
               ((float)stepper->getServosVoltage() / 10.0f),
               dap_calculationVariables_st.stepperPosMaxEndstop_i32,
               dap_calculationVariables_st.currentPedalPosition_u32);
-          sendESPNOWLog(pedalInfoBuilder.logString);
+          sendESPNOWLog("%s", pedalInfoBuilder.logString);
           ActiveSerial->println(pedalInfoBuilder.logString);
-          delay(3);
           pedalInfoBuilder.BuildESPNOWInfo(
               espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8,
               g_rssi_ai32);
-          sendESPNOWLog(pedalInfoBuilder.logESPNOWString);
+          s_printEspnowInfoPending = true;
+        }
+
+        if (s_printEspnowInfoPending && !isEspnowBusy()) {
+          sendESPNOWLog("%s", pedalInfoBuilder.logESPNOWString);
           ActiveSerial->println(pedalInfoBuilder.logESPNOWString);
+          s_printEspnowInfoPending = false;
         }
         if (g_getRudderAction_b) {
           g_getRudderAction_b = false;

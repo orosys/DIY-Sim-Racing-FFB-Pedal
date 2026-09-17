@@ -116,7 +116,7 @@ namespace DiyFfbPedal
         public bool[] Version_warning_first_show_b= new bool[3] { false, false, false };
         public bool Version_warning_first_show_b_bridge = false;
         public byte[] Pedal_version = new byte[3];
-        private SerialMonitor_Window _serial_monitor_window;
+        public SerialMonitor_Window _serial_monitor_window;
         public bool Pedal_Log_warning_1st_show_b = true;
         private string[] Rudder_Pedal_idx_Name= new string[3] {"Clutch", "Brake","Throttle"};
         public byte Pedal_connect_status = 0;

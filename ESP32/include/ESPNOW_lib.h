@@ -1146,8 +1146,8 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data,
     va_end(args);
     if (len <= 0)
       return;
-    if (len > 240)
-      len = 240;
+    if (len > 235)
+      len = 235;
     buffer[0] = payloadType;
     buffer[1] = ESPNOW_LOG_MAGIC_KEY_U8;
     buffer[2] = ESPNOW_LOG_MAGIC_KEY_2_U8;

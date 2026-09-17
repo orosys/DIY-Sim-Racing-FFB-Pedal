@@ -766,13 +766,21 @@ namespace DiyFfbPedal
                             if (pedalMessage_read_st.magicKey2 != Constants.ESPNOW_LOG_MAGIC_KEY_2) structChecker = false;
                             if (structChecker)
                             {
-                                string textContent_orig = System.Text.Encoding.UTF8.GetString(pedalMessage_read_st.text, pedalMessage_read_st.length);
-                                string timestamp = DateTime.Now.ToString("HH:mm:ss");
-                                string textContent = $"[{timestamp}] {textContent_orig}";
-                                TextBox_serialMonitor_bridge.Text += textContent + "\n";
-                                if (_serial_monitor_window != null)
+                                int safeLen = Math.Min((int)pedalMessage_read_st.length, 235);
+                                if (safeLen > 0)
                                 {
-                                    _serial_monitor_window.TextBox_SerialMonitor.Text += textContent + "\n";
+                                    string textContent_orig = System.Text.Encoding.UTF8.GetString(pedalMessage_read_st.text, safeLen);
+                                    string timestamp = DateTime.Now.ToString("HH:mm:ss");
+                                    string textContent = $"[{timestamp}] {textContent_orig}";
+                                    TextBox_serialMonitor_bridge.Text += textContent + "\n";
+                                    if (_serial_monitor_window != null && _serial_monitor_window.IsLoaded)
+                                    {
+                                        try
+                                        {
+                                            _serial_monitor_window.TextBox_SerialMonitor.Text += textContent + "\n";
+                                        }
+                                        catch { }
+                                    }
                                 }
                             }
                         }
