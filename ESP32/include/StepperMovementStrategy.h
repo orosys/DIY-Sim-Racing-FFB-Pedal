@@ -483,26 +483,92 @@ static inline IRAM_ATTR_FLAG float CalcActiveDamping(
 }
 
 /**
- * @brief Predictive EMF Reduction (Regenerative Power Clamping)
+ * @brief Regenerative Velocity and Power Governor
+ * 
+ * =========================================================================================
+ * PHYSICAL BACKGROUND & MATHEMATICAL RATIONALE:
+ * =========================================================================================
+ * 1. ENERGY CONSERVATION (Mechanical-to-Electrical Regeneration):
+ *    When a driver presses down hard on the pedal against the resisting force (spring, 
+ *    viscoelastic elastomer damping, and soft endstop), the pedal moves forward (v > 0)
+ *    while the actuator applies an opposing braking force (F_oppose > 0).
+ *    In this quadrant, the servo acts as a generator:
+ *        P_mech = F_oppose * v_pedal = tau_motor * omega_motor
+ *    Neglecting winding copper losses (I^2 * R), this mechanical work is converted directly 
+ *    into electrical current fed back through the inverter bridge diodes into the DC power bus:
+ *        P_elec ≈ P_mech
+ * 
+ * 2. WHY 35 WATTS (DC BUS CAPACITANCE & INTERNAL BLEEDER CIRCUIT):
+ *    - Capacitive Absorption Limit:
+ *      The internal DC bus capacitor bank inside the Leadshine iSV57 is C ≈ 470 - 1000 uF (63V rating).
+ *      The energy absorbed during a voltage rise from nominal supply (e.g. 36V) to the 
+ *      internal bleeder trigger threshold (Pr7.32 = 40V) is:
+ *          ΔE_C = 0.5 * C * (V_trip^2 - V_nom^2) = 0.5 * 1000uF * (40^2 - 36^2) ≈ 0.15 Joules.
+ *      At a sudden foot stomp delivering 150 W (e.g. 300 N at 0.5 m/s), this capacitor buffer 
+ *      fills and saturates in less than 1 millisecond!
+ * 
+ *    - Internal Bleeder (Braking Resistor) Dissipation:
+ *      The iSV57 integrated servo features an internal dynamic braking switch (Pr7.31 = 1) 
+ *      that dumps excess voltage into an internal resistor when V_bus >= 40V (or 52V in 48V mode).
+ *      Due to the compact 57mm frame size and lack of active cooling, the internal bleeder 
+ *      can continuously dissipate ~10-15W, with a safe transient pulse capacity of ~35W - 40W.
+ *      Exceeding ~35-40W during high-speed stomps causes the bus voltage to climb uncontrollably, 
+ *      tripping the overvoltage protection alarm (Er.020 / Er.021 at ~60V) or shutting down 
+ *      external SMPS (Switch-Mode Power Supplies) lacking reverse-current sinks.
+ * 
+ *    - Velocity Governor:
+ *      By setting P_max_regen = 35.0 W, we dynamically enforce:
+ *          v_max_power = P_max_regen / F_oppose
+ *      - At low pedal resistance (e.g. 25 N): v_max = 35 / 25 = 1.4 m/s (no restriction, completely transparent).
+ *      - At heavy braking (e.g. 250 N): v_max = 35 / 250 = 0.14 m/s (140 mm/s, halts overvoltage spikes).
+ *      - At extreme endstop hit (e.g. 500 N): v_max = 35 / 500 = 0.07 m/s (70 mm/s, smooth deceleration).
+ * 
+ * 3. BACK-EMF & MOTOR RPM LIMIT (Pr7.08 = 56):
+ *    - Pr7.08 is the Back-EMF constant: 5.6 V_rms / 1000 rpm (line-to-line).
+ *    - Peak AC voltage is 5.6 * sqrt(2) ≈ 7.9 V / 1000 rpm.
+ *    - Rectified DC voltage through the body diodes is V_rectified ≈ 1.35 * 5.6 V ≈ 7.56 V / 1000 rpm.
+ *    - At 3600 rpm, the uncontrolled passive rectified BEMF is ~27.2V, safely below 36V/48V bus rails.
+ * =========================================================================================
  */
-static inline IRAM_ATTR_FLAG void ApplyRegenPowerClamping(
-    float virtualMass_kg, float vModelVel_mps, float& acceleration_mps2, float vModelPos_01)
+static inline IRAM_ATTR_FLAG float CalcRegenVelocityLimit(
+    float totalOpposingForce_N,
+    float totalTravel_m,
+    float maxSledPos_m,
+    float spindlePitch_mm,
+    float vModelPos_01,
+    float softEndstopTravel_m)
 {
-    // NEUER FIX: Bypass im Endanschlag. 
-    // Hier MUSS das Physikmodell hart bremsen dürfen, sonst schlägt es durch.
-    if (vModelPos_01 > 1.0f) return;
+    // 1. SAFE REGENERATIVE POWER LIMIT
+    // P_regen = F_oppose * v_pedal. Safe dissipation limit before DC bus overvoltage.
+    // iSV57 internal bleeder + capacitance handles up to ~35-40W continuous/burst safely.
+    const float MAX_REGEN_POWER_W = 35.0f;
+    float safeOpposingForce_N = max(totalOpposingForce_N, 1.0f);
+    float vMaxPower_mps = MAX_REGEN_POWER_W / safeOpposingForce_N;
 
-    if ((acceleration_mps2 > 0.0f && vModelVel_mps < 0.0f) || 
-        (acceleration_mps2 < 0.0f && vModelVel_mps > 0.0f)) {
-        
-        float predictedRegenPower_W = fabsf((virtualMass_kg * acceleration_mps2) * vModelVel_mps);
-        const float MAX_REGEN_POWER_W = 1.0f; 
+    // 2. BACK-EMF VOLTAGE / MOTOR RPM LIMIT
+    // Pr7.08 = 56 (5.6 V_rms/krpm). Leadshine iSV57 max rated speed is 3000-4000 rpm.
+    // At 3600 rpm, BEMF amplitude remains safely below DC bus supply voltage (36V / 48V).
+    const float MAX_SAFE_MOTOR_RPM = 3600.0f;
+    float safePitch_mm = (spindlePitch_mm > 0.0f) ? spindlePitch_mm : 5.0f;
+    float vSledMaxBemf_mps = (MAX_SAFE_MOTOR_RPM * safePitch_mm) / 60000.0f; // mm/min to m/s
+    float vPedalMaxBemf_mps = vSledMaxBemf_mps * (totalTravel_m / max(maxSledPos_m, 0.0001f));
 
-        if (predictedRegenPower_W > MAX_REGEN_POWER_W) {
-            float powerScale = MAX_REGEN_POWER_W / predictedRegenPower_W;
-            acceleration_mps2 *= powerScale;
-        }
+    // Combine power limit and BEMF limit
+    float maxRegenVel_mps = min(vMaxPower_mps, vPedalMaxBemf_mps);
+
+    // 3. SOFT ENDSTOP CUSHIONING / TAPER
+    // When pressing into the soft endstop (> 1.0), progressively taper down allowable forward speed
+    // proportionally to penetration depth, smoothly arresting motion without abrupt power dumping.
+    if (vModelPos_01 > 1.0f) {
+        float penetration_m = (vModelPos_01 - 1.0f) * totalTravel_m;
+        float safeEndstopTravel_m = max(softEndstopTravel_m, 0.001f);
+        float penetration_01 = constrain(penetration_m / safeEndstopTravel_m, 0.0f, 1.0f);
+        // Taper down to 15% of max velocity at full endstop penetration
+        float taper = 1.0f - (0.85f * penetration_01);
+        maxRegenVel_mps *= taper;
     }
+
+    return maxRegenVel_mps;
 }
 
 // =========================================================
@@ -1004,17 +1070,11 @@ float IRAM_ATTR_FLAG MoveByAdmittanceStrategy(
   const float MAX_ACCEL_MPS2 = 30.0f; 
   acceleration_mps2 = constrain(acceleration_mps2, -MAX_ACCEL_MPS2, MAX_ACCEL_MPS2);
 
-  // Predictive EMF Reduction (Regenerative Power Clamping)
-  ApplyRegenPowerClamping(virtualMass_kg
-    , g_vModelVel_mps
-    , acceleration_mps2
-    , g_vModelPos_01);
-
   // Velocity Integration
   g_vModelVel_mps += acceleration_mps2 * dt_s;
 
-  // --- 13. VELOCITY CHOKING (STABILITY PROTECTION) ---
-  // Limit the movement speed if the system becomes unstable.
+  // --- 13. VELOCITY CHOKING & REGENERATIVE EMF GOVERNOR ---
+  // Limit the movement speed if the system becomes unstable or generates excessive regen power.
   float velocityLimit_01 = 1.0f; // Up to 70% speed reduction
   
   float maxPhysicalSledVel_mps = 0.8f; 
@@ -1028,7 +1088,24 @@ float IRAM_ATTR_FLAG MoveByAdmittanceStrategy(
   float maxPedalArcVel_mps = maxPhysicalSledVel_mps * (totalTravel_m / maxSledPos_m);
   float dynamicSpeedLimit = maxPedalArcVel_mps * velocityLimit_01;
   
-  g_vModelVel_mps = constrain(g_vModelVel_mps, -dynamicSpeedLimit, dynamicSpeedLimit);
+  // Regenerative Power & Back-EMF Clamping:
+  // Moving forward (v > 0) against the spring, endstop, and damping forces converts foot mechanical power
+  // into electrical energy (P = F_oppose * v). We limit forward velocity so P <= 35W and motor RPM <= 3600 RPM.
+  float totalOpposingForce_N = springForce_N + softEndstopForce_N + fabsf(dampingForce_N);
+  float softEndstopTravel_m = endstopBehavior_st.travelRange_mm_fl32 * 0.001f;
+  float spindlePitch_mm = (float)config_st->payloadPedalConfig_st.spindlePitch_mmPerRev_u8;
+
+  float maxRegenVel_mps = CalcRegenVelocityLimit(
+      totalOpposingForce_N,
+      totalTravel_m,
+      maxSledPos_m,
+      spindlePitch_mm,
+      g_vModelPos_01,
+      softEndstopTravel_m
+  );
+
+  float forwardSpeedLimit = min(dynamicSpeedLimit, maxRegenVel_mps);
+  g_vModelVel_mps = constrain(g_vModelVel_mps, -dynamicSpeedLimit, forwardSpeedLimit);
 
   // --- 14. POSITION INTEGRATION, BOUNDARY CONSTRAINTS & DRIFT CORRECTION ---
   // Update virtual position based on velocity
