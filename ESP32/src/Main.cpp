@@ -3542,8 +3542,21 @@ void IRAM_ATTR_FLAG serialCommunicationTaskTx(void *pvParameters) {
         usbManager.write((const uint8_t *)&resp, sizeof(DAP_servo_config_st_t));
 
 #ifdef ESPNOW_Enable
-        ESPNow.send_message(g_broadcastMac_au8, (uint8_t *)&resp,
-                            sizeof(DAP_servo_config_st_t));
+        bool hasHost = false;
+        for (int i = 0; i < 6; i++) {
+          if (g_espHost_au8[i] != 0) {
+            hasHost = true;
+            break;
+          }
+        }
+        if (hasHost) {
+          safeRegisterEspNowPeer(g_espHost_au8);
+          ESPNow.send_message(g_espHost_au8, (uint8_t *)&resp,
+                              sizeof(DAP_servo_config_st_t));
+        } else {
+          ESPNow.send_message(g_broadcastMac_au8, (uint8_t *)&resp,
+                              sizeof(DAP_servo_config_st_t));
+        }
 #endif
       }
     }
@@ -4113,9 +4126,23 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
               sizeof(espnow_dap_config_st.payloadHeader_st) +
                   sizeof(espnow_dap_config_st.payloadPedalConfig_st));
           dap_config_st_local_ptr->payloadFooter_st.checkSum_u16 = crc;
-          ESPNow.send_message(g_broadcastMac_au8,
-                              (uint8_t *)&espnow_dap_config_st,
-                              sizeof(espnow_dap_config_st));
+          bool hasHost = false;
+          for (int i = 0; i < 6; i++) {
+            if (g_espHost_au8[i] != 0) {
+              hasHost = true;
+              break;
+            }
+          }
+          if (hasHost) {
+            safeRegisterEspNowPeer(g_espHost_au8);
+            ESPNow.send_message(g_espHost_au8,
+                                (uint8_t *)&espnow_dap_config_st,
+                                sizeof(espnow_dap_config_st));
+          } else {
+            ESPNow.send_message(g_broadcastMac_au8,
+                                (uint8_t *)&espnow_dap_config_st,
+                                sizeof(espnow_dap_config_st));
+          }
           g_espNowConfigRequest_b = false;
           sendESPNOWLog("Pedal:%d Config returned by user request, CRC:%d",
                         espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8,

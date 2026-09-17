@@ -490,90 +490,115 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data,
         }
       }
     }
+    bool hasHost = false;
+    for (int i = 0; i < 6; i++) {
+      if (g_espHost_au8[i] != 0) {
+        hasHost = true;
+        break;
+      }
+    }
     bool isHostSender =
-        macCheck(g_espHost_au8, (uint8_t *)esp_now_info->src_addr);
+        hasHost && macCheck(g_espHost_au8, (uint8_t *)esp_now_info->src_addr);
     bool isUnassigned = (s_localPedalType_u8 == PEDAL_ID_UNKNOWN);
     bool isBridgeLost = (millis() - g_lastMasterHeartbeat_ms > 5000);
+
+    bool isPeerPedal = false;
+    for (int p = 0; p < 3; p++) {
+      if (macCheck((uint8_t *)esp_now_info->src_addr, g_pedalMac_aau8[p])) {
+        isPeerPedal = true;
+        break;
+      }
+    }
+
+    if (data_len == sizeof(DapConfig_t)) {
+      // Peer pedals must never configure this pedal
+      if (isPeerPedal) {
+        return;
+      }
+
+      // If host is known, config must originate from host
+      if (hasHost && !isHostSender) {
+        return;
+      }
+
+      if (isHostSender || isUnassigned || isBridgeLost) {
+        bool structChecker = true;
+        uint16_t crc;
+        DapConfig_t *dap_config_st_local_ptr;
+        dap_config_st_local_ptr = &dap_config_espnow_recv_st;
+        // ActiveSerial->readBytes((char*)dap_config_st_local_ptr,
+        // sizeof(DapConfig_t));
+        memcpy(dap_config_st_local_ptr, data, sizeof(DapConfig_t));
+
+        // check if data is plausible
+        if (dap_config_espnow_recv_st.payloadHeader_st.payloadType_u8 !=
+            DAP_PAYLOAD_TYPE_CONFIG_U8) {
+          structChecker = false;
+          g_espNowErrorCode_u8 = 101;
+        }
+        if (dap_config_espnow_recv_st.payloadHeader_st.version_u8 !=
+            DAP_VERSION_CONFIG_U8) {
+          structChecker = false;
+          if (g_espNowErrorCode_u8 == 0) {
+            g_espNowErrorCode_u8 = 102;
+          }
+        }
+        // checksum validation
+        crc = checksumCalculator_u16(
+            (uint8_t *)(&(dap_config_espnow_recv_st.payloadHeader_st)),
+            sizeof(dap_config_espnow_recv_st.payloadHeader_st) +
+                sizeof(dap_config_espnow_recv_st.payloadPedalConfig_st));
+        if (crc != dap_config_espnow_recv_st.payloadFooter_st.checkSum_u16) {
+          structChecker = false;
+          if (g_espNowErrorCode_u8 == 0) {
+            g_espNowErrorCode_u8 = 103;
+          }
+        }
+        if (structChecker && !isPedalConfigPlausible(dap_config_espnow_recv_st)) {
+          structChecker = false;
+          if (g_espNowErrorCode_u8 == 0) {
+            g_espNowErrorCode_u8 = 104;
+          }
+        }
+
+        // Target Role Protection:
+        // If this pedal already has an assigned role (< 3) and this is NOT an explicit EEPROM reassignment,
+        // then the incoming config must match our role.
+        if (structChecker && s_localPedalType_u8 < 3 &&
+            dap_config_espnow_recv_st.payloadHeader_st.storeToEeprom_u8 == 0) {
+          if (dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8 != s_localPedalType_u8) {
+            structChecker = false;
+          }
+        }
+
+        // if checks are successfull, overwrite global configuration struct
+        if (structChecker == true) {
+          if (!hasHost || !macCheck(g_espHost_au8, (uint8_t *)esp_now_info->src_addr)) {
+            memcpy(g_espHost_au8, esp_now_info->src_addr, 6);
+            safeRegisterEspNowPeer(g_espHost_au8);
+          }
+          g_lastMasterHeartbeat_ms = millis();
+          // ActiveSerial->println("Updating pedal config");
+          configDataPackage_t configPackage_st;
+          configPackage_st.config_st = dap_config_espnow_recv_st;
+          if (dap_config_espnow_recv_st.payloadHeader_st.storeToEeprom_u8 == 1 ||
+              s_localPedalType_u8 == PEDAL_ID_UNKNOWN) {
+            s_localPedalType_u8 =
+                dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8;
+          }
+          xQueueSend(s_configUpdateAvailableQueue, &configPackage_st, 0);
+          // global_dap_config_class.setConfig(dap_config_espnow_recv_st);
+          if (dap_config_espnow_recv_st.payloadHeader_st.storeToEeprom_u8 ==
+              1) {
+            g_configUpdateBuzzer_b = true;
+          }
+        }
+      }
+    }
 
     if (isHostSender || isUnassigned || isBridgeLost) {
       if (isHostSender) {
         g_lastMasterHeartbeat_ms = millis();
-      }
-
-      if (data_len == sizeof(DapConfig_t)) {
-        bool hasHost = false;
-        for (int i = 0; i < 6; i++) {
-          if (g_espHost_au8[i] != 0) {
-            hasHost = true;
-            break;
-          }
-        }
-        if (!hasHost || (esp_now_info->src_addr[5] == g_espHost_au8[5])) {
-          // ActiveSerial->println("dap_config_st ESPNow recieved");
-
-          bool structChecker = true;
-          uint16_t crc;
-          DapConfig_t *dap_config_st_local_ptr;
-          dap_config_st_local_ptr = &dap_config_espnow_recv_st;
-          // ActiveSerial->readBytes((char*)dap_config_st_local_ptr,
-          // sizeof(DapConfig_t));
-          memcpy(dap_config_st_local_ptr, data, sizeof(DapConfig_t));
-
-          // check if data is plausible
-          if (dap_config_espnow_recv_st.payloadHeader_st.payloadType_u8 !=
-              DAP_PAYLOAD_TYPE_CONFIG_U8) {
-            structChecker = false;
-            g_espNowErrorCode_u8 = 101;
-          }
-          if (dap_config_espnow_recv_st.payloadHeader_st.version_u8 !=
-              DAP_VERSION_CONFIG_U8) {
-            structChecker = false;
-            if (g_espNowErrorCode_u8 == 0) {
-              g_espNowErrorCode_u8 = 102;
-            }
-          }
-          // checksum validation
-          crc = checksumCalculator_u16(
-              (uint8_t *)(&(dap_config_espnow_recv_st.payloadHeader_st)),
-              sizeof(dap_config_espnow_recv_st.payloadHeader_st) +
-                  sizeof(dap_config_espnow_recv_st.payloadPedalConfig_st));
-          if (crc != dap_config_espnow_recv_st.payloadFooter_st.checkSum_u16) {
-            structChecker = false;
-            if (g_espNowErrorCode_u8 == 0) {
-              g_espNowErrorCode_u8 = 103;
-            }
-          }
-          if (structChecker && !isPedalConfigPlausible(dap_config_espnow_recv_st)) {
-            structChecker = false;
-            if (g_espNowErrorCode_u8 == 0) {
-              g_espNowErrorCode_u8 = 104;
-            }
-          }
-
-          // if checks are successfull, overwrite global configuration struct
-          if (structChecker == true) {
-            if (!hasHost || !macCheck(g_espHost_au8, (uint8_t *)esp_now_info->src_addr)) {
-              memcpy(g_espHost_au8, esp_now_info->src_addr, 6);
-              safeRegisterEspNowPeer(g_espHost_au8);
-            }
-            // ActiveSerial->println("Updating pedal config");
-            configDataPackage_t configPackage_st;
-            configPackage_st.config_st = dap_config_espnow_recv_st;
-            if (dap_config_espnow_recv_st.payloadHeader_st.storeToEeprom_u8 ==
-                    1 ||
-                dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8 <
-                    3) {
-              s_localPedalType_u8 =
-                  dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8;
-            }
-            xQueueSend(s_configUpdateAvailableQueue, &configPackage_st, 0);
-            // global_dap_config_class.setConfig(dap_config_espnow_recv_st);
-            if (dap_config_espnow_recv_st.payloadHeader_st.storeToEeprom_u8 ==
-                1) {
-              g_configUpdateBuzzer_b = true;
-            }
-          }
-        }
       }
 
       DapActions_t dap_actions_st;
@@ -621,6 +646,12 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data,
           }
 
             if (structChecker == true) {
+              // Actions originate exclusively from the Bridge
+              if (!hasHost || !macCheck(g_espHost_au8, (uint8_t *)esp_now_info->src_addr)) {
+                memcpy(g_espHost_au8, esp_now_info->src_addr, 6);
+                safeRegisterEspNowPeer(g_espHost_au8);
+              }
+              g_lastMasterHeartbeat_ms = millis();
 
               // Software assignment actions (clean, no config overwriting)
               if (sysAct == (uint8_t)PedalSystemAction::CLEAR_ASSIGNMENT) {
@@ -901,7 +932,15 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data,
               }
               if (wifiChPacket.payloadWifiChannel_st.command_u8 ==
                       WIFI_CH_CMD_BEACON &&
-                  isHostSender) {
+                  wifiChPacket.payloadHeader_st.pedalTag_u8 == 3) {
+                if (!hasHost || !macCheck(g_espHost_au8, (uint8_t *)esp_now_info->src_addr)) {
+                  memcpy(g_espHost_au8, esp_now_info->src_addr, 6);
+                  safeRegisterEspNowPeer(g_espHost_au8);
+                  ActiveSerial->printf(
+                      "[ESP-NOW] Learned Bridge MAC from Beacon: %02X:%02X:%02X:%02X:%02X:%02X\n",
+                      g_espHost_au8[0], g_espHost_au8[1], g_espHost_au8[2],
+                      g_espHost_au8[3], g_espHost_au8[4], g_espHost_au8[5]);
+                }
                 g_lastMasterHeartbeat_ms = millis();
                 uint8_t beaconCh =
                     wifiChPacket.payloadWifiChannel_st.currentChannel_u8;
@@ -981,6 +1020,13 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data,
                   sizeof(received_servo_config.payloadServoConfig_st));
           if (crc != received_servo_config.payloadFooter_st.checkSum_u16)
             structChecker = false;
+
+          if (structChecker == true) {
+            if (s_localPedalType_u8 < 3 &&
+                received_servo_config.payloadHeader_st.pedalTag_u8 != s_localPedalType_u8) {
+              structChecker = false;
+            }
+          }
 
           if (structChecker == true) {
             if (s_servoConfigRxQueue != NULL) {
