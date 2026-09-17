@@ -493,21 +493,11 @@ namespace DiyFfbPedal
                                     
                                     if (bridge_state.payloadBridgeState_.unassignedPedalCount > 0 && Plugin._calculations.unassignedPedalCount != bridge_state.payloadBridgeState_.unassignedPedalCount)
                                     {
-                                        
-                                        string tmp = bridge_state.payloadBridgeState_.unassignedPedalCount + " unassigned pedals founded!";
-                                        ToastNotification("New Pedal Detected", tmp);
-
-                                        Application.Current?.Dispatcher?.InvokeAsync(() =>
+                                        int count = bridge_state.payloadBridgeState_.unassignedPedalCount;
+                                        string tmp = count == 1 ? "1 unassigned pedal detected." : $"{count} unassigned pedals detected.";
+                                        ToastNotification("New Pedal Detected", tmp, "Wireless Settings", () =>
                                         {
-                                            if (!DiyFfbPedal.UIFunction.AssignmentConfigurationWindow.IsOpen)
-                                            {
-                                                var sideWindow = new DiyFfbPedal.UIFunction.AssignmentConfigurationWindow(Plugin);
-                                                double screenWidth = SystemParameters.PrimaryScreenWidth;
-                                                double screenHeight = SystemParameters.PrimaryScreenHeight;
-                                                sideWindow.Left = screenWidth / 2 - sideWindow.Width / 2;
-                                                sideWindow.Top = screenHeight / 2 - sideWindow.Height / 2;
-                                                sideWindow.Show();
-                                            }
+                                            NavigateToSystemWirelessTab();
                                         });
                                     }
                                     Plugin._calculations.unassignedPedalCount = bridge_state.payloadBridgeState_.unassignedPedalCount;

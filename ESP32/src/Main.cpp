@@ -171,22 +171,45 @@ inline bool isPedalConfigPlausible(const DapConfig_t &config,
     return false;
   }
 
-  // Max force (kg) - positive number within safety bounds (e.g. 1 - 500 kg)
-  if (isnan(p.maxForce_fl32) || isinf(p.maxForce_fl32) ||
-      p.maxForce_fl32 < 1.0f || p.maxForce_fl32 > 500.0f) {
-    if (serial)
-      serial->printf("Implausible max force: %.2f kg (expected 1-500)\n",
-                     p.maxForce_fl32);
-    return false;
-  }
+  bool isFlightRudderConfig =
+      dap_calculationVariables_st.rudderStatus_b ||
+      dap_calculationVariables_st.helicopterRudderStatus_b ||
+      (p.relativeForce01_u8 == 1) || (p.preloadForce_fl32 < 0.0f);
 
-  // Preload force (kg) - non-negative and strictly lower than max force
-  if (isnan(p.preloadForce_fl32) || isinf(p.preloadForce_fl32) ||
-      p.preloadForce_fl32 < 0.0f || p.preloadForce_fl32 >= p.maxForce_fl32) {
-    if (serial)
-      serial->printf("Implausible preload force: %.2f kg (max=%.2f)\n",
-                     p.preloadForce_fl32, p.maxForce_fl32);
-    return false;
+  if (isFlightRudderConfig) {
+    // Flight Rudder Mode (Helicopter mode has 0 centering force; trim offset can be signed ±50 kg)
+    if (isnan(p.maxForce_fl32) || isinf(p.maxForce_fl32) ||
+        p.maxForce_fl32 < 0.0f || p.maxForce_fl32 > 500.0f) {
+      if (serial)
+        serial->printf(
+            "Implausible rudder max force: %.2f kg (expected 0-500)\n",
+            p.maxForce_fl32);
+      return false;
+    }
+    if (isnan(p.preloadForce_fl32) || isinf(p.preloadForce_fl32) ||
+        p.preloadForce_fl32 < -50.0f || p.preloadForce_fl32 > 50.0f) {
+      if (serial)
+        serial->printf(
+            "Implausible rudder trim force: %.2f kg (expected -50 to +50)\n",
+            p.preloadForce_fl32);
+      return false;
+    }
+  } else {
+    // Standard Racing Pedals (Brake/Throttle/Clutch)
+    if (isnan(p.maxForce_fl32) || isinf(p.maxForce_fl32) ||
+        p.maxForce_fl32 < 1.0f || p.maxForce_fl32 > 500.0f) {
+      if (serial)
+        serial->printf("Implausible max force: %.2f kg (expected 1-500)\n",
+                       p.maxForce_fl32);
+      return false;
+    }
+    if (isnan(p.preloadForce_fl32) || isinf(p.preloadForce_fl32) ||
+        p.preloadForce_fl32 < 0.0f || p.preloadForce_fl32 >= p.maxForce_fl32) {
+      if (serial)
+        serial->printf("Implausible preload force: %.2f kg (max=%.2f)\n",
+                       p.preloadForce_fl32, p.maxForce_fl32);
+      return false;
+    }
   }
 
   // Loadcell rating
@@ -2666,7 +2689,8 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
                     .maxGameOutput_u8);
           }
         }
-        if (dap_calculationVariables_st.rudderStatus_b &&
+        if ((dap_calculationVariables_st.rudderStatus_b ||
+             dap_calculationVariables_st.helicopterRudderStatus_b) &&
             !dap_calculationVariables_st.rudderBrakeStatus_b) {
           // Symmetrical Yaw Mapping around 50% (neutral position anchored at
           // 50%)
@@ -2800,7 +2824,8 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
         dap_state_basic_st_lcl_pedalUpdateTask.payloadPedalStateBasic_st
             .errorCode_u8 = 0;
         // pedal status update
-        if (dap_calculationVariables_st.rudderStatus_b) {
+        if (dap_calculationVariables_st.rudderStatus_b ||
+            dap_calculationVariables_st.helicopterRudderStatus_b) {
           if (dap_calculationVariables_st.rudderBrakeStatus_b)
             dap_state_basic_st_lcl_pedalUpdateTask.payloadPedalStateBasic_st
                 .pedalStatus_u8 = PEDAL_STATUS_RUDDERBRAKE;
@@ -2976,7 +3001,8 @@ void IRAM_ATTR_FLAG joystickOutputTask(void *pvParameters) {
 
   // Ensure HID gamepad is immediately initialized to 0% as soon as task starts
   if (usbManager.isJoystickReady()) {
-    if (dap_calculationVariables_st.rudderStatus_b == false) {
+    if (dap_calculationVariables_st.rudderStatus_b == false &&
+        dap_calculationVariables_st.helicopterRudderStatus_b == false) {
       usbManager.sendJoystickValue(0);
     }
   }
@@ -2992,7 +3018,8 @@ void IRAM_ATTR_FLAG joystickOutputTask(void *pvParameters) {
     // force 0% report immediately
     if (isReady_b && !wasReady_b) {
       wasReady_b = true;
-      if (dap_calculationVariables_st.rudderStatus_b == false) {
+      if (dap_calculationVariables_st.rudderStatus_b == false &&
+          dap_calculationVariables_st.helicopterRudderStatus_b == false) {
         usbManager.sendJoystickValue(0);
       }
     } else if (!isReady_b) {
@@ -3007,7 +3034,8 @@ void IRAM_ATTR_FLAG joystickOutputTask(void *pvParameters) {
       bool sendFlag_b = receivedJoystickData.sendJoystickFlag_b;
 
       if (sendFlag_b && isReady_b) {
-        if (dap_calculationVariables_st.rudderStatus_b == false) {
+        if (dap_calculationVariables_st.rudderStatus_b == false &&
+            dap_calculationVariables_st.helicopterRudderStatus_b == false) {
           usbManager.sendJoystickValue(joystickData_u16);
         }
       }
@@ -3017,7 +3045,8 @@ void IRAM_ATTR_FLAG joystickOutputTask(void *pvParameters) {
       // boot, endstop detection / homing, standby, or pause). Maintain 0%
       // output.
       if (isReady_b) {
-        if (dap_calculationVariables_st.rudderStatus_b == false) {
+        if (dap_calculationVariables_st.rudderStatus_b == false &&
+            dap_calculationVariables_st.helicopterRudderStatus_b == false) {
           usbManager.sendJoystickValue(0);
         }
       }
@@ -3314,38 +3343,68 @@ void IRAM_ATTR_FLAG serialCommunicationTaskRx(void *pvParameters) {
 #ifdef ESPNOW_Enable
             uint8_t rudderAct =
                 received_action.payloadPedalAction_st.rudderAction_u8;
+            uint8_t localRole = s_localPedalType_u8;
+            if (localRole >= 3) {
+              DapConfig_t cfg;
+              if (global_dap_config_class.getConfig(&cfg, 50)) {
+                localRole = cfg.payloadPedalConfig_st.pedalType_u8;
+              }
+            }
+
             if (rudderAct == (uint8_t)RudderAction::RUDDER_THROTTLE_AND_BRAKE ||
                 rudderAct ==
                     (uint8_t)RudderAction::RUDDER_THROTTLE_AND_CLUTCH) {
-              if (dap_calculationVariables_st.rudderStatus_b == false) {
-                dap_calculationVariables_st.rudderStatus_b = true;
-                dap_calculationVariables_st.helicopterRudderStatus_b = false;
-                ActiveSerial->println("Rudder Plane on");
-              } else {
-                dap_calculationVariables_st.rudderStatus_b = false;
-                dap_calculationVariables_st.helicopterRudderStatus_b = false;
-                moveSlowlyToPosition_b = true;
-                ResetRudderStrategyState();
-                ActiveSerial->println("Rudder Plane off");
+              if (rudderAct ==
+                  (uint8_t)RudderAction::RUDDER_THROTTLE_AND_CLUTCH) {
+                if (localRole == PEDAL_ID_THROTTLE) {
+                  memcpy(g_recvMac_au8, g_pedalMac_aau8[0], 6);
+                  safeRegisterEspNowPeer(g_recvMac_au8);
+                } else if (localRole == PEDAL_ID_CLUTCH) {
+                  memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
+                  safeRegisterEspNowPeer(g_recvMac_au8);
+                }
+              } else if (rudderAct ==
+                         (uint8_t)RudderAction::RUDDER_THROTTLE_AND_BRAKE) {
+                if (localRole == PEDAL_ID_THROTTLE) {
+                  memcpy(g_recvMac_au8, g_pedalMac_aau8[1], 6);
+                  safeRegisterEspNowPeer(g_recvMac_au8);
+                } else if (localRole == PEDAL_ID_BRAKE) {
+                  memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
+                  safeRegisterEspNowPeer(g_recvMac_au8);
+                }
               }
+              dap_calculationVariables_st.rudderStatus_b = true;
+              dap_calculationVariables_st.helicopterRudderStatus_b = false;
+              ActiveSerial->println("Rudder Plane on");
             } else if (rudderAct ==
                            (uint8_t)
                                RudderAction::HELIRUDDER_THROTTLE_AND_BRAKE ||
                        rudderAct ==
                            (uint8_t)
                                RudderAction::HELIRUDDER_THROTTLE_AND_CLUTCH) {
-              if (dap_calculationVariables_st.helicopterRudderStatus_b ==
-                  false) {
-                dap_calculationVariables_st.helicopterRudderStatus_b = true;
-                dap_calculationVariables_st.rudderStatus_b = false;
-                ActiveSerial->println("Rudder Helicopter on");
-              } else {
-                dap_calculationVariables_st.helicopterRudderStatus_b = false;
-                dap_calculationVariables_st.rudderStatus_b = false;
-                moveSlowlyToPosition_b = true;
-                ResetRudderStrategyState();
-                ActiveSerial->println("Rudder Helicopter off");
+              if (rudderAct ==
+                  (uint8_t)RudderAction::HELIRUDDER_THROTTLE_AND_CLUTCH) {
+                if (localRole == PEDAL_ID_THROTTLE) {
+                  memcpy(g_recvMac_au8, g_pedalMac_aau8[0], 6);
+                  safeRegisterEspNowPeer(g_recvMac_au8);
+                } else if (localRole == PEDAL_ID_CLUTCH) {
+                  memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
+                  safeRegisterEspNowPeer(g_recvMac_au8);
+                }
+              } else if (rudderAct ==
+                         (uint8_t)
+                             RudderAction::HELIRUDDER_THROTTLE_AND_BRAKE) {
+                if (localRole == PEDAL_ID_THROTTLE) {
+                  memcpy(g_recvMac_au8, g_pedalMac_aau8[1], 6);
+                  safeRegisterEspNowPeer(g_recvMac_au8);
+                } else if (localRole == PEDAL_ID_BRAKE) {
+                  memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
+                  safeRegisterEspNowPeer(g_recvMac_au8);
+                }
               }
+              dap_calculationVariables_st.helicopterRudderStatus_b = true;
+              dap_calculationVariables_st.rudderStatus_b = false;
+              ActiveSerial->println("Rudder Helicopter on");
             } else if (rudderAct ==
                        (uint8_t)RudderAction::RUDDER_CLEAR_RUDDER_STATUS) {
               dap_calculationVariables_st.rudderStatus_b = false;

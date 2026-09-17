@@ -257,7 +257,8 @@ void ESPNow_Joystick_Broadcast(int32_t controllerValue) {
   _dap_joystick_message.cycleCnt_u64++;
   _dap_joystick_message.timeSinceBoot_i64 = esp_timer_get_time() / 1000;
   _dap_joystick_message.controllerValue_i32 = controllerValue;
-  if (dap_calculationVariables_st.rudderStatus_b) {
+  if (dap_calculationVariables_st.rudderStatus_b ||
+      dap_calculationVariables_st.helicopterRudderStatus_b) {
     if (dap_calculationVariables_st.rudderBrakeStatus_b) {
       _dap_joystick_message.pedal_status = 2;
     } else {
@@ -767,6 +768,14 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data,
               }
               uint8_t rudderAct =
                   dap_actions_st.payloadPedalAction_st.rudderAction_u8;
+              uint8_t localRole = s_localPedalType_u8;
+              if (localRole >= 3) {
+                DapConfig_t cfg;
+                if (global_dap_config_class.getConfig(&cfg, 50)) {
+                  localRole = cfg.payloadPedalConfig_st.pedalType_u8;
+                }
+              }
+
               if (rudderAct ==
                       (uint8_t)RudderAction::RUDDER_THROTTLE_AND_BRAKE ||
                   rudderAct ==
@@ -774,42 +783,25 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data,
                 g_getRudderAction_b = true;
                 if (rudderAct ==
                     (uint8_t)RudderAction::RUDDER_THROTTLE_AND_CLUTCH) {
-                  if (dap_config_espnow_recv_st.payloadPedalConfig_st
-                          .pedalType_u8 == PEDAL_ID_THROTTLE) {
+                  if (localRole == PEDAL_ID_THROTTLE) {
                     memcpy(g_recvMac_au8, g_pedalMac_aau8[0], 6);
                     safeRegisterEspNowPeer(g_recvMac_au8);
-                  } else if (dap_config_espnow_recv_st.payloadPedalConfig_st
-                                 .pedalType_u8 == PEDAL_ID_CLUTCH) {
+                  } else if (localRole == PEDAL_ID_CLUTCH) {
                     memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
                     safeRegisterEspNowPeer(g_recvMac_au8);
                   }
                 } else if (rudderAct ==
                            (uint8_t)RudderAction::RUDDER_THROTTLE_AND_BRAKE) {
-                  if (dap_config_espnow_recv_st.payloadPedalConfig_st
-                          .pedalType_u8 == PEDAL_ID_THROTTLE) {
+                  if (localRole == PEDAL_ID_THROTTLE) {
                     memcpy(g_recvMac_au8, g_pedalMac_aau8[1], 6);
                     safeRegisterEspNowPeer(g_recvMac_au8);
-                  } else if (dap_config_espnow_recv_st.payloadPedalConfig_st
-                                 .pedalType_u8 == PEDAL_ID_BRAKE) {
+                  } else if (localRole == PEDAL_ID_BRAKE) {
                     memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
                     safeRegisterEspNowPeer(g_recvMac_au8);
                   }
                 }
-                if (dap_calculationVariables_st.rudderStatus_b == false) {
-                  dap_calculationVariables_st.rudderStatus_b = true;
-                  dap_calculationVariables_st.helicopterRudderStatus_b = false;
-                  // ActiveSerial->println("Rudder_t on");
-                  // ActiveSerial->print("status:");
-                  // ActiveSerial->println(dap_calculationVariables_st.rudderStatus_b);
-                } else {
-                  dap_calculationVariables_st.rudderStatus_b = false;
-                  dap_calculationVariables_st.helicopterRudderStatus_b = false;
-                  moveSlowlyToPosition_b = true;
-                  ResetRudderStrategyState();
-                  // ActiveSerial->println("Rudder_t off");
-                  // ActiveSerial->print("status:");
-                  // ActiveSerial->println(dap_calculationVariables_st.rudderStatus_b);
-                }
+                dap_calculationVariables_st.rudderStatus_b = true;
+                dap_calculationVariables_st.helicopterRudderStatus_b = false;
               } else if (rudderAct ==
                              (uint8_t)
                                  RudderAction::HELIRUDDER_THROTTLE_AND_BRAKE ||
@@ -819,44 +811,26 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data,
                 g_getHeliRudderAction_b = true;
                 if (rudderAct ==
                     (uint8_t)RudderAction::HELIRUDDER_THROTTLE_AND_CLUTCH) {
-                  if (dap_config_espnow_recv_st.payloadPedalConfig_st
-                          .pedalType_u8 == PEDAL_ID_THROTTLE) {
+                  if (localRole == PEDAL_ID_THROTTLE) {
                     memcpy(g_recvMac_au8, g_pedalMac_aau8[0], 6);
                     safeRegisterEspNowPeer(g_recvMac_au8);
-                  } else if (dap_config_espnow_recv_st.payloadPedalConfig_st
-                                 .pedalType_u8 == PEDAL_ID_CLUTCH) {
+                  } else if (localRole == PEDAL_ID_CLUTCH) {
                     memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
                     safeRegisterEspNowPeer(g_recvMac_au8);
                   }
                 } else if (rudderAct ==
                            (uint8_t)
                                RudderAction::HELIRUDDER_THROTTLE_AND_BRAKE) {
-                  if (dap_config_espnow_recv_st.payloadPedalConfig_st
-                          .pedalType_u8 == PEDAL_ID_THROTTLE) {
+                  if (localRole == PEDAL_ID_THROTTLE) {
                     memcpy(g_recvMac_au8, g_pedalMac_aau8[1], 6);
                     safeRegisterEspNowPeer(g_recvMac_au8);
-                  } else if (dap_config_espnow_recv_st.payloadPedalConfig_st
-                                 .pedalType_u8 == PEDAL_ID_BRAKE) {
+                  } else if (localRole == PEDAL_ID_BRAKE) {
                     memcpy(g_recvMac_au8, g_pedalMac_aau8[2], 6);
                     safeRegisterEspNowPeer(g_recvMac_au8);
                   }
                 }
-                if (dap_calculationVariables_st.helicopterRudderStatus_b ==
-                    false) {
-                  dap_calculationVariables_st.helicopterRudderStatus_b = true;
-                  dap_calculationVariables_st.rudderStatus_b = false;
-                  // ActiveSerial->println("Rudder_t on");
-                  // ActiveSerial->print("status:");
-                  // ActiveSerial->println(dap_calculationVariables_st.rudderStatus_b);
-                } else {
-                  dap_calculationVariables_st.helicopterRudderStatus_b = false;
-                  dap_calculationVariables_st.rudderStatus_b = false;
-                  moveSlowlyToPosition_b = true;
-                  ResetRudderStrategyState();
-                  // ActiveSerial->println("Rudder_t off");
-                  // ActiveSerial->print("status:");
-                  // ActiveSerial->println(dap_calculationVariables_st.rudderStatus_b);
-                }
+                dap_calculationVariables_st.helicopterRudderStatus_b = true;
+                dap_calculationVariables_st.rudderStatus_b = false;
               } else if (rudderAct ==
                          (uint8_t)RudderAction::RUDDER_CLEAR_RUDDER_STATUS) {
                 dap_calculationVariables_st.rudderStatus_b = false;
@@ -864,7 +838,6 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data,
                 dap_calculationVariables_st.rudderBrakeStatus_b = false;
                 moveSlowlyToPosition_b = true;
                 ResetRudderStrategyState();
-                // ActiveSerial->println("Rudder_t Status Clear");
               }
 
               uint8_t brakeAct =

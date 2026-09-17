@@ -29,13 +29,13 @@ namespace DiyFfbPedal
 {
     public partial class DIYFFBPedalControlUI : System.Windows.Controls.UserControl
     {
-        public void ToastNotification(string message1, string message2)
+        public void ToastNotification(string message1, string message2, string actionButtonText = null, Action actionButtonCallback = null)
         {
-            System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            System.Windows.Application.Current?.Dispatcher?.BeginInvoke(new Action(() =>
             {
                 try
                 {
-                    ToastWithCustumizedWindow(message1, message2);
+                    ToastWithCustumizedWindow(message1, message2, actionButtonText, actionButtonCallback);
                 }
                 catch (Exception ex)
                 {
@@ -43,6 +43,28 @@ namespace DiyFfbPedal
                 }
             }));
 
+        }
+
+        public void NavigateToSystemWirelessTab()
+        {
+            System.Windows.Application.Current?.Dispatcher?.BeginInvoke(new Action(() =>
+            {
+                try
+                {
+                    if (Tab_System != null)
+                    {
+                        Tab_System.IsSelected = true;
+                    }
+                    if (TabItem_Wireless != null)
+                    {
+                        TabItem_Wireless.IsSelected = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    SimHub.Logging.Current.Error($"NavigateToSystemWirelessTab error: {ex.Message}");
+                }
+            }));
         }
 
         public void ToastWithToastmanager(string message1, string message2)
@@ -78,7 +100,7 @@ namespace DiyFfbPedal
             Process.Start(psi);
         }
 
-        public void ToastWithCustumizedWindow(string title, string message)
+        public void ToastWithCustumizedWindow(string title, string message, string actionButtonText = null, Action actionButtonCallback = null)
         {
             Grid mainGrid = new Grid();
             StackPanel container = new StackPanel
@@ -107,6 +129,40 @@ namespace DiyFfbPedal
 
             container.Children.Add(titleLabel);
             container.Children.Add(messageLabel);
+
+            Window toast = null;
+
+            if (!string.IsNullOrEmpty(actionButtonText) && actionButtonCallback != null)
+            {
+                Button actionBtn = new Button
+                {
+                    Content = actionButtonText,
+                    FontSize = 11,
+                    FontFamily = new FontFamily("Arial"),
+                    FontWeight = FontWeights.Bold,
+                    Foreground = Brushes.White,
+                    Background = new SolidColorBrush(Color.FromRgb(0, 122, 204)),
+                    BorderThickness = new Thickness(0),
+                    Padding = new Thickness(12, 4, 12, 4),
+                    Margin = new Thickness(0, 8, 0, 0),
+                    HorizontalAlignment = System.Windows.HorizontalAlignment.Left,
+                    Cursor = Cursors.Hand
+                };
+                actionBtn.Click += (s, e) =>
+                {
+                    try
+                    {
+                        actionButtonCallback.Invoke();
+                    }
+                    catch (Exception ex)
+                    {
+                        SimHub.Logging.Current.Error($"Toast button action error: {ex.Message}");
+                    }
+                    toast?.Close();
+                };
+                container.Children.Add(actionBtn);
+            }
+
             mainGrid.Children.Add(container);
             System.Windows.Controls.Button closeButton = new Button
             {
@@ -123,15 +179,15 @@ namespace DiyFfbPedal
                 Height = 25,
                 Cursor = Cursors.Hand
             };
-            Window toast = null; 
             closeButton.Click += (s, e) => toast?.Close();
             closeButton.MouseEnter += (s, e) => closeButton.Foreground = Brushes.White;
             closeButton.MouseLeave += (s, e) => closeButton.Foreground = Brushes.Gray;
             mainGrid.Children.Add(closeButton);
             toast = new Window
             {
-                Width = 350,
-                Height = 100,
+                Width = 360,
+                SizeToContent = SizeToContent.Height,
+                MinHeight = 100,
                 WindowStyle = WindowStyle.None,
                 AllowsTransparency = true,
                 Background = Brushes.Transparent,
@@ -145,16 +201,18 @@ namespace DiyFfbPedal
                 CornerRadius = new CornerRadius(5),
                 BorderBrush = Brushes.Gray,
                 BorderThickness = new Thickness(1),
+                Padding = new Thickness(0, 0, 0, 8),
                 Child = mainGrid 
             };
 
             var area = SystemParameters.WorkArea;
-            toast.Left = area.Right - toast.Width - 3;
-            toast.Top = area.Bottom - toast.Height - 3;
+            toast.Left = area.Right - toast.Width - 10;
+            toast.Top = area.Bottom - (string.IsNullOrEmpty(actionButtonText) ? 110 : 145);
 
             toast.Show();
             System.Media.SystemSounds.Beep.Play();
-            Task.Delay(3500).ContinueWith(_ => {
+            int delayMs = string.IsNullOrEmpty(actionButtonText) ? 3500 : 8000;
+            Task.Delay(delayMs).ContinueWith(_ => {
                 try { toast.Dispatcher.Invoke(() => toast.Close()); }
                 catch {  }
             });
@@ -1000,7 +1058,9 @@ namespace DiyFfbPedal
                     dap_config_st_rudder.payloadPedalConfig_.lengthPedal_c_horizontal = dap_config_st[i].payloadPedalConfig_.lengthPedal_c_horizontal;
                     dap_config_st_rudder.payloadPedalConfig_.lengthPedal_c_vertical = dap_config_st[i].payloadPedalConfig_.lengthPedal_c_vertical;
                     dap_config_st_rudder.payloadPedalConfig_.lengthPedal_travel = dap_config_st[i].payloadPedalConfig_.lengthPedal_travel;
-                    dap_config_st_rudder.payloadPedalConfig_.spindlePitch_mmPerRev_u8 = dap_config_st[i].payloadPedalConfig_.spindlePitch_mmPerRev_u8;
+                    byte pitch_init = dap_config_st[i].payloadPedalConfig_.spindlePitch_mmPerRev_u8;
+                    if (pitch_init == 0) pitch_init = 5;
+                    dap_config_st_rudder.payloadPedalConfig_.spindlePitch_mmPerRev_u8 = pitch_init;
                     dap_config_st_rudder.payloadPedalConfig_.invertLoadcellReading_u8 = dap_config_st[i].payloadPedalConfig_.invertLoadcellReading_u8;
                     dap_config_st_rudder.payloadPedalConfig_.invertMotorDirection_u8 = dap_config_st[i].payloadPedalConfig_.invertMotorDirection_u8;
                     dap_config_st_rudder.payloadPedalConfig_.loadcell_rating = dap_config_st[i].payloadPedalConfig_.loadcell_rating;
@@ -1136,8 +1196,8 @@ namespace DiyFfbPedal
 
             if (Plugin.Settings.rudderMode == 1)
             {
-                // Helicopter Mode: Zero Centering Force (0 N Return Spring)
-                dap_config_st_rudder.payloadPedalConfig_.maxForce = 0.0f;
+                // Helicopter Mode: Zero Centering Force (0 N Return Spring in admittance loop; set safe maxForce 1.0f for firmware config validator)
+                dap_config_st_rudder.payloadPedalConfig_.maxForce = 1.0f;
                 dap_config_st_rudder.payloadPedalConfig_.preloadForce = 0.0f;
                 dap_config_st_rudder.payloadPedalConfig_.coulombFrictionIn0p1N_u8 = (byte)Math.Round(Plugin.Settings.rudderHeliFriction * 10);
                 dap_config_st_rudder.payloadPedalConfig_.virtualPedalDamping_u8 = Plugin.Settings.rudderHeliDamping;
@@ -1217,7 +1277,9 @@ namespace DiyFfbPedal
                     dap_config_st_rudder.payloadPedalConfig_.lengthPedal_c_horizontal = dap_config_st[pedalIdx].payloadPedalConfig_.lengthPedal_c_horizontal;
                     dap_config_st_rudder.payloadPedalConfig_.lengthPedal_c_vertical = dap_config_st[pedalIdx].payloadPedalConfig_.lengthPedal_c_vertical;
                     dap_config_st_rudder.payloadPedalConfig_.lengthPedal_travel = dap_config_st[pedalIdx].payloadPedalConfig_.lengthPedal_travel;
-                    dap_config_st_rudder.payloadPedalConfig_.spindlePitch_mmPerRev_u8 = dap_config_st[pedalIdx].payloadPedalConfig_.spindlePitch_mmPerRev_u8;
+                    byte pitch_live = dap_config_st[pedalIdx].payloadPedalConfig_.spindlePitch_mmPerRev_u8;
+                    if (pitch_live == 0) pitch_live = 5;
+                    dap_config_st_rudder.payloadPedalConfig_.spindlePitch_mmPerRev_u8 = pitch_live;
                     dap_config_st_rudder.payloadPedalConfig_.invertLoadcellReading_u8 = dap_config_st[pedalIdx].payloadPedalConfig_.invertLoadcellReading_u8;
                     dap_config_st_rudder.payloadPedalConfig_.invertMotorDirection_u8 = dap_config_st[pedalIdx].payloadPedalConfig_.invertMotorDirection_u8;
                     dap_config_st_rudder.payloadPedalConfig_.loadcell_rating = dap_config_st[pedalIdx].payloadPedalConfig_.loadcell_rating;

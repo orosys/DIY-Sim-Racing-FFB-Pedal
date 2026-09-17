@@ -188,13 +188,7 @@
                                                             <Label Content="{SLoc DIYFFBPedalPlugin_ButtonTextPedalRestart, 'Restart'}" Height="15" FontSize="8" FontFamily="Arial" Padding="0,0,0,0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
                                                         </StackPanel>
                                                     </Button>
-                                                    <Button x:Name="btn_Assignment" Style="{StaticResource IconGridButtonStyle}" Click="btn_Assignment_Click" ToolTip="Wireless Assignment" Margin="5,5,5,0">
-                                                        <StackPanel>
-                                                            <Image Width="30" Height="30" Source="{StaticResource WifiAssignment}" />
-                                                            <Label Content="{SLoc DIYFFBPedalPlugin_ButtonTextWirelessAssignment, 'Pedal Roles'}" Height="15" FontSize="8" FontFamily="Arial" Padding="0,0,0,0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
-                                                        </StackPanel>
-                                                    </Button>
-                                                    <Button Style="{StaticResource IconGridButtonStyle}" Click="btn_OnlineProfile_Click" ToolTip="Community Config" Margin="0,5,0,0">
+                                                    <Button Style="{StaticResource IconGridButtonStyle}" Click="btn_OnlineProfile_Click" ToolTip="Community Config" Margin="5,5,0,0">
                                                         <StackPanel>
                                                             <Image Width="30" Height="30" Source="{StaticResource CommunityConfig}" />
                                                             <Label Content="{SLoc DIYFFBPedalPlugin_ButtonTextGetOnlineConfig, 'Cloud Config'}" Height="15" FontSize="8" FontFamily="Arial" Padding="0,0,0,0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>

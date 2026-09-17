@@ -933,6 +933,44 @@ namespace DiyFfbPedal
                 {
                     Plugin.Rudder_brake_status = (mode == 3);
                     Plugin.Rudder_brake_enable_flag = (mode == 3);
+
+                    // Live notify pedals of the new rudder action
+                    byte rudderActionCode = 0;
+                    if (mode == 1) // Helicopter
+                    {
+                        rudderActionCode = (byte)((Plugin.Rudder_Pedal_idx[0] == 0)
+                            ? RudderAction.EnableHeliRudderThreePedals
+                            : RudderAction.EnableHeliRudderTwoPedals);
+                    }
+                    else // Airplane / Toe brake
+                    {
+                        rudderActionCode = (byte)((Plugin.Rudder_Pedal_idx[0] == 0)
+                            ? RudderAction.EnableRudderThreePedals
+                            : RudderAction.EnableRudderTwoPedals);
+                    }
+
+                    DAP_action_st actionPacket = default;
+                    actionPacket.payloadHeader_.version = (byte)Constants.pedalConfigPayload_version;
+                    actionPacket.payloadHeader_.payloadType = (byte)Constants.pedalActionPayload_type;
+                    actionPacket.payloadPedalAction_.Rudder_action = rudderActionCode;
+                    actionPacket.payloadPedalAction_.Rudder_brake_action = (byte)(mode == 3 ? 2 : (mode == 2 ? (Plugin.Rudder_brake_status ? 2 : 3) : 0));
+                    actionPacket.payloadFooter_.enfOfFrame0_u8 = ENDOFFRAMCHAR[0];
+                    actionPacket.payloadFooter_.enfOfFrame1_u8 = ENDOFFRAMCHAR[1];
+                    actionPacket.payloadHeader_.startOfFrame0_u8 = STARTOFFRAMCHAR[0];
+                    actionPacket.payloadHeader_.startOfFrame1_u8 = STARTOFFRAMCHAR[1];
+
+                    for (uint i = 0; i < 2; i++)
+                    {
+                        uint pidx = Plugin.Rudder_Pedal_idx[i];
+                        actionPacket.payloadHeader_.PedalTag = (byte)pidx;
+                        unsafe
+                        {
+                            DAP_action_st* ptr = &actionPacket;
+                            actionPacket.payloadFooter_.checkSum = Plugin.checksumCalc((byte*)ptr, sizeof(payloadHeader) + sizeof(payloadPedalAction));
+                        }
+                        Plugin.SendPedalAction(actionPacket, (byte)pidx);
+                    }
+
                     RudderParameterLiveUpdate();
                 }
             }
@@ -1567,12 +1605,7 @@ namespace DiyFfbPedal
         }
         private void btn_Assignment_Click(object sender, RoutedEventArgs e)
         {
-            AssignmentConfigurationWindow sideWindow = new AssignmentConfigurationWindow(Plugin);
-            double screenWidth = SystemParameters.PrimaryScreenWidth;
-            double screenHeight = SystemParameters.PrimaryScreenHeight;
-            sideWindow.Left = screenWidth / 2 - sideWindow.Width / 2;
-            sideWindow.Top = screenHeight / 2 - sideWindow.Height / 2;
-            sideWindow.Show();
+            NavigateToSystemWirelessTab();
         }
         private void Btn_OpenLanguageDownload_Click(object sender, RoutedEventArgs e)
         {
