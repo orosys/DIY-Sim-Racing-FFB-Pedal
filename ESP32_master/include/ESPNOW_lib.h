@@ -34,6 +34,7 @@ bool g_updateBasicState_ab[3]={false,false,false};
 bool g_updateExtendState_ab[3]={false,false,false};
 bool g_sendAssignment_ab[3] = {false, false, false};
 bool g_pedalOtaAction_b=false;
+bool g_pedalWirelessSyncEnabled_ab[3]={true,true,true};
 uint16_t g_joystickValue_au16[]={0,0,0};
 uint16_t g_joystickThrottleValueFromPedal_u16=0;
 uint16_t g_joystickValueOriginal_au16[]={0,0,0};
@@ -319,6 +320,9 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int da
         uint8_t pedalTag = actual_pedal_tag;
 
         if(pedalTag < 3){
+          if (!g_pedalWirelessSyncEnabled_ab[pedalTag]) {
+            return;
+          }
           // 1. Überschreibe den Tag NUR in der lokalen Kopie
           dap_state_basic_st_lcl.payloadHeader_st.pedalTag_u8 = pedalTag;
 
@@ -369,6 +373,9 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int da
       if(structChecker){
         uint8_t pedalTag = actual_pedal_tag; // Auch hier den verifizierten Tag erzwingen
         if(pedalTag < 3){
+          if (!g_pedalWirelessSyncEnabled_ab[pedalTag]) {
+            return;
+          }
           memcpy(&dap_state_extended_st[pedalTag], data, sizeof(DapStateExtended_t));
           dap_state_extend_st_lcl.payloadHeader_st.pedalTag_u8 = pedalTag;
           dap_state_extended_st[pedalTag].payloadHeader_st.pedalTag_u8 = pedalTag;
@@ -386,6 +393,9 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int da
       uint8_t pedalTag = actual_pedal_tag; // Verifizierten Tag aus der MAC-Adresse nutzen
       
       if(pedalTag < 3){
+        if (!g_pedalWirelessSyncEnabled_ab[pedalTag]) {
+          return;
+        }
         // Überschreibe den Tag im Header und den Typ in der Konfiguration zwingend
         dap_config_st_Temp.payloadHeader_st.pedalTag_u8 = pedalTag;
         dap_config_st_Temp.payloadPedalConfig_st.pedalType_u8 = pedalTag;
@@ -419,6 +429,9 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int da
       if(structChecker){
         uint8_t pedalTag = actual_pedal_tag; // Verifizierten Tag erzwingen
         if(pedalTag < 3){
+          if (!g_pedalWirelessSyncEnabled_ab[pedalTag]) {
+            return;
+          }
           received_servo_config.payloadHeader_st.pedalTag_u8 = pedalTag;
           memcpy(&dap_servo_config_response_st[pedalTag], &received_servo_config, sizeof(DAP_servo_config_st_t));
           send_servo_config_to_host[pedalTag] = true;
@@ -454,18 +467,24 @@ void promiscuousRxCb(void *buf, wifi_promiscuous_pkt_type_t type)
     memcpy(addr_package, addr_SOURCE, 6);
     if (macCheck(addr_package, g_pedalMac_aau8[0]))
     {
-      g_rssi_ai32[0]=ppkt->rx_ctrl.rssi;
-      g_rssiDisplay_i32=g_rssi_ai32[0];
+      if (g_pedalWirelessSyncEnabled_ab[0]) {
+        g_rssi_ai32[0]=ppkt->rx_ctrl.rssi;
+        g_rssiDisplay_i32=g_rssi_ai32[0];
+      }
     }
     if (macCheck(addr_package, g_pedalMac_aau8[1]))
     {
-      g_rssi_ai32[1]=ppkt->rx_ctrl.rssi;
-      g_rssiDisplay_i32=g_rssi_ai32[1];
+      if (g_pedalWirelessSyncEnabled_ab[1]) {
+        g_rssi_ai32[1]=ppkt->rx_ctrl.rssi;
+        g_rssiDisplay_i32=g_rssi_ai32[1];
+      }
     }
     if (macCheck(addr_package, g_pedalMac_aau8[2]))
     {
-      g_rssi_ai32[2]=ppkt->rx_ctrl.rssi;
-      g_rssiDisplay_i32=g_rssi_ai32[2];
+      if (g_pedalWirelessSyncEnabled_ab[2]) {
+        g_rssi_ai32[2]=ppkt->rx_ctrl.rssi;
+        g_rssiDisplay_i32=g_rssi_ai32[2];
+      }
     }
   }
   

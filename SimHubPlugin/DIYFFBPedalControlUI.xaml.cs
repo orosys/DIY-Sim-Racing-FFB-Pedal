@@ -539,6 +539,7 @@ namespace DiyFfbPedal
             if (Plugin != null)
             {
                 Plugin.Settings = e;
+                Plugin.SendBridgeWirelessSyncConfig();
                 if (Plugin.Rudder_status || Plugin._calculations.Rudder_status)
                 {
                     RudderParameterLiveUpdate();

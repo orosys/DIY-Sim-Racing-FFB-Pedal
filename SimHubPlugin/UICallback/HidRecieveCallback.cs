@@ -85,6 +85,30 @@ namespace DiyFfbPedal
                             DAP_state_basic_st* v_state = &pedalState_read_st;
                             byte* p_state = (byte*)v_state;
                             UInt16 pedalSelected = pedalState_read_st.payloadHeader_.PedalTag;
+
+                            // Ignore wireless data if wireless communication is disabled for this pedal
+                            if (pedalSelected < 3 && !Plugin.Settings.Pedal_ESPNow_Sync_flag[pedalSelected])
+                            {
+                                Plugin._calculations.pedalWirelessStatus[pedalSelected] = WirelessConnectStateEnum.PEDAL_DISCONNECT;
+                                Plugin._calculations.rssi[pedalSelected] = 0;
+                                if (Plugin.Settings.vjoy_output_flag == 1 && Plugin._calculations._joystick != null)
+                                {
+                                    switch (pedalSelected)
+                                    {
+                                        case 0:
+                                            Plugin._calculations._joystick.SetAxis(0, Plugin.Settings.vjoy_order, HID_USAGES.HID_USAGE_RX);
+                                            break;
+                                        case 1:
+                                            Plugin._calculations._joystick.SetAxis(0, Plugin.Settings.vjoy_order, HID_USAGES.HID_USAGE_RY);
+                                            break;
+                                        case 2:
+                                            Plugin._calculations._joystick.SetAxis(0, Plugin.Settings.vjoy_order, HID_USAGES.HID_USAGE_RZ);
+                                            break;
+                                    }
+                                }
+                                return;
+                            }
+
                             // payload type check
                             bool check_payload_state_b = false;
                             if (pedalState_read_st.payloadHeader_.payloadType == Constants.pedalStateBasicPayload_type)
@@ -324,6 +348,13 @@ namespace DiyFfbPedal
                             DAP_state_extended_st* v_state = &pedalState_ext_read_st;
                             byte* p_state = (byte*)v_state;
                             UInt16 pedalSelected = pedalState_ext_read_st.payloadHeader_.PedalTag;
+
+                            // Ignore wireless data if wireless communication is disabled for this pedal
+                            if (pedalSelected < 3 && !Plugin.Settings.Pedal_ESPNow_Sync_flag[pedalSelected])
+                            {
+                                return;
+                            }
+
                             // payload type check
                             bool check_payload_state_b = false;
                             if (pedalState_ext_read_st.payloadHeader_.payloadType == Constants.pedalStateExtendedPayload_type)
@@ -509,7 +540,15 @@ namespace DiyFfbPedal
 
                                 for (int pedalIDX = 0; pedalIDX < 3; pedalIDX++)
                                 {
-                                    Plugin._calculations.rssi[pedalIDX] = bridge_state.payloadBridgeState_.Pedal_RSSI_realtime[pedalIDX];
+                                    if (Plugin.Settings.Pedal_ESPNow_Sync_flag[pedalIDX])
+                                    {
+                                        Plugin._calculations.rssi[pedalIDX] = bridge_state.payloadBridgeState_.Pedal_RSSI_realtime[pedalIDX];
+                                    }
+                                    else
+                                    {
+                                        Plugin._calculations.rssi[pedalIDX] = 0;
+                                        Plugin._calculations.pedalWirelessStatus[pedalIDX] = WirelessConnectStateEnum.PEDAL_DISCONNECT;
+                                    }
                                     int macInitialAddress = pedalIDX * 6;
                                     for (int macIndex = 0; macIndex < 6; macIndex++)
                                     {
@@ -525,71 +564,60 @@ namespace DiyFfbPedal
                                 //check wireless pedal connection, if status change make toast notification
                                 if (dap_bridge_state_st.payloadBridgeState_.Pedal_availability_0 != bridge_state.payloadBridgeState_.Pedal_availability_0)
                                 {
-
-                                    if (dap_bridge_state_st.payloadBridgeState_.Pedal_availability_0 == 0)
+                                    if (Plugin.Settings.Pedal_ESPNow_Sync_flag[0])
                                     {
-                                        //ToastNotification("Wireless Clutch", "Connected");
-                                        connection_tmp += "Clutch Connected";
-                                        wireless_connection_update = true;
-                                        Pedal_wireless_connection_update_b[0] = true;
-
-                                    }
-                                    else
-                                    {
-                                        ///ToastNotification("Wireless Clutch", "Disconnected");
-                                        connection_tmp += "Clutch Disconnected";
-                                        wireless_connection_update = true;
-                                        //Plugin._calculations.PedalAvailability[0] = false;
+                                        if (dap_bridge_state_st.payloadBridgeState_.Pedal_availability_0 == 0)
+                                        {
+                                            connection_tmp += "Clutch Connected";
+                                            wireless_connection_update = true;
+                                            Pedal_wireless_connection_update_b[0] = true;
+                                        }
+                                        else
+                                        {
+                                            connection_tmp += "Clutch Disconnected";
+                                            wireless_connection_update = true;
+                                        }
                                     }
                                     dap_bridge_state_st.payloadBridgeState_.Pedal_availability_0 = bridge_state.payloadBridgeState_.Pedal_availability_0;
-                                    //updateTheGuiFromConfig();
                                 }
 
 
                                 if (dap_bridge_state_st.payloadBridgeState_.Pedal_availability_1 != bridge_state.payloadBridgeState_.Pedal_availability_1)
                                 {
-
-                                    if (dap_bridge_state_st.payloadBridgeState_.Pedal_availability_1 == 0)
+                                    if (Plugin.Settings.Pedal_ESPNow_Sync_flag[1])
                                     {
-                                        //ToastNotification("Wireless Brake", "Connected");
-                                        connection_tmp += " Brake Connected";
-                                        wireless_connection_update = true;
-                                        Pedal_wireless_connection_update_b[1] = true;
-
-
-                                    }
-                                    else
-                                    {
-                                        //ToastNotification("Wireless Brake", "Disconnected");
-                                        connection_tmp += " Brake Disconnected";
-                                        wireless_connection_update = true;
-                                        //Plugin._calculations.PedalAvailability[1] = false;
+                                        if (dap_bridge_state_st.payloadBridgeState_.Pedal_availability_1 == 0)
+                                        {
+                                            connection_tmp += " Brake Connected";
+                                            wireless_connection_update = true;
+                                            Pedal_wireless_connection_update_b[1] = true;
+                                        }
+                                        else
+                                        {
+                                            connection_tmp += " Brake Disconnected";
+                                            wireless_connection_update = true;
+                                        }
                                     }
                                     dap_bridge_state_st.payloadBridgeState_.Pedal_availability_1 = bridge_state.payloadBridgeState_.Pedal_availability_1;
-
-                                    //updateTheGuiFromConfig();
                                 }
 
                                 if (dap_bridge_state_st.payloadBridgeState_.Pedal_availability_2 != bridge_state.payloadBridgeState_.Pedal_availability_2)
                                 {
-
-                                    if (dap_bridge_state_st.payloadBridgeState_.Pedal_availability_2 == 0)
+                                    if (Plugin.Settings.Pedal_ESPNow_Sync_flag[2])
                                     {
-                                        //ToastNotification("Wireless Throttle", "Connected");
-                                        connection_tmp += " Throttle Connected";
-                                        wireless_connection_update = true;
-                                        Pedal_wireless_connection_update_b[2] = true;
-
-                                    }
-                                    else
-                                    {
-                                        //ToastNotification("Wireless Throttle", "Disconnected");
-                                        connection_tmp += " Throttle Disconnected";
-                                        wireless_connection_update = true;
-
+                                        if (dap_bridge_state_st.payloadBridgeState_.Pedal_availability_2 == 0)
+                                        {
+                                            connection_tmp += " Throttle Connected";
+                                            wireless_connection_update = true;
+                                            Pedal_wireless_connection_update_b[2] = true;
+                                        }
+                                        else
+                                        {
+                                            connection_tmp += " Throttle Disconnected";
+                                            wireless_connection_update = true;
+                                        }
                                     }
                                     dap_bridge_state_st.payloadBridgeState_.Pedal_availability_2 = bridge_state.payloadBridgeState_.Pedal_availability_2;
-
                                 }
 
                                 //Pedal availability status update
@@ -658,6 +686,13 @@ namespace DiyFfbPedal
                             DAP_config_st* v_config = &pedalConfig_read_st;
                             byte* p_config = (byte*)v_config;
                             UInt16 pedalSelected = pedalConfig_read_st.payloadHeader_.PedalTag;
+
+                            // Ignore wireless config if wireless communication is disabled for this pedal
+                            if (pedalSelected < 3 && !Plugin.Settings.Pedal_ESPNow_Sync_flag[pedalSelected])
+                            {
+                                return;
+                            }
+
                             // payload type check
                             bool check_payload_config_b = false;
                             if (pedalConfig_read_st.payloadHeader_.payloadType == Constants.pedalConfigPayload_type)

@@ -43,6 +43,8 @@ namespace DiyFfbPedal
                 {
                     if (!Plugin.Settings.Pedal_ESPNow_Sync_flag[i])
                     {
+                        Plugin._calculations.rssi[i] = 0;
+                        Plugin._calculations.pedalWirelessStatus[i] = WirelessConnectStateEnum.PEDAL_DISCONNECT;
                         if (!Plugin._serialPort[i].IsOpen)
                         {
                             Plugin._calculations.ServoStatus[i] = 0;
@@ -166,6 +168,13 @@ namespace DiyFfbPedal
                     btn_connect_espnow_port.Content = "Connect";
                 }
                 btn_connect_espnow_port.IsEnabled = Plugin.Settings.IsFanatecAndPicoSupport;
+            }
+
+            if (indexOfSelectedPedal_u < 3 && !Plugin.Settings.Pedal_ESPNow_Sync_flag[indexOfSelectedPedal_u] && !Plugin._serialPort[indexOfSelectedPedal_u].IsOpen)
+            {
+                PedalForceTravel_Tab?.updatePedalState(0, 0);
+                PedalKinematics_Tab?.updatePedalState(0);
+                PedalJoystick_Tab?.JoystickStateUpdate(0);
             }
 
             //// Select serial port accordingly

@@ -335,10 +335,10 @@ void StepperWithLimits::findMinMaxSensorless(DapConfig_t dap_config_st) {
 
     uint32_t homingStartTime_u32 = millis();
     int32_t homingStartPos_i32 = _stepper->getCurrentPosition();
-    float maxHomingSteps_fl32 = max(
-        (float)dap_config_st.payloadPedalConfig_st.lengthPedalTravel_i16 /
-            spindlePitch * (float)stepsPerMotorRev_u32 * 1.5f,
-        50000.0f);
+    float maxHomingSteps_fl32 =
+        max((float)dap_config_st.payloadPedalConfig_st.lengthPedalTravel_i16 /
+                spindlePitch * (float)stepsPerMotorRev_u32 * 1.5f,
+            50000.0f);
 
     while ((!endPosDetected) && (getLifelineSignal())) {
       delay(1);
@@ -402,8 +402,9 @@ void StepperWithLimits::findMinMaxSensorless(DapConfig_t dap_config_st) {
         _stepper->getCurrentPosition() - 5 * s_ENDSTOP_MOVEMENT_SENSORLESS;
 
     // Return home
-    moveToPosWithSpeed(0, endstopApproachingSpeed_fl32);
-    moveSlowlyToPos(0);
+    // moveToPosWithSpeed(0, endstopApproachingSpeed_fl32);
+    // moveSlowlyToPos(0);
+    moveToPosWithSpeedBlocking(0, endstopApproachingSpeed_fl32);
 
     ActiveSerial->printf("Max endstop reached: %d\n", _endstopLimitMax);
   }
@@ -414,6 +415,11 @@ void IRAM_ATTR StepperWithLimits::moveToPosWithSpeed(int32_t targetPos_ui32,
                                                      uint32_t speedInHz_u32) {
   _stepper->setMaxSpeed(speedInHz_u32);
   _stepper->moveTo(targetPos_ui32, false);
+}
+void IRAM_ATTR StepperWithLimits::moveToPosWithSpeedBlocking(
+    int32_t targetPos_ui32, uint32_t speedInHz_u32) {
+  _stepper->setMaxSpeed(speedInHz_u32);
+  _stepper->moveTo(targetPos_ui32, true);
 }
 void IRAM_ATTR StepperWithLimits::setSpeedLive(uint32_t speedInHz_u32) {
   _stepper->setSpeedLive(speedInHz_u32);
@@ -500,7 +506,7 @@ void IRAM_ATTR StepperWithLimits::correctPos() {
   if (!_stepper->isRunning()) {
     // servo_offset_compensation_steps_i32 is volatile int32_t: 32-bit aligned →
     // atomic read/write on ESP32-S3, no mutex needed.
-    int32_t maxStepsToRecoverPerCall_i32 = 2;
+    int32_t maxStepsToRecoverPerCall_i32 = 5;
     int32_t stepOffset = (int32_t)constrain(servo_offset_compensation_steps_i32,
                                             -maxStepsToRecoverPerCall_i32,
                                             maxStepsToRecoverPerCall_i32);
@@ -985,13 +991,14 @@ void IRAM_ATTR StepperWithLimits::performSafetyChecks() {
     }
 
     timeDiff = timeNow_l - timeSinceLastServoPosChange_l;
-    // If pedal has been idle for an extended period at a hard endstop, enable deep crash
-    // detection flag
+    // If pedal has been idle for an extended period at a hard endstop, enable
+    // deep crash detection flag
     cond_crash_detected =
         (timeDiff > TIME_SINCE_SERVO_POS_CHANGE_TO_DETECT_CRASH_IN_MS &&
          timeSinceLastServoPosChange_l > 0);
   } else {
-    // Idle away from hard mechanical limits (e.g. soft min position in free air); keep timer reset
+    // Idle away from hard mechanical limits (e.g. soft min position in free
+    // air); keep timer reset
     timeSinceLastServoPosChange_l = timeNow_l;
     servoPos_last_i16 = isv57.getPosFromMin();
   }
@@ -1002,7 +1009,10 @@ void IRAM_ATTR StepperWithLimits::performSafetyChecks() {
   if (isv57.isv57dynamicStates_.servo_receivedPacketIsValid_b) {
     int32_t servo_offset_compensation_steps_local_i32 = 0;
     if (enableSteplossRecov_b && !_stepper->isRunning() &&
-        abs(getServosPosError()) < 30) {
+        getCurrentPositionFraction() < 0.1f &&
+        getCurrentSpeedInHz() < 1000
+        // && _stepper->getMaxSpeed() < 1000
+        && abs(getServosPosError()) < 30) {
       servo_offset_compensation_steps_local_i32 =
           espPos_i32 - servoPosCorrected_i32;
     }
@@ -1013,10 +1023,11 @@ void IRAM_ATTR StepperWithLimits::performSafetyChecks() {
         servo_offset_compensation_steps_local_i32;
   }
 
-  // Execute crash recovery bump only if genuinely stuck against a mechanical hard stop
-  // Sustained stall against a hard block draws high current (>= 150%)
-  if (cond_stepperIsAtHardEndstop && cond_crash_detected && enableCrashDetection_b &&
-      cycleCounterAdvanced_b && cond_cyclesSinceServoPosCorrected) {
+  // Execute crash recovery bump only if genuinely stuck against a mechanical
+  // hard stop Sustained stall against a hard block draws high current (>= 150%)
+  if (cond_stepperIsAtHardEndstop && cond_crash_detected &&
+      enableCrashDetection_b && cycleCounterAdvanced_b &&
+      cond_cyclesSinceServoPosCorrected) {
     if (abs(getServosCurrent()) >= 150) {
 
       servoLastCycleCounterWhenPositionWasCorrected_u32 =

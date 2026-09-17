@@ -1330,6 +1330,26 @@ void serialCommunicationRxTask( void * pvParameters)
                     ActiveSerial->println("[L]The command is not supported");
                   #endif
                 }
+                if (dap_bridge_state_lcl.payloadBridgeState_st.bridgeAction_u8 == BRIDGE_ACTION_SET_PEDAL_WIRELESS_SYNC)
+                {
+                  g_pedalWirelessSyncEnabled_ab[0] = (dap_bridge_state_lcl.payloadBridgeState_st.pedalAvailability_au8[0] != 0);
+                  g_pedalWirelessSyncEnabled_ab[1] = (dap_bridge_state_lcl.payloadBridgeState_st.pedalAvailability_au8[1] != 0);
+                  g_pedalWirelessSyncEnabled_ab[2] = (dap_bridge_state_lcl.payloadBridgeState_st.pedalAvailability_au8[2] != 0);
+                  for (int pIdx = 0; pIdx < 3; pIdx++)
+                  {
+                    if (!g_pedalWirelessSyncEnabled_ab[pIdx])
+                    {
+                      g_joystickValueOriginal_au16[pIdx] = JOYSTICK_MIN_VALUE;
+                      g_joystickValue_au16[pIdx] = JOYSTICK_MIN_VALUE;
+                      dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[pIdx] = 0;
+                      dap_bridge_state_st.payloadBridgeState_st.pedalRssiRealtime_ai32[pIdx] = 0;
+                      g_rssi_ai32[pIdx] = 0;
+                      if (pIdx == 0) g_pedalClutchValue_u16 = JOYSTICK_MIN_VALUE;
+                      if (pIdx == 1) g_pedalBrakeValue_u16 = JOYSTICK_MIN_VALUE;
+                      if (pIdx == 2) g_pedalThrottleValue_u16 = JOYSTICK_MIN_VALUE;
+                    }
+                  }
+                }
               }
             #endif
             break;
@@ -1628,8 +1648,8 @@ void serialCommunicationTxTask( void * pvParameters)
           dap_joystickUART_state_lcl._payloadjoystick.DAP_JOY_Version = DAP_JOY_VERSION;
           for(int i=0; i<3;i++)
           {
-            dap_joystickUART_state_lcl._payloadjoystick.controllerValue_i32[i]=g_joystickValueOriginal_au16[i];
-            dap_joystickUART_state_lcl._payloadjoystick.pedalAvailability[i] = dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[i];
+            dap_joystickUART_state_lcl._payloadjoystick.controllerValue_i32[i] = g_pedalWirelessSyncEnabled_ab[i] ? g_joystickValueOriginal_au16[i] : JOYSTICK_MIN_VALUE;
+            dap_joystickUART_state_lcl._payloadjoystick.pedalAvailability[i] = g_pedalWirelessSyncEnabled_ab[i] ? dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[i] : 0;
           }
           dap_joystickUART_state_lcl._payloadjoystick.pedal_status=g_pedalStatus_u8;
           dap_joystickUART_state_lcl._payloadfooter.checkSum_u16= checksumCalculator((uint8_t*)(&(dap_joystickUART_state_lcl._payloadjoystick)), sizeof(dap_joystickUART_state_lcl._payloadjoystick));
@@ -1744,9 +1764,13 @@ void joystickUpdateTask( void * pvParameters )
           }
           if (g_pedalStatus_u8 == 0)
           {
-            SetControllerOutputValueAccelerator(g_pedalClutchValue_u16);
-            SetControllerOutputValueBrake(g_pedalBrakeValue_u16);
-            SetControllerOutputValueThrottle(g_pedalThrottleValue_u16);
+            uint16_t clutchVal = g_pedalWirelessSyncEnabled_ab[0] ? g_pedalClutchValue_u16 : JOYSTICK_MIN_VALUE;
+            uint16_t brakeVal  = g_pedalWirelessSyncEnabled_ab[1] ? g_pedalBrakeValue_u16  : JOYSTICK_MIN_VALUE;
+            uint16_t throttleVal = g_pedalWirelessSyncEnabled_ab[2] ? g_pedalThrottleValue_u16 : JOYSTICK_MIN_VALUE;
+
+            SetControllerOutputValueAccelerator(clutchVal);
+            SetControllerOutputValueBrake(brakeVal);
+            SetControllerOutputValueThrottle(throttleVal);
             SetControllerOutputValueRudder(JOYSTICK_CENTER);
             SetControllerOutputValueRudder_brake(JOYSTICK_CENTER, JOYSTICK_CENTER);
           }
@@ -1756,9 +1780,9 @@ void joystickUpdateTask( void * pvParameters )
             SetControllerOutputValueBrake(JOYSTICK_MIN_VALUE);
             SetControllerOutputValueThrottle(JOYSTICK_MIN_VALUE);
             // 3% deadzone
-            if (g_pedalThrottleValue_u16 < ((int16_t)(0.47f * JOYSTICK_RANGE + JOYSTICK_MIN_VALUE)) || g_pedalThrottleValue_u16 > ((int16_t)(0.53f * JOYSTICK_RANGE + JOYSTICK_MIN_VALUE)))
+            uint16_t rudderValue = g_pedalWirelessSyncEnabled_ab[2] ? g_pedalThrottleValue_u16 : JOYSTICK_CENTER;
+            if (rudderValue < ((int16_t)(0.47f * JOYSTICK_RANGE + JOYSTICK_MIN_VALUE)) || rudderValue > ((int16_t)(0.53f * JOYSTICK_RANGE + JOYSTICK_MIN_VALUE)))
             {
-              uint16_t rudderValue = g_pedalThrottleValue_u16;
               SetControllerOutputValueRudder(rudderValue);
             }
             else
@@ -1773,10 +1797,10 @@ void joystickUpdateTask( void * pvParameters )
             SetControllerOutputValueBrake(JOYSTICK_MIN_VALUE);
             SetControllerOutputValueThrottle(JOYSTICK_MIN_VALUE);
 
-            uint16_t leftBrakeVal = (dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[0] == 1)
+            uint16_t leftBrakeVal = (dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[0] == 1 && g_pedalWirelessSyncEnabled_ab[0])
                                       ? g_pedalClutchValue_u16
-                                      : g_pedalBrakeValue_u16;
-            uint16_t rightBrakeVal = g_pedalThrottleValue_u16;
+                                      : (g_pedalWirelessSyncEnabled_ab[1] ? g_pedalBrakeValue_u16 : JOYSTICK_MIN_VALUE);
+            uint16_t rightBrakeVal = g_pedalWirelessSyncEnabled_ab[2] ? g_pedalThrottleValue_u16 : JOYSTICK_MIN_VALUE;
 
             // In Toe Brake mode, the pedals act purely as independent wheel brakes:
             // Rudder yaw (X-axis) remains neutral (centered) with zero connection between pedals
@@ -1807,8 +1831,10 @@ void joystickUpdateTask( void * pvParameters )
       // set analog value
       #ifdef Using_analog_output
 
-        dacWrite(Analog_brk, (uint16_t)((float)((g_joystickValue_au16[1]) / (float)(JOYSTICK_RANGE)) * 255));
-        dacWrite(Analog_gas, (uint16_t)((float)((g_joystickValue_au16[2]) / (float)(JOYSTICK_RANGE)) * 255));
+        uint16_t dacBrakeVal = g_pedalWirelessSyncEnabled_ab[1] ? g_joystickValue_au16[1] : 0;
+        uint16_t dacGasVal   = g_pedalWirelessSyncEnabled_ab[2] ? g_joystickValue_au16[2] : 0;
+        dacWrite(Analog_brk, (uint16_t)((float)(dacBrakeVal / (float)(JOYSTICK_RANGE)) * 255));
+        dacWrite(Analog_gas, (uint16_t)((float)(dacGasVal / (float)(JOYSTICK_RANGE)) * 255));
       #endif
       // set MCP4728 analog value
       #ifdef Using_MCP4728
@@ -1828,9 +1854,12 @@ void joystickUpdateTask( void * pvParameters )
           }
           */
 
-          mcp.setChannelValue(MCP4728_CHANNEL_A, (uint16_t)((float)g_joystickValue_au16[0] / (float)JOYSTICK_RANGE * 0.8f * 4096));
-          mcp.setChannelValue(MCP4728_CHANNEL_B, (uint16_t)((float)g_joystickValue_au16[1] / (float)JOYSTICK_RANGE * 0.8f * 4096));
-          mcp.setChannelValue(MCP4728_CHANNEL_C, (uint16_t)((float)g_joystickValue_au16[2] / (float)JOYSTICK_RANGE * 0.8f * 4096));
+          uint16_t mcpClu = g_pedalWirelessSyncEnabled_ab[0] ? g_joystickValue_au16[0] : 0;
+          uint16_t mcpBrk = g_pedalWirelessSyncEnabled_ab[1] ? g_joystickValue_au16[1] : 0;
+          uint16_t mcpGas = g_pedalWirelessSyncEnabled_ab[2] ? g_joystickValue_au16[2] : 0;
+          mcp.setChannelValue(MCP4728_CHANNEL_A, (uint16_t)((float)mcpClu / (float)JOYSTICK_RANGE * 0.8f * 4096));
+          mcp.setChannelValue(MCP4728_CHANNEL_B, (uint16_t)((float)mcpBrk / (float)JOYSTICK_RANGE * 0.8f * 4096));
+          mcp.setChannelValue(MCP4728_CHANNEL_C, (uint16_t)((float)mcpGas / (float)JOYSTICK_RANGE * 0.8f * 4096));
         }
 
       #endif
@@ -2302,6 +2331,26 @@ void hidCommunicaitonRxTask(void *pvParameters)
             #else
               tinyusbJoystick_.printf("The command is not supported");
             #endif
+          }
+          if (dap_bridge_state_lcl.payloadBridgeState_st.bridgeAction_u8 == BRIDGE_ACTION_SET_PEDAL_WIRELESS_SYNC)
+          {
+            g_pedalWirelessSyncEnabled_ab[0] = (dap_bridge_state_lcl.payloadBridgeState_st.pedalAvailability_au8[0] != 0);
+            g_pedalWirelessSyncEnabled_ab[1] = (dap_bridge_state_lcl.payloadBridgeState_st.pedalAvailability_au8[1] != 0);
+            g_pedalWirelessSyncEnabled_ab[2] = (dap_bridge_state_lcl.payloadBridgeState_st.pedalAvailability_au8[2] != 0);
+            for (int pIdx = 0; pIdx < 3; pIdx++)
+            {
+              if (!g_pedalWirelessSyncEnabled_ab[pIdx])
+              {
+                g_joystickValueOriginal_au16[pIdx] = JOYSTICK_MIN_VALUE;
+                g_joystickValue_au16[pIdx] = JOYSTICK_MIN_VALUE;
+                dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[pIdx] = 0;
+                dap_bridge_state_st.payloadBridgeState_st.pedalRssiRealtime_ai32[pIdx] = 0;
+                g_rssi_ai32[pIdx] = 0;
+                if (pIdx == 0) g_pedalClutchValue_u16 = JOYSTICK_MIN_VALUE;
+                if (pIdx == 1) g_pedalBrakeValue_u16 = JOYSTICK_MIN_VALUE;
+                if (pIdx == 2) g_pedalThrottleValue_u16 = JOYSTICK_MIN_VALUE;
+              }
+            }
           }
           tinyusbJoystick_.isBridgeActionGet=false;
         }

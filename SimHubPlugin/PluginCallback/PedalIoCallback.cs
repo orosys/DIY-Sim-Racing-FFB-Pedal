@@ -210,6 +210,21 @@ namespace DiyFfbPedal
             }
             if (serialUpdate || wirelessUpdate || Rudder_status || _calculations.Rudder_status) SendConfig(tmp, PedalIDX);
         }
+        public void SendBridgeWirelessSyncConfig()
+        {
+            try
+            {
+                DAP_bridge_state_st tmp = new DAP_bridge_state_st();
+                tmp.payloadBridgeState_.Bridge_action = (byte)bridgeAction.BRIDGE_ACTION_SET_PEDAL_WIRELESS_SYNC;
+                tmp.payloadBridgeState_.unassignedPedalCount = 0;
+                tmp.payloadBridgeState_.Pedal_availability_0 = (byte)(Settings.Pedal_ESPNow_Sync_flag[0] ? 1 : 0);
+                tmp.payloadBridgeState_.Pedal_availability_1 = (byte)(Settings.Pedal_ESPNow_Sync_flag[1] ? 1 : 0);
+                tmp.payloadBridgeState_.Pedal_availability_2 = (byte)(Settings.Pedal_ESPNow_Sync_flag[2] ? 1 : 0);
+                SendBridgeAction(tmp);
+            }
+            catch { }
+        }
+
         public void SendBridgeAction(DAP_bridge_state_st tmp)
         {
             int length;
@@ -220,10 +235,13 @@ namespace DiyFfbPedal
             tmp.payloadFooter_.enfOfFrame1_u8 = ENDOFFRAMCHAR[1];
             tmp.payLoadHeader_.startOfFrame0_u8 = STARTOFFRAMCHAR[0];
             tmp.payLoadHeader_.startOfFrame1_u8 = STARTOFFRAMCHAR[1];
-            tmp.payloadBridgeState_.unassignedPedalCount = 0;
-            tmp.payloadBridgeState_.Pedal_availability_0 = 0;
-            tmp.payloadBridgeState_.Pedal_availability_1 = 0;
-            tmp.payloadBridgeState_.Pedal_availability_2 = 0;
+            if (tmp.payloadBridgeState_.Bridge_action != (byte)bridgeAction.BRIDGE_ACTION_SET_PEDAL_WIRELESS_SYNC)
+            {
+                tmp.payloadBridgeState_.unassignedPedalCount = 0;
+                tmp.payloadBridgeState_.Pedal_availability_0 = 0;
+                tmp.payloadBridgeState_.Pedal_availability_1 = 0;
+                tmp.payloadBridgeState_.Pedal_availability_2 = 0;
+            }
 
 
             byte[] newBuffer_2;
