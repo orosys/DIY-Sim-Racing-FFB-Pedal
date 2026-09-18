@@ -12,6 +12,7 @@ TinyusbJoystick* TinyusbJoystick::instance = nullptr;
 TinyusbJoystick::TinyusbJoystick() 
 {    
     isBridgeActionGet=false;
+    isMacAddressesGet=false;
 }
 
 bool TinyusbJoystick::IsReady()
@@ -227,6 +228,21 @@ void TinyusbJoystick::ProcessFullData(uint8_t *rxBuffer, uint8_t totalLen)
             isBridgeActionGet = true;
         }
         
+    }
+        if(totalLen == sizeof(DapMacAddresses_t))
+    {
+        DapMacAddresses_t tmp;
+        memcpy(&tmp, rxBuffer, totalLen);
+        bool structChecker = true;
+        if(tmp.payloadHeader_st.payloadType_u8 != DAP_PAYLOAD_TYPE_MAC_ADDRESSES_U8) structChecker = false;
+        if(tmp.payloadHeader_st.version_u8 != DAP_VERSION_MAC_ADDRESSES_U8) structChecker = false;
+        uint16_t crc = checksumCal((uint8_t*)(&(tmp.payloadHeader_st)), sizeof(tmp.payloadHeader_st) + sizeof(tmp.payloadMacAddresses_st));
+        if(crc != tmp.payloadFooter_st.checkSum_u16) structChecker = false;
+        if(structChecker)
+        {
+            memcpy(&tmpMacAddresses, &tmp, totalLen);
+            isMacAddressesGet = true;
+        }
     }
     if(totalLen == sizeof(DapActionOta_t))
     {

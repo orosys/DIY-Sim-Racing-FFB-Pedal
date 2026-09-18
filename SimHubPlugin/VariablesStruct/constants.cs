@@ -22,6 +22,12 @@ namespace DiyFfbPedal
         public const uint OtaPayloadType = 220;
         public const uint pedalHidMessage_type = 225;
         public const uint wifiChannelPayloadType = 180;
+        public const uint macAddressesPayload_type = 190;
+        public const uint macAddressesPayload_version = 1;
+        public const byte NODE_CLUTCH_IDX = 0;
+        public const byte NODE_BRAKE_IDX = 1;
+        public const byte NODE_THROTTLE_IDX = 2;
+        public const byte NODE_BRIDGE_IDX = 3;
         public const byte WIFI_CH_CMD_SCAN_REQ = 1;
         public const byte WIFI_CH_CMD_SCAN_RES = 2;
         public const byte WIFI_CH_CMD_SET_REQ = 3;

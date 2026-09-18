@@ -756,6 +756,54 @@ namespace DiyFfbPedal
                         }
                         //
 
+                        if (length == sizeof(DAP_mac_addresses_st))
+                        {
+                            DAP_mac_addresses_st macs = getMacAddressesFromBytes(data);
+                            DAP_mac_addresses_st* pMacs = &macs;
+                            byte* pBytes = (byte*)pMacs;
+                            if (macs.payloadHeader_.payloadType == Constants.macAddressesPayload_type &&
+                                Plugin.checksumCalc(pBytes, sizeof(payloadHeader) + sizeof(payloadMacAddresses)) == macs.payloadFooter_.checkSum)
+                            {
+                                string ownMac = macs.payloadMacAddresses_.GetOwnMacAddressString();
+                                byte ownNode = macs.payloadMacAddresses_.ownNodeType_u8;
+                                if (ownNode < 4 && !string.IsNullOrWhiteSpace(ownMac))
+                                {
+                                    if (Plugin.Settings.AssignedPedalMac == null || Plugin.Settings.AssignedPedalMac.Length < 4)
+                                    {
+                                        Array.Resize(ref Plugin.Settings.AssignedPedalMac, 4);
+                                    }
+                                    Plugin.Settings.AssignedPedalMac[ownNode] = ownMac;
+                                }
+
+                                for (int i = 0; i < 4; i++)
+                                {
+                                    string m = macs.payloadMacAddresses_.GetMacAddressString(i);
+                                    if (!string.IsNullOrWhiteSpace(m) && m != "00:00:00:00:00:00" && m != "--")
+                                    {
+                                        if (Plugin.Settings.AssignedPedalMac == null || Plugin.Settings.AssignedPedalMac.Length < 4)
+                                        {
+                                            Array.Resize(ref Plugin.Settings.AssignedPedalMac, 4);
+                                        }
+                                        Plugin.Settings.AssignedPedalMac[i] = m;
+                                    }
+                                }
+
+                                if (macs.payloadMacAddresses_.wifiChannel_u8 >= 1 && macs.payloadMacAddresses_.wifiChannel_u8 <= 14)
+                                {
+                                    Plugin.Settings.ActiveWifiChannel = macs.payloadMacAddresses_.wifiChannel_u8;
+                                    if (SystemWireless_Tab != null)
+                                    {
+                                        SystemWireless_Tab.SetSelectedWifiChannel(macs.payloadMacAddresses_.wifiChannel_u8);
+                                    }
+                                }
+
+                                if (SystemWireless_Tab != null)
+                                {
+                                    SystemWireless_Tab.UpdateLiveStatus();
+                                }
+                            }
+                        }
+
                         if (length == sizeof(Dap_hidmessage_st))
                         {
                             //PrintHidData(data);

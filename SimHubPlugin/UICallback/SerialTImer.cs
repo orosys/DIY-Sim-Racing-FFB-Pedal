@@ -252,12 +252,14 @@ namespace DiyFfbPedal
                         List<int> indices_sof_basic_struct = FindAllOccurrences(buffer_appended[pedalSelected], STARTOFFRAME_BASIC_STRUCT, currentBufferLength);
                         List<int> indices_sof_config = FindAllOccurrences(buffer_appended[pedalSelected], STARTOFFRAME_CONFIG, currentBufferLength);
                         List<int> indices_sof_servo_config = FindAllOccurrences(buffer_appended[pedalSelected], STARTOFFRAME_SERVO_CONFIG, currentBufferLength);
+                        List<int> indices_sof_mac_addresses = FindAllOccurrences(buffer_appended[pedalSelected], STARTOFFRAME_MAC_ADDRESSES, currentBufferLength);
                         List<int> indices_eof = FindAllOccurrences(buffer_appended[pedalSelected], ENDOFFRAMCHAR, currentBufferLength);
 
                         var validPairsExtendedStruct = new List<Tuple<int, int>>();
                         var validPairsBasicStruct = new List<Tuple<int, int>>();
                         var validPairsConfig = new List<Tuple<int, int>>();
                         var validPairsServoConfig = new List<Tuple<int, int>>();
+                        var validPairsMacAddresses = new List<Tuple<int, int>>();
 
                         bool sofHasBeenReceivedEofNotYet = false;
                         byte[] bufferByteAssignedToStruct_class = serial_bufferByteAssignedToStruct_class;
@@ -304,6 +306,16 @@ namespace DiyFfbPedal
                             ref sofHasBeenReceivedEofNotYet,
                             bufferByteAssignedToStruct_class,
                             5); // classId=5: servo config (1=basic, 2=extended, 3=config, 4=bridge)
+
+                        // Search for the mac addresses struct
+                        FindValidMessagePairs(
+                            indices_sof_mac_addresses,
+                            indices_eof,
+                            sizeof(DAP_mac_addresses_st),
+                            validPairsMacAddresses,
+                            ref sofHasBeenReceivedEofNotYet,
+                            bufferByteAssignedToStruct_class,
+                            6);
 
                         // check if at least SOF1 byte was received, but EOF was not for last packet
                         List<int> indices_sof1 = FindAllOccurrences(buffer_appended[pedalSelected], STARTOFFRAMCHAR_SOF_byte0, currentBufferLength);
@@ -360,9 +372,43 @@ namespace DiyFfbPedal
 
                         // Destination array
                         byte[] destinationArray = new byte[destBufferSize];
-                        
-                        
                         int lastTrueElementIndex = 0;
+
+                        // mac addresses struct
+                        for (int pairId = 0; pairId < validPairsMacAddresses.Count; pairId++)
+                        {
+                            int srcBufferOffset_0 = validPairsMacAddresses[pairId].Item1;
+                            int srcBufferOffset_1 = validPairsMacAddresses[pairId].Item2;
+                            Buffer.BlockCopy(buffer_appended[pedalSelected], srcBufferOffset_0, destinationArray, 0, sizeof(DAP_mac_addresses_st));
+                            int destBuffLength = srcBufferOffset_1 - srcBufferOffset_0;
+                            if (destBuffLength == sizeof(DAP_mac_addresses_st))
+                            {
+                                DAP_mac_addresses_st macs = getMacAddressesFromBytes(destinationArray);
+                                DAP_mac_addresses_st* pMacs = &macs;
+                                byte* pBytes = (byte*)pMacs;
+                                if (macs.payloadHeader_.payloadType == Constants.macAddressesPayload_type &&
+                                    Plugin.checksumCalc(pBytes, sizeof(payloadHeader) + sizeof(payloadMacAddresses)) == macs.payloadFooter_.checkSum)
+                                {
+                                    bufferByteAssignedToStruct.AsSpan(srcBufferOffset_0, sizeof(DAP_mac_addresses_st)).Fill(true);
+                                    lastTrueElementIndex = Math.Max(lastTrueElementIndex, srcBufferOffset_0 + sizeof(DAP_mac_addresses_st));
+
+                                    string ownMac = macs.payloadMacAddresses_.GetOwnMacAddressString();
+                                    byte ownNode = macs.payloadMacAddresses_.ownNodeType_u8;
+                                    if (ownNode < 4 && !string.IsNullOrWhiteSpace(ownMac))
+                                    {
+                                        if (Plugin.Settings.AssignedPedalMac == null || Plugin.Settings.AssignedPedalMac.Length < 4)
+                                        {
+                                            Array.Resize(ref Plugin.Settings.AssignedPedalMac, 4);
+                                        }
+                                        Plugin.Settings.AssignedPedalMac[ownNode] = ownMac;
+                                        if (ownNode < 3 && Plugin._calculations?.unassignedPedalMacaddress != null && Plugin._calculations.unassignedPedalMacaddress.Length > ownNode)
+                                        {
+                                            Plugin._calculations.unassignedPedalMacaddress[ownNode] = macs.payloadMacAddresses_.GetMacAddress(ownNode);
+                                        }
+                                    }
+                                }
+                            }
+                        }
 
 
 

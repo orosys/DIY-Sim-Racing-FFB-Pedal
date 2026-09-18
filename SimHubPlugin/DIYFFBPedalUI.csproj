@@ -369,6 +369,8 @@
     <Compile Include="VariablesStruct\payloadHeader.cs" />
     <Compile Include="VariablesStruct\payloadPedalAction.cs" />
     <Compile Include="VariablesStruct\payloadPedalConfig.cs" />
+    <Compile Include="VariablesStruct\payloadMacAddresses.cs" />
+    <Compile Include="VariablesStruct\DAP_mac_addresses_st.cs" />
     <Compile Include="VariablesStruct\payloadServoConfig.cs" />
     <Compile Include="VariablesStruct\payloadPedalState_Basic.cs" />
     <Compile Include="VariablesStruct\payloadPedalState_Extended.cs" />

@@ -5,21 +5,20 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:styles="clr-namespace:SimHub.Plugins.Styles;assembly=SimHub.Plugins"
              mc:Ignorable="d" 
-             d:DesignHeight="183" d:DesignWidth="540">
+             d:DesignHeight="290" d:DesignWidth="535">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/DiyFfbPedal;component/UIStyles/DefaultStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-            <Style x:Name="TableActionButtonStyle" TargetType="Button">
-                <Setter Property="Height" Value="19"/>
-                <Setter Property="MinWidth" Value="24"/>
+            <Style x:Key="WirelessActionButtonStyle" TargetType="Button">
+                <Setter Property="Height" Value="20"/>
                 <Setter Property="FontSize" Value="8"/>
                 <Setter Property="FontFamily" Value="Arial"/>
                 <Setter Property="FontWeight" Value="Bold"/>
-                <Setter Property="Margin" Value="1,0"/>
-                <Setter Property="Padding" Value="4,0"/>
+                <Setter Property="Margin" Value="2,0"/>
+                <Setter Property="Padding" Value="6,0"/>
                 <Setter Property="BorderThickness" Value="1"/>
                 <Setter Property="Cursor" Value="Hand"/>
                 <Setter Property="Background" Value="#22FFFFFF"/>
@@ -50,38 +49,31 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <Grid>
-        <Border Background="#7F4E4E4E" Height="177" CornerRadius="5,5,5,5" BorderThickness="0,2,0,0" Padding="5,4">
+    <Grid Width="535" HorizontalAlignment="Left">
+        <Border Background="#7F353535" CornerRadius="5" BorderThickness="0,2,0,0" BorderBrush="#00E5FF" Padding="6,4">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <!-- Top Header & Toolbar -->
-                <DockPanel Grid.Row="0" LastChildFill="False" Margin="2,1,2,2">
+                <!-- Top Row: Title & Channel Selector -->
+                <DockPanel Grid.Row="0" LastChildFill="False" Margin="1,1,1,3">
                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Center">
-                        <!-- Wi-Fi vector icon -->
+                        <!-- Wi-Fi Vector Icon -->
                         <Canvas Width="14" Height="12" Margin="0,0,5,0" VerticalAlignment="Center">
-                            <Path Data="M1,2.5 A9,9 0 0,1 13,2.5 M3,5.5 A6,6 0 0,1 11,5.5 M5.5,8.5 A3,3 0 0,1 8.5,8.5" Stroke="#00E5FF" StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent"/>
-                            <Ellipse Width="2" Height="2" Fill="#00E5FF" Canvas.Left="6" Canvas.Top="9"/>
+                            <Path Data="M1,2.5 A8.5,8.5 0 0,1 13,2.5 M3,5.5 A5.5,5.5 0 0,1 11,5.5 M5,8.5 A2.5,2.5 0 0,1 9,8.5" Stroke="#00E5FF" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent"/>
+                            <Ellipse Width="2" Height="2" Fill="#00E5FF" Canvas.Left="6" Canvas.Top="9.5"/>
                         </Canvas>
-                        <TextBlock Text="WIRELESS PEDALS &amp; SPECTRUM" FontFamily="Arial Black" FontSize="9.5" Foreground="#00E5FF" VerticalAlignment="Center"/>
+                        <TextBlock Text="WIRELESS MANAGEMENT (UNICAST)" FontFamily="Arial Black" FontSize="9.5" Foreground="#00E5FF" VerticalAlignment="Center"/>
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
-                        <!-- Active Wi-Fi Channel Badge -->
-                        <Border Background="#2200E5FF" BorderBrush="#5500E5FF" BorderThickness="1" CornerRadius="3" Padding="5,1" Margin="0,0,5,0" VerticalAlignment="Center">
-                            <TextBlock x:Name="tb_active_channel_badge" Text="Active: Ch 11" FontFamily="Consolas" FontSize="8.5" Foreground="#00FFCC" FontWeight="Bold"/>
-                        </Border>
-
-                        <!-- Scan All Channels Action Button -->
-                        <Button x:Name="btn_scan_all_channels" Click="btn_scan_all_channels_Click" Content="🔍 Scan All Channels" Height="20" Padding="6,0" Background="#2600AAFF" Foreground="#00CCFF" BorderBrush="#3300CCFF" BorderThickness="1" FontSize="8.5" FontFamily="Arial" FontWeight="SemiBold" Cursor="Hand" ToolTip="Sequentially scans Wi-Fi channels 1 through 13 for pedal transmissions"/>
-
-                        <!-- Channel Manual Switcher -->
-                        <TextBlock Text="Ch:" FontFamily="Arial" FontSize="8" Foreground="#AAAAAA" VerticalAlignment="Center" Margin="6,0,2,0"/>
-                        <ComboBox x:Name="combo_select_channel" Width="48" Height="20" FontSize="8" VerticalAlignment="Center" Padding="2,0">
+                        <TextBlock Text="Wi-Fi Ch:" FontFamily="Arial" FontSize="8" Foreground="#AAAAAA" VerticalAlignment="Center" Margin="0,0,3,0"/>
+                        <ComboBox x:Name="combo_select_channel" Width="55" Height="20" FontSize="8" VerticalAlignment="Center" Padding="3,0">
                             <ComboBoxItem Content="Ch 1" Tag="1"/>
                             <ComboBoxItem Content="Ch 2" Tag="2"/>
                             <ComboBoxItem Content="Ch 3" Tag="3"/>
@@ -96,100 +88,99 @@
                             <ComboBoxItem Content="Ch 12" Tag="12"/>
                             <ComboBoxItem Content="Ch 13" Tag="13"/>
                         </ComboBox>
-                        <Button x:Name="btn_set_channel" Click="btn_set_channel_Click" Content="Set" Width="30" Height="20" Margin="3,0,0,0" Background="#3300E676" Foreground="#00E676" BorderBrush="#5500E676" BorderThickness="1" FontSize="8" FontFamily="Arial" FontWeight="Bold" Cursor="Hand" ToolTip="Switch Master &amp; Pedals to selected channel"/>
                     </StackPanel>
                 </DockPanel>
 
-                <!-- Status & Progress Banner -->
-                <Grid Grid.Row="1" Margin="2,1,2,3">
-                    <Border Background="#15000000" BorderBrush="#22FFFFFF" BorderThickness="1" CornerRadius="3" Padding="5,2">
-                        <DockPanel LastChildFill="True">
-                            <ProgressBar x:Name="pb_scan_progress" DockPanel.Dock="Right" Width="80" Height="8" Margin="6,0,0,0" VerticalAlignment="Center" Visibility="Collapsed" Minimum="1" Maximum="13" Value="1"/>
-                            <TextBlock x:Name="tb_scan_status" Text="Live wireless monitor active. Table updates in real-time." FontFamily="Consolas" FontSize="7.5" Foreground="#AAAAAA" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-                        </DockPanel>
-                    </Border>
-                </Grid>
+                <!-- Row 1: Action Toolbar Buttons -->
+                <DockPanel Grid.Row="1" LastChildFill="False" Margin="1,0,1,3">
+                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                        <Button x:Name="btn_autodetect_usb" Click="btn_autodetect_usb_Click" Style="{StaticResource WirelessActionButtonStyle}" Content="🔍 Auto-Detect" Height="19" Padding="5,0" Background="#2600AAFF" Foreground="#00CCFF" BorderBrush="#4400CCFF" ToolTip="Query connected USB Bridge (HID) and Pedals (COM) for hardware MACs"/>
+                        <Button x:Name="btn_read_eeprom" Click="btn_read_eeprom_Click" Style="{StaticResource WirelessActionButtonStyle}" Content="📥 Read Device" Height="19" Padding="5,0" Background="#22FFFFFF" Foreground="#D0D0D0" BorderBrush="#44FFFFFF" ToolTip="Read stored MAC addresses from connected Bridge or active pedal EEPROM"/>
+                        <Button x:Name="btn_open_docs" Click="btn_open_docs_Click" Style="{StaticResource WirelessActionButtonStyle}" Content="📖 Pairing Guide" Height="19" Padding="5,0" Background="#22FFB300" Foreground="#FFD54F" BorderBrush="#44FFB300" ToolTip="Open the step-by-step Wireless Pairing &amp; MAC Sharing documentation"/>
+                    </StackPanel>
 
-                <!-- Main Pedals Table -->
-                <Border Grid.Row="2" Background="#1E1E1E" BorderBrush="#33FFFFFF" BorderThickness="1" CornerRadius="4" Margin="2,0,2,1">
+                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                        <Button x:Name="btn_write_all_usb" Click="btn_write_all_usb_Click" Style="{StaticResource WirelessActionButtonStyle}" Content="💾 Sync to All Devices" Height="19" Padding="7,0" Background="#3300E676" Foreground="#00E676" BorderBrush="#6600E676" ToolTip="Write MAC mapping table and Wi-Fi channel into EEPROM of all connected USB nodes"/>
+                    </StackPanel>
+                </DockPanel>
+
+                <!-- Row 2: Status Banner -->
+                <Border Grid.Row="2" Background="#1A000000" BorderBrush="#22FFFFFF" BorderThickness="1" CornerRadius="3" Padding="5,2" Margin="1,0,1,3">
+                    <TextBlock x:Name="tb_scan_status" Text="Ready. Connect pedals / bridge via USB to detect or write MAC address mapping." FontFamily="Consolas" FontSize="7.5" Foreground="#999999" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                </Border>
+
+                <!-- Row 3: Node Table -->
+                <Border Grid.Row="3" Background="#181818" BorderBrush="#33FFFFFF" BorderThickness="1" CornerRadius="4" Margin="1,0,1,2">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="20"/>
-                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <!-- Table Header with clearly separated columns -->
-                        <Border Grid.Row="0" Background="#282828" BorderBrush="#33FFFFFF" BorderThickness="0,0,0,1" CornerRadius="3,3,0,0">
-                            <Grid Margin="4,0,4,0">
+                        <!-- Header Row -->
+                        <Border Grid.Row="0" Background="#222222" BorderBrush="#33FFFFFF" BorderThickness="0,0,0,1" CornerRadius="3,3,0,0">
+                            <Grid Margin="5,0,5,0">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="74"/>
-                                    <ColumnDefinition Width="62"/>
-                                    <ColumnDefinition Width="110"/>
-                                    <ColumnDefinition Width="150"/>
-                                    <ColumnDefinition Width="70"/>
+                                    <ColumnDefinition Width="65"/>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="148"/>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="80"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="PEDAL ROLE" FontFamily="Arial Black" FontSize="7.5" Foreground="#888888" VerticalAlignment="Center"/>
-                                <Border Grid.Column="1" BorderBrush="#22FFFFFF" BorderThickness="1,0,1,0">
-                                    <TextBlock Text="CHANNEL" FontFamily="Arial Black" FontSize="7.5" Foreground="#00E5FF" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                </Border>
-                                <TextBlock Grid.Column="2" Text="MAC ADDRESS" FontFamily="Arial Black" FontSize="7.5" Foreground="#888888" VerticalAlignment="Center" Margin="6,0,0,0"/>
-                                <TextBlock Grid.Column="3" Text="ROLE ASSIGNMENT" FontFamily="Arial Black" FontSize="7.5" Foreground="#888888" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                <TextBlock Grid.Column="4" Text="STATUS" FontFamily="Arial Black" FontSize="7.5" Foreground="#888888" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                <TextBlock Grid.Column="5" Text="RSSI" FontFamily="Arial Black" FontSize="7.5" Foreground="#888888" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,4,0"/>
+                                <TextBlock Grid.Column="0" Text="ROLE" FontFamily="Arial Black" FontSize="7.5" Foreground="#777777" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="USB PORT" FontFamily="Arial Black" FontSize="7.5" Foreground="#777777" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="2" Text="MAC ADDRESS" FontFamily="Arial Black" FontSize="7.5" Foreground="#777777" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="3" Text="CH" FontFamily="Arial Black" FontSize="7.5" Foreground="#00E5FF" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                <TextBlock Grid.Column="4" Text="WIRELESS" FontFamily="Arial Black" FontSize="7.5" Foreground="#777777" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                <TextBlock Grid.Column="5" Text="ACTION" FontFamily="Arial Black" FontSize="7.5" Foreground="#777777" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,2,0"/>
                             </Grid>
                         </Border>
 
-                        <!-- Table Rows (ScrollViewer) -->
-                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <!-- Items List with ScrollViewer -->
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="185">
                             <ItemsControl x:Name="ic_pedal_list">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border BorderBrush="#1AFFFFFF" BorderThickness="0,0,0,1" Padding="4,3" Background="{Binding RowBackground}">
+                                        <Border BorderBrush="#15FFFFFF" BorderThickness="0,0,0,1" Padding="5,2" Background="{Binding RowBackground}">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="74"/>
-                                                    <ColumnDefinition Width="62"/>
-                                                    <ColumnDefinition Width="110"/>
-                                                    <ColumnDefinition Width="150"/>
-                                                    <ColumnDefinition Width="70"/>
+                                                    <ColumnDefinition Width="65"/>
+                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition Width="148"/>
+                                                    <ColumnDefinition Width="50"/>
+                                                    <ColumnDefinition Width="80"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
 
-                                                <!-- Pedal Role Badge -->
+                                                <!-- Role Badge -->
                                                 <Border Grid.Column="0" Background="{Binding RoleBadgeBackground}" BorderBrush="{Binding RoleBadgeBorder}" BorderThickness="1" CornerRadius="3" Padding="4,1" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding RoleName}" FontFamily="Arial Black" FontSize="8" Foreground="{Binding RoleBadgeForeground}"/>
+                                                    <TextBlock Text="{Binding RoleName}" FontFamily="Arial Black" FontSize="7.5" Foreground="{Binding RoleBadgeForeground}"/>
                                                 </Border>
 
-                                                <!-- WiFi Channel (Distinct badge, always showing actually used channel) -->
-                                                <Border Grid.Column="1" Background="#1A00E5FF" BorderBrush="#3300E5FF" BorderThickness="1" CornerRadius="3" Padding="4,1" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding ChannelDisplay}" FontFamily="Consolas" FontSize="8" Foreground="#00E5FF" FontWeight="Bold"/>
-                                                </Border>
-
-                                                <!-- MAC Address (Clearly separated from Channel) -->
-                                                <TextBlock Grid.Column="2" Text="{Binding MacAddress}" FontFamily="Consolas" FontSize="8" Foreground="#E0E0E0" VerticalAlignment="Center" Margin="6,0,0,0" TextTrimming="CharacterEllipsis"/>
-
-                                                <!-- Role Assignment Action Buttons -->
-                                                <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                    <Button Content="Clutch" Click="btn_assign_clutch_Click" Tag="{Binding}" Height="18" FontSize="7.5" FontFamily="Arial" FontWeight="Bold" Margin="1,0" Padding="3,0" Background="#22FF5252" Foreground="#FF5252" BorderBrush="#44FF5252" BorderThickness="1" Cursor="Hand" ToolTip="Assign this pedal as Clutch"/>
-                                                    <Button Content="Brake" Click="btn_assign_brake_Click" Tag="{Binding}" Height="18" FontSize="7.5" FontFamily="Arial" FontWeight="Bold" Margin="1,0" Padding="3,0" Background="#2200E676" Foreground="#00E676" BorderBrush="#4400E676" BorderThickness="1" Cursor="Hand" ToolTip="Assign this pedal as Brake"/>
-                                                    <Button Content="Throttle" Click="btn_assign_throttle_Click" Tag="{Binding}" Height="18" FontSize="7.5" FontFamily="Arial" FontWeight="Bold" Margin="1,0" Padding="3,0" Background="#222979FF" Foreground="#2979FF" BorderBrush="#442979FF" BorderThickness="1" Cursor="Hand" ToolTip="Assign this pedal as Throttle"/>
-                                                    <Button Content="Clear" Click="btn_clear_assignment_Click" Tag="{Binding}" Height="18" FontSize="7.5" FontFamily="Arial" Margin="1,0" Padding="3,0" Background="#22FF9100" Foreground="#FF9100" BorderBrush="#44FF9100" BorderThickness="1" Cursor="Hand" ToolTip="Clear pedal assignment" IsEnabled="{Binding CanClear}"/>
-                                                    <Button Content="🔔" Click="btn_beep_Click" Tag="{Binding}" Height="18" Width="18" FontSize="8" Margin="1,0" Padding="0" Background="#22FFD600" Foreground="#FFD600" BorderBrush="#44FFD600" BorderThickness="1" Cursor="Hand" ToolTip="Identify pedal (Beep)"/>
+                                                <!-- USB Connection Status -->
+                                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Ellipse Width="5" Height="5" Fill="{Binding UsbStatusBrush}" Margin="0,0,4,0"/>
+                                                    <TextBlock Text="{Binding UsbStatusText}" FontFamily="Consolas" FontSize="7.5" Foreground="{Binding UsbStatusForeground}"/>
                                                 </StackPanel>
 
-                                                <!-- Connection Status Badge -->
-                                                <Border Grid.Column="4" Background="{Binding StatusBackground}" BorderBrush="{Binding StatusBorder}" BorderThickness="1" CornerRadius="3" Padding="4,1" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                        <Ellipse Width="4" Height="4" Fill="{Binding StatusForeground}" Margin="0,0,3,0"/>
-                                                        <TextBlock Text="{Binding StatusText}" FontFamily="Arial" FontSize="7.5" FontWeight="SemiBold" Foreground="{Binding StatusForeground}"/>
-                                                    </StackPanel>
+                                                <!-- MAC Address Entry -->
+                                                <TextBox Grid.Column="2" Text="{Binding MacAddress, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontFamily="Consolas" FontSize="8" Foreground="#00FFCC" Background="#15000000" BorderBrush="#3300FFCC" BorderThickness="1" Padding="3,1" VerticalAlignment="Center" Width="138" HorizontalAlignment="Left"/>
+
+                                                <!-- Active Wi-Fi Channel Badge -->
+                                                <Border Grid.Column="3" Background="{Binding ChannelBadgeBackground}" BorderBrush="{Binding ChannelBadgeBorder}" BorderThickness="1" CornerRadius="3" Padding="3,1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding ChannelDisplay}" FontFamily="Consolas" FontSize="7.5" Foreground="{Binding ChannelForeground}" FontWeight="Bold"/>
                                                 </Border>
 
-                                                <!-- RSSI Signal Quality -->
-                                                <StackPanel Grid.Column="5" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,4,0">
-                                                    <TextBlock Text="{Binding RssiDisplay}" FontFamily="Consolas" FontSize="8" FontWeight="Bold" Foreground="{Binding RssiForeground}" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                                                    <Border Width="6" Height="10" Background="{Binding RssiBarBrush}" CornerRadius="1" VerticalAlignment="Center" ToolTip="{Binding RssiTooltip}"/>
+                                                <!-- Wireless RSSI / Status -->
+                                                <StackPanel Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding RssiDisplay}" FontFamily="Consolas" FontSize="7.5" FontWeight="Bold" Foreground="{Binding RssiForeground}" VerticalAlignment="Center" Margin="0,0,3,0"/>
+                                                    <Border Width="5" Height="8" Background="{Binding RssiBarBrush}" CornerRadius="1" VerticalAlignment="Center" ToolTip="{Binding RssiTooltip}"/>
+                                                </StackPanel>
+
+                                                <!-- Actions -->
+                                                <StackPanel Grid.Column="5" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,1,0">
+                                                    <Button Content="🔔 Beep" Click="btn_beep_Click" Tag="{Binding}" Height="16" FontSize="7" FontFamily="Arial" FontWeight="Bold" Margin="1,0" Padding="3,0" Background="#22FFD600" Foreground="#FFD600" BorderBrush="#44FFD600" BorderThickness="1" Cursor="Hand" ToolTip="Identify node (Buzzer Beep)" IsEnabled="{Binding CanBeep}"/>
                                                 </StackPanel>
                                             </Grid>
                                         </Border>
@@ -199,6 +190,9 @@
                         </ScrollViewer>
                     </Grid>
                 </Border>
+
+                <!-- Row 4: Footer Tip -->
+                <TextBlock Grid.Row="4" Text="💡 Hint: When syncing pedals via USB COM, disable 'Wireless Communication' in that pedal tab so USB exchange is active." FontFamily="Arial" FontSize="7" Foreground="#888888" Margin="3,1,3,0"/>
             </Grid>
         </Border>
     </Grid>

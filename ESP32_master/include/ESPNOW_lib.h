@@ -60,6 +60,76 @@ struct WifiChannelConfig_t {
   uint8_t checksum_u8;
 };
 
+
+extern uint8_t g_currentWifiChannel_u8;
+
+inline DapMacAddresses_t loadMacAddressesFromEeprom() {
+  DapMacAddresses_t macCfg;
+  EEPROM.get(DAP_MAC_ADDRESSES_EEPROM_OFFSET_U32, macCfg);
+  if (macCfg.payloadHeader_st.payloadType_u8 == DAP_PAYLOAD_TYPE_MAC_ADDRESSES_U8 &&
+      macCfg.payloadHeader_st.version_u8 == DAP_VERSION_MAC_ADDRESSES_U8) {
+    uint16_t crc = checksumCalculator((uint8_t*)(&(macCfg.payloadHeader_st)),
+                                      sizeof(macCfg.payloadHeader_st) + sizeof(macCfg.payloadMacAddresses_st));
+    if (crc == macCfg.payloadFooter_st.checkSum_u16) {
+      WiFi.macAddress(macCfg.payloadMacAddresses_st.ownMacAddress_au8);
+      macCfg.payloadMacAddresses_st.ownNodeType_u8 = 3; // Bridge
+      return macCfg;
+    }
+  }
+  memset(&macCfg, 0, sizeof(macCfg));
+  macCfg.payloadHeader_st.startOfFrame0_u8 = SOF_BYTE_0_U8;
+  macCfg.payloadHeader_st.startOfFrame1_u8 = SOF_BYTE_1_U8;
+  macCfg.payloadHeader_st.payloadType_u8 = DAP_PAYLOAD_TYPE_MAC_ADDRESSES_U8;
+  macCfg.payloadHeader_st.version_u8 = DAP_VERSION_MAC_ADDRESSES_U8;
+  macCfg.payloadFooter_st.enfOfFrame0_u8 = EOF_BYTE_0_U8;
+  macCfg.payloadFooter_st.enfOfFrame1_u8 = EOF_BYTE_1_U8;
+  macCfg.payloadMacAddresses_st.wifiChannel_u8 = 11;
+  WiFi.macAddress(macCfg.payloadMacAddresses_st.ownMacAddress_au8);
+  macCfg.payloadMacAddresses_st.ownNodeType_u8 = 3; // Bridge
+  return macCfg;
+}
+
+inline void storeMacAddressesToEeprom(DapMacAddresses_t &macCfg) {
+  macCfg.payloadHeader_st.startOfFrame0_u8 = SOF_BYTE_0_U8;
+  macCfg.payloadHeader_st.startOfFrame1_u8 = SOF_BYTE_1_U8;
+  macCfg.payloadHeader_st.payloadType_u8 = DAP_PAYLOAD_TYPE_MAC_ADDRESSES_U8;
+  macCfg.payloadHeader_st.version_u8 = DAP_VERSION_MAC_ADDRESSES_U8;
+  macCfg.payloadFooter_st.enfOfFrame0_u8 = EOF_BYTE_0_U8;
+  macCfg.payloadFooter_st.enfOfFrame1_u8 = EOF_BYTE_1_U8;
+  macCfg.payloadFooter_st.checkSum_u16 = checksumCalculator((uint8_t*)(&(macCfg.payloadHeader_st)),
+                                                            sizeof(macCfg.payloadHeader_st) + sizeof(macCfg.payloadMacAddresses_st));
+  EEPROM.put(DAP_MAC_ADDRESSES_EEPROM_OFFSET_U32, macCfg);
+  EEPROM.commit();
+}
+
+inline void applyMacAddressesConfig(const DapMacAddresses_t &macCfg) {
+  uint8_t ch = macCfg.payloadMacAddresses_st.wifiChannel_u8;
+  if (ch >= 1 && ch <= 13) {
+    g_currentWifiChannel_u8 = ch;
+  }
+  esp_wifi_set_channel(g_currentWifiChannel_u8, WIFI_SECOND_CHAN_NONE);
+
+  for (int i = 0; i < 3; i++) {
+    memcpy(g_pedalMac_aau8[i], macCfg.payloadMacAddresses_st.macAddress_aau8[i], 6);
+    bool hasMac = false;
+    for (int b = 0; b < 6; b++) {
+      if (g_pedalMac_aau8[i][b] != 0) { hasMac = true; break; }
+    }
+    if (hasMac) {
+      esp_now_peer_info_t peerInfo = {};
+      memcpy(peerInfo.peer_addr, g_pedalMac_aau8[i], 6);
+      peerInfo.channel = g_currentWifiChannel_u8;
+      peerInfo.ifidx = WIFI_IF_STA;
+      peerInfo.encrypt = false;
+      if (!esp_now_is_peer_exist(g_pedalMac_aau8[i])) {
+        esp_now_add_peer(&peerInfo);
+      } else {
+        esp_now_mod_peer(&peerInfo);
+      }
+    }
+  }
+}
+
 inline uint8_t loadWifiChannelFromEeprom() {
   WifiChannelConfig_t cfg;
   EEPROM.get(WIFI_CH_EEPROM_OFFSET, cfg);
@@ -152,6 +222,15 @@ void espNowPairingCallback(const uint8_t *mac_addr, const uint8_t *data, int dat
 
 void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int data_len)
 {
+  static uint32_t lastRxDiagTime = 0;
+  if (millis() - lastRxDiagTime > 3000) {
+    lastRxDiagTime = millis();
+    ActiveSerial->printf("[ESPNOW RX] Packet len=%d from %02X:%02X:%02X:%02X:%02X:%02X (ch=%d)\n",
+                         data_len,
+                         esp_now_info->src_addr[0], esp_now_info->src_addr[1], esp_now_info->src_addr[2],
+                         esp_now_info->src_addr[3], esp_now_info->src_addr[4], esp_now_info->src_addr[5],
+                         g_currentWifiChannel_u8);
+  }
   if(g_espNowPairingAction_b)
   {
     espNowPairingCallback(esp_now_info->src_addr, data, data_len);
@@ -216,7 +295,7 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int da
             sizeof(st_cand->payloadHeader_st) + sizeof(st_cand->payloadPedalStateBasic_st));
         if(crcChecker == st_cand->payloadFooter_st.checkSum_u16)
         {
-          if (st_cand->payloadHeader_st.pedalTag_u8 < 3 && g_espPairingReg_st.pairStatus_au8[st_cand->payloadHeader_st.pedalTag_u8] == 1)
+          if (st_cand->payloadHeader_st.pedalTag_u8 < 3)
           {
             uint8_t discTag = st_cand->payloadHeader_st.pedalTag_u8;
             // Dynamisch im RAM merken
@@ -234,41 +313,6 @@ void onRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int da
             if(esp_now_info->rx_ctrl != NULL){
               g_rssi_ai32[discTag] = esp_now_info->rx_ctrl->rssi;
               g_rssiDisplay_i32 = g_rssi_ai32[discTag];
-            }
-          }
-          else
-          {
-            // Unassigned / unknown pedal (pedalTag >= 3)
-            // Register into slot 5..7 (PEDAL_ID_TEMP_1..3)
-            int freeSlot = -1;
-            for (int p = 5; p < 8; p++) {
-              if (macCheck((uint8_t*)esp_now_info->src_addr, g_pedalMac_aau8[p])) {
-                freeSlot = p;
-                break;
-              }
-              if (freeSlot == -1 && g_pedalMac_aau8[p][0] == 0 && g_pedalMac_aau8[p][1] == 0 && g_pedalMac_aau8[p][2] == 0) {
-                freeSlot = p;
-              }
-            }
-            if (freeSlot != -1) {
-              bool isNew = (g_pedalMac_aau8[freeSlot][0] == 0 && g_pedalMac_aau8[freeSlot][1] == 0 && g_pedalMac_aau8[freeSlot][2] == 0);
-              memcpy(g_pedalMac_aau8[freeSlot], esp_now_info->src_addr, 6);
-              if(!esp_now_is_peer_exist(esp_now_info->src_addr))
-              {
-                esp_now_peer_info_t peerInfo = {};
-                memcpy(peerInfo.peer_addr, esp_now_info->src_addr, 6);
-                peerInfo.channel = 0;
-                peerInfo.ifidx = WIFI_IF_STA;
-                peerInfo.encrypt = false;
-                esp_now_add_peer(&peerInfo);
-              }
-              if (isNew) {
-                ActiveSerial->printf("[L]Found Unassigned Pedal: %02X:%02X:%02X:%02X:%02X:%02X at slot %d\n",
-                                     esp_now_info->src_addr[0], esp_now_info->src_addr[1], esp_now_info->src_addr[2],
-                                     esp_now_info->src_addr[3], esp_now_info->src_addr[4], esp_now_info->src_addr[5],
-                                     freeSlot);
-              }
-              actual_pedal_tag = freeSlot;
             }
           }
         }
@@ -520,21 +564,13 @@ void espNowInitialize()
       #endif
     #endif
 
-    // Read paired pedal hardware MACs from EEPROM
-    EspPairingReg_t ESP_pairing_reg_local;
-    EEPROM.get(EEPROM_offset, ESP_pairing_reg_local);
-    memcpy(&g_espPairingReg_st, &ESP_pairing_reg_local, sizeof(EspPairingReg_t));
-    for (int i = 0; i < 3; i++)
-    {
-      if (g_espPairingReg_st.pairStatus_au8[i] == 1)
-      {
-        memcpy(g_pedalMac_aau8[i], g_espPairingReg_st.pairMac_aau8[i], 6);
-        ActiveSerial->printf("[L]Paired Pedal #%d Mac: %02X:%02X:%02X:%02X:%02X:%02X\n", i, g_pedalMac_aau8[i][0], g_pedalMac_aau8[i][1], g_pedalMac_aau8[i][2], g_pedalMac_aau8[i][3], g_pedalMac_aau8[i][4], g_pedalMac_aau8[i][5]);
-      }
-      else
-      {
-        memset(g_pedalMac_aau8[i], 0, 6);
-      }
+    // Read MAC configuration from EEPROM (Offset 0)
+    DapMacAddresses_t macCfg = loadMacAddressesFromEeprom();
+    applyMacAddressesConfig(macCfg);
+    for (int i = 0; i < 3; i++) {
+      ActiveSerial->printf("[L]Configured Pedal #%d Mac: %02X:%02X:%02X:%02X:%02X:%02X\n",
+                           i, g_pedalMac_aau8[i][0], g_pedalMac_aau8[i][1], g_pedalMac_aau8[i][2],
+                           g_pedalMac_aau8[i][3], g_pedalMac_aau8[i][4], g_pedalMac_aau8[i][5]);
     }
 
     bool addPeerCHecker = true;
@@ -545,13 +581,10 @@ void espNowInitialize()
         if (ESPNow.add_peer(g_pedalMac_aau8[i]) != ESP_OK) addPeerCHecker = false;
       }
     }
-    if (ESPNow.add_peer(g_broadcastMac_au8) != ESP_OK) addPeerCHecker = false;
+    // Broadcast disabled: pure unicast architecture
     if(addPeerCHecker) ActiveSerial->println("[L]Peers added successfully.");
     ESPNow.reg_recv_cb(onRecv);
     ESPNow.reg_send_cb(onSent);
-    //set wifi channel
-    g_currentWifiChannel_u8 = loadWifiChannelFromEeprom();
-    esp_wifi_set_channel(g_currentWifiChannel_u8, WIFI_SECOND_CHAN_NONE);
     ActiveSerial->printf("[L]ESPNow Channel: %d\n", g_currentWifiChannel_u8);
     //g_rssi_ai32 calculate
     // esp_wifi_set_promiscuous(true);

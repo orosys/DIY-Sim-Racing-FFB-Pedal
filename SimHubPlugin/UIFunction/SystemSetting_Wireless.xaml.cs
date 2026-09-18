@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO.Ports;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,40 +15,40 @@ using System.Windows.Threading;
 
 namespace DiyFfbPedal.UIFunction
 {
-    public class WirelessPedalRow : INotifyPropertyChanged
+    public class WirelessNodeRow : INotifyPropertyChanged
     {
+        private int _nodeIndex; // 0=Clutch, 1=Brake, 2=Throttle, 3=Bridge
         private string _roleName;
-        private byte _roleTag;
-        private bool _isAssigned;
+        private string _usbStatusText = "Disconnected";
+        private Brush _usbStatusForeground = new SolidColorBrush(Color.FromRgb(136, 136, 136));
+        private Brush _usbStatusBrush = new SolidColorBrush(Color.FromRgb(100, 100, 100));
+        private string _macAddress = "--";
         private string _channelDisplay = "--";
         private byte _channelNumber = 0;
-        private string _macAddress = "--";
-        private string _statusText = "Disconnected";
-        private Brush _statusForeground = new SolidColorBrush(Color.FromRgb(136, 136, 136));
-        private Brush _statusBackground = new SolidColorBrush(Color.FromArgb(30, 255, 255, 255));
-        private Brush _statusBorder = new SolidColorBrush(Color.FromArgb(60, 255, 255, 255));
-        private int _rssiValue = 0;
+        private Brush _channelForeground = new SolidColorBrush(Color.FromRgb(0, 229, 255));
+        private Brush _channelBadgeBackground = new SolidColorBrush(Color.FromArgb(26, 0, 229, 255));
+        private Brush _channelBadgeBorder = new SolidColorBrush(Color.FromArgb(51, 0, 229, 255));
         private string _rssiDisplay = "--";
         private Brush _rssiForeground = new SolidColorBrush(Color.FromRgb(136, 136, 136));
         private Brush _rssiBarBrush = new SolidColorBrush(Color.FromRgb(80, 80, 80));
-        private string _rssiTooltip = "No signal";
+        private string _rssiTooltip = "No signal / Disconnected";
         private Brush _roleBadgeForeground = new SolidColorBrush(Colors.White);
         private Brush _roleBadgeBackground = new SolidColorBrush(Color.FromArgb(34, 255, 255, 255));
         private Brush _roleBadgeBorder = new SolidColorBrush(Color.FromArgb(68, 255, 255, 255));
         private Brush _rowBackground = Brushes.Transparent;
-        private bool _canClear = false;
+        private bool _canBeep = false;
 
+        public int NodeIndex { get => _nodeIndex; set { _nodeIndex = value; OnPropertyChanged(); } }
         public string RoleName { get => _roleName; set { _roleName = value; OnPropertyChanged(); } }
-        public byte RoleTag { get => _roleTag; set { _roleTag = value; OnPropertyChanged(); } }
-        public bool IsAssigned { get => _isAssigned; set { _isAssigned = value; OnPropertyChanged(); } }
+        public string UsbStatusText { get => _usbStatusText; set { _usbStatusText = value; OnPropertyChanged(); } }
+        public Brush UsbStatusForeground { get => _usbStatusForeground; set { _usbStatusForeground = value; OnPropertyChanged(); } }
+        public Brush UsbStatusBrush { get => _usbStatusBrush; set { _usbStatusBrush = value; OnPropertyChanged(); } }
+        public string MacAddress { get => _macAddress; set { _macAddress = value; OnPropertyChanged(); } }
         public string ChannelDisplay { get => _channelDisplay; set { _channelDisplay = value; OnPropertyChanged(); } }
         public byte ChannelNumber { get => _channelNumber; set { _channelNumber = value; OnPropertyChanged(); } }
-        public string MacAddress { get => _macAddress; set { _macAddress = value; OnPropertyChanged(); } }
-        public string StatusText { get => _statusText; set { _statusText = value; OnPropertyChanged(); } }
-        public Brush StatusForeground { get => _statusForeground; set { _statusForeground = value; OnPropertyChanged(); } }
-        public Brush StatusBackground { get => _statusBackground; set { _statusBackground = value; OnPropertyChanged(); } }
-        public Brush StatusBorder { get => _statusBorder; set { _statusBorder = value; OnPropertyChanged(); } }
-        public int RssiValue { get => _rssiValue; set { _rssiValue = value; OnPropertyChanged(); } }
+        public Brush ChannelForeground { get => _channelForeground; set { _channelForeground = value; OnPropertyChanged(); } }
+        public Brush ChannelBadgeBackground { get => _channelBadgeBackground; set { _channelBadgeBackground = value; OnPropertyChanged(); } }
+        public Brush ChannelBadgeBorder { get => _channelBadgeBorder; set { _channelBadgeBorder = value; OnPropertyChanged(); } }
         public string RssiDisplay { get => _rssiDisplay; set { _rssiDisplay = value; OnPropertyChanged(); } }
         public Brush RssiForeground { get => _rssiForeground; set { _rssiForeground = value; OnPropertyChanged(); } }
         public Brush RssiBarBrush { get => _rssiBarBrush; set { _rssiBarBrush = value; OnPropertyChanged(); } }
@@ -55,7 +57,7 @@ namespace DiyFfbPedal.UIFunction
         public Brush RoleBadgeBackground { get => _roleBadgeBackground; set { _roleBadgeBackground = value; OnPropertyChanged(); } }
         public Brush RoleBadgeBorder { get => _roleBadgeBorder; set { _roleBadgeBorder = value; OnPropertyChanged(); } }
         public Brush RowBackground { get => _rowBackground; set { _rowBackground = value; OnPropertyChanged(); } }
-        public bool CanClear { get => _canClear; set { _canClear = value; OnPropertyChanged(); } }
+        public bool CanBeep { get => _canBeep; set { _canBeep = value; OnPropertyChanged(); } }
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)
@@ -69,253 +71,220 @@ namespace DiyFfbPedal.UIFunction
         public DIY_FFB_Pedal Plugin { get; set; }
         public DIYFFBPedalControlUI ParentUI { get; set; }
 
-        public ObservableCollection<WirelessPedalRow> PedalRows { get; } = new ObservableCollection<WirelessPedalRow>();
+        public ObservableCollection<WirelessNodeRow> NodeRows { get; } = new ObservableCollection<WirelessNodeRow>();
 
         private DispatcherTimer _liveUpdateTimer;
-        private CancellationTokenSource _scanCts;
-        private bool _isScanning = false;
-
-        private readonly int[] _pedalActionId = new int[3] {
-            (int)PedalSystemAction.SET_ASSIGNMENT_0,
-            (int)PedalSystemAction.SET_ASSIGNMENT_1,
-            (int)PedalSystemAction.SET_ASSIGNMENT_2
-        };
-
-        private readonly byte[] _tempPedalTags = new byte[3] {
-            (byte)PedalIdEnum.PEDAL_ID_TEMP_1,
-            (byte)PedalIdEnum.PEDAL_ID_TEMP_2,
-            (byte)PedalIdEnum.PEDAL_ID_TEMP_3
-        };
 
         public SystemSetting_Wireless()
         {
             InitializeComponent();
-            ic_pedal_list.ItemsSource = PedalRows;
+            ic_pedal_list.ItemsSource = NodeRows;
 
-            // Initialize standard 3 pedal rows
-            InitDefaultPedalRows();
+            InitDefaultRows();
 
-            // Periodic live refresh (5 Hz)
             _liveUpdateTimer = new DispatcherTimer();
-            _liveUpdateTimer.Interval = TimeSpan.FromMilliseconds(200);
+            _liveUpdateTimer.Interval = TimeSpan.FromMilliseconds(250);
             _liveUpdateTimer.Tick += (s, e) =>
             {
-                if (this.IsVisible && !_isScanning)
+                if (this.IsVisible)
                 {
-                    UpdateLiveTable();
+                    UpdateLiveStatus();
                 }
             };
             _liveUpdateTimer.Start();
 
             this.Loaded += (s, e) =>
             {
-                UpdateActiveChannelUI();
-                UpdateLiveTable();
+                if (Plugin?.Settings != null && Plugin.Settings.ActiveWifiChannel >= 1 && Plugin.Settings.ActiveWifiChannel <= 14)
+                {
+                    SetSelectedWifiChannel(Plugin.Settings.ActiveWifiChannel);
+                }
+                UpdateLiveStatus();
+
+                // If bridge or any pedal is missing MAC, auto-query connected devices in background
+                if (NodeRows.Any(r => r.MacAddress == "--" || string.IsNullOrWhiteSpace(r.MacAddress)))
+                {
+                    _ = QueryAndAutoDetectDevicesAsync(false);
+                }
             };
         }
 
-        private void InitDefaultPedalRows()
+        private void InitDefaultRows()
         {
-            PedalRows.Clear();
+            NodeRows.Clear();
 
-            // Clutch (Red: RGB convention)
-            PedalRows.Add(new WirelessPedalRow
+            // 1. Bridge (Node Index 3) - Gold
+            NodeRows.Add(new WirelessNodeRow
             {
+                NodeIndex = 3,
+                RoleName = "BRIDGE",
+                RoleBadgeForeground = new SolidColorBrush(Color.FromRgb(255, 215, 0)),
+                RoleBadgeBackground = new SolidColorBrush(Color.FromArgb(34, 255, 215, 0)),
+                RoleBadgeBorder = new SolidColorBrush(Color.FromArgb(68, 255, 215, 0)),
+                CanBeep = false
+            });
+
+            // 2. Clutch (Node Index 0) - Red
+            NodeRows.Add(new WirelessNodeRow
+            {
+                NodeIndex = 0,
                 RoleName = "CLUTCH",
-                RoleTag = 0,
-                IsAssigned = true,
-                CanClear = true,
                 RoleBadgeForeground = new SolidColorBrush(Color.FromRgb(255, 82, 82)),
                 RoleBadgeBackground = new SolidColorBrush(Color.FromArgb(34, 255, 82, 82)),
-                RoleBadgeBorder = new SolidColorBrush(Color.FromArgb(68, 255, 82, 82))
+                RoleBadgeBorder = new SolidColorBrush(Color.FromArgb(68, 255, 82, 82)),
+                CanBeep = true
             });
 
-            // Brake (Green: RGB convention)
-            PedalRows.Add(new WirelessPedalRow
+            // 3. Brake (Node Index 1) - Green
+            NodeRows.Add(new WirelessNodeRow
             {
+                NodeIndex = 1,
                 RoleName = "BRAKE",
-                RoleTag = 1,
-                IsAssigned = true,
-                CanClear = true,
                 RoleBadgeForeground = new SolidColorBrush(Color.FromRgb(0, 230, 118)),
                 RoleBadgeBackground = new SolidColorBrush(Color.FromArgb(34, 0, 230, 118)),
-                RoleBadgeBorder = new SolidColorBrush(Color.FromArgb(68, 0, 230, 118))
+                RoleBadgeBorder = new SolidColorBrush(Color.FromArgb(68, 0, 230, 118)),
+                CanBeep = true
             });
 
-            // Throttle (Blue: RGB convention)
-            PedalRows.Add(new WirelessPedalRow
+            // 4. Throttle (Node Index 2) - Blue
+            NodeRows.Add(new WirelessNodeRow
             {
+                NodeIndex = 2,
                 RoleName = "THROTTLE",
-                RoleTag = 2,
-                IsAssigned = true,
-                CanClear = true,
                 RoleBadgeForeground = new SolidColorBrush(Color.FromRgb(41, 121, 255)),
                 RoleBadgeBackground = new SolidColorBrush(Color.FromArgb(34, 41, 121, 255)),
-                RoleBadgeBorder = new SolidColorBrush(Color.FromArgb(68, 41, 121, 255))
+                RoleBadgeBorder = new SolidColorBrush(Color.FromArgb(68, 41, 121, 255)),
+                CanBeep = true
             });
         }
 
-        public void UpdateLiveTable()
+        public void UpdateLiveTable() { UpdateLiveStatus(); }
+        public void UpdateLiveStatus()
         {
-            if (Plugin == null || Plugin._calculations == null) return;
+            if (Plugin == null) return;
 
-            byte activeChannel = Plugin.Settings != null ? Plugin.Settings.ActiveWifiChannel : (byte)11;
-            if (activeChannel < 1 || activeChannel > 14) activeChannel = 11;
+            byte selectedCh = GetSelectedWifiChannel();
+            byte activeCh = (Plugin.Settings != null && Plugin.Settings.ActiveWifiChannel >= 1 && Plugin.Settings.ActiveWifiChannel <= 14) 
+                            ? Plugin.Settings.ActiveWifiChannel 
+                            : selectedCh;
 
-            if (tb_active_channel_badge != null)
+            foreach (var row in NodeRows)
             {
-                tb_active_channel_badge.Text = $"Active: Ch {activeChannel}";
-            }
+                int idx = row.NodeIndex;
 
-            // Update 3 assigned pedals
-            for (int i = 0; i < 3; i++)
-            {
-                if (i >= PedalRows.Count) break;
-                WirelessPedalRow row = PedalRows[i];
-
-                WirelessConnectStateEnum state = Plugin._calculations.pedalWirelessStatus != null && Plugin._calculations.pedalWirelessStatus.Length > i
-                    ? Plugin._calculations.pedalWirelessStatus[i]
-                    : WirelessConnectStateEnum.PEDAL_DISCONNECT;
-
-                int rssi = Plugin._calculations.rssi != null && Plugin._calculations.rssi.Length > i
-                    ? Plugin._calculations.rssi[i]
-                    : 0;
-
-                // MAC Address
-                string mac = GetAssignedMac(i);
-                if (!string.IsNullOrEmpty(mac))
+                // Sync MAC address from plugin settings if known
+                if (Plugin.Settings?.AssignedPedalMac != null && Plugin.Settings.AssignedPedalMac.Length > idx)
                 {
-                    row.MacAddress = mac;
-                }
-                else if (state == WirelessConnectStateEnum.PEDAL_WIRELESS_IS_READY || state == WirelessConnectStateEnum.PEDAL_GET_BASIC_PACKETS_OVER_ESPNOW)
-                {
-                    row.MacAddress = "Paired (Master)";
-                }
-                else
-                {
-                    row.MacAddress = "--";
-                }
-
-                // Channel: Always display the actually used channel of the pedal when connected, or -- when disconnected!
-                if (state == WirelessConnectStateEnum.PEDAL_WIRELESS_IS_READY || state == WirelessConnectStateEnum.PEDAL_GET_BASIC_PACKETS_OVER_ESPNOW)
-                {
-                    row.ChannelNumber = activeChannel;
-                    row.ChannelDisplay = $"Ch {activeChannel}";
-                }
-                else
-                {
-                    row.ChannelNumber = 0;
-                    row.ChannelDisplay = "--";
-                }
-
-                // Connection Status
-                UpdateRowStatus(row, state);
-
-                // RSSI
-                UpdateRowRssi(row, rssi, state);
-            }
-
-            // Update Unassigned pedals
-            int unassignedCount = Plugin._calculations.unassignedPedalCount;
-            if (unassignedCount < 0) unassignedCount = 0;
-            if (unassignedCount > 3) unassignedCount = 3;
-
-            // Remove excess unassigned rows
-            while (PedalRows.Count > 3 + unassignedCount)
-            {
-                PedalRows.RemoveAt(PedalRows.Count - 1);
-            }
-
-            // Update or add unassigned rows
-            for (int u = 0; u < unassignedCount; u++)
-            {
-                int rowIndex = 3 + u;
-                string unassignedMac = FormatMac(Plugin._calculations.unassignedPedalMacaddress, u);
-                byte tag = _tempPedalTags[u];
-
-                if (rowIndex < PedalRows.Count)
-                {
-                    WirelessPedalRow existing = PedalRows[rowIndex];
-                    existing.RoleName = $"UNASSIGNED #{u + 1}";
-                    existing.RoleTag = tag;
-                    existing.IsAssigned = false;
-                    existing.CanClear = false;
-                    existing.MacAddress = unassignedMac;
-                    existing.ChannelNumber = activeChannel;
-                    existing.ChannelDisplay = $"Ch {activeChannel}";
-                    existing.StatusText = "Detected";
-                    existing.StatusForeground = new SolidColorBrush(Color.FromRgb(255, 167, 38));
-                    existing.StatusBackground = new SolidColorBrush(Color.FromArgb(34, 255, 167, 38));
-                    existing.StatusBorder = new SolidColorBrush(Color.FromArgb(68, 255, 167, 38));
-                }
-                else
-                {
-                    PedalRows.Add(new WirelessPedalRow
+                    string savedMac = Plugin.Settings.AssignedPedalMac[idx];
+                    if (!string.IsNullOrWhiteSpace(savedMac) && savedMac != "--" && savedMac != "00:00:00:00:00:00")
                     {
-                        RoleName = $"UNASSIGNED #{u + 1}",
-                        RoleTag = tag,
-                        IsAssigned = false,
-                        CanClear = false,
-                        MacAddress = unassignedMac,
-                        ChannelNumber = activeChannel,
-                        ChannelDisplay = $"Ch {activeChannel}",
-                        StatusText = "Detected",
-                        StatusForeground = new SolidColorBrush(Color.FromRgb(255, 167, 38)),
-                        StatusBackground = new SolidColorBrush(Color.FromArgb(34, 255, 167, 38)),
-                        StatusBorder = new SolidColorBrush(Color.FromArgb(68, 255, 167, 38)),
-                        RoleBadgeForeground = new SolidColorBrush(Color.FromRgb(255, 167, 38)),
-                        RoleBadgeBackground = new SolidColorBrush(Color.FromArgb(34, 255, 167, 38)),
-                        RoleBadgeBorder = new SolidColorBrush(Color.FromArgb(68, 255, 167, 38)),
-                        RowBackground = new SolidColorBrush(Color.FromArgb(20, 255, 167, 38))
-                    });
+                        row.MacAddress = savedMac;
+                    }
+                }
+
+                bool hasMac = !string.IsNullOrWhiteSpace(row.MacAddress) && row.MacAddress != "--" && row.MacAddress != "00:00:00:00:00:00";
+                bool isBridgeOnline = idx == 3 && ((Plugin.BridgeHidService != null && Plugin.BridgeHidService.IsConnected) || (Plugin.ESPsync_serialPort != null && Plugin.ESPsync_serialPort.IsOpen));
+                bool isPedalOnline = idx < 3 && Plugin._serialPort != null && Plugin._serialPort.Length > idx && Plugin._serialPort[idx] != null && Plugin._serialPort[idx].IsOpen;
+
+                if (hasMac || isBridgeOnline || isPedalOnline)
+                {
+                    row.ChannelNumber = activeCh;
+                }
+
+                if (idx == 3) // Bridge
+                {
+                    bool isHid = Plugin.BridgeHidService != null && Plugin.BridgeHidService.IsConnected;
+                    bool isSerial = Plugin.ESPsync_serialPort != null && Plugin.ESPsync_serialPort.IsOpen;
+
+                    if (isHid)
+                    {
+                        row.UsbStatusText = "USB-HID Online";
+                        row.UsbStatusForeground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
+                        row.UsbStatusBrush = new SolidColorBrush(Color.FromRgb(0, 230, 118));
+                    }
+                    else if (isSerial)
+                    {
+                        row.UsbStatusText = $"{Plugin.ESPsync_serialPort.PortName} Online";
+                        row.UsbStatusForeground = new SolidColorBrush(Color.FromRgb(0, 229, 255));
+                        row.UsbStatusBrush = new SolidColorBrush(Color.FromRgb(0, 229, 255));
+                    }
+                    else
+                    {
+                        row.UsbStatusText = "Disconnected";
+                        row.UsbStatusForeground = new SolidColorBrush(Color.FromRgb(136, 136, 136));
+                        row.UsbStatusBrush = new SolidColorBrush(Color.FromRgb(100, 100, 100));
+                    }
+
+                    row.RssiDisplay = "MASTER";
+                    row.RssiForeground = new SolidColorBrush(Color.FromRgb(255, 215, 0));
+                    row.RssiTooltip = "ESP32 Bridge (ESP-NOW Master Node)";
+                    row.CanBeep = false;
+                }
+                else // Pedals (0=Clutch, 1=Brake, 2=Throttle)
+                {
+                    bool isCom = Plugin._serialPort != null && Plugin._serialPort.Length > idx &&
+                                 Plugin._serialPort[idx] != null && Plugin._serialPort[idx].IsOpen;
+
+                    if (isCom)
+                    {
+                        row.UsbStatusText = $"{Plugin._serialPort[idx].PortName} Online";
+                        row.UsbStatusForeground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
+                        row.UsbStatusBrush = new SolidColorBrush(Color.FromRgb(0, 230, 118));
+                    }
+                    else
+                    {
+                        row.UsbStatusText = "No USB COM";
+                        row.UsbStatusForeground = new SolidColorBrush(Color.FromRgb(136, 136, 136));
+                        row.UsbStatusBrush = new SolidColorBrush(Color.FromRgb(100, 100, 100));
+                    }
+
+                    // Live wireless status / RSSI
+                    int rssi = (Plugin._calculations != null && Plugin._calculations.rssi != null && Plugin._calculations.rssi.Length > idx)
+                               ? Plugin._calculations.rssi[idx] : 0;
+                    WirelessConnectStateEnum state = (Plugin._calculations != null && Plugin._calculations.pedalWirelessStatus != null && Plugin._calculations.pedalWirelessStatus.Length > idx)
+                                                    ? Plugin._calculations.pedalWirelessStatus[idx] : WirelessConnectStateEnum.PEDAL_DISCONNECT;
+
+                    UpdateRowRssi(row, rssi, state);
+                }
+
+                // Update Channel badge styling (match vs mismatch)
+                if (row.ChannelNumber > 0)
+                {
+                    row.ChannelDisplay = $"Ch {row.ChannelNumber}";
+                    if (row.ChannelNumber == selectedCh)
+                    {
+                        row.ChannelForeground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
+                        row.ChannelBadgeBackground = new SolidColorBrush(Color.FromArgb(34, 0, 230, 118));
+                        row.ChannelBadgeBorder = new SolidColorBrush(Color.FromArgb(68, 0, 230, 118));
+                    }
+                    else
+                    {
+                        row.ChannelForeground = new SolidColorBrush(Color.FromRgb(255, 167, 38));
+                        row.ChannelBadgeBackground = new SolidColorBrush(Color.FromArgb(34, 255, 167, 38));
+                        row.ChannelBadgeBorder = new SolidColorBrush(Color.FromArgb(68, 255, 167, 38));
+                    }
+                }
+                else
+                {
+                    row.ChannelDisplay = "--";
+                    row.ChannelForeground = new SolidColorBrush(Color.FromRgb(136, 136, 136));
+                    row.ChannelBadgeBackground = new SolidColorBrush(Color.FromArgb(20, 255, 255, 255));
+                    row.ChannelBadgeBorder = new SolidColorBrush(Color.FromArgb(40, 255, 255, 255));
                 }
             }
         }
 
-        private void UpdateRowStatus(WirelessPedalRow row, WirelessConnectStateEnum state)
-        {
-            switch (state)
-            {
-                case WirelessConnectStateEnum.PEDAL_WIRELESS_IS_READY:
-                    row.StatusText = "Connected";
-                    row.StatusForeground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
-                    row.StatusBackground = new SolidColorBrush(Color.FromArgb(34, 0, 230, 118));
-                    row.StatusBorder = new SolidColorBrush(Color.FromArgb(68, 0, 230, 118));
-                    break;
-                case WirelessConnectStateEnum.PEDAL_GET_BASIC_PACKETS_OVER_ESPNOW:
-                    row.StatusText = "Receiving";
-                    row.StatusForeground = new SolidColorBrush(Color.FromRgb(0, 229, 255));
-                    row.StatusBackground = new SolidColorBrush(Color.FromArgb(34, 0, 229, 255));
-                    row.StatusBorder = new SolidColorBrush(Color.FromArgb(68, 0, 229, 255));
-                    break;
-                case WirelessConnectStateEnum.PEDAL_BRIDGE_ENTRY_CONNECT:
-                    row.StatusText = "Connecting";
-                    row.StatusForeground = new SolidColorBrush(Color.FromRgb(255, 235, 59));
-                    row.StatusBackground = new SolidColorBrush(Color.FromArgb(34, 255, 235, 59));
-                    row.StatusBorder = new SolidColorBrush(Color.FromArgb(68, 255, 235, 59));
-                    break;
-                default:
-                    row.StatusText = "Offline";
-                    row.StatusForeground = new SolidColorBrush(Color.FromRgb(136, 136, 136));
-                    row.StatusBackground = new SolidColorBrush(Color.FromArgb(30, 255, 255, 255));
-                    row.StatusBorder = new SolidColorBrush(Color.FromArgb(60, 255, 255, 255));
-                    break;
-            }
-        }
-
-        private void UpdateRowRssi(WirelessPedalRow row, int rssi, WirelessConnectStateEnum state)
+        private void UpdateRowRssi(WirelessNodeRow row, int rssi, WirelessConnectStateEnum state)
         {
             if (state == WirelessConnectStateEnum.PEDAL_DISCONNECT || rssi >= 0 || rssi < -120)
             {
-                row.RssiValue = 0;
-                row.RssiDisplay = "--";
+                row.RssiDisplay = "Offline";
                 row.RssiForeground = new SolidColorBrush(Color.FromRgb(136, 136, 136));
                 row.RssiBarBrush = new SolidColorBrush(Color.FromRgb(80, 80, 80));
-                row.RssiTooltip = "Disconnected / No signal";
+                row.RssiTooltip = "Disconnected / No RF signal";
                 return;
             }
 
-            row.RssiValue = rssi;
             row.RssiDisplay = $"{rssi} dBm";
 
             if (rssi >= -65)
@@ -344,237 +313,345 @@ namespace DiyFfbPedal.UIFunction
             }
         }
 
-        private string GetAssignedMac(int roleIndex)
+        public byte GetSelectedWifiChannel()
         {
-            if (Plugin?.Settings?.AssignedPedalMac != null && Plugin.Settings.AssignedPedalMac.Length > roleIndex)
+            if (combo_select_channel?.SelectedItem is ComboBoxItem item &&
+                byte.TryParse(item.Tag?.ToString(), out byte ch) && ch >= 1 && ch <= 13)
             {
-                return Plugin.Settings.AssignedPedalMac[roleIndex];
+                return ch;
             }
-            return "";
+            return 11;
         }
 
-        private string FormatMac(byte[][] macList, int index)
+        public void SetSelectedWifiChannel(byte channel)
         {
-            if (macList == null || index >= macList.Length || macList[index] == null) return "--";
-            byte[] bytes = macList[index];
-            if (bytes.Length < 6) return "--";
-            if (bytes[0] == 0 && bytes[1] == 0 && bytes[2] == 0 && bytes[3] == 0 && bytes[4] == 0 && bytes[5] == 0) return "--";
-            return $"{bytes[0]:X2}:{bytes[1]:X2}:{bytes[2]:X2}:{bytes[3]:X2}:{bytes[4]:X2}:{bytes[5]:X2}";
-        }
-
-        private void UpdateActiveChannelUI()
-        {
-            if (Plugin?.Settings == null) return;
-            byte ch = Plugin.Settings.ActiveWifiChannel;
-            if (ch >= 1 && ch <= 13 && combo_select_channel != null)
+            if (combo_select_channel == null) return;
+            foreach (ComboBoxItem item in combo_select_channel.Items)
             {
-                foreach (ComboBoxItem item in combo_select_channel.Items)
+                if (item.Tag?.ToString() == channel.ToString())
                 {
-                    if (item.Tag != null && byte.TryParse(item.Tag.ToString(), out byte tag) && tag == ch)
-                    {
-                        combo_select_channel.SelectedItem = item;
-                        break;
-                    }
+                    combo_select_channel.SelectedItem = item;
+                    break;
                 }
             }
         }
 
-        #region Scanning All Available Wi-Fi Channels
-        private async void btn_scan_all_channels_Click(object sender, RoutedEventArgs e)
+        private async void btn_autodetect_usb_Click(object sender, RoutedEventArgs e)
         {
-            if (_isScanning)
-            {
-                _scanCts?.Cancel();
-                return;
-            }
+            await QueryAndAutoDetectDevicesAsync(false);
+        }
 
-            if (ParentUI == null)
-            {
-                tb_scan_status.Text = "Bridge interface offline. Please connect Bridge port first.";
-                return;
-            }
+        private async void btn_read_eeprom_Click(object sender, RoutedEventArgs e)
+        {
+            await QueryAndAutoDetectDevicesAsync(true);
+        }
 
-            _isScanning = true;
-            _scanCts = new CancellationTokenSource();
-            CancellationToken token = _scanCts.Token;
+        private async Task QueryAndAutoDetectDevicesAsync(bool readEepromOnly)
+        {
+            if (Plugin == null) return;
+            tb_scan_status.Text = readEepromOnly ? "Reading stored MAC table from EEPROM..." : "Querying connected USB devices for hardware MACs...";
+            btn_autodetect_usb.IsEnabled = false;
+            btn_read_eeprom.IsEnabled = false;
 
-            btn_scan_all_channels.Content = "⏹ Stop Scan";
-            btn_scan_all_channels.Background = new SolidColorBrush(Color.FromRgb(255, 82, 82));
-            btn_scan_all_channels.Foreground = Brushes.White;
-            pb_scan_progress.Visibility = Visibility.Visible;
-
-            byte activeCh = Plugin?.Settings != null ? Plugin.Settings.ActiveWifiChannel : (byte)11;
-            if (activeCh < 1 || activeCh > 14) activeCh = 11;
+            int detectedCount = 0;
 
             try
             {
-                tb_scan_status.Text = "Scanning 2.4 GHz spectrum channels 1–13 for pedal RF activity...";
+                // Prepare query packet
+                DAP_mac_addresses_st queryPacket = new DAP_mac_addresses_st();
+                queryPacket.payloadHeader_.startOfFrame0_u8 = 0xAA;
+                queryPacket.payloadHeader_.startOfFrame1_u8 = 0x55;
+                queryPacket.payloadHeader_.payloadType = (byte)Constants.macAddressesPayload_type;
+                queryPacket.payloadHeader_.version = (byte)Constants.macAddressesPayload_version;
+                queryPacket.payloadHeader_.storeToEeprom = 0; // Query mode
+                queryPacket.payloadFooter_.enfOfFrame0_u8 = 0xAA;
+                queryPacket.payloadFooter_.enfOfFrame1_u8 = 0x56;
 
-                // Request Master to analyze RF congestion on the 2.4GHz spectrum
-                ParentUI.SendWifiChannelCommand(Constants.WIFI_CH_CMD_SCAN_REQ);
-
-                for (byte ch = 1; ch <= 13; ch++)
+                byte[] queryBytes;
+                unsafe
                 {
-                    if (token.IsCancellationRequested) break;
-
-                    pb_scan_progress.Value = ch;
-                    tb_scan_status.Text = $"Scanning Channel {ch} of 13... Checking for active pedals and RF noise...";
-
-                    await Task.Delay(180, token);
+                    DAP_mac_addresses_st* pStruct = &queryPacket;
+                    byte* pBytes = (byte*)pStruct;
+                    queryPacket.payloadFooter_.checkSum = Plugin.checksumCalc(pBytes, sizeof(payloadHeader) + sizeof(payloadMacAddresses));
+                    queryBytes = Plugin.getBytes_MacAddresses(queryPacket);
                 }
 
-                tb_scan_status.Text = $"Scan complete. Master and pedals verified on active Channel {activeCh}.";
-            }
-            catch (TaskCanceledException)
-            {
-                tb_scan_status.Text = $"Scan cancelled. Active channel is Ch {activeCh}.";
+                // 1. Send query to Bridge via USB HID
+                if (Plugin.BridgeHidService != null && Plugin.BridgeHidService.IsConnected)
+                {
+                    try
+                    {
+                        await Task.Run(() => Plugin.BridgeHidService.SendLargeDataAsync(queryBytes));
+                    }
+                    catch { }
+                }
+
+                // 2. Send query to Bridge via ESPsync_serialPort if open
+                if (Plugin.ESPsync_serialPort != null && Plugin.ESPsync_serialPort.IsOpen)
+                {
+                    try
+                    {
+                        Plugin.ESPsync_serialPort.DiscardInBuffer();
+                        Plugin.ESPsync_serialPort.Write(queryBytes, 0, queryBytes.Length);
+                    }
+                    catch { }
+                }
+
+                // 3. Send query packet over connected pedal COM ports
+                for (int p = 0; p < 3; p++)
+                {
+                    if (Plugin._serialPort != null && Plugin._serialPort.Length > p &&
+                        Plugin._serialPort[p] != null && Plugin._serialPort[p].IsOpen)
+                    {
+                        try
+                        {
+                            Plugin._serialPort[p].DiscardInBuffer();
+                            Plugin._serialPort[p].Write(queryBytes, 0, queryBytes.Length);
+                        }
+                        catch { }
+                    }
+                }
+
+                // Give devices 300ms to reply over HID / Serial
+                await Task.Delay(300);
+
+                // 4. Update Pedals (0=Clutch, 1=Brake, 2=Throttle)
+                for (int i = 0; i < 3; i++)
+                {
+                    var row = NodeRows.FirstOrDefault(r => r.NodeIndex == i);
+                    if (row != null)
+                    {
+                        bool found = false;
+                        if (Plugin.Settings?.AssignedPedalMac != null &&
+                            Plugin.Settings.AssignedPedalMac.Length > i)
+                        {
+                            string m = Plugin.Settings.AssignedPedalMac[i];
+                            if (!string.IsNullOrWhiteSpace(m) && m != "--" && m != "00:00:00:00:00:00")
+                            {
+                                row.MacAddress = m;
+                                detectedCount++;
+                                found = true;
+                            }
+                        }
+
+                        if (!found && Plugin._calculations?.unassignedPedalMacaddress != null &&
+                            Plugin._calculations.unassignedPedalMacaddress.Length > i &&
+                            Plugin._calculations.unassignedPedalMacaddress[i] != null)
+                        {
+                            byte[] mac = Plugin._calculations.unassignedPedalMacaddress[i];
+                            if (mac.Any(b => b != 0))
+                            {
+                                row.MacAddress = string.Join(":", mac.Select(b => b.ToString("X2")));
+                                detectedCount++;
+                            }
+                        }
+                    }
+                }
+
+                // 5. Update Bridge (Node 3)
+                var bridgeRow = NodeRows.FirstOrDefault(r => r.NodeIndex == 3);
+                if (bridgeRow != null)
+                {
+                    if (Plugin.Settings?.AssignedPedalMac != null &&
+                        Plugin.Settings.AssignedPedalMac.Length > 3)
+                    {
+                        string bMac = Plugin.Settings.AssignedPedalMac[3];
+                        if (!string.IsNullOrWhiteSpace(bMac) && bMac != "--" && bMac != "00:00:00:00:00:00")
+                        {
+                            bridgeRow.MacAddress = bMac;
+                            detectedCount++;
+                        }
+                    }
+                }
+
+                byte activeCh = (Plugin.Settings != null && Plugin.Settings.ActiveWifiChannel >= 1 && Plugin.Settings.ActiveWifiChannel <= 14) 
+                                ? Plugin.Settings.ActiveWifiChannel 
+                                : GetSelectedWifiChannel();
+
+                foreach (var row in NodeRows)
+                {
+                    if (!string.IsNullOrWhiteSpace(row.MacAddress) && row.MacAddress != "--" && row.MacAddress != "00:00:00:00:00:00")
+                    {
+                        if (row.ChannelNumber == 0) row.ChannelNumber = activeCh;
+                    }
+                }
+
+                UpdateLiveStatus();
+                tb_scan_status.Text = $"Device query complete. ({detectedCount} MAC addresses ready)";
             }
             catch (Exception ex)
             {
-                tb_scan_status.Text = "Scan error: " + ex.Message;
+                tb_scan_status.Text = $"Query error: {ex.Message}";
             }
             finally
             {
-                _isScanning = false;
-                pb_scan_progress.Visibility = Visibility.Collapsed;
-                btn_scan_all_channels.Content = "🔍 Scan All Channels";
-                btn_scan_all_channels.Background = new SolidColorBrush(Color.FromArgb(38, 0, 170, 255));
-                btn_scan_all_channels.Foreground = new SolidColorBrush(Color.FromRgb(0, 204, 255));
-                UpdateLiveTable();
+                btn_autodetect_usb.IsEnabled = true;
+                btn_read_eeprom.IsEnabled = true;
             }
         }
 
-        private void btn_set_channel_Click(object sender, RoutedEventArgs e)
+        private void btn_open_docs_Click(object sender, RoutedEventArgs e)
         {
-            if (combo_select_channel?.SelectedItem is ComboBoxItem item &&
-                item.Tag != null &&
-                byte.TryParse(item.Tag.ToString(), out byte targetCh))
-            {
-                if (Plugin?.Settings != null)
-                {
-                    Plugin.Settings.ActiveWifiChannel = targetCh;
-                    Plugin.SavePluginSettings();
-                }
-
-                ParentUI?.SendWifiChannelCommand(Constants.WIFI_CH_CMD_SET_REQ, targetCh);
-                tb_scan_status.Text = $"Switching active radio to Channel {targetCh}...";
-                if (tb_active_channel_badge != null) tb_active_channel_badge.Text = $"Active: Ch {targetCh}";
-                UpdateLiveTable();
-            }
-        }
-        #endregion
-
-        #region Role Assignment Handlers
-        private void btn_assign_clutch_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button btn && btn.Tag is WirelessPedalRow row)
-            {
-                AssignPedalRole(row, 0, "Clutch");
-            }
-        }
-
-        private void btn_assign_brake_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button btn && btn.Tag is WirelessPedalRow row)
-            {
-                AssignPedalRole(row, 1, "Brake");
-            }
-        }
-
-        private void btn_assign_throttle_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button btn && btn.Tag is WirelessPedalRow row)
-            {
-                AssignPedalRole(row, 2, "Throttle");
-            }
-        }
-
-        private void AssignPedalRole(WirelessPedalRow row, byte targetRoleIndex, string roleName)
-        {
-            if (Plugin == null) return;
-
             try
             {
-                DAP_action_st action = default;
-                action.payloadHeader_.version = (byte)Constants.pedalConfigPayload_version;
-                action.payloadHeader_.payloadType = (byte)Constants.pedalActionPayload_type;
-                action.payloadHeader_.PedalTag = row.RoleTag;
-                action.payloadPedalAction_.system_action_u8 = (byte)_pedalActionId[targetRoleIndex];
-
-                Plugin.SendPedalActionWireless(action, row.RoleTag);
-
-                // Save MAC if known
-                if (!string.IsNullOrEmpty(row.MacAddress) && row.MacAddress != "--" && row.MacAddress != "Paired (Master)")
+                string pluginDir = AppDomain.CurrentDomain.BaseDirectory;
+                string docsPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(pluginDir, "..", "..", "docs", "pedal_pairing_and_assignment_guide.md"));
+                if (System.IO.File.Exists(docsPath))
                 {
-                    if (Plugin.Settings?.AssignedPedalMac != null && Plugin.Settings.AssignedPedalMac.Length > targetRoleIndex)
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                     {
-                        Plugin.Settings.AssignedPedalMac[targetRoleIndex] = row.MacAddress;
-                        Plugin.SavePluginSettings();
-                    }
+                        FileName = docsPath,
+                        UseShellExecute = true
+                    });
                 }
-
-                tb_scan_status.Text = $"Assigned {row.RoleName} ({row.MacAddress}) as {roleName} successfully.";
+                else
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = "https://github.com/ChrGri/DIY-Sim-Racing-FFB-Pedal/tree/master/docs",
+                        UseShellExecute = true
+                    });
+                }
             }
             catch (Exception ex)
             {
-                tb_scan_status.Text = "Assignment error: " + ex.Message;
+                System.Windows.MessageBox.Show($"Could not open documentation: {ex.Message}", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
-        private void btn_clear_assignment_Click(object sender, RoutedEventArgs e)
+        private async void btn_write_all_usb_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button btn && btn.Tag is WirelessPedalRow row)
+            if (Plugin == null) return;
+            byte targetChannel = GetSelectedWifiChannel();
+            tb_scan_status.Text = $"Packaging DAP_mac_addresses_st_t (Channel {targetChannel}) and writing to EEPROM...";
+            btn_write_all_usb.IsEnabled = false;
+
+            try
             {
-                if (Plugin == null) return;
+                DAP_mac_addresses_st packet = new DAP_mac_addresses_st();
+                packet.payloadHeader_.startOfFrame0_u8 = 0xAA;
+                packet.payloadHeader_.startOfFrame1_u8 = 0x55;
+                packet.payloadHeader_.payloadType = (byte)Constants.macAddressesPayload_type;
+                packet.payloadHeader_.version = (byte)Constants.macAddressesPayload_version;
+                packet.payloadHeader_.storeToEeprom = 1; // Commit to EEPROM
+                packet.payloadHeader_.PedalTag = 0;
 
-                try
+                packet.payloadMacAddresses_.Initialize();
+                packet.payloadMacAddresses_.wifiChannel_u8 = targetChannel;
+
+                unsafe
                 {
-                    DAP_action_st action = default;
-                    action.payloadHeader_.version = (byte)Constants.pedalConfigPayload_version;
-                    action.payloadHeader_.payloadType = (byte)Constants.pedalActionPayload_type;
-                    action.payloadHeader_.PedalTag = row.RoleTag;
-                    action.payloadPedalAction_.system_action_u8 = (byte)PedalSystemAction.CLEAR_ASSIGNMENT;
-
-                    Plugin.SendPedalActionWireless(action, row.RoleTag);
-
-                    if (row.RoleTag < 3 && Plugin.Settings?.AssignedPedalMac != null && Plugin.Settings.AssignedPedalMac.Length > row.RoleTag)
+                    foreach (var row in NodeRows)
                     {
-                        Plugin.Settings.AssignedPedalMac[row.RoleTag] = "";
-                        Plugin.SavePluginSettings();
+                        int idx = row.NodeIndex;
+                        if (idx >= 0 && idx < 4)
+                        {
+                            bool valid = packet.payloadMacAddresses_.SetMacAddressFromString(idx, row.MacAddress);
+                            packet.payloadMacAddresses_.assignmentState_au8[idx] = (byte)(valid ? 1 : 0);
+                            if (valid)
+                            {
+                                row.ChannelNumber = targetChannel;
+                            }
+                        }
                     }
+                }
 
-                    tb_scan_status.Text = $"Cleared assignment for {row.RoleName}. Pedal will reboot into unassigned mode.";
-                }
-                catch (Exception ex)
+                packet.payloadFooter_.enfOfFrame0_u8 = 0xAA;
+                packet.payloadFooter_.enfOfFrame1_u8 = 0x56;
+
+                byte[] rawPacket;
+                unsafe
                 {
-                    tb_scan_status.Text = "Clear assignment error: " + ex.Message;
+                    DAP_mac_addresses_st* pStruct = &packet;
+                    byte* pBytes = (byte*)pStruct;
+                    packet.payloadFooter_.checkSum = Plugin.checksumCalc(pBytes, sizeof(payloadHeader) + sizeof(payloadMacAddresses));
+                    rawPacket = Plugin.getBytes_MacAddresses(packet);
                 }
+
+                int successDevices = 0;
+
+                // 1. Send to Bridge via HID
+                if (Plugin.BridgeHidService != null && Plugin.BridgeHidService.IsConnected)
+                {
+                    await Task.Run(() => Plugin.BridgeHidService.SendLargeDataAsync(rawPacket));
+                    successDevices++;
+                }
+                else if (Plugin.ESPsync_serialPort != null && Plugin.ESPsync_serialPort.IsOpen)
+                {
+                    Plugin.ESPsync_serialPort.DiscardInBuffer();
+                    Plugin.ESPsync_serialPort.Write(rawPacket, 0, rawPacket.Length);
+                    successDevices++;
+                }
+
+                // 2. Send to Pedals via USB COM ports
+                for (int p = 0; p < 3; p++)
+                {
+                    if (Plugin._serialPort != null && Plugin._serialPort.Length > p &&
+                        Plugin._serialPort[p] != null && Plugin._serialPort[p].IsOpen)
+                    {
+                        try
+                        {
+                            Plugin._serialPort[p].DiscardInBuffer();
+                            Plugin._serialPort[p].Write(rawPacket, 0, rawPacket.Length);
+                            successDevices++;
+                        }
+                        catch (Exception ex)
+                        {
+                            SimHub.Logging.Current.Error($"Failed sending MAC table to Pedal #{p}: {ex.Message}");
+                        }
+                    }
+                }
+
+                // Save MACs to Plugin settings (0..2=Pedals, 3=Bridge)
+                if (Plugin.Settings.AssignedPedalMac == null || Plugin.Settings.AssignedPedalMac.Length < 4)
+                {
+                    string[] newMacs = new string[4];
+                    if (Plugin.Settings.AssignedPedalMac != null)
+                    {
+                        Array.Copy(Plugin.Settings.AssignedPedalMac, newMacs, Math.Min(Plugin.Settings.AssignedPedalMac.Length, 4));
+                    }
+                    Plugin.Settings.AssignedPedalMac = newMacs;
+                }
+
+                for (int i = 0; i < 4; i++)
+                {
+                    var row = NodeRows.FirstOrDefault(r => r.NodeIndex == i);
+                    if (row != null && row.MacAddress != "--" && !string.IsNullOrWhiteSpace(row.MacAddress))
+                    {
+                        Plugin.Settings.AssignedPedalMac[i] = row.MacAddress;
+                    }
+                }
+
+                UpdateLiveStatus();
+                tb_scan_status.Text = $"Success! Synchronized MAC table & Channel {targetChannel} to {successDevices} USB device(s) and saved to EEPROM.";
+                ParentUI?.ToastNotification("Wireless Sync", $"Configured {successDevices} device(s) on Channel {targetChannel}.");
+            }
+            catch (Exception ex)
+            {
+                tb_scan_status.Text = $"Write failed: {ex.Message}";
+                ParentUI?.ToastNotification("Sync Error", ex.Message);
+            }
+            finally
+            {
+                btn_write_all_usb.IsEnabled = true;
             }
         }
 
         private void btn_beep_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button btn && btn.Tag is WirelessPedalRow row)
+            if (sender is Button btn && btn.Tag is WirelessNodeRow row)
             {
-                if (Plugin == null) return;
-
-                try
+                int nodeIdx = row.NodeIndex;
+                if (nodeIdx >= 0 && nodeIdx < 3 && Plugin != null)
                 {
                     DAP_action_st action = default;
                     action.payloadHeader_.version = (byte)Constants.pedalConfigPayload_version;
                     action.payloadHeader_.payloadType = (byte)Constants.pedalActionPayload_type;
-                    action.payloadHeader_.PedalTag = row.RoleTag;
                     action.payloadPedalAction_.system_action_u8 = (byte)PedalSystemAction.ASSIGNMENT_CHECK_BEEP;
-
-                    Plugin.SendPedalActionWireless(action, row.RoleTag);
-                    tb_scan_status.Text = $"Sent beep identify signal to {row.RoleName}.";
-                }
-                catch (Exception ex)
-                {
-                    tb_scan_status.Text = "Beep error: " + ex.Message;
+                    Plugin.SendPedalAction(action, (byte)nodeIdx);
+                    tb_scan_status.Text = $"Sent identify beep to {row.RoleName}.";
                 }
             }
         }
-        #endregion
     }
 }

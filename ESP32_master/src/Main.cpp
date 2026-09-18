@@ -545,25 +545,7 @@ void espNowCommunicationTxTask( void * pvParameters )
           }
         }
       #endif
-      // 1 Hz sync beacon broadcast
-      static unsigned long s_lastWifiBeacon_ms = 0;
-      if (millis() - s_lastWifiBeacon_ms >= 400)
-      {
-        s_lastWifiBeacon_ms = millis();
-        DapWifiChannel_t beacon = {};
-        beacon.payloadHeader_st.startOfFrame0_u8 = SOF_BYTE_0_U8;
-        beacon.payloadHeader_st.startOfFrame1_u8 = SOF_BYTE_1_U8;
-        beacon.payloadHeader_st.payloadType_u8 = DAP_PAYLOAD_TYPE_WIFI_CHANNEL_U8;
-        beacon.payloadHeader_st.version_u8 = DAP_VERSION_CONFIG_U8;
-        beacon.payloadHeader_st.pedalTag_u8 = 3;
-        beacon.payloadWifiChannel_st.command_u8 = WIFI_CH_CMD_BEACON;
-        beacon.payloadWifiChannel_st.currentChannel_u8 = g_currentWifiChannel_u8;
-        beacon.payloadWifiChannel_st.recommendedChannel_u8 = g_currentWifiChannel_u8;
-        beacon.payloadFooter_st.enfOfFrame0_u8 = EOF_BYTE_0_U8;
-        beacon.payloadFooter_st.enfOfFrame1_u8 = EOF_BYTE_1_U8;
-        beacon.payloadFooter_st.checkSum_u16 = checksumCalculator((uint8_t*)(&(beacon.payloadHeader_st)), sizeof(beacon.payloadHeader_st) + sizeof(beacon.payloadWifiChannel_st));
-        ESPNow.send_message(g_broadcastMac_au8, (uint8_t*)&beacon, sizeof(DapWifiChannel_t));
-      }
+
 
       for(int i=0;i<3;i++)
       {
@@ -819,6 +801,8 @@ static inline size_t getExpectedPacketSize(uint8_t payloadType) {
             return sizeof(DAP_servo_config_st_t);
         case DAP_PAYLOAD_TYPE_WIFI_CHANNEL_U8:
             return sizeof(DapWifiChannel_t);
+        case DAP_PAYLOAD_TYPE_MAC_ADDRESSES_U8:
+            return sizeof(DapMacAddresses_t);
         // Add other packet types here in the future
         default:
             return 0;
@@ -921,7 +905,7 @@ void handleWifiSetChannelRequest(uint8_t newChannel, bool isHid) {
         ESPNow.send_message(g_pedalMac_aau8[p], (uint8_t*)&fwd, sizeof(DapWifiChannel_t));
       }
     }
-    ESPNow.send_message(g_broadcastMac_au8, (uint8_t*)&fwd, sizeof(DapWifiChannel_t));
+
     delay(50);
   }
 
@@ -1398,6 +1382,45 @@ void serialCommunicationRxTask( void * pvParameters)
             }
             break;
           }
+          case DAP_PAYLOAD_TYPE_MAC_ADDRESSES_U8:
+          {
+            bool structChecker = true;
+            DapMacAddresses_t macCfg_local;
+            memcpy(&macCfg_local, packet_start, sizeof(DapMacAddresses_t));
+            if (macCfg_local.payloadHeader_st.payloadType_u8 != DAP_PAYLOAD_TYPE_MAC_ADDRESSES_U8)
+            {
+              structChecker = false;
+              structIsValid = false;
+            }
+            if (macCfg_local.payloadHeader_st.version_u8 != DAP_VERSION_MAC_ADDRESSES_U8)
+            {
+              structChecker = false;
+              structIsValid = false;
+            }
+            uint16_t crc = checksumCalculator((uint8_t *)(&(macCfg_local.payloadHeader_st)), sizeof(macCfg_local.payloadHeader_st) + sizeof(macCfg_local.payloadMacAddresses_st));
+            if (crc != macCfg_local.payloadFooter_st.checkSum_u16)
+            {
+              structChecker = false;
+              structIsValid = false;
+            }
+            if (structChecker == true)
+            {
+              if (macCfg_local.payloadHeader_st.storeToEeprom_u8 == 1)
+              {
+                storeMacAddressesToEeprom(macCfg_local);
+                ActiveSerial->println("[L]Stored MAC addresses & channel to EEPROM (Serial)");
+              }
+              applyMacAddressesConfig(macCfg_local);
+
+              DapMacAddresses_t reply = loadMacAddressesFromEeprom();
+              reply.payloadHeader_st.payloadType_u8 = DAP_PAYLOAD_TYPE_MAC_ADDRESSES_U8;
+              reply.payloadHeader_st.version_u8 = DAP_VERSION_MAC_ADDRESSES_U8;
+              reply.payloadHeader_st.storeToEeprom_u8 = 0;
+              reply.payloadFooter_st.checkSum_u16 = checksumCalculator((uint8_t*)&reply.payloadHeader_st, sizeof(reply.payloadHeader_st) + sizeof(reply.payloadMacAddresses_st));
+              ActiveSerial->write((char*)&reply, sizeof(DapMacAddresses_t));
+            }
+            break;
+          }
           //case action for servo config
           case DAP_PAYLOAD_TYPE_SERVO_CONFIG_U8:
           {
@@ -1596,21 +1619,8 @@ void serialCommunicationTxTask( void * pvParameters)
           dap_bridge_state_st.payloadBridgeState_st.bridgeFirmwareVersion_au8[2]=versionPatch;
           uint8_t unassignedCount = 0;
           memset(dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8, 0, sizeof(dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8));
-          for (int p = 5; p < 8; p++) {
-            bool hasMac = false;
-            for (int b = 0; b < 6; b++) {
-              if (g_pedalMac_aau8[p][b] != 0) {
-                hasMac = true;
-                break;
-              }
-            }
-            if (hasMac) {
-              unassignedCount++;
-              int offset = (p - 5) * 6;
-              if (offset + 6 <= sizeof(dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8)) {
-                memcpy(&dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8[offset], g_pedalMac_aau8[p], 6);
-              }
-            }
+          for (int p = 0; p < 3; p++) {
+            memcpy(&dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8[p * 6], g_pedalMac_aau8[p], 6);
           }
           dap_bridge_state_st.payloadBridgeState_st.unassignedPedalCount_u8 = unassignedCount;
           //CRC check should be in the final
@@ -2243,7 +2253,26 @@ void hidCommunicaitonRxTask(void *pvParameters)
             tinyusbJoystick_.isActionGet[i]=false;
           }
         }
-                if(tinyusbJoystick_.isWifiChannelGet)
+                        if(tinyusbJoystick_.isMacAddressesGet)
+        {
+          DapMacAddresses_t macCfg = tinyusbJoystick_.tmpMacAddresses;
+          if (macCfg.payloadHeader_st.storeToEeprom_u8 == 1)
+          {
+            storeMacAddressesToEeprom(macCfg);
+            ActiveSerial->println("[L]Stored MAC addresses & channel to EEPROM");
+          }
+          applyMacAddressesConfig(macCfg);
+
+          DapMacAddresses_t reply = loadMacAddressesFromEeprom();
+          reply.payloadHeader_st.payloadType_u8 = DAP_PAYLOAD_TYPE_MAC_ADDRESSES_U8;
+          reply.payloadHeader_st.version_u8 = DAP_VERSION_MAC_ADDRESSES_U8;
+          reply.payloadHeader_st.storeToEeprom_u8 = 0;
+          reply.payloadFooter_st.checkSum_u16 = checksumCalculator((uint8_t*)&reply.payloadHeader_st, sizeof(reply.payloadHeader_st) + sizeof(reply.payloadMacAddresses_st));
+          tinyusbJoystick_.sendData((uint8_t*)&reply, sizeof(DapMacAddresses_t));
+
+          tinyusbJoystick_.isMacAddressesGet = false;
+        }
+        if(tinyusbJoystick_.isWifiChannelGet)
         {
           uint8_t cmd = tinyusbJoystick_.tmpWifiChannel.payloadWifiChannel_st.command_u8;
           if (cmd == WIFI_CH_CMD_SCAN_REQ)
@@ -2526,21 +2555,8 @@ void hidCommunicaitonTxTask(void *pvParameters)
           dap_bridge_state_st.payloadBridgeState_st.bridgeFirmwareVersion_au8[2]=versionPatch;
           uint8_t unassignedCount = 0;
           memset(dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8, 0, sizeof(dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8));
-          for (int p = 5; p < 8; p++) {
-            bool hasMac = false;
-            for (int b = 0; b < 6; b++) {
-              if (g_pedalMac_aau8[p][b] != 0) {
-                hasMac = true;
-                break;
-              }
-            }
-            if (hasMac) {
-              unassignedCount++;
-              int offset = (p - 5) * 6;
-              if (offset + 6 <= sizeof(dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8)) {
-                memcpy(&dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8[offset], g_pedalMac_aau8[p], 6);
-              }
-            }
+          for (int p = 0; p < 3; p++) {
+            memcpy(&dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8[p * 6], g_pedalMac_aau8[p], 6);
           }
           dap_bridge_state_st.payloadBridgeState_st.unassignedPedalCount_u8 = unassignedCount;
           //CRC check should be in the final

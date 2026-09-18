@@ -446,6 +446,19 @@ namespace DiyFfbPedal
             fixed (byte* p = myBuffer) { return *(DAP_bridge_state_st*)p; }
         }
 
+                unsafe public byte[] getBytes_MacAddresses(DAP_mac_addresses_st aux)
+        {
+            byte[] myBuffer = new byte[sizeof(DAP_mac_addresses_st)];
+            fixed (byte* p = myBuffer) { *(DAP_mac_addresses_st*)p = aux; }
+            return myBuffer;
+        }
+
+        unsafe public DAP_mac_addresses_st getMacAddressesFromBytes(byte[] myBuffer)
+        {
+            if (myBuffer == null || myBuffer.Length < sizeof(DAP_mac_addresses_st)) return default(DAP_mac_addresses_st);
+            fixed (byte* p = myBuffer) { return *(DAP_mac_addresses_st*)p; }
+        }
+
         unsafe public byte[] getBytes_WifiChannel(DAP_wifi_channel_st aux)
         {
             byte[] myBuffer = new byte[sizeof(DAP_wifi_channel_st)];
@@ -737,6 +750,7 @@ namespace DiyFfbPedal
         public byte[] STARTOFFRAME_CONFIG = { 0xAA, 0x55, 100 };
         public byte[] STARTOFFRAME_SERVO_CONFIG = { 0xAA, 0x55, 170 };
         public byte[] STARTOFFRAME_WIFI_CHANNEL = { 0xAA, 0x55, 180 };
+        public byte[] STARTOFFRAME_MAC_ADDRESSES = { 0xAA, 0x55, 190 };
 
         public byte[] STARTOFFRAMCHAR_SOF_byte0 = { 0xAA};
         public byte[] STARTOFFRAMCHAR_SOF_byte1 = { 0x55};

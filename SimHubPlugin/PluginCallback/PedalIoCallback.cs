@@ -12,6 +12,19 @@ namespace DiyFfbPedal
 {
     public partial class DIY_FFB_Pedal : IPlugin, IDataPlugin, IWPFSettingsV2
     {
+                unsafe public byte[] getBytes_MacAddresses(DAP_mac_addresses_st aux)
+        {
+            byte[] myBuffer = new byte[sizeof(DAP_mac_addresses_st)];
+            fixed (byte* p = myBuffer) { *(DAP_mac_addresses_st*)p = aux; }
+            return myBuffer;
+        }
+
+        unsafe public DAP_mac_addresses_st getMacAddressesFromBytes(byte[] myBuffer)
+        {
+            if (myBuffer == null || myBuffer.Length < sizeof(DAP_mac_addresses_st)) return default(DAP_mac_addresses_st);
+            fixed (byte* p = myBuffer) { return *(DAP_mac_addresses_st*)p; }
+        }
+
         public void SendPedalAction(DAP_action_st action_tmp, Byte PedalID)
         {
 

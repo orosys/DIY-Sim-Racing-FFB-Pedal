@@ -131,6 +131,8 @@ public:
   DapBridgeState_t tmpBridgeAction;
   DapActionOta_t tmpOtaAction;
   bool isWifiChannelGet;
+  bool isMacAddressesGet;
+  DapMacAddresses_t tmpMacAddresses;
   DapWifiChannel_t tmpWifiChannel;
   uint8_t rawLength;
   static TinyusbJoystick* instance;

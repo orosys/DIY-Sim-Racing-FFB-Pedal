@@ -1420,6 +1420,24 @@ namespace DiyFfbPedal
 
             // Load settings
             Settings = this.ReadCommonSettings<DIYFFBPedalSettings>("GeneralSettings", () => new DIYFFBPedalSettings());
+            if (Settings.AssignedPedalMac == null || Settings.AssignedPedalMac.Length < 4)
+            {
+                string[] newMacs = new string[4] { "", "", "", "" };
+                if (Settings.AssignedPedalMac != null)
+                {
+                    Array.Copy(Settings.AssignedPedalMac, newMacs, Math.Min(Settings.AssignedPedalMac.Length, 4));
+                }
+                Settings.AssignedPedalMac = newMacs;
+            }
+            if (Settings.PedalDetectedChannel == null || Settings.PedalDetectedChannel.Length < 4)
+            {
+                int[] newChs = new int[4] { 0, 0, 0, 0 };
+                if (Settings.PedalDetectedChannel != null)
+                {
+                    Array.Copy(Settings.PedalDetectedChannel, newChs, Math.Min(Settings.PedalDetectedChannel.Length, 4));
+                }
+                Settings.PedalDetectedChannel = newChs;
+            }
             Simhub_version = (String)pluginManager.GetPropertyValue("DataCorePlugin.SimHubVersion");
             // Declare a property available in the property list, this gets evaluated "on demand" (when shown or used in formulas)
             //this.AttachDelegate("CurrentDateTime", () => DateTime.Now);

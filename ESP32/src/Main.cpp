@@ -3081,6 +3081,8 @@ static inline size_t getExpectedPacketSize(uint8_t payloadType) {
     return sizeof(DAP_servo_config_st);
   case DAP_PAYLOAD_TYPE_WIFI_CHANNEL_U8:
     return sizeof(DapWifiChannel_t);
+  case DAP_PAYLOAD_TYPE_MAC_ADDRESSES_U8:
+    return sizeof(DapMacAddresses_t);
   // Add other packet types here in the future
   default:
     return 0;
@@ -3534,6 +3536,48 @@ void IRAM_ATTR_FLAG serialCommunicationTaskRx(void *pvParameters) {
           }
           break;
         }
+        case DAP_PAYLOAD_TYPE_MAC_ADDRESSES_U8: {
+          DapMacAddresses_t received_macs;
+          memcpy(&received_macs, &rx_buffer[buffer_idx],
+                 sizeof(DapMacAddresses_t));
+          calculated_crc = checksumCalculator_u16(
+              (uint8_t *)(&(received_macs.payloadHeader_st)),
+              sizeof(received_macs.payloadHeader_st) +
+                  sizeof(received_macs.payloadMacAddresses_st));
+          received_crc = received_macs.payloadFooter_st.checkSum_u16;
+
+          if (calculated_crc != received_crc ||
+              received_macs.payloadHeader_st.version_u8 !=
+                  DAP_VERSION_MAC_ADDRESSES_U8) {
+            structIsValid = false;
+          } else {
+#ifdef ESPNOW_Enable
+            if (received_macs.payloadHeader_st.storeToEeprom_u8 == 1) {
+              storeMacAddressesToEeprom(received_macs);
+              applyMacAddressesConfig(received_macs);
+              ActiveSerial->printf("[MAC] Stored & Applied MAC Addresses table via Serial COM. Channel: %d\n",
+                                   received_macs.payloadMacAddresses_st.wifiChannel_u8);
+            }
+
+            // Always reply with current MAC table + own hardware MAC & node type
+            DapMacAddresses_t replyMacs = loadMacAddressesFromEeprom();
+            replyMacs.payloadHeader_st.startOfFrame0_u8 = SOF_BYTE_0_U8;
+            replyMacs.payloadHeader_st.startOfFrame1_u8 = SOF_BYTE_1_U8;
+            replyMacs.payloadHeader_st.payloadType_u8 = DAP_PAYLOAD_TYPE_MAC_ADDRESSES_U8;
+            replyMacs.payloadHeader_st.version_u8 = DAP_VERSION_MAC_ADDRESSES_U8;
+            replyMacs.payloadHeader_st.pedalTag_u8 = s_localPedalType_u8;
+            replyMacs.payloadMacAddresses_st.ownNodeType_u8 = s_localPedalType_u8;
+            WiFi.macAddress(replyMacs.payloadMacAddresses_st.ownMacAddress_au8);
+            replyMacs.payloadFooter_st.enfOfFrame0_u8 = EOF_BYTE_0_U8;
+            replyMacs.payloadFooter_st.enfOfFrame1_u8 = EOF_BYTE_1_U8;
+            replyMacs.payloadFooter_st.checkSum_u16 = checksumCalculator_u16(
+                (uint8_t *)(&(replyMacs.payloadHeader_st)),
+                sizeof(replyMacs.payloadHeader_st) + sizeof(replyMacs.payloadMacAddresses_st));
+            usbManager.write((const uint8_t *)&replyMacs, sizeof(DapMacAddresses_t));
+#endif
+          }
+          break;
+        }
         } // end switch
 
         if (!structIsValid) {
@@ -3611,9 +3655,6 @@ void IRAM_ATTR_FLAG serialCommunicationTaskTx(void *pvParameters) {
         if (hasHost) {
           safeRegisterEspNowPeer(g_espHost_au8);
           espnowSendWrapper(g_espHost_au8, (uint8_t *)&resp,
-                            sizeof(DAP_servo_config_st_t));
-        } else {
-          espnowSendWrapper(g_broadcastMac_au8, (uint8_t *)&resp,
                             sizeof(DAP_servo_config_st_t));
         }
 #endif
@@ -4100,19 +4141,21 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
                   (uint8_t *)(&(dap_state_basic_st_lcl.payloadHeader_st)),
                   sizeof(dap_state_basic_st_lcl.payloadHeader_st) +
                       sizeof(dap_state_basic_st_lcl.payloadPedalStateBasic_st));
-              esp_err_t res = espnowSendWrapper(
-                  g_broadcastMac_au8, (uint8_t *)&dap_state_basic_st_lcl,
-                  sizeof(dap_state_basic_st_lcl));
+              bool hasHost = false;
+              for (int b = 0; b < 6; b++) { if (g_espHost_au8[b] != 0) { hasHost = true; break; } }
+              esp_err_t res = ESP_FAIL;
+              if (hasHost) {
+                res = espnowSendWrapper(g_espHost_au8, (uint8_t *)&dap_state_basic_st_lcl, sizeof(dap_state_basic_st_lcl));
+              }
 
-              // static uint32_t counter_cycle = 0;
-              // counter_cycle++;
-              // if (counter_cycle % 100 == 0) {
-              //   ActiveSerial->printf(
-              //       "Pedal: send out basic struct via ESP now, "
-              //       "pedalType_u8:%d\n",
-              //       dap_state_basic_st_lcl.payloadHeader_st.pedalTag_u8);
-              //   counter_cycle = 0;
-              // }
+              static uint32_t lastTxDiagTime = 0;
+              if (millis() - lastTxDiagTime > 3000) {
+                lastTxDiagTime = millis();
+                ActiveSerial->printf("[ESPNOW TX] Sent basic state to Bridge %02X:%02X:%02X:%02X:%02X:%02X, res=%s (ch=%d)\n",
+                                     g_espHost_au8[0], g_espHost_au8[1], g_espHost_au8[2],
+                                     g_espHost_au8[3], g_espHost_au8[4], g_espHost_au8[5],
+                                     esp_err_to_name(res), g_currentWifiChannel_u8);
+              }
 
               if (res == ESP_OK) {
                 packetSentThisCycle = true;
@@ -4152,9 +4195,12 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
                     sizeof(dap_state_extended_st_espNow.payloadHeader_st) +
                         sizeof(dap_state_extended_st_espNow
                                    .payloadPedalStateExtended_st));
-            esp_err_t res = espnowSendWrapper(
-                g_broadcastMac_au8, (uint8_t *)&dap_state_extended_st_espNow,
-                sizeof(dap_state_extended_st_espNow));
+            bool hasHost = false;
+            for (int b = 0; b < 6; b++) { if (g_espHost_au8[b] != 0) { hasHost = true; break; } }
+            esp_err_t res = ESP_FAIL;
+            if (hasHost) {
+              res = espnowSendWrapper(g_espHost_au8, (uint8_t *)&dap_state_extended_st_espNow, sizeof(dap_state_extended_st_espNow));
+            }
             if (res == ESP_OK) {
               packetSentThisCycle = true;
             }
@@ -4195,10 +4241,6 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
           if (hasHost) {
             safeRegisterEspNowPeer(g_espHost_au8);
             espnowSendWrapper(g_espHost_au8,
-                              (uint8_t *)&espnow_dap_config_st,
-                              sizeof(espnow_dap_config_st));
-          } else {
-            espnowSendWrapper(g_broadcastMac_au8,
                               (uint8_t *)&espnow_dap_config_st,
                               sizeof(espnow_dap_config_st));
           }
@@ -4327,7 +4369,7 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
                   sizeof(g_dapRudderSending_st.payloadHeader_st) +
                       sizeof(g_dapRudderSending_st.payloadRudderState_st));
               g_dapRudderSending_st.payloadFooter_st.checkSum_u16 = crc;
-              uint8_t *targetMac = g_broadcastMac_au8;
+              uint8_t *targetMac = NULL;
               bool isRecvMacValid = false;
               for (int m = 0; m < 6; m++) {
                 if (g_recvMac_au8[m] != 0) {
@@ -4338,12 +4380,28 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
               if (isRecvMacValid) {
                 safeRegisterEspNowPeer(g_recvMac_au8);
                 targetMac = g_recvMac_au8;
+              } else {
+                // If this is throttle (pedalType 2), peer is clutch (0), and vice-versa
+                uint8_t peerIdx = (espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8 == 2) ? 0 : 2;
+                bool isPeerValid = false;
+                for (int m = 0; m < 6; m++) {
+                  if (g_pedalMac_aau8[peerIdx][m] != 0) {
+                    isPeerValid = true;
+                    break;
+                  }
+                }
+                if (isPeerValid) {
+                  safeRegisterEspNowPeer(g_pedalMac_aau8[peerIdx]);
+                  targetMac = g_pedalMac_aau8[peerIdx];
+                }
               }
-              esp_err_t res = espnowSendWrapper(
-                  targetMac, (uint8_t *)&g_dapRudderSending_st,
-                  sizeof(g_dapRudderSending_st));
-              if (res == ESP_OK) {
-                packetSentThisCycle = true;
+              if (targetMac != NULL) {
+                esp_err_t res = espnowSendWrapper(
+                    targetMac, (uint8_t *)&g_dapRudderSending_st,
+                    sizeof(g_dapRudderSending_st));
+                if (res == ESP_OK) {
+                  packetSentThisCycle = true;
+                }
               }
             }
             if (g_espNowRudderUpdate_b) {

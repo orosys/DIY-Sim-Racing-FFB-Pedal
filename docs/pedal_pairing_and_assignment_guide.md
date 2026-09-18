@@ -1,156 +1,114 @@
-# Wireless Pedal Pairing & Assignment Guide
+# Wireless Management & Pure Unicast Pairing Guide
 
-This guide explains how to pair, assign, reassign, and manage your DIY Sim Racing Active Pedals using the SimHub Plugin and the ESP-NOW wireless USB Bridge.
+This guide explains how to pair, assign, and synchronize your DIY Sim Racing Active Pedals and ESP32-S3 Bridge using the pure unicast ESP-NOW wireless management system in SimHub.
 
 ---
 
 ## 1. Overview & Architecture
 
-The wireless communication between your pedals and the PC uses Espressif's high-speed **ESP-NOW** protocol operating at 2.4 GHz. 
+The wireless communication uses Espressif's high-speed **ESP-NOW** protocol operating in **100% Pure Static Unicast Mode** (no broadcast frames):
 
-Key features of the system:
-- **Factory Hardware MAC Addresses**: Each pedal and Bridge uses its unique, factory-burned eFuse MAC address. There are zero hardcoded fake MAC addresses. Multiple simulator rigs in the same room operate completely isolated with zero cross-talk or interference.
-- **Automatic Discovery**: New or unassigned pedals are detected automatically over the air. SimHub notifies you with a popup dialog the moment a pedal is found.
-- **Peer-to-Peer Rudder Sync**: In flight simulation modes (Airplane/Helicopter Rudder), the Throttle and Brake pedals communicate directly peer-to-peer with zero host latency.
-- **Smart Wi-Fi Channel Hunting (1–13)**: Pedals automatically scan all 2.4 GHz Wi-Fi channels (1 to 13) to acquire the Bridge if the channel was changed while a pedal was powered off.
-
----
-
-## 2. Initial Setup: Pairing New Pedals
-
-When a pedal is powered on for the first time (or after its assignment has been cleared), it operates in **Unassigned Mode** and broadcasts discovery beacons.
-
-![SimHub Unassigned Pedal Detected Notification](media/images/simhub_pedal_detected_toast.png)  
-*Figure 1: Toast notification in SimHub when an unassigned pedal is detected.*
-
-### Step-by-Step Pairing Workflow:
-
-1. **Power on your Bridge**: Plug the ESP32-S3 Bridge module into your PC via USB. Ensure the SimHub DIY FFB Pedal plugin is active.
-2. **Power on the Pedal**: Connect power to the pedal controller board.
-3. **Automatic Popup**: Within 1–3 seconds, SimHub automatically displays the **Pedal Assignment** window:
-
-![SimHub Pedal Assignment Window](media/images/simhub_pedal_assignment_window.png)  
-*Figure 2: The Assignment Configuration Window with detected pedals and role selection.*
-
-4. **Identify the Physical Pedal**:
-   - Select the detected pedal from the dropdown list (e.g., `#1 - 48:27:E2:59:48:C0`).
-   - Click the **"Beep"** button. The corresponding pedal will emit a short acoustic tone from its onboard buzzer.
-   - Alternatively, use **"Vibration On / Off"** to test the motor haptic vibration.
-5. **Assign the Role**:
-   - In SimHub, select the tab corresponding to the role you want to configure (**Throttle**, **Brake**, or **Clutch**).
-   - Click the **"Assign"** button.
-6. **Confirmation**:
-   - The pedal sounds a confirmation beep.
-   - The pedal stores the Bridge's hardware MAC address and its assigned role in onboard EEPROM.
-   - The Bridge saves the pedal's hardware MAC address to its internal pairing table.
-   - The pedal status updates to **Connected / Ready** in SimHub.
-
-> [!TIP]
-> If you are setting up a 3-pedal set (Clutch, Brake, Throttle), repeat this process for each pedal. When an assignment is completed, the window automatically updates for the next unassigned pedal.
+- **Factory eFuse Hardware MACs**: Every pedal and Bridge module uses its permanent, factory-burned hardware MAC address.
+- **Dedicated EEPROM Partition**: The routing table `DapMacAddresses_t` (containing the MAC addresses for Bridge, Clutch, Brake, Throttle and the active Wi-Fi channel) is stored in EEPROM at fixed offset 0, completely isolated from pedal motion configs (offset 64).
+- **Buffer-Starvation Protection**: Pure unicast communication prevents broadcast buffer overflows and eliminates connection drops.
+- **Multi-Rig Isolation**: Multiple simulator rigs operating in the same room or household will never interfere with each other.
 
 ---
 
-## 3. Reassigning or Swapping Pedal Roles
+## 2. Step-by-Step Initial Setup & MAC Sharing
 
-If you want to change a pedal's role (for example, swapping your Brake and Throttle pedals, or moving a pedal from Clutch to Throttle), follow either of the methods below:
+![SimHub Wireless Management Interface](media/images/simhub_system_wireless_tab.png)  
+*Figure 1: Wireless Management tab in SimHub (`System -> Wireless`).*
 
-### Method A: Wireless Reassignment via SimHub (Recommended)
-
-1. Open SimHub and navigate to the **DIY FFB Pedal** plugin.
-2. Select the pedal tab you wish to unassign (e.g., **Brake**).
-3. Open the **System Setting / Wireless** section and click **"Assignment"** (or the assignment icon).
-4. Since the pedal is currently connected, the dialog displays:
-   > *"[Role] is connected, click Clear to remove Assignment"*
-5. Click **"Clear Assignment"**.
-
-![SimHub Clear Assignment Dialog](media/images/simhub_clear_assignment.png)  
-*Figure 3: Clearing an existing pedal assignment.*
-
-6. The pedal sounds an acoustic tone, erases its role from EEPROM, and restarts into **Unassigned Mode**.
-7. Within a few seconds, SimHub detects the unassigned pedal and re-opens the **Pedal Assignment** dialog.
-8. Choose your desired new role and click **"Assign"**.
+> [!IMPORTANT]
+> **Wichtiger Hinweis (USB COM vs. Wireless):**  
+> Wenn ein Pedal per USB-C-Kabel (COM-Port) an den PC angeschlossen ist, muss im jeweiligen Pedal-Reiter in SimHub die Checkbox/Option **"Wireless Communication" temporär deaktiviert (OFF)** werden.  
+> Dadurch erhält die serielle USB-Kommunikation Priorität, damit Hardware-MAC-Abfragen und EEPROM-Schreibvorgänge schnell und zuverlässig durchgeführt werden können. Nach dem Synchronisieren kann das USB-Kabel abgezogen und die drahtlose Kommunikation wieder aktiviert werden.
 
 ---
 
-### Method B: Direct USB Connection (Fallback)
+### Pairing Workflow
 
-If wireless communication is unavailable:
-1. Connect a USB-C cable directly from your PC to the pedal controller board.
-2. Open SimHub. The pedal connects directly as a wired USB device.
-3. In the pedal configuration tab, click **"Clear Assignment"** (or send the reset command).
-4. Disconnect the USB cable. The pedal will power-cycle into Unassigned Mode, ready to pair wirelessly with the Bridge.
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as User
+    participant Plugin as SimHub Plugin (System -> Wireless)
+    participant Bridge as ESP32 Bridge (USB HID)
+    participant Pedals as Pedals (USB COM)
 
----
+    User->>Plugin: Open "System -> Wireless"
+    User->>Plugin: Click "🔍 Auto-Detect"
+    Plugin->>Bridge: Query Hardware MAC (USB HID)
+    Plugin->>Pedals: Query Hardware MAC (USB COM)
+    Bridge-->>Plugin: Return Factory MAC & State
+    Pedals-->>Plugin: Return Factory MAC & State
+    Plugin->>User: Populate Table (Bridge, Clutch, Brake, Throttle)
+    User->>Plugin: Select Wi-Fi Channel (e.g. Ch 11)
+    User->>Plugin: Click "💾 Sync to All Devices"
+    Plugin->>Bridge: Write DapMacAddresses_t to EEPROM (Offset 0)
+    Plugin->>Pedals: Write DapMacAddresses_t to EEPROM (Offset 0)
+    Bridge-->>Plugin: Ack & Apply Static Unicast Peer
+    Pedals-->>Plugin: Ack & Apply Static Unicast Peer
+    Plugin->>User: "Sync complete! Devices paired."
+```
 
-## 4. Replacing or Swapping the USB Bridge Module
+### Schritt-für-Schritt-Anleitung (DE)
 
-If you replace your ESP32-S3 Bridge module with a new board (or flash a different Bridge device with a new hardware MAC address), the pedals will automatically detect the change:
-
-1. **Loss Detection**: When the original Bridge is disconnected, the pedals notice the absence of heartbeats. After **5 seconds**, the pedals automatically activate **Auto-Discovery Broadcast Mode**.
-2. **New Bridge Detection**: As soon as the new Bridge is plugged into your PC, it catches the discovery packets and reports the pedals to SimHub.
-3. **Pairing**: The SimHub assignment popup appears for each pedal. Simply click **"Assign"** to pair the pedal with your new Bridge.
-4. All previously tuned pedal curves, force settings, and travel limits remain intact on each pedal.
-
----
-
-## 5. Wi-Fi Channel Configuration & Automatic Hunting (Channels 1–13)
-
-By default, the wireless system operates on **Wi-Fi Channel 11**. In congested 2.4 GHz environments, switching to another channel (such as Channel 1, 6, or any channel from 1 to 13) can improve signal stability and eliminate packet jitter.
-
-![SimHub Wi-Fi Channel Optimizer](media/images/wifi_channel_optimizer_ui.png)  
-*Figure 4: Wi-Fi Channel Optimizer and selection in the SimHub plugin.*
-
-### Changing the Wi-Fi Channel:
-1. Navigate to **System Settings -> Wireless / Wi-Fi Channel**.
-2. Select your desired target channel (Channels 1 through 13).
-3. Click **"Set Channel"**.
-4. The Bridge broadcasts the channel migration command across all paired pedals.
-5. Each pedal switches its radio to the new channel and schedules a deferred EEPROM write (saved safely when the motor is idle to prevent motion stutter).
-
-### Automatic Channel Hunting:
-What happens if a pedal was powered off when the channel was changed?
-- When the pedal is powered back on, it initially boots on its old channel.
-- After 3.5 seconds of silence from the Bridge, the pedal automatically activates **Channel Hunting**.
-- It systematically scans through all channels: **1, 6, 11, 2, 3, 4, 5, 7, 8, 9, 10, 12, 13**.
-- At 400 ms beacon intervals from the Bridge, the pedal detects the Bridge on the new channel within ~3 seconds, locks on, and updates its EEPROM.
-
----
-
-## 6. Rudder Modes & Peer-to-Peer Communication
-
-In flight simulation mode, the DIY FFB Pedals support direct synchronization:
-- **Airplane Rudder**: Throttle and Brake act as coupled left/right rudder pedals (one pushes forward as the other moves back).
-- **Helicopter Rudder**: Center-sprung or friction anti-torque pedals.
-- **Airplane with Toe Brakes**: Differential braking on upper pedal angles.
-
-![SimHub Rudder Mode Configuration](media/images/plugin_rudder_mode_airplane_0.png)  
-*Figure 5: Rudder Mode configuration in SimHub.*
-
-### How Peer-to-Peer Pairing Works:
-1. When any Rudder mode is activated in SimHub, the Bridge automatically syncs the complete hardware MAC table of all rig pedals to each pedal.
-2. The Throttle and Brake pedals register each other as direct ESP-NOW peers.
-3. Position and force data are exchanged directly between the pedals via unicast at up to **280 Hz with < 3 ms latency**, bypassing PC USB polling entirely.
-4. Because real hardware MACs are used, adjacent flight sim rigs in the same room will never cross-connect.
+1. **Geräte per USB verbinden**:
+   - Schließe die ESP32-S3 Bridge per USB an den PC an (erscheint als `USB-HID Online`).
+   - Schließe die Pedale nacheinander oder gleichzeitig per USB-C-Kabel an den PC an.
+2. **Wireless Communication im Pedal-Tab temporär ausschalten**:
+   - Öffne in SimHub den jeweiligen Reiter (z. B. *Brake* oder *Throttle*).
+   - Schalte **"Wireless Communication" auf OFF**, damit der COM-Port aktiv für die Datenübertragung genutzt wird.
+3. **Wireless Management Tab öffnen**:
+   - Navigiere zu **System -> Wireless**.
+4. **Auto-Erkennung starten**:
+   - Klicke auf **"🔍 Auto-Detect"**.
+   - Das Plugin fragt alle USB-Geräte ab und trägt die echten Hardware-MAC-Adressen automatisch in die Zeilen (`BRIDGE`, `CLUTCH`, `BRAKE`, `THROTTLE`) ein.
+   - Mit dem **"🔔 Beep"**-Button kannst du testen, welches physische Pedal angesprochen wird.
+5. **WLAN-Kanal wählen**:
+   - Wähle oben rechts den gewünschten Wi-Fi-Kanal (z. B. **Ch 11** oder einen störungsfreien Kanal 1–13).
+6. **Synchronisieren**:
+   - Klicke auf **"💾 Sync to All Devices"**.
+   - Die komplette Routing-Tabelle wird nun in das EEPROM (Offset 0) der Bridge sowie aller verbundenen Pedale geflasht.
+7. **Drahtlosbetrieb starten**:
+   - Trenne die USB-Kabel der Pedale.
+   - Aktiviere im SimHub-Pedal-Tab wieder **"Wireless Communication"**.
+   - Die Pedale verbinden sich nun rein über statischen Unicast mit der Bridge.
 
 ---
 
-## 7. Troubleshooting & Status Indicators
+## 3. Wi-Fi-Kanalverwaltung (Kanäle 1–13)
 
-### Checking Signal Quality (RSSI):
-In the SimHub plugin status bar, verify the real-time RSSI signal strength:
-- **-30 to -55 dBm**: Excellent signal.
-- **-56 to -66 dBm**: Good, stable connection.
-- **< -75 dBm**: Weak signal. Consider repositioning the Bridge or pedals to ensure direct line-of-sight (see the [ESP-NOW Placement Guide](espnow_pcb_and_bridge_placement_guide.md)).
+Standardmäßig arbeitet das System auf **Kanal 11**. Sollte dein Heim-WLAN oder Nachbarnetzwerke auf 2.4 GHz stark funken, kannst du jederzeit auf einen anderen Kanal wechseln:
+- Wähle in der Dropdown-Liste oben rechts den neuen Kanal (1–13).
+- Klicke auf **"💾 Sync to All Devices"**, während die Geräte per USB angeschlossen sind.
+- Sowohl Bridge als auch Pedale schalten auf den neuen Kanal um und speichern ihn permanent im EEPROM.
 
-### LED Status Codes:
-| LED Color / Blink | Meaning | Action |
+---
+
+## 4. Benötigte Screenshots / Required Screenshots
+
+Um die Dokumentation mit ansprechenden Bildern zu vervollständigen, werden folgende Screenshots benötigt (abzulegen unter `docs/media/images/`):
+
+| Dateiname | Beschreibung | Wo aufzunehmen? |
 | :--- | :--- | :--- |
-| **Blinking Yellow/White** | Unassigned mode / Waiting for pairing | Check SimHub popup and assign role. |
-| **Solid Blue / Green** | Connected and active | Ready to race. |
-| **Blinking Red** | Lost connection to Bridge | Check Bridge power and USB cable. |
-| **Double Purple Blink** | Calibration / Homing in progress | Keep feet off pedals until homed. |
+| **`simhub_system_wireless_tab.png`** | Übersicht des neuen Wireless-Tabs mit allen 4 Zeilen (Bridge, Clutch, Brake, Throttle), ausgefüllten MAC-Adressen, Status-LEDs und RSSI-Anzeige. | SimHub Plugin -> *System* -> *Wireless* |
+| **`simhub_pedal_wireless_toggle_off.png`** | Ansicht eines Pedal-Tabs (z. B. Brake) mit hervorgehobener Checkbox **"Wireless Communication" (auf OFF gesetzt)** bei aktiver USB-Verbindung. | SimHub Plugin -> *Pedal Tab (Brake)* |
+| **`simhub_wireless_sync_success.png`** | Screenshot direkt nach dem Klick auf **"💾 Sync to All Devices"** mit der Erfolgsmeldung in der Statuszeile. | SimHub Plugin -> *System* -> *Wireless* |
+| **`simhub_wireless_channel_dropdown.png`** | Aufgeklapptes Wi-Fi-Kanal-Dropdown-Menü (Ch 1 bis 13). | SimHub Plugin -> *System* -> *Wireless* (oben rechts) |
 
-### Common Issues & Solutions:
-- **Pedal does not show up in SimHub popup**: Ensure power supply is connected and board LED is illuminated. If previously paired to an old bridge, wait 5 seconds after powering on for auto-discovery broadcast to trigger.
-- **Popup does not appear automatically**: In SimHub, navigate to **Settings -> Wireless** and click **"Scan Unassigned Pedals"** manually.
-- **Channel mismatch**: Ensure no external 2.4 GHz antennas are obstructed by heavy aluminum 8020 extrusion beams.
+---
+
+## 5. Fehlerbehebung / Troubleshooting
+
+- **MAC-Adresse wird nicht automatisch erkannt**:
+  - Prüfe, ob das Pedal im Pedal-Tab erkannt wird.
+  - Stelle sicher, dass **"Wireless Communication" auf OFF** steht, während das Pedal per USB angeschlossen ist.
+  - Klicke erneut auf **"🔍 Auto-Detect"** oder **"📥 Read Device"**.
+- **Pedal verbindet sich drahtlos nicht mit der Bridge**:
+  - Stelle sicher, dass die Bridge-MAC in das EEPROM des Pedals geschrieben wurde (erkennbar am Boot-Log: `[MAC] Configured Bridge MAC: XX:XX:XX:XX:XX:XX`).
+  - Überprüfe, ob der Wi-Fi-Kanal auf Bridge und Pedal identisch ist.
+- **Signalstärke (RSSI) prüfen**:
+  - Im Wireless-Tab zeigt die Spalte **WIRELESS** die Echtzeit-Signalstärke (z. B. `-45 dBm` = Hervorragend, `-70 dBm` = Gut, `-85 dBm` = Schwach).
