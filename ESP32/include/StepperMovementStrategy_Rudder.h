@@ -468,11 +468,72 @@ float IRAM_ATTR_FLAG MoveByRudderStrategy(
   float accel_mps2 = netForce_N / virtualMass_kg;
 
   g_vRudderModelVel_mps += accel_mps2 * dt_s;
-  float maxPedalVel_mps =
+  // --- 11. Velocity Choking & Regenerative EMF Governor ---
+  // Limit movement speed based on physical motor limits and regenerative braking constraints
+  float maxPhysicalSledVel_mps = 0.8f;
+  if (calc_st->stepsPerMotorRevolution_u32 > 0) {
+    maxPhysicalSledVel_mps = (float)MAXIMUM_STEPPER_SPEED_U32 * pitch_mm /
+                             (float)calc_st->stepsPerMotorRevolution_u32 * 0.001f;
+  }
+  float maxSledPos_m = max(maxSledPos_mm * 0.001f, 0.0001f);
+  float maxPedalArcVel_mps = maxPhysicalSledVel_mps * (totalTravel_m / maxSledPos_m);
+
+  float dynamicSpeedLimit =
       (rudderOffsets_st.rudderMode_u8 == RUDDER_MODE_HELICOPTER) ? 0.12f
                                                                  : 0.80f;
-  g_vRudderModelVel_mps =
-      constrain(g_vRudderModelVel_mps, -maxPedalVel_mps, maxPedalVel_mps);
+  dynamicSpeedLimit = min(dynamicSpeedLimit, maxPedalArcVel_mps);
+
+  // Regenerative Power & Back-EMF Clamping:
+  // Dynamically governs speed so regeneration <= 35W and motor RPM <= 3600 RPM.
+  float spindlePitch_mm = pitch_mm;
+
+  // Opposing forces opposing forward (v > 0) or backward (v < 0) pedal travel
+  float opposingForceForward_N = max(0.0f, springForce_N) + max(0.0f, softEndstopForce_N) +
+                                 fabsf(dampingForce_N) + max(0.0f, -rudderPedalOpposingForce_N) +
+                                 max(0.0f, -syncTrackingForce_N) + max(0.0f, -commonModeForce_N);
+
+  float opposingForceBackward_N = max(0.0f, -springForce_N) + max(0.0f, -softEndstopForce_N) +
+                                  fabsf(dampingForce_N) + max(0.0f, rudderPedalOpposingForce_N) +
+                                  max(0.0f, syncTrackingForce_N) + max(0.0f, commonModeForce_N);
+
+  // Calculate soft endstop penetration for cushioning
+  float upperPenetration_01 = 0.0f;
+  float lowerPenetration_01 = 0.0f;
+  if (softEndstopTravel_01 > 0.001f) {
+    float upperSoftThreshold_01 = upperTravelLimit_01 - softEndstopTravel_01;
+    if (g_vRudderModelPos_01 > upperSoftThreshold_01) {
+      upperPenetration_01 = constrain((g_vRudderModelPos_01 - upperSoftThreshold_01) / softEndstopTravel_01, 0.0f, 1.0f);
+    }
+    float lowerSoftThreshold_01 = lowerTravelLimit_01 + softEndstopTravel_01;
+    if (g_vRudderModelPos_01 < lowerSoftThreshold_01) {
+      lowerPenetration_01 = constrain((lowerSoftThreshold_01 - g_vRudderModelPos_01) / softEndstopTravel_01, 0.0f, 1.0f);
+    }
+  }
+
+  float effectivePosForward_01 = 1.0f + (upperPenetration_01 * (softEndstopTravel_m / totalTravel_m));
+  float effectivePosBackward_01 = 1.0f + (lowerPenetration_01 * (softEndstopTravel_m / totalTravel_m));
+
+  float maxRegenVelForward_mps = CalcRegenVelocityLimit(
+      opposingForceForward_N,
+      totalTravel_m,
+      maxSledPos_m,
+      spindlePitch_mm,
+      effectivePosForward_01,
+      softEndstopTravel_m
+  );
+
+  float maxRegenVelBackward_mps = CalcRegenVelocityLimit(
+      opposingForceBackward_N,
+      totalTravel_m,
+      maxSledPos_m,
+      spindlePitch_mm,
+      effectivePosBackward_01,
+      softEndstopTravel_m
+  );
+
+  float forwardSpeedLimit = min(dynamicSpeedLimit, maxRegenVelForward_mps);
+  float backwardSpeedLimit = min(dynamicSpeedLimit, maxRegenVelBackward_mps);
+  g_vRudderModelVel_mps = constrain(g_vRudderModelVel_mps, -backwardSpeedLimit, forwardSpeedLimit);
 
   g_vRudderModelPos_01 += (g_vRudderModelVel_mps * dt_s) / totalTravel_m;
 
@@ -485,7 +546,7 @@ float IRAM_ATTR_FLAG MoveByRudderStrategy(
     if (g_vRudderModelVel_mps < 0.0f) g_vRudderModelVel_mps = 0.0f;
   }
 
-  // 11. Target Stepper Position Output: Strictly clamped to soft endstops
+  // 12. Target Stepper Position Output: Strictly clamped to soft endstops
   float targetStepPos_fl32 = (float)calc_st->softEndstopMinStepperPos_i32 +
                              (g_vRudderModelPos_01 * travelSteps_cnt);
   targetStepPos_fl32 = constrain(targetStepPos_fl32,
