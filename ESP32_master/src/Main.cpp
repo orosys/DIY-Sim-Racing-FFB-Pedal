@@ -72,7 +72,7 @@ DapEspPairing_t dap_esppairing_lcl;//sending
 //DapConfig_t dap_config_st_store[3];
 DapBridgeState_t dap_bridge_state_lcl;//
 DapActionOta_t dap_action_ota_st;
-#include "ESPNOW_lib.h"
+#include "WirelessCommunication_bridge.h"
 
 // global variable for servo config routing ---
 DAP_servo_config_st_t dap_servo_config_st[3];          // packets from host to servo
@@ -80,7 +80,6 @@ DAP_servo_config_st_t dap_servo_config_response_st[3]; // packets from servo to 
 bool update_servo_config[3] = {false, false, false};
 bool send_servo_config_to_host[3] = {false, false, false}; // Muss in ESPNOW_lib.cpp bei RX gesetzt werden
 bool firstDebugMessage_b = false;
-uint8_t g_currentWifiChannel_u8 = 11;
 
 
 #define EEPROM_offset 15
@@ -247,7 +246,7 @@ void setup()
     disableCore1WDT();
   #endif
   //enable ESP-NOW
-  espNowInitialize();
+  wirelessComm.begin(loadMacAddressesFromEeprom());
   
   #ifdef Using_MCP4728
     MCP4728_I2C.begin(MCP_SDA,MCP_SCL,400000);
@@ -406,27 +405,27 @@ inline void syncPairingTableToPedals()
   for (int p = 0; p < 3; p++) {
     bool hasMac = false;
     for (int b = 0; b < 6; b++) {
-      if (g_pedalMac_aau8[p][b] != 0) {
+      if (wirelessComm.getPedalMac(p)[b] != 0) {
         hasMac = true;
         break;
       }
     }
     if (hasMac) {
       pairSync.pairStatus_au8[p] = 1;
-      memcpy(pairSync.pairedMac_aau8[p], g_pedalMac_aau8[p], 6);
+      memcpy(pairSync.pairedMac_aau8[p], wirelessComm.getPedalMac(p), 6);
     } else {
       pairSync.pairStatus_au8[p] = 0;
       memset(pairSync.pairedMac_aau8[p], 0, 6);
     }
   }
   pairSync.pairStatus_au8[3] = 1;
-  memcpy(pairSync.pairedMac_aau8[3], g_espMac_au8, 6);
+  memcpy(pairSync.pairedMac_aau8[3], wirelessComm.getOwnMac(), 6);
 
   for (int p = 0; p < 3; p++) {
     if (pairSync.pairStatus_au8[p] == 1) {
       pairSync.deviceId_u8 = p;
       pairSync.crc_u16 = checksumCalculator((uint8_t*)(&pairSync), sizeof(DapAssignmentReg_t) - sizeof(uint16_t));
-      ESPNow.send_message(g_pedalMac_aau8[p], (uint8_t*)&pairSync, sizeof(DapAssignmentReg_t));
+      wirelessComm.sendAssignmentSync(pairSync);
     }
   }
 }
@@ -555,24 +554,8 @@ void espNowCommunicationTxTask( void * pvParameters )
           if(dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[i]==1)
           {
             esp_err_t err;
-            switch (i)
-            {
-              case PEDAL_ID_CLUTCH:
-                ActiveSerial->print("[L]Sending Clutch config,Result:");
-                err = ESPNow.send_message(g_pedalMac_aau8[0], (uint8_t *)&dap_config_st[i], sizeof(DapConfig_t));
-                break;
-              case PEDAL_ID_BRAKE:
-                ActiveSerial->print("[L]Sending Brake config,Result:");
-                err = ESPNow.send_message(g_pedalMac_aau8[1], (uint8_t *)&dap_config_st[i], sizeof(DapConfig_t));
-                break;
-              case PEDAL_ID_THROTTLE:
-                ActiveSerial->print("[L]Sending Throttle config,Result:");
-                err = ESPNow.send_message(g_pedalMac_aau8[2], (uint8_t *)&dap_config_st[i], sizeof(DapConfig_t));
-                
-                break;
-              default:
-                break;
-            }
+            ActiveSerial->printf("[L]Sending Pedal #%d config, Result:", i);
+            err = wirelessComm.sendConfigToPedal(i, dap_config_st[i]);
             ActiveSerial->println(esp_err_to_name(err));
             #ifdef USB_JOYSTICK
               tinyusbJoystick_.printf("Forward config to Pedal: %d, result:%s", i, esp_err_to_name(err));
@@ -589,24 +572,12 @@ void espNowCommunicationTxTask( void * pvParameters )
           dap_action_update[i]=false;
           if(dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[i]==1)
           {
-            switch (i)
-            {
-              case PEDAL_ID_CLUTCH:
-                ESPNow.send_message(g_pedalMac_aau8[0],(uint8_t *) &dap_actions_st[i],sizeof(DapActions_t));
-                break;
-              case PEDAL_ID_BRAKE:
-                if (dap_actions_st[i].payloadPedalAction_st.rudderAction_u8 != 0 &&
-                    dap_actions_st[i].payloadPedalAction_st.systemAction_u8 == 0) {
-                  syncPairingTableToPedals();
-                }
-                ESPNow.send_message(g_pedalMac_aau8[1],(uint8_t *) &dap_actions_st[i],sizeof(DapActions_t));
-                break;
-              case PEDAL_ID_THROTTLE:
-                ESPNow.send_message(g_pedalMac_aau8[2],(uint8_t *) &dap_actions_st[i],sizeof(DapActions_t));
-                break;
-              default:
-                break;
+            if (i == PEDAL_ID_BRAKE &&
+                dap_actions_st[i].payloadPedalAction_st.rudderAction_u8 != 0 &&
+                dap_actions_st[i].payloadPedalAction_st.systemAction_u8 == 0) {
+              syncPairingTableToPedals();
             }
+            wirelessComm.sendActionToPedal(i, dap_actions_st[i]);
           }
         }
 
@@ -618,12 +589,7 @@ void espNowCommunicationTxTask( void * pvParameters )
             update_servo_config[s] = false;
             if(dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[s]==1)
             {
-              switch (s)
-              {
-                case PEDAL_ID_CLUTCH:   ESPNow.send_message(g_pedalMac_aau8[0],(uint8_t *) &dap_servo_config_st[s],sizeof(DAP_servo_config_st_t)); break;
-                case PEDAL_ID_BRAKE:    ESPNow.send_message(g_pedalMac_aau8[1],(uint8_t *) &dap_servo_config_st[s],sizeof(DAP_servo_config_st_t)); break;
-                case PEDAL_ID_THROTTLE: ESPNow.send_message(g_pedalMac_aau8[2],(uint8_t *) &dap_servo_config_st[s],sizeof(DAP_servo_config_st_t)); break;
-              }
+              wirelessComm.sendServoConfigToPedal(s, dap_servo_config_st[s]);
             }
           }
         }
@@ -635,20 +601,9 @@ void espNowCommunicationTxTask( void * pvParameters )
       //forward the basic wifi info for pedals
       if(g_pedalOtaAction_b)
       {
-        switch(dap_action_ota_st.payloadOtaInfo_st.deviceId_u8)
-        {
-          case 0:
-            ESPNow.send_message(g_pedalMac_aau8[0],(uint8_t *) &dap_action_ota_st,sizeof(DapActionOta_t));
-            ActiveSerial->println("[L]Forward OTA command to Clutch");
-          break;
-          case 1:
-            ESPNow.send_message(g_pedalMac_aau8[1],(uint8_t *) &dap_action_ota_st,sizeof(DapActionOta_t));
-            ActiveSerial->println("[L]Forward OTA command to Brake");
-          break;
-          case 2:
-            ESPNow.send_message(g_pedalMac_aau8[2],(uint8_t *) &dap_action_ota_st,sizeof(DapActionOta_t));
-            ActiveSerial->println("[L]Forward OTA command to Throttle");
-          break;
+        if (dap_action_ota_st.payloadOtaInfo_st.deviceId_u8 < 3) {
+          wirelessComm.sendOtaToPedal(dap_action_ota_st.payloadOtaInfo_st.deviceId_u8, dap_action_ota_st);
+          ActiveSerial->printf("[L]Forward OTA command to Pedal #%d\n", dap_action_ota_st.payloadOtaInfo_st.deviceId_u8);
         }
         g_pedalOtaAction_b=false;
       }
@@ -663,7 +618,7 @@ void clearPedalAssignmentAction(uint8_t targetIdx, const DapActions_t &action)
   uint8_t targetMac[6] = {0};
   bool hasMac = false;
   for (int b = 0; b < 6; b++) {
-    if (g_pedalMac_aau8[targetIdx][b] != 0) {
+    if (wirelessComm.getPedalMac(targetIdx)[b] != 0) {
       hasMac = true;
       break;
     }
@@ -679,22 +634,11 @@ void clearPedalAssignmentAction(uint8_t targetIdx, const DapActions_t &action)
       memcpy(targetMac, g_espPairingReg_st.pairMac_aau8[targetIdx], 6);
     }
   } else {
-    memcpy(targetMac, g_pedalMac_aau8[targetIdx], 6);
+    memcpy(targetMac, wirelessComm.getPedalMac(targetIdx), 6);
   }
 
   if (hasMac) {
-    if (!esp_now_is_peer_exist(targetMac)) {
-      esp_now_peer_info_t peerInfo = {};
-      memcpy(peerInfo.peer_addr, targetMac, 6);
-      peerInfo.channel = 0;
-      peerInfo.ifidx = WIFI_IF_STA;
-      peerInfo.encrypt = false;
-      esp_now_add_peer(&peerInfo);
-    }
-    for (int retry = 0; retry < 5; retry++) {
-      ESPNow.send_message(targetMac, (uint8_t*)&action, sizeof(DapActions_t));
-      delay(20);
-    }
+    wirelessComm.sendBroadcastRetry((const uint8_t*)&action, sizeof(DapActions_t), 5, 20);
   }
 
   // Clear pairing in EEPROM & RAM
@@ -702,7 +646,8 @@ void clearPedalAssignmentAction(uint8_t targetIdx, const DapActions_t &action)
   memset(g_espPairingReg_st.pairMac_aau8[targetIdx], 0, 6);
   EEPROM.put(EEPROM_offset, g_espPairingReg_st);
   EEPROM.commit();
-  memset(g_pedalMac_aau8[targetIdx], 0, 6);
+  uint8_t zeroMac[6] = {0};
+  wirelessComm.setPedalMac(targetIdx, zeroMac);
   dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[targetIdx] = 0;
 
   ActiveSerial->printf("[L]Cleared assignment for pedal %d and sent CLEAR_ASSIGNMENT action\n", targetIdx);
@@ -723,42 +668,34 @@ void pushPedalAssignmentAction(uint8_t sourceTag, uint8_t newRole, const DapActi
   uint8_t targetMac[6] = {0};
   bool foundMac = false;
 
-  // Prüfe ob Quell-MAC in g_pedalMac_aau8 liegt
-  for (int b = 0; b < 6; b++) {
-    if (g_pedalMac_aau8[sourceTag][b] != 0) {
-      foundMac = true;
-      break;
+  // Prüfe ob Quell-MAC bereits bekannt ist
+  if (sourceTag < 3) {
+    for (int b = 0; b < 6; b++) {
+      if (wirelessComm.getPedalMac(sourceTag)[b] != 0) {
+        foundMac = true;
+        break;
+      }
+    }
+    if (foundMac) {
+      memcpy(targetMac, wirelessComm.getPedalMac(sourceTag), 6);
     }
   }
-  if (foundMac) {
-    memcpy(targetMac, g_pedalMac_aau8[sourceTag], 6);
-  } else {
+  if (!foundMac) {
     ActiveSerial->printf("[L]pushPedalAssignmentAction: No MAC known for tag %d\n", sourceTag);
     return;
   }
 
-  // Per ESP-NOW direkt an die MAC-Adresse des Pedals senden
-  if (!esp_now_is_peer_exist(targetMac)) {
-    esp_now_peer_info_t peerInfo = {};
-    memcpy(peerInfo.peer_addr, targetMac, 6);
-    peerInfo.channel = 0;
-    peerInfo.ifidx = WIFI_IF_STA;
-    peerInfo.encrypt = false;
-    esp_now_add_peer(&peerInfo);
-  }
-
-  for (int retry = 0; retry < 3; retry++) {
-    ESPNow.send_message(targetMac, (uint8_t*)&action, sizeof(DapActions_t));
-    delay(20);
-  }
+  // Broadcast a few times for reliability - no unicast peer/ACK needed.
+  wirelessComm.sendBroadcastRetry((const uint8_t*)&action, sizeof(DapActions_t), 3, 20);
   ActiveSerial->printf("[L]Assignment action sent to pedal: %02X:%02X:%02X:%02X:%02X:%02X, new role: %d\n",
                        targetMac[0], targetMac[1], targetMac[2], targetMac[3], targetMac[4], targetMac[5], newRole);
 
   // Bridge merkt sich die MAC-Adresse im RAM & EEPROM
   if (sourceTag != newRole) {
-    memcpy(g_pedalMac_aau8[newRole], targetMac, 6);
+    wirelessComm.setPedalMac(newRole, targetMac);
     if (sourceTag >= 3) {
-      memset(g_pedalMac_aau8[sourceTag], 0, 6);
+      uint8_t zeroMac[6] = {0};
+      wirelessComm.setPedalMac(sourceTag, zeroMac);
     }
 
     memcpy(g_espPairingReg_st.pairMac_aau8[newRole], targetMac, 6);
@@ -834,7 +771,7 @@ void handleWifiScanRequest(bool isHid) {
   }
   WiFi.scanDelete();
 
-  esp_wifi_set_channel(g_currentWifiChannel_u8, WIFI_SECOND_CHAN_NONE);
+  esp_wifi_set_channel(wirelessComm.getChannel(), WIFI_SECOND_CHAN_NONE);
 
   uint8_t recommended = 1;
   int minScore = score[1];
@@ -854,7 +791,7 @@ void handleWifiScanRequest(bool isHid) {
   resp.payloadHeader_st.version_u8 = DAP_VERSION_CONFIG_U8;
   resp.payloadHeader_st.pedalTag_u8 = 3;
   resp.payloadWifiChannel_st.command_u8 = WIFI_CH_CMD_SCAN_RES;
-  resp.payloadWifiChannel_st.currentChannel_u8 = g_currentWifiChannel_u8;
+  resp.payloadWifiChannel_st.currentChannel_u8 = wirelessComm.getChannel();
   resp.payloadWifiChannel_st.recommendedChannel_u8 = recommended;
   resp.payloadWifiChannel_st.channel1Rssi_i8 = (bestRssi[1] > -120) ? (int8_t)bestRssi[1] : (int8_t)0;
   resp.payloadWifiChannel_st.channel6Rssi_i8 = (bestRssi[6] > -120) ? (int8_t)bestRssi[6] : (int8_t)0;
@@ -883,7 +820,7 @@ void handleWifiScanRequest(bool isHid) {
 
 void handleWifiSetChannelRequest(uint8_t newChannel, bool isHid) {
   if (newChannel < 1 || newChannel > 14) return;
-  ActiveSerial->printf("[L]Switching Wi-Fi channel from %d to %d...\n", g_currentWifiChannel_u8, newChannel);
+  ActiveSerial->printf("[L]Switching Wi-Fi channel from %d to %d...\n", wirelessComm.getChannel(), newChannel);
 
   DapWifiChannel_t fwd = {};
   fwd.payloadHeader_st.startOfFrame0_u8 = SOF_BYTE_0_U8;
@@ -898,19 +835,11 @@ void handleWifiSetChannelRequest(uint8_t newChannel, bool isHid) {
   fwd.payloadFooter_st.enfOfFrame1_u8 = EOF_BYTE_1_U8;
   fwd.payloadFooter_st.checkSum_u16 = checksumCalculator((uint8_t*)(&(fwd.payloadHeader_st)), sizeof(fwd.payloadHeader_st) + sizeof(fwd.payloadWifiChannel_st));
 
-  // Staggered multi-unicast to paired pedals and broadcast over ~200ms
-  for (int k = 0; k < 4; k++) {
-    for (int p = 0; p < 3; p++) {
-      if (g_espPairingReg_st.pairStatus_au8[p] == 1) {
-        ESPNow.send_message(g_pedalMac_aau8[p], (uint8_t*)&fwd, sizeof(DapWifiChannel_t));
-      }
-    }
-
-    delay(50);
-  }
+  // Broadcast a few times over ~200ms for reliability - no unicast peer/ACK needed.
+  wirelessComm.sendBroadcastRetry((const uint8_t*)&fwd, sizeof(DapWifiChannel_t), 4, 50);
 
   saveWifiChannelToEeprom(newChannel);
-  g_currentWifiChannel_u8 = newChannel;
+  wirelessComm.setChannel(newChannel);
 
   delay(20);
   esp_wifi_set_channel(newChannel, WIFI_SECOND_CHAN_NONE);
@@ -938,8 +867,8 @@ void sendWifiChannelStatus(bool isHid) {
   fwd.payloadHeader_st.version_u8 = DAP_VERSION_CONFIG_U8;
   fwd.payloadHeader_st.pedalTag_u8 = 3;
   fwd.payloadWifiChannel_st.command_u8 = WIFI_CH_CMD_SET_ACK;
-  fwd.payloadWifiChannel_st.currentChannel_u8 = g_currentWifiChannel_u8;
-  fwd.payloadWifiChannel_st.recommendedChannel_u8 = g_currentWifiChannel_u8;
+  fwd.payloadWifiChannel_st.currentChannel_u8 = wirelessComm.getChannel();
+  fwd.payloadWifiChannel_st.recommendedChannel_u8 = wirelessComm.getChannel();
   fwd.payloadFooter_st.enfOfFrame0_u8 = EOF_BYTE_0_U8;
   fwd.payloadFooter_st.enfOfFrame1_u8 = EOF_BYTE_1_U8;
   fwd.payloadFooter_st.checkSum_u16 = checksumCalculator((uint8_t*)(&(fwd.payloadHeader_st)), sizeof(fwd.payloadHeader_st) + sizeof(fwd.payloadWifiChannel_st));
@@ -1136,8 +1065,8 @@ void serialCommunicationRxTask( void * pvParameters)
                 } else if (sysAction == (uint8_t)PedalSystemAction::CLEAR_ASSIGNMENT) {
                   clearPedalAssignmentAction(pedalIdx, dap_actions_st_local);
                 } else if (sysAction == (uint8_t)PedalSystemAction::ASSIGNMENT_CHECK_BEEP) {
-                  if (pedalIdx >= 0 && pedalIdx < 8 && g_pedalMac_aau8[pedalIdx][0] != 0) {
-                    ESPNow.send_message(g_pedalMac_aau8[pedalIdx], (uint8_t*)&dap_actions_st_local, sizeof(DapActions_t));
+                  if (pedalIdx >= 0 && pedalIdx < 3 && wirelessComm.getPedalMac(pedalIdx)[0] != 0) {
+                    wirelessComm.sendActionToPedal(pedalIdx, dap_actions_st_local);
                   }
                 } else if(pedalIdx == PEDAL_ID_CLUTCH || pedalIdx == PEDAL_ID_BRAKE || pedalIdx == PEDAL_ID_THROTTLE)
                 {
@@ -1317,18 +1246,18 @@ void serialCommunicationRxTask( void * pvParameters)
                 }
                 if (dap_bridge_state_lcl.payloadBridgeState_st.bridgeAction_u8 == BRIDGE_ACTION_SET_PEDAL_WIRELESS_SYNC)
                 {
-                  g_pedalWirelessSyncEnabled_ab[0] = (dap_bridge_state_lcl.payloadBridgeState_st.pedalAvailability_au8[0] != 0);
-                  g_pedalWirelessSyncEnabled_ab[1] = (dap_bridge_state_lcl.payloadBridgeState_st.pedalAvailability_au8[1] != 0);
-                  g_pedalWirelessSyncEnabled_ab[2] = (dap_bridge_state_lcl.payloadBridgeState_st.pedalAvailability_au8[2] != 0);
+                  wirelessComm.setPedalWirelessSyncEnabled(0, dap_bridge_state_lcl.payloadBridgeState_st.pedalAvailability_au8[0] != 0);
+                  wirelessComm.setPedalWirelessSyncEnabled(1, dap_bridge_state_lcl.payloadBridgeState_st.pedalAvailability_au8[1] != 0);
+                  wirelessComm.setPedalWirelessSyncEnabled(2, dap_bridge_state_lcl.payloadBridgeState_st.pedalAvailability_au8[2] != 0);
                   for (int pIdx = 0; pIdx < 3; pIdx++)
                   {
-                    if (!g_pedalWirelessSyncEnabled_ab[pIdx])
+                    if (!wirelessComm.isPedalWirelessSyncEnabled(pIdx))
                     {
                       g_joystickValueOriginal_au16[pIdx] = JOYSTICK_MIN_VALUE;
                       g_joystickValue_au16[pIdx] = JOYSTICK_MIN_VALUE;
                       dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[pIdx] = 0;
                       dap_bridge_state_st.payloadBridgeState_st.pedalRssiRealtime_ai32[pIdx] = 0;
-                      g_rssi_ai32[pIdx] = 0;
+                      wirelessComm.setRssi(pIdx, 0);
                       if (pIdx == 0) g_pedalClutchValue_u16 = JOYSTICK_MIN_VALUE;
                       if (pIdx == 1) g_pedalBrakeValue_u16 = JOYSTICK_MIN_VALUE;
                       if (pIdx == 2) g_pedalThrottleValue_u16 = JOYSTICK_MIN_VALUE;
@@ -1410,7 +1339,7 @@ void serialCommunicationRxTask( void * pvParameters)
                 storeMacAddressesToEeprom(macCfg_local);
                 ActiveSerial->println("[L]Stored MAC addresses & channel to EEPROM (Serial)");
               }
-              applyMacAddressesConfig(macCfg_local);
+              wirelessComm.applyMacConfig(macCfg_local);
 
               DapMacAddresses_t reply = loadMacAddressesFromEeprom();
               reply.payloadHeader_st.payloadType_u8 = DAP_PAYLOAD_TYPE_MAC_ADDRESSES_U8;
@@ -1612,7 +1541,7 @@ void serialCommunicationTxTask( void * pvParameters)
           dap_bridge_state_st.payloadHeader_st.payloadType_u8=DAP_PAYLOAD_TYPE_BRIDGE_STATE_U8;
           dap_bridge_state_st.payloadHeader_st.version_u8=DAP_VERSION_CONFIG_U8;
           dap_bridge_state_st.payloadBridgeState_st.bridgeAction_u8=0;
-          memcpy(dap_bridge_state_st.payloadBridgeState_st.pedalRssiRealtime_ai32,g_rssi_ai32,sizeof(int32_t)*3);
+          memcpy(dap_bridge_state_st.payloadBridgeState_st.pedalRssiRealtime_ai32,wirelessComm.getRssiArray(),sizeof(int32_t)*3);
           //parse_version(BRIDGE_FIRMWARE_VERSION,&dap_bridge_state_st.payloadBridgeState_st.Bridge_firmware_version_u8[0],&dap_bridge_state_st.payloadBridgeState_st.Bridge_firmware_version_u8[1],&dap_bridge_state_st.payloadBridgeState_st.Bridge_firmware_version_u8[2]);
           dap_bridge_state_st.payloadBridgeState_st.bridgeFirmwareVersion_au8[0]=versionMajor;
           dap_bridge_state_st.payloadBridgeState_st.bridgeFirmwareVersion_au8[1]=versionMinor;
@@ -1620,7 +1549,7 @@ void serialCommunicationTxTask( void * pvParameters)
           uint8_t unassignedCount = 0;
           memset(dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8, 0, sizeof(dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8));
           for (int p = 0; p < 3; p++) {
-            memcpy(&dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8[p * 6], g_pedalMac_aau8[p], 6);
+            memcpy(&dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8[p * 6], wirelessComm.getPedalMac(p), 6);
           }
           dap_bridge_state_st.payloadBridgeState_st.unassignedPedalCount_u8 = unassignedCount;
           //CRC check should be in the final
@@ -1659,8 +1588,8 @@ void serialCommunicationTxTask( void * pvParameters)
           dap_joystickUART_state_lcl._payloadjoystick.DAP_JOY_Version = DAP_JOY_VERSION;
           for(int i=0; i<3;i++)
           {
-            dap_joystickUART_state_lcl._payloadjoystick.controllerValue_i32[i] = g_pedalWirelessSyncEnabled_ab[i] ? g_joystickValueOriginal_au16[i] : JOYSTICK_MIN_VALUE;
-            dap_joystickUART_state_lcl._payloadjoystick.pedalAvailability[i] = g_pedalWirelessSyncEnabled_ab[i] ? dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[i] : 0;
+            dap_joystickUART_state_lcl._payloadjoystick.controllerValue_i32[i] = wirelessComm.isPedalWirelessSyncEnabled(i) ? g_joystickValueOriginal_au16[i] : JOYSTICK_MIN_VALUE;
+            dap_joystickUART_state_lcl._payloadjoystick.pedalAvailability[i] = wirelessComm.isPedalWirelessSyncEnabled(i) ? dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[i] : 0;
           }
           dap_joystickUART_state_lcl._payloadjoystick.pedal_status=g_pedalStatus_u8;
           dap_joystickUART_state_lcl._payloadfooter.checkSum_u16= checksumCalculator((uint8_t*)(&(dap_joystickUART_state_lcl._payloadjoystick)), sizeof(dap_joystickUART_state_lcl._payloadjoystick));
@@ -1723,7 +1652,7 @@ void serialCommunicationTxTask( void * pvParameters)
                 ActiveSerial->print(" Update interval: ");
                 ActiveSerial->print(current_time-g_pedalLastUpdate_au32[pedalIDX]);
                 ActiveSerial->print(" RSSI: ");
-                ActiveSerial->println(g_rssi_ai32[pedalIDX]);
+                ActiveSerial->println(wirelessComm.getRssi(pedalIDX));
               }
               
             }
@@ -1775,9 +1704,9 @@ void joystickUpdateTask( void * pvParameters )
           }
           if (g_pedalStatus_u8 == 0)
           {
-            uint16_t clutchVal = g_pedalWirelessSyncEnabled_ab[0] ? g_pedalClutchValue_u16 : JOYSTICK_MIN_VALUE;
-            uint16_t brakeVal  = g_pedalWirelessSyncEnabled_ab[1] ? g_pedalBrakeValue_u16  : JOYSTICK_MIN_VALUE;
-            uint16_t throttleVal = g_pedalWirelessSyncEnabled_ab[2] ? g_pedalThrottleValue_u16 : JOYSTICK_MIN_VALUE;
+            uint16_t clutchVal = wirelessComm.isPedalWirelessSyncEnabled(0) ? g_pedalClutchValue_u16 : JOYSTICK_MIN_VALUE;
+            uint16_t brakeVal  = wirelessComm.isPedalWirelessSyncEnabled(1) ? g_pedalBrakeValue_u16  : JOYSTICK_MIN_VALUE;
+            uint16_t throttleVal = wirelessComm.isPedalWirelessSyncEnabled(2) ? g_pedalThrottleValue_u16 : JOYSTICK_MIN_VALUE;
 
             SetControllerOutputValueAccelerator(clutchVal);
             SetControllerOutputValueBrake(brakeVal);
@@ -1791,7 +1720,7 @@ void joystickUpdateTask( void * pvParameters )
             SetControllerOutputValueBrake(JOYSTICK_MIN_VALUE);
             SetControllerOutputValueThrottle(JOYSTICK_MIN_VALUE);
             // 3% deadzone
-            uint16_t rudderValue = g_pedalWirelessSyncEnabled_ab[2] ? g_pedalThrottleValue_u16 : JOYSTICK_CENTER;
+            uint16_t rudderValue = wirelessComm.isPedalWirelessSyncEnabled(2) ? g_pedalThrottleValue_u16 : JOYSTICK_CENTER;
             if (rudderValue < ((int16_t)(0.47f * JOYSTICK_RANGE + JOYSTICK_MIN_VALUE)) || rudderValue > ((int16_t)(0.53f * JOYSTICK_RANGE + JOYSTICK_MIN_VALUE)))
             {
               SetControllerOutputValueRudder(rudderValue);
@@ -1808,10 +1737,10 @@ void joystickUpdateTask( void * pvParameters )
             SetControllerOutputValueBrake(JOYSTICK_MIN_VALUE);
             SetControllerOutputValueThrottle(JOYSTICK_MIN_VALUE);
 
-            uint16_t leftBrakeVal = (dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[0] == 1 && g_pedalWirelessSyncEnabled_ab[0])
+            uint16_t leftBrakeVal = (dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[0] == 1 && wirelessComm.isPedalWirelessSyncEnabled(0))
                                       ? g_pedalClutchValue_u16
-                                      : (g_pedalWirelessSyncEnabled_ab[1] ? g_pedalBrakeValue_u16 : JOYSTICK_MIN_VALUE);
-            uint16_t rightBrakeVal = g_pedalWirelessSyncEnabled_ab[2] ? g_pedalThrottleValue_u16 : JOYSTICK_MIN_VALUE;
+                                      : (wirelessComm.isPedalWirelessSyncEnabled(1) ? g_pedalBrakeValue_u16 : JOYSTICK_MIN_VALUE);
+            uint16_t rightBrakeVal = wirelessComm.isPedalWirelessSyncEnabled(2) ? g_pedalThrottleValue_u16 : JOYSTICK_MIN_VALUE;
 
             // In Toe Brake mode, the pedals act purely as independent wheel brakes:
             // Rudder yaw (X-axis) remains neutral (centered) with zero connection between pedals
@@ -1842,8 +1771,8 @@ void joystickUpdateTask( void * pvParameters )
       // set analog value
       #ifdef Using_analog_output
 
-        uint16_t dacBrakeVal = g_pedalWirelessSyncEnabled_ab[1] ? g_joystickValue_au16[1] : 0;
-        uint16_t dacGasVal   = g_pedalWirelessSyncEnabled_ab[2] ? g_joystickValue_au16[2] : 0;
+        uint16_t dacBrakeVal = wirelessComm.isPedalWirelessSyncEnabled(1) ? g_joystickValue_au16[1] : 0;
+        uint16_t dacGasVal   = wirelessComm.isPedalWirelessSyncEnabled(2) ? g_joystickValue_au16[2] : 0;
         dacWrite(Analog_brk, (uint16_t)((float)(dacBrakeVal / (float)(JOYSTICK_RANGE)) * 255));
         dacWrite(Analog_gas, (uint16_t)((float)(dacGasVal / (float)(JOYSTICK_RANGE)) * 255));
       #endif
@@ -1865,9 +1794,9 @@ void joystickUpdateTask( void * pvParameters )
           }
           */
 
-          uint16_t mcpClu = g_pedalWirelessSyncEnabled_ab[0] ? g_joystickValue_au16[0] : 0;
-          uint16_t mcpBrk = g_pedalWirelessSyncEnabled_ab[1] ? g_joystickValue_au16[1] : 0;
-          uint16_t mcpGas = g_pedalWirelessSyncEnabled_ab[2] ? g_joystickValue_au16[2] : 0;
+          uint16_t mcpClu = wirelessComm.isPedalWirelessSyncEnabled(0) ? g_joystickValue_au16[0] : 0;
+          uint16_t mcpBrk = wirelessComm.isPedalWirelessSyncEnabled(1) ? g_joystickValue_au16[1] : 0;
+          uint16_t mcpGas = wirelessComm.isPedalWirelessSyncEnabled(2) ? g_joystickValue_au16[2] : 0;
           mcp.setChannelValue(MCP4728_CHANNEL_A, (uint16_t)((float)mcpClu / (float)JOYSTICK_RANGE * 0.8f * 4096));
           mcp.setChannelValue(MCP4728_CHANNEL_B, (uint16_t)((float)mcpBrk / (float)JOYSTICK_RANGE * 0.8f * 4096));
           mcp.setChannelValue(MCP4728_CHANNEL_C, (uint16_t)((float)mcpGas / (float)JOYSTICK_RANGE * 0.8f * 4096));
@@ -1918,9 +1847,7 @@ void otaUpdateTask( void * pvParameters )
           {
             ActiveSerial->println("[L]de-initialize espnow");
             ActiveSerial->println("[L]wait...");
-            esp_err_t result= esp_now_deinit();
-            g_espNowInitialStatus_b=false;
-            g_espNowStatus_b=false;
+            esp_err_t result= wirelessComm.deinit();
             delay(200);
             if(result==ESP_OK)
             {
@@ -2241,8 +2168,8 @@ void hidCommunicaitonRxTask(void *pvParameters)
             } else if (sysAction == (uint8_t)PedalSystemAction::CLEAR_ASSIGNMENT) {
               clearPedalAssignmentAction(pedalIdx, tinyusbJoystick_.tmpAction[i]);
             } else if (sysAction == (uint8_t)PedalSystemAction::ASSIGNMENT_CHECK_BEEP) {
-              if (pedalIdx >= 0 && pedalIdx < 8 && g_pedalMac_aau8[pedalIdx][0] != 0) {
-                ESPNow.send_message(g_pedalMac_aau8[pedalIdx], (uint8_t*)&tinyusbJoystick_.tmpAction[i], sizeof(DapActions_t));
+              if (pedalIdx >= 0 && pedalIdx < 3 && wirelessComm.getPedalMac(pedalIdx)[0] != 0) {
+                wirelessComm.sendActionToPedal(pedalIdx, tinyusbJoystick_.tmpAction[i]);
               }
             } else if(pedalIdx == PEDAL_ID_CLUTCH || pedalIdx == PEDAL_ID_BRAKE || pedalIdx == PEDAL_ID_THROTTLE)
             {
@@ -2261,7 +2188,7 @@ void hidCommunicaitonRxTask(void *pvParameters)
             storeMacAddressesToEeprom(macCfg);
             ActiveSerial->println("[L]Stored MAC addresses & channel to EEPROM");
           }
-          applyMacAddressesConfig(macCfg);
+          wirelessComm.applyMacConfig(macCfg);
 
           DapMacAddresses_t reply = loadMacAddressesFromEeprom();
           reply.payloadHeader_st.payloadType_u8 = DAP_PAYLOAD_TYPE_MAC_ADDRESSES_U8;
@@ -2364,18 +2291,18 @@ void hidCommunicaitonRxTask(void *pvParameters)
           }
           if (dap_bridge_state_lcl.payloadBridgeState_st.bridgeAction_u8 == BRIDGE_ACTION_SET_PEDAL_WIRELESS_SYNC)
           {
-            g_pedalWirelessSyncEnabled_ab[0] = (dap_bridge_state_lcl.payloadBridgeState_st.pedalAvailability_au8[0] != 0);
-            g_pedalWirelessSyncEnabled_ab[1] = (dap_bridge_state_lcl.payloadBridgeState_st.pedalAvailability_au8[1] != 0);
-            g_pedalWirelessSyncEnabled_ab[2] = (dap_bridge_state_lcl.payloadBridgeState_st.pedalAvailability_au8[2] != 0);
+            wirelessComm.setPedalWirelessSyncEnabled(0, dap_bridge_state_lcl.payloadBridgeState_st.pedalAvailability_au8[0] != 0);
+            wirelessComm.setPedalWirelessSyncEnabled(1, dap_bridge_state_lcl.payloadBridgeState_st.pedalAvailability_au8[1] != 0);
+            wirelessComm.setPedalWirelessSyncEnabled(2, dap_bridge_state_lcl.payloadBridgeState_st.pedalAvailability_au8[2] != 0);
             for (int pIdx = 0; pIdx < 3; pIdx++)
             {
-              if (!g_pedalWirelessSyncEnabled_ab[pIdx])
+              if (!wirelessComm.isPedalWirelessSyncEnabled(pIdx))
               {
                 g_joystickValueOriginal_au16[pIdx] = JOYSTICK_MIN_VALUE;
                 g_joystickValue_au16[pIdx] = JOYSTICK_MIN_VALUE;
                 dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[pIdx] = 0;
                 dap_bridge_state_st.payloadBridgeState_st.pedalRssiRealtime_ai32[pIdx] = 0;
-                g_rssi_ai32[pIdx] = 0;
+                wirelessComm.setRssi(pIdx, 0);
                 if (pIdx == 0) g_pedalClutchValue_u16 = JOYSTICK_MIN_VALUE;
                 if (pIdx == 1) g_pedalBrakeValue_u16 = JOYSTICK_MIN_VALUE;
                 if (pIdx == 2) g_pedalThrottleValue_u16 = JOYSTICK_MIN_VALUE;
@@ -2548,7 +2475,7 @@ void hidCommunicaitonTxTask(void *pvParameters)
           dap_bridge_state_st.payloadHeader_st.payloadType_u8=DAP_PAYLOAD_TYPE_BRIDGE_STATE_U8;
           dap_bridge_state_st.payloadHeader_st.version_u8=DAP_VERSION_CONFIG_U8;
           dap_bridge_state_st.payloadBridgeState_st.bridgeAction_u8=0;
-          memcpy(dap_bridge_state_st.payloadBridgeState_st.pedalRssiRealtime_ai32,g_rssi_ai32,sizeof(int32_t)*3);
+          memcpy(dap_bridge_state_st.payloadBridgeState_st.pedalRssiRealtime_ai32,wirelessComm.getRssiArray(),sizeof(int32_t)*3);
           //parse_version(BRIDGE_FIRMWARE_VERSION,&dap_bridge_state_st.payloadBridgeState_st.Bridge_firmware_version_u8[0],&dap_bridge_state_st.payloadBridgeState_st.Bridge_firmware_version_u8[1],&dap_bridge_state_st.payloadBridgeState_st.Bridge_firmware_version_u8[2]);
           dap_bridge_state_st.payloadBridgeState_st.bridgeFirmwareVersion_au8[0]=versionMajor;
           dap_bridge_state_st.payloadBridgeState_st.bridgeFirmwareVersion_au8[1]=versionMinor;
@@ -2556,7 +2483,7 @@ void hidCommunicaitonTxTask(void *pvParameters)
           uint8_t unassignedCount = 0;
           memset(dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8, 0, sizeof(dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8));
           for (int p = 0; p < 3; p++) {
-            memcpy(&dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8[p * 6], g_pedalMac_aau8[p], 6);
+            memcpy(&dap_bridge_state_st.payloadBridgeState_st.macAddressDetected_au8[p * 6], wirelessComm.getPedalMac(p), 6);
           }
           dap_bridge_state_st.payloadBridgeState_st.unassignedPedalCount_u8 = unassignedCount;
           //CRC check should be in the final
@@ -2582,7 +2509,7 @@ void hidCommunicaitonTxTask(void *pvParameters)
             {
               firstDebugMessage_b = false;
               tinyusbJoystick_.printf("Bridge Board:%s, Version:%s.", BRIDGE_BOARD, BRIDGE_FIRMWARE_VERSION); 
-              tinyusbJoystick_.printf("Bridge Original Mac: %02X:%02X:%02X:%02X:%02X:%02X", g_espMac_au8[0], g_espMac_au8[1], g_espMac_au8[2], g_espMac_au8[3], g_espMac_au8[4], g_espMac_au8[5]);
+              tinyusbJoystick_.printf("Bridge Original Mac: %02X:%02X:%02X:%02X:%02X:%02X", wirelessComm.getOwnMac()[0], wirelessComm.getOwnMac()[1], wirelessComm.getOwnMac()[2], wirelessComm.getOwnMac()[3], wirelessComm.getOwnMac()[4], wirelessComm.getOwnMac()[5]);
               uint8_t espMac_au8[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
               WiFi.macAddress(espMac_au8);  
               tinyusbJoystick_.printf("Bridge Mac OverWritted: %02X:%02X:%02X:%02X:%02X:%02X", espMac_au8[0], espMac_au8[1], espMac_au8[2], espMac_au8[3], espMac_au8[4], espMac_au8[5]);
@@ -2592,7 +2519,7 @@ void hidCommunicaitonTxTask(void *pvParameters)
             {
               if(dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[pedalIDX]==1)
               {
-                tinyusbJoystick_.printf("Pedal %d, Update Interval: %d, RSSI: %d", pedalIDX, (int)(millis()-g_pedalLastUpdate_au32[pedalIDX]),g_rssi_ai32[pedalIDX]);
+                tinyusbJoystick_.printf("Pedal %d, Update Interval: %d, RSSI: %d", pedalIDX, (int)(millis()-g_pedalLastUpdate_au32[pedalIDX]),wirelessComm.getRssi(pedalIDX));
                 //delay(10);
               }
             }
