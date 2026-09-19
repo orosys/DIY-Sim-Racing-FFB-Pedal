@@ -14,7 +14,7 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
-        <Border HorizontalAlignment="Left" Height="272" VerticalAlignment="Top" Width="540" Background="#7F4E4E4E" CornerRadius="8" Padding="0,0,0,4" Margin="0,3,0,0">
+        <Border HorizontalAlignment="Left" Height="272" VerticalAlignment="Top" Width="540" Background="#7F4E4E4E" CornerRadius="8" Padding="0,0,0,4">
             <Grid Width="540" Height="268">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="264"/>
