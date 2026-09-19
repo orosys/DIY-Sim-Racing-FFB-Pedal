@@ -643,6 +643,9 @@ namespace User.PluginSdkDemo
                 UpdateHomeSlotButton(HomeSlotA, 0);
                 UpdateHomeSlotButton(HomeSlotB, 1);
                 UpdateHomeSlotButton(HomeSlotC, 2);
+                UpdateHomeSlotButton(HomeSlotD, 3);
+                UpdateHomeSlotButton(HomeSlotE, 4);
+                UpdateHomeSlotButton(HomeSlotF, 5);
                 int connected = 0;
                 for (int pedal = 0; pedal < 3; pedal++)
                 {
