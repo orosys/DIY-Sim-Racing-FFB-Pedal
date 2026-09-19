@@ -371,7 +371,6 @@ namespace User.PluginSdkDemo
         private void SystemProfile_Tab_btn_apply_profile_Click_event(object sender, EventArgs e)
         {
             Profile_change((uint)Plugin._calculations.profile_index);
-            Parsefile((uint)Plugin._calculations.profile_index);
         }
 
         private void SystemLicense_Tab_btn_test_Click_event(object sender, EventArgs e)
