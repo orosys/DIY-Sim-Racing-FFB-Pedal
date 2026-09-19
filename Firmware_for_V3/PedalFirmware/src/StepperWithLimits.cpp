@@ -5,7 +5,7 @@
 
 
 
-#define STEPPER_WITH_LIMITS_SENSORLESS_CURRENT_THRESHOLD_IN_PERCENT 20
+#define STEPPER_WITH_LIMITS_SENSORLESS_CURRENT_THRESHOLD_IN_PERCENT 15
 #define MIN_POS_MAX_ENDSTOP 10000 // servo has to drive minimum N steps before it allows the detection of the max endstop
 #define INCLUDE_vTaskDelete 1
 

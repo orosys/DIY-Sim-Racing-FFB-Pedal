@@ -34,6 +34,7 @@ public:
 private:
     // Internal helper functions
     void performCommunicationSteps();
+    void resetConnection();
     void changeBaudRate(unsigned long baudrate);
     void makeCRCTable(uint8_t poly);
     uint8_t generateCRC(uint8_t* input, size_t length);
@@ -63,8 +64,14 @@ private:
     // Connection callback function pointer
     void (*_connectedCallback)(bool);
 
-    // Initialization flag
+    // Hardware initialization and debounced cable state.
     bool _initialized;
+    bool _plugState;
+    bool _lastRawPlugState;
+    unsigned long _plugChangedAt;
+    size_t _handshakeStep;
+    size_t _handshakeMatched;
+    unsigned long _stepStartedAt;
 };
 
 #endif // FANATEC_INTERFACE_H
