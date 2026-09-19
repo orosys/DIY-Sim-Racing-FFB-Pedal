@@ -33,8 +33,10 @@ namespace User.PluginSdkDemo
 
         private void Function_Tab_seleciton_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (Function_Tab_seleciton.SelectedIndex == 2)
+            if (!Object.ReferenceEquals(e.OriginalSource, Function_Tab_seleciton)) return;
+            if (Plugin != null && Function_Tab_seleciton.SelectedItem == Tab_System)
             {
+                RefreshGameProfileUI();
                 //Update_Profile_Checkbox_b = true;
                 Plugin._calculations.Update_Profile_Checkbox_b = true;
                 updateTheGuiFromConfig();

@@ -179,7 +179,8 @@ namespace User.PluginSdkDemo
                                 {
 
                                     // write vJoy data
-                                    Pedal_position_reading[pedalSelected] = pedalState_read_st.payloadPedalBasicState_.joystickOutput_u16;
+                                    Pedal_output_reading[pedalSelected] = pedalState_read_st.payloadPedalBasicState_.joystickOutput_u16;
+                                    Pedal_travel_reading[pedalSelected] = pedalState_read_st.payloadPedalBasicState_.pedalPosition_u16;
                                     //if (Plugin.Rudder_enable_flag == false)
                                     //{
                                     if (Plugin.Settings.vjoy_output_flag == 1)

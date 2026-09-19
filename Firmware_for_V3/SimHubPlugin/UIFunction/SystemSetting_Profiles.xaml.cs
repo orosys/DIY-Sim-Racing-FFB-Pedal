@@ -571,7 +571,18 @@ namespace User.PluginSdkDemo.UIFunction
             SettingsChangedEvent(Settings);
         }
         public event EventHandler btn_apply_profile_Click_event;
-        private void btn_apply_profile_Click(object sender, RoutedEventArgs e)
+        public void ApplySlot(uint slot)
+        {
+            if (slot > 5) return;
+            profile_select = slot;
+            ProfileTab.SelectedIndex = (int)slot;
+            calculation.profile_index = slot;
+            calculation.Update_Profile_Checkbox_b = true;
+            updateUI();
+            SaveProfileEffectSelections();
+        }
+
+        private void SaveProfileEffectSelections()
         {
             InitializeLinkedEffectStates(profile_select);
             for (int pedal = 0; pedal < 3; pedal++)
@@ -584,6 +595,11 @@ namespace User.PluginSdkDemo.UIFunction
                 Settings.Effect_status_profile_initialized[profile_select, pedal] = true;
             }
             SettingsChangedEvent(Settings);
+        }
+
+        private void btn_apply_profile_Click(object sender, RoutedEventArgs e)
+        {
+            SaveProfileEffectSelections();
             btn_apply_profile_Click_event?.Invoke(this, EventArgs.Empty);
         }
         public event EventHandler btn_send_profile_Click_event;

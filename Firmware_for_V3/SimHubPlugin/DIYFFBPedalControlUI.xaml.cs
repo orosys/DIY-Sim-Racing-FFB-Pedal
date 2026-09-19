@@ -108,7 +108,19 @@ namespace User.PluginSdkDemo
         private string system_info_text_connection;
         private int current_pedal_travel_state= 0;
         //private int gridline_kinematic_count_original = 0;
-        private double[] Pedal_position_reading=new double[3];
+        private readonly double[] Pedal_output_reading = new double[3];
+        private readonly double[] Pedal_travel_reading = new double[3];
+        private static readonly TimeSpan HomeOutputWindow = TimeSpan.FromSeconds(10);
+        private static readonly TimeSpan HomeOutputSampleInterval = TimeSpan.FromMilliseconds(80);
+        private readonly Queue<KeyValuePair<DateTime, double>>[] homePedalHistory =
+            { new Queue<KeyValuePair<DateTime, double>>(),
+              new Queue<KeyValuePair<DateTime, double>>(),
+              new Queue<KeyValuePair<DateTime, double>>() };
+        private readonly DateTime[] lastHomeOutputSampleUtc = new DateTime[3];
+        private DispatcherTimer homeRefreshTimer;
+        private int homeRefreshTicks;
+        private readonly int[] homeCurveSignature = { int.MinValue, int.MinValue, int.MinValue };
+        private bool updatingGameProfileUI;
         private bool[] Serial_connect_status = new bool[3] { false,false,false};
         //public byte Bridge_RSSI = 0;
         public bool[] Pedal_wireless_connection_update_b = new bool[3] { false,false,false};
@@ -196,6 +208,17 @@ namespace User.PluginSdkDemo
             
             indexOfSelectedPedal_u = plugin.Settings.table_selected;
             MyTab.SelectedIndex = (int)indexOfSelectedPedal_u;
+            SystemProfile_Tab.Settings = plugin.Settings;
+            SystemProfile_Tab.calculation = plugin._calculations;
+            RefreshGameProfileUI();
+
+            homeRefreshTimer = new DispatcherTimer(DispatcherPriority.Render)
+                { Interval = TimeSpan.FromMilliseconds(40) };
+            homeRefreshTimer.Tick += (sender, args) =>
+                UpdateHomeDashboard(++homeRefreshTicks % 12 == 0);
+            homeRefreshTimer.Start();
+            Unloaded += (sender, args) => homeRefreshTimer.Stop();
+            Loaded += (sender, args) => homeRefreshTimer.Start();
 
 
             //auto connection with timmer
@@ -209,6 +232,11 @@ namespace User.PluginSdkDemo
             connect_timer.Tick += new EventHandler(connection_timmer_tick);
             connect_timer.Interval = 5000; // in miliseconds try connect every 5s
             connect_timer.Start();
+            if (plugin.Settings.AutoProfileByGame)
+            {
+                plugin.Page_update_flag = false;
+                ApplyAutomaticProfile(plugin._calculations.profile_index);
+            }
             System.Threading.Thread.Sleep(50);
 
         }
@@ -371,6 +399,479 @@ namespace User.PluginSdkDemo
         private void SystemProfile_Tab_btn_apply_profile_Click_event(object sender, EventArgs e)
         {
             Profile_change((uint)Plugin._calculations.profile_index);
+            UpdateHomeDashboard();
+        }
+
+        private void HomeSlotApply_Click(object sender, RoutedEventArgs e)
+        {
+            if (Plugin == null) return;
+            var button = sender as System.Windows.Controls.Button;
+            uint slot;
+            if (button == null || !UInt32.TryParse(button.Tag.ToString(), out slot)) return;
+
+            if (!HasLinkedPedal((int)slot))
+            {
+                HomeApplyFeedback.Text = String.Format("Slot {0} has no enabled pedal files. Set it up in System > Profiles.",
+                    (char)('A' + slot));
+                return;
+            }
+
+            for (int pedal = 0; pedal < 3; pedal++)
+            {
+                if (Plugin.Settings.file_enable_check[slot, pedal] == 1 &&
+                    !File.Exists(Plugin.Settings.Pedal_file_string[slot, pedal]))
+                {
+                    HomeApplyFeedback.Text = String.Format("Slot {0}: a pedal config file is missing. Check System > Profiles.",
+                        (char)('A' + slot));
+                    return;
+                }
+            }
+            try
+            {
+                SystemProfile_Tab.Settings = Plugin.Settings;
+                SystemProfile_Tab.calculation = Plugin._calculations;
+                SystemProfile_Tab.ApplySlot(slot);
+                Plugin._calculations.profile_index = slot;
+                Profile_change(slot);
+                int sent = ApplyHomeSlotToConnectedPedals(slot);
+                HomeApplyFeedback.Text = sent > 0
+                    ? String.Format("{0} applied · sent to {1} connected pedal(s)",
+                        Plugin.Settings.Profile_name[slot], sent)
+                    : String.Format("{0} loaded · no connected pedal to send to",
+                        Plugin.Settings.Profile_name[slot]);
+                UpdateHomeDashboard();
+            }
+            catch (Exception ex)
+            {
+                HomeApplyFeedback.Text = "Profile could not be applied: " + ex.Message;
+            }
+        }
+
+        private int ApplyHomeSlotToConnectedPedals(uint slot)
+        {
+            int sent = 0;
+            for (int pedal = 0; pedal < 3; pedal++)
+            {
+                if (Plugin.Settings.file_enable_check[slot, pedal] != 1) continue;
+                bool connected = Plugin.Settings.Pedal_ESPNow_Sync_flag[pedal]
+                    ? Plugin.ESPsync_serialPort != null && Plugin.ESPsync_serialPort.IsOpen &&
+                        Plugin._calculations.PedalAvailability[pedal]
+                    : Plugin._serialPort[pedal] != null && Plugin._serialPort[pedal].IsOpen;
+                if (!connected) continue;
+
+                var config = dap_config_st[pedal];
+                config.payloadHeader_.version = (byte)Constants.pedalConfigPayload_version;
+                config.payloadHeader_.payloadType = (byte)Constants.pedalConfigPayload_type;
+                config.payloadPedalConfig_.pedal_type = (byte)pedal;
+                Plugin.SendConfigWithoutSaveToEEPROM(config, (byte)pedal);
+                sent++;
+            }
+            return sent;
+        }
+
+        private void HomeOpenPedals_Click(object sender, RoutedEventArgs e)
+        {
+            Function_Tab_seleciton.SelectedItem = Tab_Pedals;
+        }
+
+        private void HomeOpenSystem_Click(object sender, RoutedEventArgs e)
+        {
+            Function_Tab_seleciton.SelectedItem = Tab_System;
+        }
+
+        private void UpdateHomePedal(int pedal, TextBlock status, TextBlock value,
+            System.Windows.Controls.ProgressBar bar, Polyline graph, Polyline configGraph,
+            Line positionLine, Ellipse positionMarker,
+            TextBlock settings, WrapPanel effects, bool refreshSummary)
+        {
+            bool connected = Plugin._calculations.PedalAvailability[pedal] ||
+                             Plugin._calculations.PedalSerialAvailability[pedal];
+            double percent = connected ? Math.Max(0, Math.Min(100,
+                Pedal_output_reading[pedal] * 100.0 / 32767.0)) : 0;
+            string statusText = connected ? "Connected · live output" : "Disconnected";
+            if (status.Text != statusText) status.Text = statusText;
+            string valueText = connected ? String.Format("{0:0}%", percent) : "—";
+            if (value.Text != valueText) value.Text = valueText;
+            if (Math.Abs(bar.Value - percent) > 0.1) bar.Value = percent;
+
+            DateTime now = DateTime.UtcNow;
+            Queue<KeyValuePair<DateTime, double>> history = homePedalHistory[pedal];
+            if (history.Count == 0 || now - lastHomeOutputSampleUtc[pedal] >= HomeOutputSampleInterval)
+            {
+                history.Enqueue(new KeyValuePair<DateTime, double>(now, percent));
+                lastHomeOutputSampleUtc[pedal] = now;
+            }
+            while (history.Count > 0 && now - history.Peek().Key > HomeOutputWindow)
+                history.Dequeue();
+            var points = new PointCollection();
+            foreach (KeyValuePair<DateTime, double> sample in history)
+            {
+                double x = 700 - (now - sample.Key).TotalSeconds * 70;
+                points.Add(new Point(x, 100 - sample.Value));
+            }
+            graph.Points = points;
+
+            UpdateHomePositionMarker(connected, Pedal_travel_reading[pedal],
+                configGraph, positionLine, positionMarker);
+
+            if (!refreshSummary) return;
+            var config = dap_config_st[pedal].payloadPedalConfig_;
+            string settingsText = String.Format("Max {0:0.#} kg · Travel {1}–{2}%",
+                config.maxForce, config.pedalStartPosition, config.pedalEndPosition);
+            if (settings.Text != settingsText) settings.Text = settingsText;
+            UpdateHomeEffectTags(pedal, effects, graph.Stroke);
+            UpdateHomeConfigGraph(pedal, config, configGraph);
+            UpdateHomePositionMarker(connected, Pedal_travel_reading[pedal],
+                configGraph, positionLine, positionMarker);
+        }
+
+        private void UpdateHomeEffectTags(int pedal, WrapPanel panel, Brush accent)
+        {
+            var names = new List<string>();
+            var settings = Plugin.Settings;
+            if (settings.ABS_enable_flag[pedal] == 1) names.Add("ABS");
+            if (settings.RPM_enable_flag[pedal] == 1) names.Add("RPM");
+            if (dap_config_st[pedal].payloadPedalConfig_.BP_trigger == 1) names.Add("BITE POINT");
+            if (settings.G_force_enable_flag[pedal] == 1) names.Add("G-FORCE");
+            if (settings.WS_enable_flag[pedal] == 1) names.Add("WHEEL SLIP");
+            if (settings.Road_impact_enable_flag[pedal] == 1) names.Add("ROAD IMPACT");
+            if (settings.CV1_enable_flag[pedal]) names.Add("CUSTOM 1");
+            if (settings.CV2_enable_flag[pedal]) names.Add("CUSTOM 2");
+
+            string signature = String.Join("|", names);
+            if (Equals(panel.Tag, signature)) return;
+            panel.Tag = signature;
+            panel.Children.Clear();
+            foreach (string name in names)
+            {
+                panel.Children.Add(new Border
+                {
+                    Background = new SolidColorBrush(Color.FromRgb(45, 54, 63)),
+                    BorderBrush = accent,
+                    BorderThickness = new Thickness(1),
+                    CornerRadius = new CornerRadius(10),
+                    Padding = new Thickness(7, 2, 7, 2),
+                    Margin = new Thickness(0, 0, 5, 5),
+                    Child = new TextBlock { Text = name, Foreground = accent, FontSize = 9 }
+                });
+            }
+        }
+
+        private void UpdateHomePositionMarker(bool connected, double rawTravel,
+            Polyline configGraph, Line positionLine, Ellipse positionMarker)
+        {
+            PointCollection curve = configGraph.Points;
+            if (!connected || curve == null || curve.Count < 2)
+            {
+                positionLine.Visibility = Visibility.Collapsed;
+                positionMarker.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            double x = Math.Max(0, Math.Min(202, rawTravel * 202.0 / 65535.0));
+            double y = curve[curve.Count - 1].Y;
+            for (int point = 1; point < curve.Count; point++)
+            {
+                if (x <= curve[point].X)
+                {
+                    double span = curve[point].X - curve[point - 1].X;
+                    double fraction = span > 0 ? (x - curve[point - 1].X) / span : 0;
+                    y = curve[point - 1].Y + fraction * (curve[point].Y - curve[point - 1].Y);
+                    break;
+                }
+            }
+            positionLine.X1 = x;
+            positionLine.X2 = x;
+            Canvas.SetLeft(positionMarker, Math.Max(0, Math.Min(192, x - 5)));
+            Canvas.SetTop(positionMarker, Math.Max(0, Math.Min(68, y - 5)));
+            positionLine.Visibility = Visibility.Visible;
+            positionMarker.Visibility = Visibility.Visible;
+        }
+
+        private void UpdateHomeConfigGraph(int pedal, payloadPedalConfig config, Polyline graph)
+        {
+            byte[] travel = { config.relativeTravel00, config.relativeTravel01, config.relativeTravel02,
+                config.relativeTravel03, config.relativeTravel04, config.relativeTravel05,
+                config.relativeTravel06, config.relativeTravel07, config.relativeTravel08,
+                config.relativeTravel09, config.relativeTravel10 };
+            byte[] force = { config.relativeForce00, config.relativeForce01, config.relativeForce02,
+                config.relativeForce03, config.relativeForce04, config.relativeForce05,
+                config.relativeForce06, config.relativeForce07, config.relativeForce08,
+                config.relativeForce09, config.relativeForce10 };
+            int count = Math.Min(11, (int)config.quantityOfControl);
+            int signature = count;
+            for (int point = 0; point < count; point++)
+                signature = unchecked(signature * 31 + travel[point] * 101 + force[point]);
+            if (homeCurveSignature[pedal] == signature) return;
+            homeCurveSignature[pedal] = signature;
+            var x = new List<double>();
+            var y = new List<double>();
+            for (int point = 0; point < count; point++)
+            {
+                if (x.Count > 0 && travel[point] <= x[x.Count - 1]) continue;
+                x.Add(travel[point]);
+                y.Add(force[point]);
+            }
+            if (x.Count < 2)
+            {
+                graph.Points = new PointCollection();
+                return;
+            }
+            var curve = Cubic.Interpolate1D(x.ToArray(), y.ToArray(), 51);
+            var points = new PointCollection();
+            for (int point = 0; point < curve.xs.Length; point++)
+            {
+                double px = Math.Max(0, Math.Min(100, curve.xs[point])) * 2.02;
+                double py = 78 - Math.Max(0, Math.Min(100, curve.ys[point])) * 0.78;
+                points.Add(new Point(px, py));
+            }
+            graph.Points = points;
+        }
+
+        private void UpdateHomeDashboard(bool refreshSummary = true)
+        {
+            if (Plugin == null || HomeGasStatus == null) return;
+            if (refreshSummary)
+            {
+                uint slot = Plugin._calculations.profile_index;
+                if (slot < 6)
+                {
+                    string profileText = String.Format("Slot {0} · {1}",
+                        (char)('A' + slot), Plugin.Settings.Profile_name[slot]);
+                    if (HomeCurrentProfile.Text != profileText) HomeCurrentProfile.Text = profileText;
+                }
+                UpdateHomeSlotButton(HomeSlotA, 0);
+                UpdateHomeSlotButton(HomeSlotB, 1);
+                UpdateHomeSlotButton(HomeSlotC, 2);
+                int connected = 0;
+                for (int pedal = 0; pedal < 3; pedal++)
+                {
+                    if (Plugin._calculations.PedalAvailability[pedal] ||
+                        Plugin._calculations.PedalSerialAvailability[pedal]) connected++;
+                }
+                string connectionText = String.Format("{0} of 3 pedals connected", connected);
+                if (HomeConnectionSummary.Text != connectionText)
+                    HomeConnectionSummary.Text = connectionText;
+                string gameText = String.IsNullOrWhiteSpace(Plugin.Current_Game)
+                    ? "Current game: none" : "Current game: " + Plugin.Current_Game;
+                if (GameProfileCurrentGame.Text != gameText)
+                    GameProfileCurrentGame.Text = gameText;
+            }
+            if (Function_Tab_seleciton.SelectedItem != Tab_Home) return;
+
+            UpdateHomePedal(2, HomeGasStatus, HomeGasValue, HomeGasBar, HomeGasGraph,
+                HomeGasConfigGraph, HomeGasPositionLine, HomeGasPositionMarker,
+                HomeGasSettings, HomeGasEffects, refreshSummary);
+            UpdateHomePedal(1, HomeBrakeStatus, HomeBrakeValue, HomeBrakeBar, HomeBrakeGraph,
+                HomeBrakeConfigGraph, HomeBrakePositionLine, HomeBrakePositionMarker,
+                HomeBrakeSettings, HomeBrakeEffects, refreshSummary);
+            UpdateHomePedal(0, HomeClutchStatus, HomeClutchValue, HomeClutchBar, HomeClutchGraph,
+                HomeClutchConfigGraph, HomeClutchPositionLine, HomeClutchPositionMarker,
+                HomeClutchSettings, HomeClutchEffects, refreshSummary);
+        }
+
+        private void UpdateHomeSlotButton(System.Windows.Controls.Button button, int slot)
+        {
+            string name = Plugin.Settings.Profile_name[slot];
+            string label = String.IsNullOrWhiteSpace(name)
+                ? String.Format("Slot {0} Apply", (char)('A' + slot))
+                : name.Trim() + " Apply";
+            if (!Equals(button.Content, label)) button.Content = label;
+            string tooltip = String.Format("Apply Slot {0}: {1}", (char)('A' + slot), name);
+            if (!Equals(button.ToolTip, tooltip)) button.ToolTip = tooltip;
+        }
+
+        private bool HasLinkedPedal(int slot)
+        {
+            for (int pedal = 0; pedal < 3; pedal++)
+            {
+                if (Plugin.Settings.file_enable_check[slot, pedal] == 1) return true;
+            }
+            return false;
+        }
+
+        private sealed class GameProfileMappingItem
+        {
+            public string GameCode { get; set; }
+            public int Slot { get; set; }
+            public string SlotName { get; set; }
+            public override string ToString()
+            {
+                return String.Format("{0}  →  {1}: {2}", GameCode, (char)('A' + Slot), SlotName);
+            }
+        }
+
+        private void RefreshGameProfileUI()
+        {
+            if (Plugin == null || GameProfileGame == null) return;
+            updatingGameProfileUI = true;
+            try
+            {
+                if (Plugin.Settings.GameProfileSlots == null)
+                    Plugin.Settings.GameProfileSlots = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+                GameProfileAutoEnabled.IsChecked = Plugin.Settings.AutoProfileByGame;
+                GameProfileDefaultSlot.Items.Clear();
+                GameProfileSlot.Items.Clear();
+                for (int slot = 0; slot < 6; slot++)
+                {
+                    string label = String.Format("{0}: {1}", (char)('A' + slot),
+                        Plugin.Settings.Profile_name[slot]);
+                    GameProfileDefaultSlot.Items.Add(label);
+                    GameProfileSlot.Items.Add(label);
+                }
+                GameProfileDefaultSlot.SelectedIndex = Math.Max(0,
+                    Math.Min(5, Plugin.Settings.DefaultProfileSlot));
+                if (GameProfileSlot.SelectedIndex < 0) GameProfileSlot.SelectedIndex = 0;
+
+                string selectedGame = GameProfileGame.Text;
+                GameProfileGame.Items.Clear();
+                var gameCodes = new HashSet<string>(Plugin.Settings.GameProfileSlots.Keys,
+                    StringComparer.OrdinalIgnoreCase);
+                string gameDataPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PluginsData");
+                if (Directory.Exists(gameDataPath))
+                {
+                    foreach (string directory in Directory.GetDirectories(gameDataPath))
+                    {
+                        string code = System.IO.Path.GetFileName(directory);
+                        if (code != "Common" && code != "_Backups" &&
+                            code != "MotionRecords" && code != "MotionTrackProfiles")
+                            gameCodes.Add(code);
+                    }
+                }
+                if (!String.IsNullOrWhiteSpace(Plugin.Current_Game))
+                    gameCodes.Add(Plugin.Current_Game);
+                foreach (string code in gameCodes.OrderBy(code => code, StringComparer.OrdinalIgnoreCase))
+                    GameProfileGame.Items.Add(code);
+                GameProfileGame.Text = selectedGame;
+
+                GameProfileMappings.Items.Clear();
+                foreach (var mapping in Plugin.Settings.GameProfileSlots.OrderBy(item => item.Key,
+                    StringComparer.OrdinalIgnoreCase))
+                {
+                    if (mapping.Value < 0 || mapping.Value > 5) continue;
+                    GameProfileMappings.Items.Add(new GameProfileMappingItem
+                    {
+                        GameCode = mapping.Key,
+                        Slot = mapping.Value,
+                        SlotName = Plugin.Settings.Profile_name[mapping.Value]
+                    });
+                }
+                GameProfileStatus.Text = String.Format("{0} game codes available", gameCodes.Count);
+            }
+            catch (Exception ex)
+            {
+                GameProfileStatus.Text = "Could not read game list: " + ex.Message;
+            }
+            finally
+            {
+                updatingGameProfileUI = false;
+            }
+        }
+
+        private void GameProfileAutoEnabled_Changed(object sender, RoutedEventArgs e)
+        {
+            if (Plugin == null || updatingGameProfileUI) return;
+            Plugin.Settings.AutoProfileByGame = GameProfileAutoEnabled.IsChecked == true;
+            Plugin.RequestAutomaticProfileRefresh();
+        }
+
+        private void GameProfileDefaultSlot_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (Plugin == null || updatingGameProfileUI || GameProfileDefaultSlot.SelectedIndex < 0) return;
+            Plugin.Settings.DefaultProfileSlot = GameProfileDefaultSlot.SelectedIndex;
+            Plugin.RequestAutomaticProfileRefresh();
+        }
+
+        private void GameProfileSave_Click(object sender, RoutedEventArgs e)
+        {
+            if (Plugin == null) return;
+            string code = GameProfileGame.Text.Trim();
+            int slot = GameProfileSlot.SelectedIndex;
+            if (code.Length == 0 || slot < 0 || slot > 5)
+            {
+                GameProfileStatus.Text = "Choose a game and a slot first.";
+                return;
+            }
+            var mappings = new Dictionary<string, int>(Plugin.Settings.GameProfileSlots,
+                StringComparer.OrdinalIgnoreCase);
+            mappings[code] = slot;
+            Plugin.Settings.GameProfileSlots = mappings;
+            RefreshGameProfileUI();
+            GameProfileGame.Text = code;
+            GameProfileStatus.Text = String.Format("{0} → Slot {1} saved", code, (char)('A' + slot));
+            Plugin.RequestAutomaticProfileRefresh();
+        }
+
+        private void GameProfileRemove_Click(object sender, RoutedEventArgs e)
+        {
+            if (Plugin == null) return;
+            var mapping = GameProfileMappings.SelectedItem as GameProfileMappingItem;
+            if (mapping == null) return;
+            var mappings = new Dictionary<string, int>(Plugin.Settings.GameProfileSlots,
+                StringComparer.OrdinalIgnoreCase);
+            mappings.Remove(mapping.GameCode);
+            Plugin.Settings.GameProfileSlots = mappings;
+            RefreshGameProfileUI();
+            GameProfileStatus.Text = mapping.GameCode + " mapping removed";
+            Plugin.RequestAutomaticProfileRefresh();
+        }
+
+        private void GameProfileRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshGameProfileUI();
+        }
+
+        private void GameProfileMappings_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (updatingGameProfileUI) return;
+            var mapping = GameProfileMappings.SelectedItem as GameProfileMappingItem;
+            if (mapping == null) return;
+            GameProfileGame.Text = mapping.GameCode;
+            GameProfileSlot.SelectedIndex = mapping.Slot;
+        }
+
+        public void ApplyAutomaticProfile(uint slot)
+        {
+            if (Plugin == null || !Plugin.Settings.AutoProfileByGame || slot > 5) return;
+            if (!HasLinkedPedal((int)slot))
+            {
+                GameProfileStatus.Text = String.Format("Slot {0} has no enabled pedal files", (char)('A' + slot));
+                HomeApplyFeedback.Text = GameProfileStatus.Text;
+                SimHub.Logging.Current.Error("DIY pedal auto profile: " + GameProfileStatus.Text);
+                return;
+            }
+            for (int pedal = 0; pedal < 3; pedal++)
+            {
+                if (Plugin.Settings.file_enable_check[slot, pedal] == 1 &&
+                    !File.Exists(Plugin.Settings.Pedal_file_string[slot, pedal]))
+                {
+                    GameProfileStatus.Text = String.Format("Slot {0} has a missing config file", (char)('A' + slot));
+                    HomeApplyFeedback.Text = GameProfileStatus.Text;
+                    SimHub.Logging.Current.Error("DIY pedal auto profile: " + GameProfileStatus.Text);
+                    return;
+                }
+            }
+            try
+            {
+                SystemProfile_Tab.Settings = Plugin.Settings;
+                SystemProfile_Tab.calculation = Plugin._calculations;
+                SystemProfile_Tab.ApplySlot(slot);
+                Plugin._calculations.profile_index = slot;
+                Profile_change(slot);
+                int sent = ApplyHomeSlotToConnectedPedals(slot);
+                GameProfileStatus.Text = String.Format("Slot {0} applied · {1} pedal(s) updated",
+                    (char)('A' + slot), sent);
+                HomeApplyFeedback.Text = "Auto profile: " + GameProfileStatus.Text;
+                SimHub.Logging.Current.Info("DIY pedal auto profile: " + GameProfileStatus.Text);
+                UpdateHomeDashboard();
+            }
+            catch (Exception ex)
+            {
+                GameProfileStatus.Text = "Auto switch failed: " + ex.Message;
+                HomeApplyFeedback.Text = GameProfileStatus.Text;
+                SimHub.Logging.Current.Error("DIY pedal auto profile: " + ex);
+            }
         }
 
         private void SystemLicense_Tab_btn_test_Click_event(object sender, EventArgs e)

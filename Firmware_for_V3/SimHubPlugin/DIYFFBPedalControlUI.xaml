@@ -386,11 +386,26 @@
                     </Trigger>
                 </Style.Triggers>
             </Style>
+            <Style x:Key="HomeCard" TargetType="Border">
+                <Setter Property="Background" Value="#FF30343B"/>
+                <Setter Property="CornerRadius" Value="12"/>
+                <Setter Property="Padding" Value="18"/>
+                <Setter Property="Margin" Value="5"/>
+            </Style>
+            <Style x:Key="HomeQuickButton" TargetType="Button">
+                <Setter Property="Background" Value="#FF414954"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="18,10"/>
+                <Setter Property="Margin" Value="4"/>
+                <Setter Property="Cursor" Value="Hand"/>
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Width="810">
-        <Grid RenderTransformOrigin="0,0" Width="810" Height="900">
-            <TabControl  x:Name="Function_Tab_seleciton"  SelectionChanged="Function_Tab_seleciton_SelectionChanged" Width="770" Grid.ColumnSpan="2" HorizontalContentAlignment="Left" HorizontalAlignment="Left" VerticalAlignment="Top" Height="910" RenderTransformOrigin="0,0" Grid.RowSpan="1">
+    <Grid>
+        <Viewbox Stretch="Uniform" StretchDirection="Both" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Grid Width="810" Height="920">
+            <TabControl x:Name="Function_Tab_seleciton" SelectionChanged="Function_Tab_seleciton_SelectionChanged" Width="810" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Height="920">
                 <TabControl.Resources>
                     <Style TargetType="TabItem">
                         <Setter Property="Template">
@@ -428,6 +443,142 @@
                 <TabControl.Background>
                     <SolidColorBrush Color="#FF252525" Opacity="0"/>
                 </TabControl.Background>
+                <TabItem x:Name="Tab_Home" Width="200" Height="40" Padding="0" HorizontalAlignment="Left">
+                    <TabItem.Header>
+                        <Border Width="200" Height="40">
+                            <TextBlock Text="HOME" FontFamily="Arial Black" FontSize="24" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                    </TabItem.Header>
+                    <Grid Background="#FF25282D" Margin="0,3,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="90"/>
+                            <RowDefinition Height="330"/>
+                            <RowDefinition Height="150"/>
+                            <RowDefinition Height="140"/>
+                            <RowDefinition Height="110"/>
+                        </Grid.RowDefinitions>
+                        <Grid Margin="20,15,20,10">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="PEDAL OVERVIEW" FontSize="27" FontWeight="Bold" Foreground="White"/>
+                                <TextBlock Text="Live output and current profile at a glance" FontSize="12" Foreground="#FFABB4BE" Margin="0,6,0,0"/>
+                            </StackPanel>
+                            <Border Grid.Column="1" Background="#FF343B44" CornerRadius="8" Padding="14,9" VerticalAlignment="Center">
+                                <StackPanel>
+                                    <TextBlock Text="ACTIVE PROFILE" Foreground="#FFABB4BE" FontSize="10"/>
+                                    <TextBlock x:Name="HomeCurrentProfile" Text="Slot A" Foreground="White" FontSize="17" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                        <Grid Grid.Row="1" Margin="15,0">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Style="{StaticResource HomeCard}">
+                                <StackPanel>
+                                    <TextBlock Text="ACCELERATOR" Foreground="#FF62D2BA" FontWeight="Bold" FontSize="14"/>
+                                    <TextBlock x:Name="HomeGasStatus" Text="Disconnected" Foreground="#FFABB4BE" FontSize="11" Margin="0,6,0,0"/>
+                                    <TextBlock x:Name="HomeGasValue" Text="0%" Foreground="White" FontSize="36" FontWeight="Bold" Margin="0,8,0,2"/>
+                                    <ProgressBar x:Name="HomeGasBar" Maximum="100" Height="10" Foreground="#FF62D2BA" Background="#FF1D2228"/>
+                                    <TextBlock Text="FORCE–TRAVEL SETUP" Foreground="#FFABB4BE" FontSize="10" Margin="0,14,0,3"/>
+                                    <Border Background="#FF232A31" CornerRadius="7" Height="82">
+                                        <Canvas Width="202" Height="78" ClipToBounds="True">
+                                            <Polyline x:Name="HomeGasConfigGraph" Stroke="#FFB5EFE3" StrokeThickness="2" StrokeLineJoin="Round"/>
+                                            <Line x:Name="HomeGasPositionLine" Y1="0" Y2="78" Stroke="#99FFFFFF" StrokeThickness="1" StrokeDashArray="3,3" Visibility="Collapsed"/>
+                                            <Ellipse x:Name="HomeGasPositionMarker" Width="10" Height="10" Fill="#FF62D2BA" Stroke="White" StrokeThickness="1.5" Visibility="Collapsed"/>
+                                        </Canvas>
+                                    </Border>
+                                    <TextBlock x:Name="HomeGasSettings" Text="Force / travel —" Foreground="#FFCCD2D9" FontSize="11" TextWrapping="Wrap"/>
+                                    <WrapPanel x:Name="HomeGasEffects" Margin="0,7,0,0"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Grid.Column="1" Style="{StaticResource HomeCard}">
+                                <StackPanel>
+                                    <TextBlock Text="BRAKE" Foreground="#FFFFAA75" FontWeight="Bold" FontSize="14"/>
+                                    <TextBlock x:Name="HomeBrakeStatus" Text="Disconnected" Foreground="#FFABB4BE" FontSize="11" Margin="0,6,0,0"/>
+                                    <TextBlock x:Name="HomeBrakeValue" Text="0%" Foreground="White" FontSize="36" FontWeight="Bold" Margin="0,8,0,2"/>
+                                    <ProgressBar x:Name="HomeBrakeBar" Maximum="100" Height="10" Foreground="#FFFFAA75" Background="#FF1D2228"/>
+                                    <TextBlock Text="FORCE–TRAVEL SETUP" Foreground="#FFABB4BE" FontSize="10" Margin="0,14,0,3"/>
+                                    <Border Background="#FF232A31" CornerRadius="7" Height="82">
+                                        <Canvas Width="202" Height="78" ClipToBounds="True">
+                                            <Polyline x:Name="HomeBrakeConfigGraph" Stroke="#FFFFD0AE" StrokeThickness="2" StrokeLineJoin="Round"/>
+                                            <Line x:Name="HomeBrakePositionLine" Y1="0" Y2="78" Stroke="#99FFFFFF" StrokeThickness="1" StrokeDashArray="3,3" Visibility="Collapsed"/>
+                                            <Ellipse x:Name="HomeBrakePositionMarker" Width="10" Height="10" Fill="#FFFFAA75" Stroke="White" StrokeThickness="1.5" Visibility="Collapsed"/>
+                                        </Canvas>
+                                    </Border>
+                                    <TextBlock x:Name="HomeBrakeSettings" Text="Force / travel —" Foreground="#FFCCD2D9" FontSize="11" TextWrapping="Wrap"/>
+                                    <WrapPanel x:Name="HomeBrakeEffects" Margin="0,7,0,0"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Grid.Column="2" Style="{StaticResource HomeCard}">
+                                <StackPanel>
+                                    <TextBlock Text="CLUTCH" Foreground="#FF9DB7FF" FontWeight="Bold" FontSize="14"/>
+                                    <TextBlock x:Name="HomeClutchStatus" Text="Disconnected" Foreground="#FFABB4BE" FontSize="11" Margin="0,6,0,0"/>
+                                    <TextBlock x:Name="HomeClutchValue" Text="0%" Foreground="White" FontSize="36" FontWeight="Bold" Margin="0,8,0,2"/>
+                                    <ProgressBar x:Name="HomeClutchBar" Maximum="100" Height="10" Foreground="#FF9DB7FF" Background="#FF1D2228"/>
+                                    <TextBlock Text="FORCE–TRAVEL SETUP" Foreground="#FFABB4BE" FontSize="10" Margin="0,14,0,3"/>
+                                    <Border Background="#FF232A31" CornerRadius="7" Height="82">
+                                        <Canvas Width="202" Height="78" ClipToBounds="True">
+                                            <Polyline x:Name="HomeClutchConfigGraph" Stroke="#FFD0DDFF" StrokeThickness="2" StrokeLineJoin="Round"/>
+                                            <Line x:Name="HomeClutchPositionLine" Y1="0" Y2="78" Stroke="#99FFFFFF" StrokeThickness="1" StrokeDashArray="3,3" Visibility="Collapsed"/>
+                                            <Ellipse x:Name="HomeClutchPositionMarker" Width="10" Height="10" Fill="#FF9DB7FF" Stroke="White" StrokeThickness="1.5" Visibility="Collapsed"/>
+                                        </Canvas>
+                                    </Border>
+                                    <TextBlock x:Name="HomeClutchSettings" Text="Force / travel —" Foreground="#FFCCD2D9" FontSize="11" TextWrapping="Wrap"/>
+                                    <WrapPanel x:Name="HomeClutchEffects" Margin="0,7,0,0"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                        <Border Grid.Row="2" Style="{StaticResource HomeCard}" Margin="20,5,20,5">
+                            <Grid>
+                                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <TextBlock Text="LIVE PEDAL OUTPUT" Foreground="White" FontSize="15" FontWeight="Bold"/>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <TextBlock Text="● ACCELERATOR" Foreground="#FF62D2BA" FontSize="10" Margin="0,0,12,0"/>
+                                        <TextBlock Text="● BRAKE" Foreground="#FFFFAA75" FontSize="10" Margin="0,0,12,0"/>
+                                        <TextBlock Text="● CLUTCH" Foreground="#FF9DB7FF" FontSize="10"/>
+                                    </StackPanel>
+                                </Grid>
+                                <Border Grid.Row="1" Background="#FF232A31" CornerRadius="7" Margin="0,8,0,0" ClipToBounds="True">
+                                    <Viewbox Stretch="Fill">
+                                        <Canvas Width="700" Height="100" ClipToBounds="True">
+                                            <Line X1="0" X2="700" Y1="50" Y2="50" Stroke="#223F4A55" StrokeThickness="1"/>
+                                            <Polyline x:Name="HomeGasGraph" Stroke="#FF62D2BA" StrokeThickness="2.5" StrokeLineJoin="Round"/>
+                                            <Polyline x:Name="HomeBrakeGraph" Stroke="#FFFFAA75" StrokeThickness="2.5" StrokeLineJoin="Round"/>
+                                            <Polyline x:Name="HomeClutchGraph" Stroke="#FF9DB7FF" StrokeThickness="2.5" StrokeLineJoin="Round"/>
+                                        </Canvas>
+                                    </Viewbox>
+                                </Border>
+                            </Grid>
+                        </Border>
+                        <Border Grid.Row="3" Style="{StaticResource HomeCard}" Margin="20,5,20,5">
+                            <StackPanel>
+                                <TextBlock Text="QUICK PROFILES" Foreground="White" FontSize="16" FontWeight="Bold"/>
+                                <TextBlock Text="Apply saved pedal settings and effects in one click" Foreground="#FFABB4BE" FontSize="11" Margin="0,5,0,10"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button x:Name="HomeSlotA" Style="{StaticResource HomeQuickButton}" Content="Slot A Apply" Tag="0" Click="HomeSlotApply_Click"/>
+                                    <Button x:Name="HomeSlotB" Style="{StaticResource HomeQuickButton}" Content="Slot B Apply" Tag="1" Click="HomeSlotApply_Click"/>
+                                    <Button x:Name="HomeSlotC" Style="{StaticResource HomeQuickButton}" Content="Slot C Apply" Tag="2" Click="HomeSlotApply_Click"/>
+                                </StackPanel>
+                                <TextBlock x:Name="HomeApplyFeedback" Foreground="#FFB5EFE3" FontSize="11" Margin="4,5,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Row="4" Style="{StaticResource HomeCard}" Margin="20,5,20,5">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="SYSTEM STATUS" Foreground="White" FontSize="16" FontWeight="Bold"/>
+                                    <TextBlock x:Name="HomeConnectionSummary" Text="Checking pedal connections…" Foreground="#FFCCD2D9" FontSize="13" Margin="0,10,0,0"/>
+                                    <TextBlock Text="Use Pedals for detailed tuning or System for slots D–F." Foreground="#FFABB4BE" FontSize="11" Margin="0,8,0,0"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Button Style="{StaticResource HomeQuickButton}" Content="Pedals →" Click="HomeOpenPedals_Click"/>
+                                    <Button Style="{StaticResource HomeQuickButton}" Content="System →" Click="HomeOpenSystem_Click"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </TabItem>
                 <TabItem x:Name="Tab_Pedals" Width="200" Height="40" Padding="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
                     <TabItem.Header>
                         <Border  Width="200" Height="40" Margin="0,0,0,0" >
@@ -1056,6 +1207,29 @@
                                         </TabItem>
                                     </TabControl>
 
+                                    <Border Width="540" Height="265" Background="#7F4E4E4E" CornerRadius="6" Margin="1,6,0,0" Padding="12,8">
+                                        <StackPanel>
+                                            <TextBlock Text="GAME PROFILE SWITCHING" Foreground="White" FontSize="13" FontWeight="Bold"/>
+                                            <TextBlock x:Name="GameProfileCurrentGame" Text="Current game: none" Foreground="#FFB5EFE3" FontSize="10" Margin="0,3,0,0"/>
+                                            <CheckBox x:Name="GameProfileAutoEnabled" Content="Automatically switch profiles when a game starts" Foreground="White" FontSize="11" Margin="0,6,0,4" Checked="GameProfileAutoEnabled_Changed" Unchecked="GameProfileAutoEnabled_Changed"/>
+                                            <StackPanel Orientation="Horizontal" Height="27">
+                                                <TextBlock Text="Default / no game" Foreground="#FFCCCCCC" Width="122" VerticalAlignment="Center" FontSize="11"/>
+                                                <ComboBox x:Name="GameProfileDefaultSlot" Width="170" Height="23" SelectionChanged="GameProfileDefaultSlot_SelectionChanged"/>
+                                                <TextBlock Text="Unmapped games use this slot" Foreground="#FFAAAAAA" Margin="9,0,0,0" VerticalAlignment="Center" FontSize="10"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Height="31" Margin="0,5,0,0">
+                                                <ComboBox x:Name="GameProfileGame" Width="230" Height="24" IsEditable="True" IsTextSearchEnabled="True" ToolTip="SimHub game code; choose a used game or type a code"/>
+                                                <ComboBox x:Name="GameProfileSlot" Width="130" Height="24" Margin="6,0,0,0"/>
+                                                <Button Content="Save" Width="62" Height="24" Margin="6,0,0,0" Click="GameProfileSave_Click"/>
+                                                <Button Content="Refresh" Width="64" Height="24" Margin="5,0,0,0" Click="GameProfileRefresh_Click"/>
+                                            </StackPanel>
+                                            <ListBox x:Name="GameProfileMappings" Height="76" Margin="0,4,0,0" FontSize="11" SelectionChanged="GameProfileMappings_SelectionChanged"/>
+                                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                                <Button Content="Remove selected" Width="110" Height="22" Click="GameProfileRemove_Click"/>
+                                                <TextBlock x:Name="GameProfileStatus" Foreground="#FFCCCCCC" FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
 
                                     <StackPanel Width="540" Height="281" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="1,3,0,0">
                                         <Border  HorizontalAlignment="Left" Height="281" VerticalAlignment="Top" Width="540" Background="#7F4E4E4E" CornerRadius="5,5,5,5">
@@ -1078,7 +1252,7 @@
                     </Border>
                 </TabItem>
             </TabControl>
-
         </Grid>
-    </ScrollViewer>
+        </Viewbox>
+    </Grid>
 </UserControl>
