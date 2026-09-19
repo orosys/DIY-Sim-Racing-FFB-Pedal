@@ -2258,8 +2258,22 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
         servoActionLast = millis();
       }
 
-      // Check if pedal needs to wake up from standby / homing request
-      if (g_pedalOperationalState_u8 == (uint8_t)PEDAL_STATE_HOMING_E) {
+      // Check if pedal needs to wake up from standby / homing request.
+      // Wait for ESP-NOW/Wi-Fi init to finish first: it runs concurrently on
+      // another core during boot and its driver init + task stack alone eat
+      // most of the free heap, so starting homing (esp_timer_create +
+      // stepper motion-planner state) at the same moment can push free heap
+      // low enough that esp_now_send() starts failing with
+      // ESP_ERR_ESPNOW_NO_MEM. Re-checked every tick, so this just delays
+      // homing start by however long Wi-Fi/ESP-NOW init takes (a few
+      // hundred ms), not indefinitely.
+#ifdef ESPNOW_Enable
+      bool wirelessReadyForHoming_b = wirelessComm.isInitialStatusDone();
+#else
+      bool wirelessReadyForHoming_b = true;
+#endif
+      if (g_pedalOperationalState_u8 == (uint8_t)PEDAL_STATE_HOMING_E &&
+          wirelessReadyForHoming_b) {
         Buzzer.single_beep_tone(770, 100);
         delay(300);
         Buzzer.single_beep_tone(770, 100);
