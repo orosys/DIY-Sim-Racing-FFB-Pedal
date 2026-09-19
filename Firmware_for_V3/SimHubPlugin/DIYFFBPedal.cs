@@ -1409,6 +1409,7 @@ namespace User.PluginSdkDemo
                 
                 
 
+                wpfHandle.closeSharedConnections();
                 for (uint pedalIdx = 0; pedalIdx < 3; pedalIdx++)
                 {
                     wpfHandle.closeSerialAndStopReadCallback(pedalIdx);
