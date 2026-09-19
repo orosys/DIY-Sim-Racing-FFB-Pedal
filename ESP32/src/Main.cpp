@@ -992,7 +992,8 @@ void setup() {
   // System-Pointer auf den Manager umbiegen
   ActiveSerial = &usbManager;
 
-  delay(5000);
+  // delay(5000);
+
   // One-time boot diagnostic: establishes the true heap baseline before any
   // tasks/WiFi/ESP-NOW are started, and whether PSRAM is present/enabled -
   // ESP.getPsramSize() returns 0 both when there's no PSRAM chip and when
@@ -1536,20 +1537,26 @@ void setup() {
   dap_calculationVariables_st.helicopterRudderStatus_b = false;
   dap_calculationVariables_st.rudderBrakeStatus_b = false;
   ActiveSerial->println("Starting ESP now tasks");
-  ActiveSerial->printf("[Boot] Heap before wirelessComm.begin(): Free=%u Min=%u LargestFreeBlock=%u\n",
-                       esp_get_free_heap_size(), esp_get_minimum_free_heap_size(),
+  ActiveSerial->printf("[Boot] Heap before wirelessComm.begin(): Free=%u "
+                       "Min=%u LargestFreeBlock=%u\n",
+                       esp_get_free_heap_size(),
+                       esp_get_minimum_free_heap_size(),
                        heap_caps_get_largest_free_block(MALLOC_CAP_8BIT));
   wirelessComm.begin(loadMacAddressesFromEeprom());
-  ActiveSerial->printf("[Boot] Heap after wirelessComm.begin(): Free=%u Min=%u LargestFreeBlock=%u\n",
-                       esp_get_free_heap_size(), esp_get_minimum_free_heap_size(),
+  ActiveSerial->printf("[Boot] Heap after wirelessComm.begin(): Free=%u Min=%u "
+                       "LargestFreeBlock=%u\n",
+                       esp_get_free_heap_size(),
+                       esp_get_minimum_free_heap_size(),
                        heap_caps_get_largest_free_block(MALLOC_CAP_8BIT));
   ActiveSerial->println("ESPNOW initialized, add task in");
   addScheduledTask(espNowCommunicationTaskTx, "ESPNOW_update_Task",
                    REPETITION_INTERVAL_ESPNOW_TASK_IN_US_I64,
                    TASK_PRIORITY_ESPNOW_TASK_UBASETYPE, CORE_ID_ESPNOW_TASK_U8,
                    10000);
-  ActiveSerial->printf("[Boot] Heap after ESPNOW task created: Free=%u Min=%u LargestFreeBlock=%u\n",
-                       esp_get_free_heap_size(), esp_get_minimum_free_heap_size(),
+  ActiveSerial->printf("[Boot] Heap after ESPNOW task created: Free=%u Min=%u "
+                       "LargestFreeBlock=%u\n",
+                       esp_get_free_heap_size(),
+                       esp_get_minimum_free_heap_size(),
                        heap_caps_get_largest_free_block(MALLOC_CAP_8BIT));
   ActiveSerial->println("ESPNOW task added");
   delay(500);

@@ -637,6 +637,121 @@ namespace DiyFfbPedal.UIFunction
             }
         }
 
+        private async void btn_clear_mac_usb_Click(object sender, RoutedEventArgs e)
+        {
+            if (Plugin == null) return;
+
+            var confirm = System.Windows.MessageBox.Show(
+                "This erases the MAC address table (Bridge + all 3 Pedals) from EEPROM on every USB-connected device, and clears it here. " +
+                "Devices will need to be re-paired (Auto-Detect + Sync to All Devices) afterwards.\n\nContinue?",
+                "Clear MAC List",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+            if (confirm != MessageBoxResult.Yes) return;
+
+            byte keepChannel = GetSelectedWifiChannel();
+            tb_scan_status.Text = "Clearing MAC address table on all USB-connected devices...";
+            btn_clear_mac_usb.IsEnabled = false;
+
+            try
+            {
+                DAP_mac_addresses_st packet = new DAP_mac_addresses_st();
+                packet.payloadHeader_.startOfFrame0_u8 = 0xAA;
+                packet.payloadHeader_.startOfFrame1_u8 = 0x55;
+                packet.payloadHeader_.payloadType = (byte)Constants.macAddressesPayload_type;
+                packet.payloadHeader_.version = (byte)Constants.macAddressesPayload_version;
+                packet.payloadHeader_.storeToEeprom = 1; // Commit - all-zero MACs get stored & applied
+                packet.payloadHeader_.PedalTag = 0;
+
+                // All-zero MAC/assignment table; keep the currently selected
+                // channel so clearing pairing doesn't also knock devices onto
+                // a different Wi-Fi channel.
+                packet.payloadMacAddresses_.Initialize();
+                packet.payloadMacAddresses_.wifiChannel_u8 = keepChannel;
+
+                byte[] rawPacket;
+                unsafe
+                {
+                    DAP_mac_addresses_st* pStruct = &packet;
+                    byte* pBytes = (byte*)pStruct;
+                    packet.payloadFooter_.checkSum = Plugin.checksumCalc(pBytes, sizeof(payloadHeader) + sizeof(payloadMacAddresses));
+                    packet.payloadFooter_.enfOfFrame0_u8 = 0xAA;
+                    packet.payloadFooter_.enfOfFrame1_u8 = 0x56;
+                    rawPacket = Plugin.getBytes_MacAddresses(packet);
+                }
+
+                int clearedDevices = 0;
+
+                // 1. Bridge via HID
+                if (Plugin.BridgeHidService != null && Plugin.BridgeHidService.IsConnected)
+                {
+                    try
+                    {
+                        await Task.Run(() => Plugin.BridgeHidService.SendLargeDataAsync(rawPacket));
+                        clearedDevices++;
+                    }
+                    catch { }
+                }
+                // 2. Bridge via ESPsync_serialPort
+                else if (Plugin.ESPsync_serialPort != null && Plugin.ESPsync_serialPort.IsOpen)
+                {
+                    try
+                    {
+                        Plugin.ESPsync_serialPort.DiscardInBuffer();
+                        Plugin.ESPsync_serialPort.Write(rawPacket, 0, rawPacket.Length);
+                        clearedDevices++;
+                    }
+                    catch { }
+                }
+
+                // 3. Pedals via USB COM ports
+                for (int p = 0; p < 3; p++)
+                {
+                    if (Plugin._serialPort != null && Plugin._serialPort.Length > p &&
+                        Plugin._serialPort[p] != null && Plugin._serialPort[p].IsOpen)
+                    {
+                        try
+                        {
+                            Plugin._serialPort[p].DiscardInBuffer();
+                            Plugin._serialPort[p].Write(rawPacket, 0, rawPacket.Length);
+                            clearedDevices++;
+                        }
+                        catch (Exception ex)
+                        {
+                            SimHub.Logging.Current.Error($"Failed clearing MAC table on Pedal #{p}: {ex.Message}");
+                        }
+                    }
+                }
+
+                // Clear locally: table rows + saved settings
+                foreach (var row in NodeRows)
+                {
+                    row.MacAddress = "--";
+                    row.ChannelNumber = 0;
+                }
+                if (Plugin.Settings.AssignedPedalMac != null)
+                {
+                    for (int i = 0; i < Plugin.Settings.AssignedPedalMac.Length; i++)
+                    {
+                        Plugin.Settings.AssignedPedalMac[i] = "--";
+                    }
+                }
+
+                UpdateLiveStatus();
+                tb_scan_status.Text = $"MAC table cleared on {clearedDevices} USB device(s). Re-pair via Auto-Detect + Sync to All Devices.";
+                ParentUI?.ToastNotification("Wireless", $"MAC table cleared on {clearedDevices} device(s).");
+            }
+            catch (Exception ex)
+            {
+                tb_scan_status.Text = $"Clear failed: {ex.Message}";
+                ParentUI?.ToastNotification("Clear Error", ex.Message);
+            }
+            finally
+            {
+                btn_clear_mac_usb.IsEnabled = true;
+            }
+        }
+
         private void btn_beep_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.Tag is WirelessNodeRow row)

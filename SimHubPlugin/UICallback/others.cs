@@ -1539,26 +1539,5 @@ namespace DiyFfbPedal
             SendWifiChannelCommand(Constants.WIFI_CH_CMD_SCAN_REQ);
         }
 
-        private void btn_apply_wifi_channel_Click(object sender, RoutedEventArgs e)
-        {
-            if (combo_wifi_channel != null && combo_wifi_channel.SelectedValue != null)
-            {
-                if (byte.TryParse(combo_wifi_channel.SelectedValue.ToString(), out byte targetCh))
-                {
-                    if (tb_wifi_ch_active != null) tb_wifi_ch_active.Text = $"Active: Ch {targetCh}";
-                    if (Plugin?.Settings != null)
-                    {
-                        Plugin.Settings.ActiveWifiChannel = targetCh;
-                        Plugin.SavePluginSettings();
-                    }
-                    if (tb_wifi_scan_status != null)
-                    {
-                        tb_wifi_scan_status.Text = $"Switching Master & Pedals to Channel {targetCh}...";
-                        tb_wifi_scan_status.Foreground = new SolidColorBrush(Color.FromRgb(0, 229, 255));
-                    }
-                    SendWifiChannelCommand(Constants.WIFI_CH_CMD_SET_REQ, targetCh);
-                }
-            }
-        }
     }
 }

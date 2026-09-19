@@ -100,6 +100,7 @@
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                        <Button x:Name="btn_clear_mac_usb" Click="btn_clear_mac_usb_Click" Style="{StaticResource WirelessActionButtonStyle}" Content="🗑️ Clear MAC List" Height="19" Padding="7,0" Background="#33FF5252" Foreground="#FF5252" BorderBrush="#66FF5252" ToolTip="Erase the MAC address table (Bridge + all Pedals) in EEPROM and in this table - forces re-pairing"/>
                         <Button x:Name="btn_write_all_usb" Click="btn_write_all_usb_Click" Style="{StaticResource WirelessActionButtonStyle}" Content="💾 Sync to All Devices" Height="19" Padding="7,0" Background="#3300E676" Foreground="#00E676" BorderBrush="#6600E676" ToolTip="Write MAC mapping table and Wi-Fi channel into EEPROM of all connected USB nodes"/>
                     </StackPanel>
                 </DockPanel>

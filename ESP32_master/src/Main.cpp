@@ -1338,8 +1338,12 @@ void serialCommunicationRxTask( void * pvParameters)
               {
                 storeMacAddressesToEeprom(macCfg_local);
                 ActiveSerial->println("[L]Stored MAC addresses & channel to EEPROM (Serial)");
+                // Only a commit (storeToEeprom=1) carries a real MAC table -
+                // a query (storeToEeprom=0, e.g. the plugin's UI auto-detect
+                // on tab load) sends an all-zero payload just to ask for the
+                // current table back, and must not overwrite the live one.
+                wirelessComm.applyMacConfig(macCfg_local);
               }
-              wirelessComm.applyMacConfig(macCfg_local);
 
               DapMacAddresses_t reply = loadMacAddressesFromEeprom();
               reply.payloadHeader_st.payloadType_u8 = DAP_PAYLOAD_TYPE_MAC_ADDRESSES_U8;
@@ -2187,8 +2191,12 @@ void hidCommunicaitonRxTask(void *pvParameters)
           {
             storeMacAddressesToEeprom(macCfg);
             ActiveSerial->println("[L]Stored MAC addresses & channel to EEPROM");
+            // Only a commit (storeToEeprom=1) carries a real MAC table - a
+            // query (storeToEeprom=0, e.g. the plugin's UI auto-detect on
+            // tab load) sends an all-zero payload just to ask for the
+            // current table back, and must not overwrite the live one.
+            wirelessComm.applyMacConfig(macCfg);
           }
-          wirelessComm.applyMacConfig(macCfg);
 
           DapMacAddresses_t reply = loadMacAddressesFromEeprom();
           reply.payloadHeader_st.payloadType_u8 = DAP_PAYLOAD_TYPE_MAC_ADDRESSES_U8;

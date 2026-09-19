@@ -311,18 +311,18 @@ public:
     s_rxCount++;
     if (millis() - lastRxDiagTime > 3000) {
       lastRxDiagTime = millis();
-      ActiveSerial->printf("[ESPNOW RX] Packet len=%d from %02X:%02X:%02X:%02X:%02X:%02X (ch=%d)\n",
-                           len,
-                           info->src_addr[0], info->src_addr[1], info->src_addr[2],
-                           info->src_addr[3], info->src_addr[4], info->src_addr[5],
-                           _currentChannel);
-#ifdef USB_JOYSTICK
-      tinyusbJoystick_.printf("[ESPNOW RX] Count=%u, len=%d from %02X:%02X:%02X:%02X:%02X:%02X (ch=%d)\n",
-                              s_rxCount, len,
-                              info->src_addr[0], info->src_addr[1], info->src_addr[2],
-                              info->src_addr[3], info->src_addr[4], info->src_addr[5],
-                              _currentChannel);
-#endif
+//       ActiveSerial->printf("[ESPNOW RX] Packet len=%d from %02X:%02X:%02X:%02X:%02X:%02X (ch=%d)\n",
+//                            len,
+//                            info->src_addr[0], info->src_addr[1], info->src_addr[2],
+//                            info->src_addr[3], info->src_addr[4], info->src_addr[5],
+//                            _currentChannel);
+// #ifdef USB_JOYSTICK
+//       tinyusbJoystick_.printf("[ESPNOW RX] Count=%u, len=%d from %02X:%02X:%02X:%02X:%02X:%02X (ch=%d)\n",
+//                               s_rxCount, len,
+//                               info->src_addr[0], info->src_addr[1], info->src_addr[2],
+//                               info->src_addr[3], info->src_addr[4], info->src_addr[5],
+//                               _currentChannel);
+// #endif
     }
 
     // Log packets are self-identified by magic bytes and accepted from any

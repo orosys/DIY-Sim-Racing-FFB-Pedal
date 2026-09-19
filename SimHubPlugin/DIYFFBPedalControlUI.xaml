@@ -890,12 +890,11 @@
                                                 
                                                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
                                                     <TextBlock Text="Target:" FontFamily="Arial" FontSize="8.5" Foreground="#AAAAAA" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                                                    <ComboBox x:Name="combo_wifi_channel" SelectedValuePath="Tag" Width="58" Height="20" FontSize="8.5" VerticalAlignment="Center" Padding="3,0">
+                                                    <ComboBox x:Name="combo_wifi_channel" SelectedValuePath="Tag" Width="58" Height="20" FontSize="8.5" VerticalAlignment="Center" Padding="3,0" IsEnabled="False" ToolTip="Recommended channel from the last scan (apply it from System &gt; Wireless)">
                                                         <ComboBoxItem Content="Ch 1" Tag="1"/>
                                                         <ComboBoxItem Content="Ch 6" Tag="6"/>
                                                         <ComboBoxItem Content="Ch 11" Tag="11" IsSelected="True"/>
                                                     </ComboBox>
-                                                    <Button x:Name="btn_apply_wifi_channel" Click="btn_apply_wifi_channel_Click" Content="Apply" Width="54" Height="20" Margin="5,0,0,0" Background="#3300E676" Foreground="#00E676" BorderBrush="#5500E676" BorderThickness="1" FontSize="8.5" FontFamily="Arial" FontWeight="Bold" Cursor="Hand" ToolTip="Broadcast new Wi-Fi channel to pedals and switch master radio"/>
                                                 </StackPanel>
                                             </DockPanel>
 
