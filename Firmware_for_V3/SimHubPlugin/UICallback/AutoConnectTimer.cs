@@ -38,17 +38,13 @@ namespace User.PluginSdkDemo
             Plugin._calculations.BridgeConnetingString = tmp;
             for (uint pedal_idex = 0; pedal_idex < 3; pedal_idex++)
             {
-                // Retry a lost startup config reply on the next 5-second tick.
-                // A USB reconnect must not be required to request it again.
-                bool needsConfig = Pedal_wireless_connection_update_b[pedal_idex]
-                    || !Plugin.PedalConfigRead_b[pedal_idex];
-                Pedal_wireless_connection_update_b[pedal_idex] = false;
-                if (needsConfig && Plugin.Settings.reading_config == 1
-                    && Plugin.Settings.Pedal_ESPNow_Sync_flag[pedal_idex]
-                    && Plugin.ESPsync_serialPort.IsOpen
-                    && Plugin._calculations.PedalAvailability[pedal_idex])
+                if (Pedal_wireless_connection_update_b[pedal_idex])
                 {
-                    Reading_config_auto(pedal_idex);
+                    Pedal_wireless_connection_update_b[pedal_idex] = false;
+                    if (Plugin.Settings.reading_config == 1)
+                    {
+                        Reading_config_auto(pedal_idex);
+                    }
                 }
             }
 
@@ -143,12 +139,6 @@ namespace User.PluginSdkDemo
 
                 for (uint pedalIdx = 0; pedalIdx < 3; pedalIdx++)
                 {
-                    // Opening a USB-UART port can reset an ESP32 and trigger homing.
-                    // Wireless pedals use the bridge even when their USB cable is plugged in.
-                    if (Plugin.Settings.Pedal_ESPNow_Sync_flag[pedalIdx])
-                    {
-                        continue;
-                    }
                     if (Plugin.Settings.auto_connect_flag[pedalIdx] == 1)
                     {
 

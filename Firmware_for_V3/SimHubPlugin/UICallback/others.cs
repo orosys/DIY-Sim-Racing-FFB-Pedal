@@ -631,7 +631,7 @@ namespace User.PluginSdkDemo
         unsafe public void Reading_config_auto(uint i)
         {
             // compute checksum
-            DAP_action_st tmp = new DAP_action_st();
+            DAP_action_st tmp;
             tmp.payloadPedalAction_.returnPedalConfig_u8 = 1;
             tmp.payloadHeader_.version = (byte)Constants.pedalConfigPayload_version;
             tmp.payloadHeader_.payloadType = (byte)Constants.pedalActionPayload_type;
@@ -777,9 +777,6 @@ namespace User.PluginSdkDemo
                 {
                     try
                     {
-                        // Set control lines before opening, including after an S3 setting change.
-                        Plugin._serialPort[pedalIdx].RtsEnable = false;
-                        Plugin._serialPort[pedalIdx].DtrEnable = Plugin.Settings.USING_ESP32S3[pedalIdx];
                         Plugin._serialPort[pedalIdx].Open();
 
                         // ESP32 S3
@@ -792,6 +789,12 @@ namespace User.PluginSdkDemo
                         */
                         //
 
+                        if (Plugin.Settings.USING_ESP32S3[pedalIdx] == true)
+                        {
+                            // ESP32 S3
+                            Plugin._serialPort[pedalIdx].RtsEnable = false;
+                            Plugin._serialPort[pedalIdx].DtrEnable = true;
+                        }
 
 
 
@@ -847,7 +850,13 @@ namespace User.PluginSdkDemo
             {
                 pedal_serial_read_timer[pedalIdx].Stop();
                 pedal_serial_read_timer[pedalIdx].Dispose();
-                pedal_serial_read_timer[pedalIdx] = null;
+            }
+            connect_timer.Dispose();
+            connect_timer.Stop();
+            if (ESP_host_serial_timer != null)
+            {
+                ESP_host_serial_timer.Stop();
+                ESP_host_serial_timer.Dispose();
             }
             System.Threading.Thread.Sleep(300);
 
@@ -868,23 +877,6 @@ namespace User.PluginSdkDemo
                 Plugin._serialPort[pedalIdx].DiscardOutBuffer();
                 Plugin._serialPort[pedalIdx].Close();
                 Plugin.Settings.connect_status[pedalIdx] = 0;
-            }
-        }
-
-        // Shared wireless resources are closed only when the plugin shuts down.
-        public void closeSharedConnections()
-        {
-            if (connect_timer != null)
-            {
-                connect_timer.Stop();
-                connect_timer.Dispose();
-                connect_timer = null;
-            }
-            if (ESP_host_serial_timer != null)
-            {
-                ESP_host_serial_timer.Stop();
-                ESP_host_serial_timer.Dispose();
-                ESP_host_serial_timer = null;
             }
             if (Plugin.ESPsync_serialPort.IsOpen)
             {
