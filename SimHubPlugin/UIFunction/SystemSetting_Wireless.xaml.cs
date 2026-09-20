@@ -38,6 +38,11 @@ namespace DiyFfbPedal.UIFunction
         private Brush _rowBackground = Brushes.Transparent;
         private bool _canBeep = false;
 
+        // Not bound to any UI element - just tells the 250ms live-status timer
+        // to leave this row's MAC text alone while the user has it focused, so
+        // it doesn't stomp keystrokes back to the last saved value mid-edit.
+        public bool IsUserEditing { get; set; }
+
         public int NodeIndex { get => _nodeIndex; set { _nodeIndex = value; OnPropertyChanged(); } }
         public string RoleName { get => _roleName; set { _roleName = value; OnPropertyChanged(); } }
         public string UsbStatusText { get => _usbStatusText; set { _usbStatusText = value; OnPropertyChanged(); } }
@@ -172,8 +177,10 @@ namespace DiyFfbPedal.UIFunction
             {
                 int idx = row.NodeIndex;
 
-                // Sync MAC address from plugin settings if known
-                if (Plugin.Settings?.AssignedPedalMac != null && Plugin.Settings.AssignedPedalMac.Length > idx)
+                // Sync MAC address from plugin settings if known - but not while
+                // the user is actively editing this row's textbox, otherwise this
+                // runs every 250ms and reverts their typing mid-keystroke.
+                if (!row.IsUserEditing && Plugin.Settings?.AssignedPedalMac != null && Plugin.Settings.AssignedPedalMac.Length > idx)
                 {
                     string savedMac = Plugin.Settings.AssignedPedalMac[idx];
                     if (!string.IsNullOrWhiteSpace(savedMac) && savedMac != "--" && savedMac != "00:00:00:00:00:00")
@@ -765,6 +772,42 @@ namespace DiyFfbPedal.UIFunction
                     action.payloadPedalAction_.system_action_u8 = (byte)PedalSystemAction.ASSIGNMENT_CHECK_BEEP;
                     Plugin.SendPedalAction(action, (byte)nodeIdx);
                     tb_scan_status.Text = $"Sent identify beep to {row.RoleName}.";
+                }
+            }
+        }
+
+        private void MacAddressTextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox tb && tb.Tag is WirelessNodeRow row)
+            {
+                row.IsUserEditing = true;
+            }
+        }
+
+        private void MacAddressTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox tb && tb.Tag is WirelessNodeRow row)
+            {
+                row.IsUserEditing = false;
+
+                // Persist immediately so the edit isn't lost/reverted by the next
+                // live-status refresh, and survives even without an explicit Sync -
+                // though the hardware itself is only updated by "Sync to All Devices".
+                if (Plugin?.Settings != null)
+                {
+                    if (Plugin.Settings.AssignedPedalMac == null || Plugin.Settings.AssignedPedalMac.Length < 4)
+                    {
+                        string[] newMacs = new string[4];
+                        if (Plugin.Settings.AssignedPedalMac != null)
+                        {
+                            Array.Copy(Plugin.Settings.AssignedPedalMac, newMacs, Math.Min(Plugin.Settings.AssignedPedalMac.Length, 4));
+                        }
+                        Plugin.Settings.AssignedPedalMac = newMacs;
+                    }
+                    if (row.NodeIndex >= 0 && row.NodeIndex < Plugin.Settings.AssignedPedalMac.Length)
+                    {
+                        Plugin.Settings.AssignedPedalMac[row.NodeIndex] = row.MacAddress;
+                    }
                 }
             }
         }

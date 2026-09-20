@@ -427,6 +427,14 @@ private:
       return;
     }
     memcpy(&dap_state_basic_st[pedalTag], data, sizeof(DapStateBasic_t));
+    // Force the tag to the MAC-verified slot, not whatever the sender
+    // embedded in the payload - a pedal freshly reassigned to a new role
+    // (e.g. Throttle -> Clutch) keeps broadcasting its old self-reported
+    // pedalTag_u8 for a while, and downstream code (pedalAvailability_au8,
+    // "Found Pedal" logging, and the packet forwarded to the PC) all key off
+    // this field. handleStateExtendedPacket() already does this; this
+    // sibling function was missing it.
+    dap_state_basic_st[pedalTag].payloadHeader_st.pedalTag_u8 = pedalTag;
     g_updateBasicState_ab[pedalTag] = true;
     g_pedalLastUpdate_au32[pedalTag] = millis();
     if (local.payloadPedalStateBasic_st.errorCode_u8 != 0) g_espNowError_ab[pedalTag] = true;

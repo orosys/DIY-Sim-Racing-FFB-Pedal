@@ -393,17 +393,32 @@ namespace DiyFfbPedal
                                     lastTrueElementIndex = Math.Max(lastTrueElementIndex, srcBufferOffset_0 + sizeof(DAP_mac_addresses_st));
 
                                     string ownMac = macs.payloadMacAddresses_.GetOwnMacAddressString();
-                                    byte ownNode = macs.payloadMacAddresses_.ownNodeType_u8;
-                                    if (ownNode < 4 && !string.IsNullOrWhiteSpace(ownMac))
+                                    if (!string.IsNullOrWhiteSpace(ownMac))
                                     {
+                                        // Use the COM port/tab this reply arrived on (pedalSelected), not
+                                        // the device's own stored role (ownNodeType_u8). The device may
+                                        // still report its OLD role here (e.g. "Throttle") even though the
+                                        // user has deliberately connected it under a different tab (e.g.
+                                        // "Clutch") in order to reassign it - trusting ownNodeType_u8 would
+                                        // silently write the detected MAC into the wrong slot and make
+                                        // reassignment impossible via auto-detect.
                                         if (Plugin.Settings.AssignedPedalMac == null || Plugin.Settings.AssignedPedalMac.Length < 4)
                                         {
                                             Array.Resize(ref Plugin.Settings.AssignedPedalMac, 4);
                                         }
-                                        Plugin.Settings.AssignedPedalMac[ownNode] = ownMac;
-                                        if (ownNode < 3 && Plugin._calculations?.unassignedPedalMacaddress != null && Plugin._calculations.unassignedPedalMacaddress.Length > ownNode)
+                                        Plugin.Settings.AssignedPedalMac[pedalSelected] = ownMac;
+                                        if (Plugin._calculations?.unassignedPedalMacaddress != null && Plugin._calculations.unassignedPedalMacaddress.Length > pedalSelected)
                                         {
-                                            Plugin._calculations.unassignedPedalMacaddress[ownNode] = macs.payloadMacAddresses_.GetMacAddress(ownNode);
+                                            string[] macParts = ownMac.Split(':');
+                                            if (macParts.Length == 6)
+                                            {
+                                                byte[] macBytes = new byte[6];
+                                                for (int mi = 0; mi < 6; mi++)
+                                                {
+                                                    macBytes[mi] = Convert.ToByte(macParts[mi], 16);
+                                                }
+                                                Plugin._calculations.unassignedPedalMacaddress[pedalSelected] = macBytes;
+                                            }
                                         }
                                     }
                                 }
