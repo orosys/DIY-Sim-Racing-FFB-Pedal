@@ -340,6 +340,30 @@ namespace DiyFfbPedal
             dap_config_st_rudder.payloadPedalConfig_.joystickMapOrig09 = 0;
             dap_config_st_rudder.payloadPedalConfig_.joystickMapOrig10 = 0;
 
+            dap_config_st_rudder.payloadPedalConfig_.numOfJoystickMapControlToe = 6;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapMappedToe00 = 0;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapMappedToe01 = 20;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapMappedToe02 = 40;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapMappedToe03 = 60;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapMappedToe04 = 80;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapMappedToe05 = 100;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapMappedToe06 = 0;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapMappedToe07 = 0;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapMappedToe08 = 0;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapMappedToe09 = 0;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapMappedToe10 = 0;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapOrigToe00 = 0;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapOrigToe01 = 20;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapOrigToe02 = 40;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapOrigToe03 = 60;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapOrigToe04 = 80;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapOrigToe05 = 100;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapOrigToe06 = 0;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapOrigToe07 = 0;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapOrigToe08 = 0;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapOrigToe09 = 0;
+            dap_config_st_rudder.payloadPedalConfig_.joystickMapOrigToe10 = 0;
+
             dap_config_st_rudder.payloadPedalConfig_.absFrequency = 5;
             dap_config_st_rudder.payloadPedalConfig_.absAmplitude = 20;
             dap_config_st_rudder.payloadPedalConfig_.absPattern = 0;

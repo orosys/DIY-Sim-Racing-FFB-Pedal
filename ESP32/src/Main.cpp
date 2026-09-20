@@ -2701,6 +2701,12 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
       if (g_pedalOperationalState_u8 != (uint8_t)PEDAL_STATE_ACTIVE_E) {
         joystickNormalizedToUInt16 = 0;
       } else {
+        // Load whichever joystick curve (yaw/regular vs toe-brake) the
+        // upcoming EvalJoystickCubicSpline() calls below need. No-ops unless
+        // rudderBrakeStatus_b just changed since the last tick.
+        dap_calculationVariables_st.refreshActiveJoystickCurve(
+            dap_calculationVariables_st.rudderBrakeStatus_b);
+
         if (dap_calculationVariables_st.rudderStatus_b &&
             dap_calculationVariables_st.rudderBrakeStatus_b) {
           if (1 == dap_config_pedalUpdateTask_st.payloadPedalConfig_st

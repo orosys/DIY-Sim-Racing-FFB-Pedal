@@ -723,9 +723,13 @@ namespace DiyFfbPedal
                                                     bool isToeBrakeMode = (Plugin.Settings.rudderMode == 3 || (Plugin.Settings.rudderMode == 2 && (Plugin.Rudder_brake_status || (leftRel > 0.52 && rightRel > 0.52))));
                                                     if (isToeBrakeMode)
                                                     {
-                                                        double toeRatio = (Plugin.Settings.rudderMode == 3)
-                                                            ? Math.Max(0.0, Math.Min(1.0, Math.Max(leftRel, rightRel)))
-                                                            : Math.Max(0.0, Math.Min(1.0, (Math.Max(leftRel, rightRel) - 0.5) * 2.0));
+                                                        // Both modes read leftRel/rightRel centered at ~0.5 at rest
+                                                        // (matching the yaw-axis convention these two pedals also
+                                                        // serve under), so both need the same rescale to show 0%
+                                                        // at rest - mode 3 previously skipped it and showed ~50%
+                                                        // idle in the curve preview even though the actual applied
+                                                        // output was correct.
+                                                        double toeRatio = Math.Max(0.0, Math.Min(1.0, (Math.Max(leftRel, rightRel) - 0.5) * 2.0));
                                                         RudderJoystick_Tab.UpdateYawState(0.5);
                                                         RudderJoystick_Tab.UpdateToeBrakeState(toeRatio);
                                                     }
