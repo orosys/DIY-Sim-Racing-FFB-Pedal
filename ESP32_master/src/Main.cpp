@@ -1723,16 +1723,15 @@ void joystickUpdateTask( void * pvParameters )
             SetControllerOutputValueAccelerator(JOYSTICK_MIN_VALUE);
             SetControllerOutputValueBrake(JOYSTICK_MIN_VALUE);
             SetControllerOutputValueThrottle(JOYSTICK_MIN_VALUE);
-            // 3% deadzone
+            // No deadzone here by design: rudderValue already comes from the
+            // pedal's own joystick-mapping curve (Main.cpp on the pedal,
+            // mirrored symmetrically for left/right), which has its own
+            // deadzone control - dragging the curve's center control point
+            // outward clamps flat near center and ramps from there, with no
+            // discontinuity. A second, independent, hardcoded deadzone here
+            // was both redundant and (as shipped) buggy - see git history.
             uint16_t rudderValue = wirelessComm.isPedalWirelessSyncEnabled(2) ? g_pedalThrottleValue_u16 : JOYSTICK_CENTER;
-            if (rudderValue < ((int16_t)(0.47f * JOYSTICK_RANGE + JOYSTICK_MIN_VALUE)) || rudderValue > ((int16_t)(0.53f * JOYSTICK_RANGE + JOYSTICK_MIN_VALUE)))
-            {
-              SetControllerOutputValueRudder(rudderValue);
-            }
-            else
-            {
-              SetControllerOutputValueRudder((int16_t)(JOYSTICK_CENTER));
-            }
+            SetControllerOutputValueRudder(rudderValue);
             SetControllerOutputValueRudder_brake(JOYSTICK_MIN_VALUE, JOYSTICK_MIN_VALUE);
           }
           if (g_pedalStatus_u8 == 2)
