@@ -773,15 +773,17 @@ void handleWifiScanRequest(bool isHid) {
 
   esp_wifi_set_channel(wirelessComm.getChannel(), WIFI_SECOND_CHAN_NONE);
 
+  // Recommend from all 13 channels now, not just the classic non-overlapping
+  // 1/6/11 trio - the per-channel scores (with adjacent-channel bleed
+  // already folded in above) were always computed for all of them, they
+  // just weren't reported before.
   uint8_t recommended = 1;
   int minScore = score[1];
-  if (score[6] < minScore) {
-    minScore = score[6];
-    recommended = 6;
-  }
-  if (score[11] < minScore) {
-    minScore = score[11];
-    recommended = 11;
+  for (uint8_t ch = 2; ch <= 13; ch++) {
+    if (score[ch] < minScore) {
+      minScore = score[ch];
+      recommended = ch;
+    }
   }
 
   DapWifiChannel_t resp = {};
@@ -793,15 +795,12 @@ void handleWifiScanRequest(bool isHid) {
   resp.payloadWifiChannel_st.command_u8 = WIFI_CH_CMD_SCAN_RES;
   resp.payloadWifiChannel_st.currentChannel_u8 = wirelessComm.getChannel();
   resp.payloadWifiChannel_st.recommendedChannel_u8 = recommended;
-  resp.payloadWifiChannel_st.channel1Rssi_i8 = (bestRssi[1] > -120) ? (int8_t)bestRssi[1] : (int8_t)0;
-  resp.payloadWifiChannel_st.channel6Rssi_i8 = (bestRssi[6] > -120) ? (int8_t)bestRssi[6] : (int8_t)0;
-  resp.payloadWifiChannel_st.channel11Rssi_i8 = (bestRssi[11] > -120) ? (int8_t)bestRssi[11] : (int8_t)0;
-  resp.payloadWifiChannel_st.channel1ApCount_u8 = (uint8_t)constrain(apCount[1], 0, 255);
-  resp.payloadWifiChannel_st.channel6ApCount_u8 = (uint8_t)constrain(apCount[6], 0, 255);
-  resp.payloadWifiChannel_st.channel11ApCount_u8 = (uint8_t)constrain(apCount[11], 0, 255);
-  resp.payloadWifiChannel_st.channel1ApScore_u8 = (uint8_t)constrain(score[1], 0, 100);
-  resp.payloadWifiChannel_st.channel6ApScore_u8 = (uint8_t)constrain(score[6], 0, 100);
-  resp.payloadWifiChannel_st.channel11ApScore_u8 = (uint8_t)constrain(score[11], 0, 100);
+  for (uint8_t ch = 1; ch <= 13; ch++) {
+    uint8_t idx = ch - 1;
+    resp.payloadWifiChannel_st.channelRssi_ai8[idx] = (bestRssi[ch] > -120) ? (int8_t)bestRssi[ch] : (int8_t)0;
+    resp.payloadWifiChannel_st.channelApCount_au8[idx] = (uint8_t)constrain(apCount[ch], 0, 255);
+    resp.payloadWifiChannel_st.channelApScore_au8[idx] = (uint8_t)constrain(score[ch], 0, 100);
+  }
   resp.payloadFooter_st.enfOfFrame0_u8 = EOF_BYTE_0_U8;
   resp.payloadFooter_st.enfOfFrame1_u8 = EOF_BYTE_1_U8;
   resp.payloadFooter_st.checkSum_u16 = checksumCalculator((uint8_t*)(&(resp.payloadHeader_st)), sizeof(resp.payloadHeader_st) + sizeof(resp.payloadWifiChannel_st));
@@ -815,7 +814,7 @@ void handleWifiScanRequest(bool isHid) {
 #else
   ActiveSerial->write((uint8_t*)&resp, sizeof(DapWifiChannel_t));
 #endif
-  ActiveSerial->printf("[L]Scan done. Best channel: %d (Score Ch1: %d, Ch6: %d, Ch11: %d)\n", recommended, score[1], score[6], score[11]);
+  ActiveSerial->printf("[L]Scan done. Best channel: %d (score %d)\n", recommended, minScore);
 }
 
 void handleWifiSetChannelRequest(uint8_t newChannel, bool isHid) {

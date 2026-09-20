@@ -264,6 +264,7 @@ namespace DiyFfbPedal
                 if (tb_wifi_ch_active != null) tb_wifi_ch_active.Text = $"Active: Ch {plugin.Settings.ActiveWifiChannel}";
                 if (combo_wifi_channel != null) combo_wifi_channel.SelectedValue = plugin.Settings.ActiveWifiChannel.ToString();
             }
+            InitWifiChannelBars();
 
             if (SystemWireless_Tab != null)
             {
