@@ -198,5 +198,9 @@ namespace DiyFfbPedal
         public byte joystickMapMappedToe08;
         public byte joystickMapMappedToe09;
         public byte joystickMapMappedToe10;
+
+        // 1 = brake resistor allowed to switch on as normal, 0 = force it off
+        // (debug/bench use only - servo braking energy will not be dissipated)
+        public byte enableBrakeResistor_u8;
     }
 }

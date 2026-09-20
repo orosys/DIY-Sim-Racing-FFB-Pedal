@@ -193,4 +193,8 @@ typedef struct __attribute__((packed)) PayloadPedalConfig
   uint8_t joystickMapMappedToe09_u8;
   uint8_t joystickMapMappedToe10_u8;
 
+  // 1 = brake resistor allowed to switch on as normal, 0 = force it off
+  // (debug/bench use only - servo braking energy will not be dissipated)
+  uint8_t enableBrakeResistor_u8;
+
 } PayloadPedalConfig_t;

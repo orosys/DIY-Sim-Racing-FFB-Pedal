@@ -153,6 +153,7 @@ namespace DiyFfbPedal
             DefaultConfig.payloadPedalConfig_.endstopTravelRange_mm_u8 = 0;
             DefaultConfig.payloadPedalConfig_.dampingProgression_u8 = 0;
             DefaultConfig.payloadPedalConfig_.wakeOnPluginOnly_u8 = 0;
+            DefaultConfig.payloadPedalConfig_.enableBrakeResistor_u8 = 1;
 
         }
 
