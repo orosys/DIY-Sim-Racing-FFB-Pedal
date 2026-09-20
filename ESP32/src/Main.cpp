@@ -369,7 +369,6 @@ float motorRevolutionsPerSteps_fl32 = 1.0f / 3200.0f;
 
 #include "SignalFilter_1st_order.h"
 KalmanFilter1stOrder *kalman = NULL;
-KalmanFilter1stOrder *kalman_joystick = NULL;
 
 #include "SignalFilter_2nd_order.h"
 KalmanFilter2ndOrder *kalman_2nd_order = NULL;
@@ -1297,7 +1296,6 @@ void setup() {
 
   // setup Kalman filters
   kalman = new KalmanFilter1stOrder(loadcell->getVarianceEstimate());
-  kalman_joystick = new KalmanFilter1stOrder(0.1f);
   kalman_2nd_order = new KalmanFilter2ndOrder(loadcell->getVarianceEstimate());
 
   // Check if wakeup only by plugin trigger is requested
@@ -1837,6 +1835,11 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
   uint16_t joystickNormalizedToUInt16 = 0;
   int32_t ABS_trigger_value;
 
+  // Post-curve joystick HID denoise state (see "compute joystick value").
+  bool joystickDenoiseInit_b = false;
+  float joystickDenoisedPercent_fl32 = 0.0f;
+  uint32_t joystickDenoiseLastMicros_u32 = 0;
+
   uint8_t sendPedalStructsViaSerialCounter_u8 = 0;
   uint8_t sendJoystickDataCounter_u8 = 0;
 
@@ -2247,17 +2250,12 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
       // end profiler 4, loadcell reading filtering
       profiler_pedalUpdateTask.end(4);
 
-      float FilterReadingJoystick = 0.0f;
-      if (dap_config_pedalUpdateTask_st.payloadPedalConfig_st.kfJoystick_u8 ==
-          1) {
-        FilterReadingJoystick = kalman_joystick->filteredValue(
-            filteredReading, 0.0f,
-            dap_config_pedalUpdateTask_st.payloadPedalConfig_st
-                .kfModelNoiseJoystick_u8);
-
-      } else {
-        FilterReadingJoystick = filteredReading;
-      }
+      // Joystick HID denoise (kfJoystick_u8/kfModelNoiseJoystick_u8) is now
+      // applied once, post-curve, to the final 0-100% eval value below -- see
+      // "compute joystick value". That covers force-as-joystick,
+      // travel-as-joystick and rudder yaw/toe-brake uniformly, unlike the old
+      // pre-curve Kalman filter which only ever touched the force-as-joystick
+      // path.
 
       // if filtered reading > min force, mark the servo was in aciton
       if (filteredReading > dap_config_pedalUpdateTask_st.payloadPedalConfig_st
@@ -2342,6 +2340,22 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
         ActiveSerial->println("Servo force Stoped.");
       }
 #endif
+
+      // Sustained servo overcurrent protection. The actual axis shutdown
+      // already happened inside StepperWithLimits::performSafetyChecks() (on
+      // the servo communication task, so it can't be delayed by anything
+      // going on here); this just surfaces it to the user once.
+      if (stepper->consumeOvercurrentTripFlag()) {
+        Buzzer.single_beep_tone(770, 100);
+        delay(300);
+        pedalLED.setPixelColor(0, 0xff, 0x00, 0x00); // show red
+        pedalLED.show();
+        Buzzer.single_beep_tone(770, 100);
+        ActiveSerial->println(
+            "Servo overcurrent protection triggered - motor disabled to "
+            "prevent overheating. Restart the pedal to clear.");
+      }
+
       // float
       // FilterReadingJoystick=g_averageFilterJoystick_st.process(filteredReading);
 
@@ -2438,6 +2452,14 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
       //     ((float)cached_servosVoltage_i16) * 0.1f, current_time_us,
       //     cached_currentSpeedInHz_i32, cached_servoCycleCounter_u32);
 #endif
+
+      // Config-driven brake resistor kill switch (default: enabled). Lets a
+      // user disable the brake resistor from Pedals > General for
+      // debug/bench use, without needing a firmware rebuild.
+      if (!(dap_config_pedalUpdateTask_st.payloadPedalConfig_st
+                .enableBrakeResistor_u8)) {
+        brake_state = false;
+      }
 
 #if defined(BRAKE_RESISTOR_PIN_U8) && (BRAKE_RESISTOR_PIN_U8 >= 0)
       if (brake_state) {
@@ -2700,6 +2722,9 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
       // compute joystick value
       if (g_pedalOperationalState_u8 != (uint8_t)PEDAL_STATE_ACTIVE_E) {
         joystickNormalizedToUInt16 = 0;
+        // Force a fresh (non-smoothed) start next time the pedal re-activates,
+        // instead of slowly ramping in from whatever was smoothed last.
+        joystickDenoiseInit_b = false;
       } else {
         // Load whichever joystick curve (yaw/regular vs toe-brake) the
         // upcoming EvalJoystickCubicSpline() calls below need. No-ops unless
@@ -2721,7 +2746,7 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
                     .maxGameOutput_u8);
           } else {
             joystickNormalizedToInt32_orig = NormalizeControllerOutputValue(
-                (FilterReadingJoystick /*filteredReading*/),
+                filteredReading,
                 dap_calculationVariables_st.forceMin_fl32,
                 dap_calculationVariables_st.forceMax_fl32,
                 dap_config_pedalUpdateTask_st.payloadPedalConfig_st
@@ -2736,7 +2761,7 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
                     .maxGameOutput_u8);
           } else {
             joystickNormalizedToInt32_orig = NormalizeControllerOutputValue(
-                FilterReadingJoystick /*filteredReading*/,
+                filteredReading,
                 dap_calculationVariables_st.forceMin_fl32,
                 dap_calculationVariables_st.forceMax_fl32,
                 dap_config_pedalUpdateTask_st.payloadPedalConfig_st
@@ -2769,11 +2794,68 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
               joystickfrac);
         }
 
-        joystickNormalizedToUInt16 =
-            joystickNormalizedToInt32_eval / 100.0f * s_JOYSTICK_MAX_VALUE_U16;
-        joystickNormalizedToUInt16 =
-            constrain(joystickNormalizedToUInt16, s_JOYSTICK_MIN_VALUE_U16,
-                      s_JOYSTICK_MAX_VALUE_U16);
+        // Clamp before anything else touches this value: the cubic-spline
+        // eval can overshoot slightly outside [0,100], and casting an
+        // out-of-range float straight to uint16_t further down would wrap
+        // (e.g. a hair below 0% wrapping to ~65535, i.e. ~100%).
+        joystickNormalizedToInt32_eval =
+            constrain(joystickNormalizedToInt32_eval, 0.0f, 100.0f);
+
+        // Joystick HID denoise: exponential smoothing on the final 0-100%
+        // value, using the actual measured cycle time so filter strength
+        // doesn't drift with scheduling jitter. Applied here (post-curve,
+        // after the branches above converge) it uniformly covers
+        // force-as-joystick, travel-as-joystick and rudder yaw/toe-brake --
+        // unlike the old pre-curve Kalman filter, which only ever touched
+        // the force-as-joystick path and left travel/rudder unfiltered.
+        if (dap_config_pedalUpdateTask_st.payloadPedalConfig_st.kfJoystick_u8 ==
+            1) {
+          uint32_t nowMicros_u32 = micros();
+          uint32_t elapsedMicros_u32 =
+              nowMicros_u32 - joystickDenoiseLastMicros_u32;
+          joystickDenoiseLastMicros_u32 = nowMicros_u32;
+          // Guard against a stale/huge first-sample delta and against a
+          // zero delta (both would otherwise skew the exponent below).
+          elapsedMicros_u32 = constrain(elapsedMicros_u32, 1u, 50000u);
+
+          // kfModelNoiseJoystick_u8 (1-255, UI slider "KF for Joystick
+          // Denoise") keeps its existing "higher = less lag" direction from
+          // the old Kalman filter, mapped log-scale onto a tau (time
+          // constant) between ~2 ms (barely any smoothing) and ~500 ms
+          // (heavy smoothing) so the full slider range stays useful.
+          const float tauMin_ms_fl32 = 2.0f;
+          const float tauMax_ms_fl32 = 500.0f;
+          float sliderFrac_fl32 =
+              (float)(dap_config_pedalUpdateTask_st.payloadPedalConfig_st
+                          .kfModelNoiseJoystick_u8 -
+                      1) /
+              254.0f;
+          sliderFrac_fl32 = constrain(sliderFrac_fl32, 0.0f, 1.0f);
+          float tau_ms_fl32 =
+              tauMax_ms_fl32 *
+              powf(tauMin_ms_fl32 / tauMax_ms_fl32, sliderFrac_fl32);
+
+          float alpha_fl32 =
+              expf(-((float)elapsedMicros_u32 * 0.001f) / tau_ms_fl32);
+
+          if (!joystickDenoiseInit_b) {
+            joystickDenoisedPercent_fl32 = joystickNormalizedToInt32_eval;
+            joystickDenoiseInit_b = true;
+          } else {
+            joystickDenoisedPercent_fl32 =
+                alpha_fl32 * joystickDenoisedPercent_fl32 +
+                (1.0f - alpha_fl32) * joystickNormalizedToInt32_eval;
+          }
+          joystickNormalizedToInt32_eval = joystickDenoisedPercent_fl32;
+        } else {
+          joystickDenoiseInit_b = false;
+        }
+
+        float joystickRaw_fl32 = joystickNormalizedToInt32_eval / 100.0f *
+                                  (float)s_JOYSTICK_MAX_VALUE_U16;
+        joystickNormalizedToUInt16 = (uint16_t)constrain(
+            joystickRaw_fl32, (float)s_JOYSTICK_MIN_VALUE_U16,
+            (float)s_JOYSTICK_MAX_VALUE_U16);
       }
 
       // send joystick data to queue
