@@ -3147,6 +3147,21 @@ void IRAM_ATTR_FLAG joystickOutputTask(void *pvParameters) {
   joystickDataPackage_t receivedJoystickData;
   bool wasReady_b = false;
 
+  // pedalUpdateTask posts to the queue every
+  // REPETITION_INTERVAL_JOYSTICKOUTPUT_TASK_IN_US_I64 (currently 10ms),
+  // driven by a hardware timer with very little jitter. If this task's
+  // receive timeout is set to that same 10ms, the two periods aren't
+  // phase-locked and drift against each other: the receive window
+  // periodically closes just before the new value arrives, times out, and
+  // this task (wrongly) treats that as "pedal task stopped feeding data"
+  // and forces a spurious 0% report -- even while the pedal is held
+  // steady. Give the timeout a comfortable multiple of the feed period so
+  // ordinary scheduling jitter can't trip the stall-detection fallback,
+  // while a genuine stall (boot/homing/standby/pause) is still caught
+  // quickly.
+  const TickType_t joystickQueueTimeoutTicks_st = pdMS_TO_TICKS(
+      (REPETITION_INTERVAL_JOYSTICKOUTPUT_TASK_IN_US_I64 / 1000) * 3);
+
   for (;;) {
     bool isReady_b = usbManager.isJoystickReady();
 
@@ -3163,7 +3178,7 @@ void IRAM_ATTR_FLAG joystickOutputTask(void *pvParameters) {
     }
 
     if (xQueueReceive(s_joystickDataQueue, &receivedJoystickData,
-                      pdMS_TO_TICKS(10)) == pdPASS) {
+                      joystickQueueTimeoutTicks_st) == pdPASS) {
 
       uint16_t joystickData_u16 =
           receivedJoystickData.joystickNormalizedToUInt16;
