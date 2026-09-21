@@ -471,18 +471,27 @@ public:
       return;
     }
 
+    // DapWifiChannel_t and DAP_servo_config_st_t are both exactly 52 bytes
+    // (6-byte header + 42-byte payload + 4-byte footer, coincidentally
+    // identical for both) - length alone can't tell them apart, so whichever
+    // check ran first here always won, silently swallowing every servo
+    // register read/write over wireless (DapWifiChannel_t was checked
+    // first, so it always "won", and handleWifiChannelPacket()'s own
+    // payload-type check then rejected the payload) while the
+    // WIFI_CH_CMD_SET_REQ path was never actually broken. Both structs
+    // share the same PayloadHeader_t layout, so byte 2 (payloadType_u8) is
+    // always safe to read here to disambiguate.
     if (len == sizeof(DapWifiChannel_t)) {
-      handleWifiChannelPacket(data);
+      if (data[2] == DAP_PAYLOAD_TYPE_SERVO_CONFIG_U8) {
+        handleServoConfigPacket(data);
+      } else {
+        handleWifiChannelPacket(data);
+      }
       return;
     }
 
     if (len == sizeof(DapAssignmentReg_t)) {
       handleAssignmentPacket(data);
-      return;
-    }
-
-    if (len == sizeof(DAP_servo_config_st_t)) {
-      handleServoConfigPacket(data);
       return;
     }
   }
@@ -1064,6 +1073,18 @@ private:
     DAP_servo_config_st received_servo_config;
     memcpy(&received_servo_config, data, sizeof(DAP_servo_config_st));
 
+    // TEMP DIAGNOSTIC (unconditional - "Load From Servo" is a rare,
+    // user-triggered action, never continuous, so no volume concern here).
+    // Tracking down why servo register exchange doesn't complete over
+    // wireless despite working over direct USB. Remove once confirmed fixed.
+    sendLogToBridge(
+        "[DIAG] ServoConfig RX: tag=%u localTag=%u typeOk=%u versionOk=%u",
+        received_servo_config.payloadHeader_st.pedalTag_u8, s_localPedalType_u8,
+        (unsigned)(received_servo_config.payloadHeader_st.payloadType_u8 ==
+                   DAP_PAYLOAD_TYPE_SERVO_CONFIG_U8),
+        (unsigned)(received_servo_config.payloadHeader_st.version_u8 ==
+                   DAP_VERSION_CONFIG_U8));
+
     if (received_servo_config.payloadHeader_st.payloadType_u8 !=
             DAP_PAYLOAD_TYPE_SERVO_CONFIG_U8 ||
         received_servo_config.payloadHeader_st.version_u8 !=
@@ -1075,18 +1096,21 @@ private:
         sizeof(received_servo_config.payloadHeader_st) +
             sizeof(received_servo_config.payloadServoConfig_st));
     if (crc != received_servo_config.payloadFooter_st.checkSum_u16) {
+      sendLogToBridge("[DIAG] ServoConfig DROPPED: bad CRC");
       logDebug("RX ServoConfig dropped: bad CRC");
       return;
     }
     if (s_localPedalType_u8 < 3 &&
         received_servo_config.payloadHeader_st.pedalTag_u8 !=
             s_localPedalType_u8) {
+      sendLogToBridge("[DIAG] ServoConfig DROPPED: role tag mismatch");
       logDebug("RX ServoConfig dropped: role tag mismatch");
       return;
     }
     if (s_servoConfigRxQueue != NULL) {
       xQueueSend(s_servoConfigRxQueue, &received_servo_config, (TickType_t)0);
     }
+    sendLogToBridge("[DIAG] ServoConfig ACCEPTED, queued for Modbus task");
     logDebug("RX ServoConfig accepted");
   }
 

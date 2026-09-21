@@ -629,10 +629,25 @@ void espNowCommunicationTxTask( void * pvParameters )
           if(update_servo_config[s])
           {
             update_servo_config[s] = false;
+            // TEMP DIAGNOSTIC (unconditional - "Load From Servo" is rare/
+            // user-triggered, not continuous). Tracking down why servo
+            // register exchange doesn't complete over wireless. Remove
+            // once confirmed fixed.
             if(dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[s]==1)
             {
               wirelessComm.sendServoConfigToPedal(s, dap_servo_config_st[s]);
               sentThisCycle = true;
+              ActiveSerial->printf("[L][DIAG] ServoConfig forwarded to Pedal #%d\n", s);
+              #ifdef USB_JOYSTICK
+              tinyusbJoystick_.printf("[DIAG] ServoConfig forwarded to Pedal #%d", s);
+              #endif
+            }
+            else
+            {
+              ActiveSerial->printf("[L][DIAG] ServoConfig for Pedal #%d DROPPED - pedalAvailability=0\n", s);
+              #ifdef USB_JOYSTICK
+              tinyusbJoystick_.printf("[DIAG] ServoConfig for Pedal #%d DROPPED - pedalAvailability=0", s);
+              #endif
             }
           }
         }
@@ -2473,6 +2488,9 @@ void hidCommunicaitonTxTask(void *pvParameters)
           {
             send_servo_config_to_host[i] = false;
             tinyusbJoystick_.sendData((uint8_t*)&dap_servo_config_response_st[i], sizeof(DAP_servo_config_st_t));
+            // TEMP DIAGNOSTIC (unconditional - rare/user-triggered action).
+            // Remove once wireless servo register exchange is confirmed fixed.
+            ActiveSerial->printf("[L][DIAG] ServoConfig response forwarded to host for Pedal #%d\n", i);
           }
         }
         

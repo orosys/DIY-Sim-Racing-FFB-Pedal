@@ -636,6 +636,15 @@ private:
   void handleServoConfigPacket(const uint8_t *data, uint8_t pedalTag) {
     DAP_servo_config_st_t received_servo_config;
     memcpy(&received_servo_config, data, sizeof(DAP_servo_config_st_t));
+    // TEMP DIAGNOSTIC (unconditional - "Load From Servo" is rare/user-
+    // triggered, not continuous). Tracking down why servo register
+    // exchange doesn't complete over wireless. Remove once confirmed fixed.
+    ActiveSerial->printf("[L][DIAG] ServoConfig response RX from pedal=%u, syncEnabled=%u\n",
+                         pedalTag, (unsigned)_pedalWirelessSyncEnabled[pedalTag]);
+    #ifdef USB_JOYSTICK
+    tinyusbJoystick_.printf("[DIAG] ServoConfig response RX from pedal=%u, syncEnabled=%u",
+                            pedalTag, (unsigned)_pedalWirelessSyncEnabled[pedalTag]);
+    #endif
     if (received_servo_config.payloadHeader_st.version_u8 != DAP_VERSION_CONFIG_U8 ||
         received_servo_config.payloadHeader_st.payloadType_u8 != DAP_PAYLOAD_TYPE_SERVO_CONFIG_U8) {
       logDebug("RX ServoConfig dropped: bad type/version");

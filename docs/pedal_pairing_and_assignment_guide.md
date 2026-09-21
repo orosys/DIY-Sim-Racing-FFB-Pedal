@@ -57,6 +57,10 @@ sequenceDiagram
 
 ### Step-by-Step Guide
 
+<video src="media/images/simhub_wireless_assignment.mp4" controls width="720"></video>
+
+*Video 1: End-to-end walkthrough of the Wireless Management tab - auto-detect, channel selection, and Sync to All Devices.*
+
 1. **Connect devices via USB**:
    - Connect the ESP32-S3 Bridge to the PC via USB (it will show up as `USB-HID Online`).
    - Connect the pedals to the PC via USB-C cable, one at a time or all at once.
@@ -87,10 +91,6 @@ sequenceDiagram
 
    ![Sync to All Devices success message](media/images/simhub_wireless_sync_success.png)  
    *Figure 4: Status line after a successful "Sync to All Devices".*
-
-<video src="media/images/simhub_wireless_assignment.mp4" controls width="720"></video>
-
-*Video 1: End-to-end walkthrough of the Wireless Management tab - auto-detect, channel selection, and Sync to All Devices.*
 7. **Start wireless operation**:
    - Disconnect the pedals' USB cables.
    - Re-enable **"Wireless Communication"** in the SimHub pedal tab.
