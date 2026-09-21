@@ -529,6 +529,62 @@ namespace DiyFfbPedal.UIFunction
         private async void btn_write_all_usb_Click(object sender, RoutedEventArgs e)
         {
             if (Plugin == null) return;
+
+            // Guard against pushing a corrupted role<->MAC table to EEPROM: if two
+            // pedal roles ended up carrying the same MAC (possible if a stale/wrong
+            // COM-port-to-role mapping was picked up during Auto-Detect), syncing it
+            // as-is would make the bridge's MAC-based routing consistently treat two
+            // roles as the same physical pedal - the exact "settings got mixed up /
+            // pedal shows disconnected" symptom this table is meant to prevent.
+            var duplicateGroups = NodeRows
+                .Where(r => r.NodeIndex >= 0 && r.NodeIndex < 3 &&
+                            !string.IsNullOrWhiteSpace(r.MacAddress) &&
+                            r.MacAddress != "--" && r.MacAddress != "00:00:00:00:00:00")
+                .GroupBy(r => r.MacAddress.ToUpperInvariant())
+                .Where(g => g.Count() > 1)
+                .ToList();
+            if (duplicateGroups.Count > 0)
+            {
+                string roles = string.Join(", ", duplicateGroups.SelectMany(g => g.Select(r => r.RoleName)));
+                var confirmDuplicate = System.Windows.MessageBox.Show(
+                    $"The same MAC address is assigned to more than one pedal role ({roles}).\n\n" +
+                    "Syncing this table would make the plugin and bridge treat those roles as the same physical pedal. " +
+                    "Re-run Auto-Detect (connecting one pedal's USB cable at a time if needed) or fix the MAC fields manually before syncing.\n\n" +
+                    "Sync anyway?",
+                    "Duplicate Pedal MAC Address",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+                if (confirmDuplicate != MessageBoxResult.Yes) return;
+            }
+
+            // Guard against writing an unknown/placeholder Bridge MAC into a
+            // pedal's EEPROM: a pedal only learns the bridge's MAC via this
+            // exact sync (there's no wireless path to fix it afterwards), so
+            // syncing while the Bridge row is still "--" permanently blinds
+            // that pedal to every packet the bridge ever sends it - it can
+            // still transmit its own telemetry (broadcast doesn't need the
+            // bridge's MAC), so the plugin sees it, but every reply/config
+            // push/config-request the bridge sends back gets silently
+            // dropped forever, with no error anywhere. This produces a
+            // permanent "stuck on Read Pedal Config" with zero diagnostics.
+            var bridgeRow = NodeRows.FirstOrDefault(r => r.NodeIndex == 3);
+            bool bridgeMacKnown = bridgeRow != null && !string.IsNullOrWhiteSpace(bridgeRow.MacAddress) &&
+                                   bridgeRow.MacAddress != "--" && bridgeRow.MacAddress != "00:00:00:00:00:00";
+            if (!bridgeMacKnown)
+            {
+                var confirmNoBridgeMac = System.Windows.MessageBox.Show(
+                    "The Bridge row has no known MAC address yet.\n\n" +
+                    "Syncing now will write an empty bridge address into every connected pedal's EEPROM. " +
+                    "A pedal only learns the bridge's MAC through this sync - there's no way to fix it wirelessly afterwards - " +
+                    "so any pedal synced this way will silently stop responding to the bridge (it'll still send telemetry, but " +
+                    "config/config-request replies will be dropped forever) until re-synced with a known Bridge MAC.\n\n" +
+                    "Run Auto-Detect first (with the bridge connected) so its MAC is known, or continue anyway?",
+                    "Bridge MAC Unknown",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+                if (confirmNoBridgeMac != MessageBoxResult.Yes) return;
+            }
+
             byte targetChannel = GetSelectedWifiChannel();
             tb_scan_status.Text = $"Packaging DAP_mac_addresses_st_t (Channel {targetChannel}) and writing to EEPROM...";
             btn_write_all_usb.IsEnabled = false;

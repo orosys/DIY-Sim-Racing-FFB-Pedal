@@ -590,16 +590,38 @@ private:
          sysAct == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_2 ||
          sysAct == (uint8_t)PedalSystemAction::ASSIGNMENT_CHECK_BEEP);
 
+    // TEMP DIAGNOSTIC (unconditional, not gated behind WIRELESS_COMM_DEBUG -
+    // relayed to the PC's Serial Logs via sendLogToBridge) - tracking down
+    // why the config-echo request never completes over wireless. Only fires
+    // for the rare returnPedalConfig_u8 action, so it stays low-volume even
+    // though this handler otherwise runs for every high-frequency FFB action
+    // packet. Remove once the root cause is confirmed.
+    bool isConfigRequest =
+        dap_actions_st.payloadPedalAction_st.returnPedalConfig_u8 != 0;
+    if (isConfigRequest) {
+      sendLogToBridge(
+          "[DIAG] ConfigReq RX: incomingTag=%u myTag=%u localTag=%u typeOk=%u",
+          incomingTag, myTag, s_localPedalType_u8,
+          (unsigned)(dap_actions_st.payloadHeader_st.payloadType_u8 ==
+                     DAP_PAYLOAD_TYPE_ACTION_U8));
+    }
+
     if (dap_actions_st.payloadHeader_st.payloadType_u8 !=
             DAP_PAYLOAD_TYPE_ACTION_U8 ||
         !(isAssignmentAction || incomingTag == myTag ||
           incomingTag == s_localPedalType_u8)) {
+      if (isConfigRequest) {
+        sendLogToBridge("[DIAG] ConfigReq DROPPED at type/tag gate");
+      }
       return;
     }
 
     if (dap_actions_st.payloadHeader_st.version_u8 != DAP_VERSION_CONFIG_U8) {
       if (g_espNowErrorCode_u8 == 0)
         g_espNowErrorCode_u8 = 112;
+      if (isConfigRequest) {
+        sendLogToBridge("[DIAG] ConfigReq DROPPED: bad version");
+      }
       logDebug("RX Actions dropped: bad version");
       return;
     }
@@ -610,6 +632,9 @@ private:
     if (crc != dap_actions_st.payloadFooter_st.checkSum_u16) {
       if (g_espNowErrorCode_u8 == 0)
         g_espNowErrorCode_u8 = 113;
+      if (isConfigRequest) {
+        sendLogToBridge("[DIAG] ConfigReq DROPPED: bad CRC");
+      }
       logDebug("RX Actions dropped: bad CRC");
       return;
     }
@@ -687,6 +712,9 @@ private:
       g_customVibration4_st.trigger();
     if (dap_actions_st.payloadPedalAction_st.returnPedalConfig_u8) {
       g_espNowConfigRequest_b = true;
+      if (isConfigRequest) {
+        sendLogToBridge("[DIAG] ConfigReq ACCEPTED, g_espNowConfigRequest_b set");
+      }
     }
 
     // Rudder mode select - broadcast means we don't need to resolve a unicast

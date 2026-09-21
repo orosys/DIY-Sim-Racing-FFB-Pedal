@@ -570,6 +570,11 @@ void espNowCommunicationTxTask( void * pvParameters )
         if(dap_action_update[i] )
         {
           dap_action_update[i]=false;
+          // TEMP DIAGNOSTIC (unconditional, low-volume - only fires for the
+          // rare returnPedalConfig_u8 action) - tracking down why the
+          // wireless config-echo request never completes. Remove once the
+          // root cause is confirmed.
+          bool isConfigRequest = dap_actions_st[i].payloadPedalAction_st.returnPedalConfig_u8 != 0;
           if(dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[i]==1)
           {
             if (i == PEDAL_ID_BRAKE &&
@@ -578,6 +583,19 @@ void espNowCommunicationTxTask( void * pvParameters )
               syncPairingTableToPedals();
             }
             wirelessComm.sendActionToPedal(i, dap_actions_st[i]);
+            if (isConfigRequest) {
+              ActiveSerial->printf("[L][DIAG] ConfigReq action forwarded to Pedal #%d\n", i);
+              #ifdef USB_JOYSTICK
+              tinyusbJoystick_.printf("[DIAG] ConfigReq action forwarded to Pedal #%d", i);
+              #endif
+            }
+          }
+          else if (isConfigRequest)
+          {
+            ActiveSerial->printf("[L][DIAG] ConfigReq action for Pedal #%d DROPPED - pedalAvailability=0\n", i);
+            #ifdef USB_JOYSTICK
+            tinyusbJoystick_.printf("[DIAG] ConfigReq action for Pedal #%d DROPPED - pedalAvailability=0", i);
+            #endif
           }
         }
 

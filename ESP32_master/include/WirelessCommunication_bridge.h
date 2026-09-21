@@ -488,6 +488,14 @@ private:
   }
 
   void handleConfigEchoPacket(const uint8_t *data, uint8_t pedalTag) {
+    // TEMP DIAGNOSTIC (unconditional, low-volume - config echoes are rare).
+    // Remove once the root cause is confirmed.
+    ActiveSerial->printf("[L][DIAG] ConfigEcho RX from pedal=%u, syncEnabled=%u\n",
+                         pedalTag, (unsigned)_pedalWirelessSyncEnabled[pedalTag]);
+    #ifdef USB_JOYSTICK
+    tinyusbJoystick_.printf("[DIAG] ConfigEcho RX from pedal=%u, syncEnabled=%u",
+                            pedalTag, (unsigned)_pedalWirelessSyncEnabled[pedalTag]);
+    #endif
     if (!_pedalWirelessSyncEnabled[pedalTag]) {
       return;
     }

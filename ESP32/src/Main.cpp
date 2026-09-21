@@ -4297,6 +4297,24 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
 
         profiler_espNow.end(3);
 
+        // TEMP DIAGNOSTIC: g_espNowConfigRequest_b getting set (confirmed by
+        // the pedal-side [DIAG] logs in WirelessCommunication_pedal.h) but
+        // never reaching the send below would otherwise be a silent gap -
+        // this closes it. Edge-triggered (static latch) so a stuck gate logs
+        // once instead of spamming this hot loop. Remove once the root
+        // cause is confirmed.
+        static bool s_diagConfigReqGateBlockedLogged = false;
+        if (g_espNowConfigRequest_b && !(pedalId < 3 || pedalId == PEDAL_ID_UNKNOWN)) {
+          if (!s_diagConfigReqGateBlockedLogged) {
+            s_diagConfigReqGateBlockedLogged = true;
+            wirelessComm.sendLogToBridge(
+                "[DIAG] ConfigReq set but BLOCKED by pedalId gate, pedalId=%d",
+                (int)pedalId);
+          }
+        } else {
+          s_diagConfigReqGateBlockedLogged = false;
+        }
+
         if (g_espNowConfigRequest_b &&
             (pedalId < 3 || pedalId == PEDAL_ID_UNKNOWN)) {
           DapConfig_t *dap_config_st_local_ptr;

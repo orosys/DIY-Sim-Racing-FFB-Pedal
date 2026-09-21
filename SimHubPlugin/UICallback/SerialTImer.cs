@@ -402,22 +402,65 @@ namespace DiyFfbPedal
                                         // "Clutch") in order to reassign it - trusting ownNodeType_u8 would
                                         // silently write the detected MAC into the wrong slot and make
                                         // reassignment impossible via auto-detect.
-                                        if (Plugin.Settings.AssignedPedalMac == null || Plugin.Settings.AssignedPedalMac.Length < 4)
+                                        //
+                                        // But blindly trusting pedalSelected is also how a stale/wrong
+                                        // COM-port-to-role mapping (Windows doesn't guarantee stable COM
+                                        // numbers across reconnects) gets silently baked into
+                                        // AssignedPedalMac, and from there into the bridge's EEPROM MAC
+                                        // table on the next "Sync to All Devices" - after which the
+                                        // bridge's MAC-based routing faithfully misroutes every wireless
+                                        // packet for that role (reported by users as pedals showing
+                                        // disconnected / getting each other's settings). So when the
+                                        // device's reported role disagrees with this tab AND assigning it
+                                        // here would actually change what's stored, ask before overwriting
+                                        // instead of doing it silently.
+                                        // NOTE: this code runs on the UI thread inside the serial-poll
+                                        // timer tick, including the silent background auto-detect that
+                                        // fires on Wireless-tab load - a blocking MessageBox here would
+                                        // (and, in an earlier version of this guard, did) freeze the whole
+                                        // plugin UI on a modal dialog nobody asked for or could see, stuck
+                                        // showing "Read Pedal Config" forever. So instead of blocking for
+                                        // confirmation, default to the safe choice (don't overwrite an
+                                        // existing, different assignment) and just notify - the user can
+                                        // still deliberately reassign the pedal via the tab's explicit
+                                        // "Set as Default"/role-write action, which already has its own
+                                        // synchronous, user-initiated confirmation dialog.
+                                        byte ownNodeType = macs.payloadMacAddresses_.ownNodeType_u8;
+                                        string previousMac = (Plugin.Settings.AssignedPedalMac != null && Plugin.Settings.AssignedPedalMac.Length > pedalSelected)
+                                            ? Plugin.Settings.AssignedPedalMac[pedalSelected] : null;
+                                        bool wouldChangeAssignment = !string.IsNullOrWhiteSpace(previousMac) &&
+                                            previousMac != "--" && previousMac != "00:00:00:00:00:00" &&
+                                            !string.Equals(previousMac, ownMac, StringComparison.OrdinalIgnoreCase);
+                                        bool roleMismatch = ownNodeType <= (byte)PedalIdEnum.PEDAL_ID_THROTTLE && ownNodeType != pedalSelected;
+
+                                        bool proceedWithAssignment = true;
+                                        if (roleMismatch && wouldChangeAssignment)
                                         {
-                                            Array.Resize(ref Plugin.Settings.AssignedPedalMac, 4);
+                                            proceedWithAssignment = false;
+                                            ToastNotification("Pedal Role Mismatch",
+                                                $"Device on {PedalConstStrings.PedalID[pedalSelected]} port identifies as {PedalConstStrings.PedalID[ownNodeType]} - not auto-assigned. " +
+                                                "Use the tab's config assignment to reassign it deliberately if intended.");
                                         }
-                                        Plugin.Settings.AssignedPedalMac[pedalSelected] = ownMac;
-                                        if (Plugin._calculations?.unassignedPedalMacaddress != null && Plugin._calculations.unassignedPedalMacaddress.Length > pedalSelected)
+
+                                        if (proceedWithAssignment)
                                         {
-                                            string[] macParts = ownMac.Split(':');
-                                            if (macParts.Length == 6)
+                                            if (Plugin.Settings.AssignedPedalMac == null || Plugin.Settings.AssignedPedalMac.Length < 4)
                                             {
-                                                byte[] macBytes = new byte[6];
-                                                for (int mi = 0; mi < 6; mi++)
+                                                Array.Resize(ref Plugin.Settings.AssignedPedalMac, 4);
+                                            }
+                                            Plugin.Settings.AssignedPedalMac[pedalSelected] = ownMac;
+                                            if (Plugin._calculations?.unassignedPedalMacaddress != null && Plugin._calculations.unassignedPedalMacaddress.Length > pedalSelected)
+                                            {
+                                                string[] macParts = ownMac.Split(':');
+                                                if (macParts.Length == 6)
                                                 {
-                                                    macBytes[mi] = Convert.ToByte(macParts[mi], 16);
+                                                    byte[] macBytes = new byte[6];
+                                                    for (int mi = 0; mi < 6; mi++)
+                                                    {
+                                                        macBytes[mi] = Convert.ToByte(macParts[mi], 16);
+                                                    }
+                                                    Plugin._calculations.unassignedPedalMacaddress[pedalSelected] = macBytes;
                                                 }
-                                                Plugin._calculations.unassignedPedalMacaddress[pedalSelected] = macBytes;
                                             }
                                         }
                                     }
