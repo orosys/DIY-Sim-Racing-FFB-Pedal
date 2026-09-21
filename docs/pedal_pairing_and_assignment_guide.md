@@ -87,6 +87,10 @@ sequenceDiagram
 
    ![Sync to All Devices success message](media/images/simhub_wireless_sync_success.png)  
    *Figure 4: Status line after a successful "Sync to All Devices".*
+
+<video src="media/images/simhub_wireless_assignment.mp4" controls width="720"></video>
+
+*Video 1: End-to-end walkthrough of the Wireless Management tab - auto-detect, channel selection, and Sync to All Devices.*
 7. **Start wireless operation**:
    - Disconnect the pedals' USB cables.
    - Re-enable **"Wireless Communication"** in the SimHub pedal tab.
