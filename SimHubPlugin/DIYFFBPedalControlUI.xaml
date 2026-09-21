@@ -64,9 +64,15 @@
                 <TabControl.Background>
                     <SolidColorBrush Color="#FF252525" Opacity="0"/>
                 </TabControl.Background>
-                <TabItem x:Name="Tab_Pedals" Width="191" Height="40" Padding="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
+                <TabItem x:Name="Tab_Home" Width="154" Height="40" Padding="0" HorizontalAlignment="Left" VerticalAlignment="Top">
                     <TabItem.Header>
-                        <Border  Width="191" Height="40" Margin="0,0,0,0" >
+                        <Border Width="154" Height="40"><TextBlock Text="HOME" FontFamily="Arial Black" FontSize="24" VerticalAlignment="Center" HorizontalAlignment="Center"/></Border>
+                    </TabItem.Header>
+                    <localFunction:HomeDashboard x:Name="HomeDashboardSection"/>
+                </TabItem>
+                <TabItem x:Name="Tab_Pedals" Width="154" Height="40" Padding="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <TabItem.Header>
+                        <Border  Width="154" Height="40" Margin="0,0,0,0" >
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <Image Width="26" Height="26" Source="{StaticResource Pedals}" />
                                 <Label Content="{SLoc DIYFFBPedalPlugin_TextPedals, 'PEDALS'}"  FontFamily="Arial Black" FontSize="26" Height="40" Width="126" Padding="0,0,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" RenderTransformOrigin="0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"  />
@@ -488,9 +494,9 @@
 
                     </Border>
                 </TabItem>
-                <TabItem x:Name="Tab_Rudder" Width="191" Height="40" Padding="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
+                <TabItem x:Name="Tab_Rudder" Width="154" Height="40" Padding="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
                     <TabItem.Header>
-                        <Border  Width="191" Height="40" Margin="0,0,0,0" >
+                        <Border  Width="154" Height="40" Margin="0,0,0,0" >
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <Image Width="26" Height="26" Source="{StaticResource plane}" />
                                 <Label Content="{SLoc DIYFFBPedalPlugin_TextRudder, 'RUDDER'}"  FontFamily="Arial Black" FontSize="26" Height="40" Width="126" Padding="0,0,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" RenderTransformOrigin="0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"  />
@@ -879,9 +885,9 @@
                         </StackPanel>
                     </Border>
                 </TabItem>
-                <TabItem x:Name="Tab_System" Width="191" Height="40" Padding="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
+                <TabItem x:Name="Tab_System" Width="154" Height="40" Padding="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
                     <TabItem.Header>
-                        <Border  Width="191" Height="40" Margin="0,0,0,0" >
+                        <Border  Width="154" Height="40" Margin="0,0,0,0" >
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <Image Width="26" Height="26" Source="{StaticResource Settings}" />
                                 <Label Content="{SLoc DIYFFBPedalPlugin_TextSystem, 'SYSTEM'}"  FontFamily="Arial Black" FontSize="26" Height="40" Width="126" Padding="0,0,0,0" RenderTransformOrigin="0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"  />
@@ -1042,9 +1048,9 @@
                         </StackPanel>
                     </Border>
                 </TabItem>
-                <TabItem x:Name="Tab_LivePlot" Width="191" Height="40" Padding="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
+                <TabItem x:Name="Tab_LivePlot" Width="154" Height="40" Padding="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
                     <TabItem.Header>
-                        <Border Width="191" Height="40" Margin="0,0,0,0">
+                        <Border Width="154" Height="40" Margin="0,0,0,0">
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <TextBlock Text="📈" FontSize="22" VerticalAlignment="Center" Margin="0,0,4,0" />
                                 <Label Content="LIVE PLOT" FontFamily="Arial Black" FontSize="24" Height="40" Padding="0,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" RenderTransformOrigin="0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />

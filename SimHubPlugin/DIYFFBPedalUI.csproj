@@ -221,6 +221,9 @@
     <Compile Include="UIElement\SliderWithLabel.xaml.cs">
       <DependentUpon>SliderWithLabel.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UIFunction\HomeDashboard.xaml.cs">
+      <DependentUpon>HomeDashboard.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UIFunction\AssignmentConfigurationWindow.xaml.cs">
       <DependentUpon>AssignmentConfigurationWindow.xaml</DependentUpon>
     </Compile>
@@ -413,6 +416,10 @@
     <Page Include="UIElement\SliderWithLabel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UIFunction\HomeDashboard.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="UIFunction\AssignmentConfigurationWindow.xaml">
       <SubType>Designer</SubType>

@@ -249,6 +249,10 @@ namespace DiyFfbPedal
             {
                 LivePlotSection.SetReferences(plugin, this);
             }
+            if (HomeDashboardSection != null)
+            {
+                HomeDashboardSection.Initialize(plugin, this);
+            }
             if (LivePlotSection != null)
             {
                 LivePlotSection.SetReferences(plugin, this);
@@ -300,6 +304,24 @@ namespace DiyFfbPedal
             System.Threading.Thread.Sleep(50);
             Plugin.BridgeHidService.OnDataReceived += HidRecieveCallback;
             updateTheGuiFromConfig();
+        }
+
+        public bool IsHomePedalConnected(int pedal)
+        {
+            return Plugin != null && pedal >= 0 && pedal < 3 &&
+                (Plugin._calculations.pedalWirelessStatus[pedal] == WirelessConnectStateEnum.PEDAL_WIRELESS_IS_READY ||
+                 Plugin._calculations.pedalSerialStatus[pedal] == ConnectStateEnum.PEDAL_IS_READY);
+        }
+
+        public double GetHomePedalPercent(int pedal)
+        {
+            if (Plugin == null || pedal < 0 || pedal >= Plugin.rawPedalPos.Length) return 0;
+            return Plugin.rawPedalPos[pedal] * 100.0 / UInt16.MaxValue;
+        }
+
+        public void ShowHomeTarget(bool system)
+        {
+            Function_Tab_seleciton.SelectedItem = system ? Tab_System : Tab_Pedals;
         }
 
 

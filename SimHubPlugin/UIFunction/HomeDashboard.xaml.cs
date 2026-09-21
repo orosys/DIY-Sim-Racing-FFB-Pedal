@@ -1,0 +1,167 @@
+using System;
+using System.Collections.Generic;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Shapes;
+using System.Windows.Threading;
+
+namespace DiyFfbPedal.UIFunction
+{
+    public partial class HomeDashboard : UserControl
+    {
+        private readonly Queue<KeyValuePair<DateTime, double>>[] history =
+        {
+            new Queue<KeyValuePair<DateTime, double>>(),
+            new Queue<KeyValuePair<DateTime, double>>(),
+            new Queue<KeyValuePair<DateTime, double>>()
+        };
+        private readonly DispatcherTimer refreshTimer;
+        private DIY_FFB_Pedal plugin;
+        private DIYFFBPedalControlUI parent;
+        private int refreshTicks;
+
+        public HomeDashboard()
+        {
+            InitializeComponent();
+            refreshTimer = new DispatcherTimer(DispatcherPriority.Render)
+            {
+                Interval = TimeSpan.FromMilliseconds(80)
+            };
+            refreshTimer.Tick += RefreshTimer_Tick;
+            Loaded += delegate { refreshTimer.Start(); };
+            Unloaded += delegate { refreshTimer.Stop(); };
+        }
+
+        public void Initialize(DIY_FFB_Pedal pluginInstance, DIYFFBPedalControlUI parentControl)
+        {
+            plugin = pluginInstance;
+            parent = parentControl;
+            UpdateDashboard(true);
+            refreshTimer.Start();
+        }
+
+        private void RefreshTimer_Tick(object sender, EventArgs e)
+        {
+            if (IsVisible) UpdateDashboard(++refreshTicks % 7 == 0);
+        }
+
+        private void UpdateDashboard(bool refreshSummary)
+        {
+            if (plugin == null || parent == null) return;
+            if (refreshSummary)
+            {
+                string profile = plugin._calculations.ProfileEditing;
+                if (String.IsNullOrWhiteSpace(profile)) profile = plugin.ProfileServicePlugin.CurrentGameProfile;
+                ActiveProfile.Text = String.IsNullOrWhiteSpace(profile) ? "None" : profile;
+                UpdateQuickButtons();
+            }
+
+            int connectedCount = 0;
+            for (int pedal = 0; pedal < 3; pedal++)
+            {
+                bool connected = parent.IsHomePedalConnected(pedal);
+                if (connected) connectedCount++;
+                double percent = parent.GetHomePedalPercent(pedal);
+                UpdatePedal(pedal, connected, percent, refreshSummary);
+            }
+            ConnectionSummary.Text = String.Format("{0} of 3 pedals connected", connectedCount);
+        }
+
+        private void UpdatePedal(int pedal, bool connected, double percent, bool refreshSummary)
+        {
+            TextBlock status = pedal == 0 ? Status0 : pedal == 1 ? Status1 : Status2;
+            TextBlock value = pedal == 0 ? Value0 : pedal == 1 ? Value1 : Value2;
+            ProgressBar bar = pedal == 0 ? Bar0 : pedal == 1 ? Bar1 : Bar2;
+            Polyline graph = pedal == 0 ? Graph0 : pedal == 1 ? Graph1 : Graph2;
+            TextBlock configText = pedal == 0 ? Config0 : pedal == 1 ? Config1 : Config2;
+            TextBlock effectsText = pedal == 0 ? Effects0 : pedal == 1 ? Effects1 : Effects2;
+
+            percent = Math.Max(0, Math.Min(100, percent));
+            status.Text = connected ? "Connected" : "Disconnected";
+            status.Foreground = connected ? Brushes.LightGreen : new SolidColorBrush(Color.FromRgb(171, 180, 190));
+            value.Text = String.Format("{0:0}%", percent);
+            bar.Value = percent;
+
+            DateTime now = DateTime.UtcNow;
+            Queue<KeyValuePair<DateTime, double>> pedalHistory = history[pedal];
+            pedalHistory.Enqueue(new KeyValuePair<DateTime, double>(now, percent));
+            while (pedalHistory.Count > 0 && now - pedalHistory.Peek().Key > TimeSpan.FromSeconds(10)) pedalHistory.Dequeue();
+            PointCollection points = new PointCollection();
+            foreach (KeyValuePair<DateTime, double> sample in pedalHistory)
+            {
+                double x = 700 - (now - sample.Key).TotalSeconds * 70;
+                points.Add(new Point(x, 78 - sample.Value * 0.78));
+            }
+            graph.Points = points;
+
+            if (!refreshSummary) return;
+            payloadPedalConfig config = parent.dap_config_st[pedal].payloadPedalConfig_;
+            configText.Text = String.Format("Max {0:0.#} kg · Travel {1}–{2}%", config.maxForce, config.pedalStartPosition, config.pedalEndPosition);
+            effectsText.Text = "Effects: " + GetEffects(pedal);
+        }
+
+        private string GetEffects(int pedal)
+        {
+            List<string> names = new List<string>();
+            DIYFFBPedalSettings settings = plugin.Settings;
+            if (settings.ABS_enable_flag[pedal] == 1) names.Add("ABS");
+            if (settings.RPM_enable_flag[pedal] == 1) names.Add("RPM");
+            if (settings.G_force_enable_flag[pedal] == 1) names.Add("G-force");
+            if (settings.WS_enable_flag[pedal] == 1) names.Add("Slip");
+            if (settings.Road_impact_enable_flag[pedal] == 1) names.Add("Road");
+            if (settings.CV1_enable_flag[pedal]) names.Add("Custom 1");
+            if (settings.CV2_enable_flag[pedal]) names.Add("Custom 2");
+            if (settings.CV3_enable_flag[pedal]) names.Add("Custom 3");
+            if (settings.CV4_enable_flag[pedal]) names.Add("Custom 4");
+            return names.Count == 0 ? "none" : String.Join(", ", names.ToArray());
+        }
+
+        private Button GetQuickButton(int index)
+        {
+            return index == 0 ? Quick0 : index == 1 ? Quick1 : index == 2 ? Quick2 : index == 3 ? Quick3 : index == 4 ? Quick4 : Quick5;
+        }
+
+        private void UpdateQuickButtons()
+        {
+            int count = plugin.ProfileServicePlugin.ProfileList == null ? 0 : plugin.ProfileServicePlugin.ProfileList.Count;
+            for (int i = 0; i < 6; i++)
+            {
+                Button button = GetQuickButton(i);
+                button.Visibility = i < count ? Visibility.Visible : Visibility.Hidden;
+                button.IsEnabled = i < count;
+                if (i < count)
+                {
+                    ProfileListItem item = plugin.ProfileServicePlugin.ProfileList[i];
+                    string name = String.IsNullOrWhiteSpace(item.ListNameOrig) ? item.FileName : item.ListNameOrig;
+                    button.Content = name + " Apply";
+                }
+            }
+        }
+
+        private void QuickApply_Click(object sender, RoutedEventArgs e)
+        {
+            if (plugin == null || parent == null) return;
+            int index = Convert.ToInt32(((Button)sender).Tag);
+            if (plugin.ProfileServicePlugin.ProfileList == null || index >= plugin.ProfileServicePlugin.ProfileList.Count) return;
+            ProfileListItem item = plugin.ProfileServicePlugin.ProfileList[index];
+            try
+            {
+                plugin.ProfileServicePlugin.ApplyProfile(item.FullPath);
+                plugin._calculations.ProfileEditing = item.FileName;
+                plugin._calculations.ProfileSelected = item.FileName;
+                parent.SystemProfile_TabNew.ApplyProfileOnUiWithPath(item.FullPath);
+                parent.updateTheGuiFromConfig();
+                ApplyFeedback.Text = String.Format("{0} applied · settings and effects updated", String.IsNullOrWhiteSpace(item.ListNameOrig) ? item.FileName : item.ListNameOrig);
+                UpdateDashboard(true);
+            }
+            catch (Exception ex)
+            {
+                ApplyFeedback.Text = "Profile could not be applied: " + ex.Message;
+            }
+        }
+
+        private void OpenPedals_Click(object sender, RoutedEventArgs e) { parent.ShowHomeTarget(false); }
+        private void OpenSystem_Click(object sender, RoutedEventArgs e) { parent.ShowHomeTarget(true); }
+    }
+}
