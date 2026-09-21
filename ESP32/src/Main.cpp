@@ -2755,8 +2755,18 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
         } else {
           if (1 == dap_config_pedalUpdateTask_st.payloadPedalConfig_st
                        .travelAsJoystickOutput_u8) {
+            // Preload gate: travel alone can't tell idle servo
+            // hunting/vibration from real pedal input, so below forceMin the
+            // travel output is forced to a clean 0 rather than smoothing it
+            // (the EMA denoise above only softens the noise, it doesn't
+            // remove it).
+            float travelJoystick_01 =
+                constrain(pedalArcPercentage_fl32, 0.0f, 1.0f);
+            if (filteredReading < dap_calculationVariables_st.forceMin_fl32) {
+              travelJoystick_01 = 0.0f;
+            }
             joystickNormalizedToInt32_orig = NormalizeControllerOutputValue(
-                constrain(pedalArcPercentage_fl32, 0.0f, 1.0f), 0.0f, 1.0f,
+                travelJoystick_01, 0.0f, 1.0f,
                 dap_config_pedalUpdateTask_st.payloadPedalConfig_st
                     .maxGameOutput_u8);
           } else {
@@ -2821,10 +2831,12 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
           // kfModelNoiseJoystick_u8 (1-255, UI slider "KF for Joystick
           // Denoise") keeps its existing "higher = less lag" direction from
           // the old Kalman filter, mapped log-scale onto a tau (time
-          // constant) between ~2 ms (barely any smoothing) and ~500 ms
-          // (heavy smoothing) so the full slider range stays useful.
+          // constant) between ~2 ms (barely any smoothing) and ~125 ms
+          // (heavy smoothing) so the full slider range stays useful. Capped
+          // at 125ms (rather than 500ms) because the lower half of the
+          // slider range above that is unusable lag in practice.
           const float tauMin_ms_fl32 = 2.0f;
-          const float tauMax_ms_fl32 = 500.0f;
+          const float tauMax_ms_fl32 = 125.0f;
           float sliderFrac_fl32 =
               (float)(dap_config_pedalUpdateTask_st.payloadPedalConfig_st
                           .kfModelNoiseJoystick_u8 -
