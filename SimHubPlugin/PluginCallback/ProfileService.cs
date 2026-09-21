@@ -135,6 +135,7 @@ namespace DiyFfbPedal
                                 _plugin._calculations.ProfileEditing = item.FileName;
                             }
                             ApplyProfile(ProfilePath);
+                            UpdateProfileUi(item);
                             UpdateProfileLabelDefaultAndEditing();
                             _plugin.wpfHandle.ToastNotification("Profile Applied", $"Profile:{item.ListNameOrig} for Car:{carName} applied.");
                         }
@@ -167,6 +168,7 @@ namespace DiyFfbPedal
                             }
                             ApplyProfileForGame(ProfilePath);
                             CurrentGameProfile= item.FileName;
+                            UpdateProfileUi(item);
                             UpdateProfileLabelDefaultAndEditing();
                             //_plugin.wpfHandle.ToastNotification("Profile Applied", $"Profile:{item.ListNameOrig} for Game:{gameName} applied.");
                         }
@@ -259,6 +261,16 @@ namespace DiyFfbPedal
                 _plugin.Settings.CV2_enable_flag[pedal] = effects[7];
                 _plugin.Settings.CV3_enable_flag[pedal] = effects[8];
                 _plugin.Settings.CV4_enable_flag[pedal] = effects[9];
+            }
+
+            private void UpdateProfileUi(ProfileListItem item)
+            {
+                if (item == null || _plugin.wpfHandle == null) return;
+                _plugin.wpfHandle.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    _plugin.wpfHandle.SystemProfile_TabNew.ApplyProfileOnUiWithPath(item.FullPath);
+                    _plugin.wpfHandle.updateTheGuiFromConfig();
+                }));
             }
             public void RefreshProfileList()
             {
