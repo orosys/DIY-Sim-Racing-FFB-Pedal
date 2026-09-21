@@ -146,14 +146,16 @@ void sWirelessCommSentTrampoline(const esp_now_send_info_t *info,
 // =========================================================================
 // WirelessCommunicationPedal
 //
-// Replaces the old ESP-NOW transport (ESPNOW_lib.h). Broadcast-only: every
-// packet goes to FF:FF:FF:FF:FF:FF, there is exactly one ESP-NOW peer ever
-// registered, and there is no busy-flag/backoff/retry state machine - a send
-// either succeeds or fails immediately, and the caller just tries again on
-// its next scheduled interval. Receivers filter by source MAC against the
-// addresses loaded from DapMacAddresses_t (no auto-discovery: a MAC must
-// already be provisioned, e.g. via the USB config tool, before its traffic
-// is accepted).
+// Unicast: bridge-bound traffic targets _hostMac, rudder sync targets
+// whichever sibling pedal is the currently-resolved rudder partner - all
+// through sendTo(), the sole esp_now_send() call site, which implements
+// the flow-control this repo already learned it needs the hard way (see
+// the history note on sendTo() below). The old broadcast peer/
+// sendBroadcast() path is kept only as a fallback for anything not yet
+// converted. Receivers filter by source MAC against the addresses loaded
+// from DapMacAddresses_t (no auto-discovery: a MAC must already be
+// provisioned, e.g. via the USB config tool, before its traffic is
+// accepted).
 // =========================================================================
 class WirelessCommunicationPedal {
 public:
@@ -239,6 +241,7 @@ public:
     for (int i = 0; i < 3; i++) {
       memcpy(_pedalMac[i], macCfg.payloadMacAddresses_st.macAddress_aau8[i], 6);
     }
+    syncPeerTable();
   }
 
   esp_err_t deinit() {
@@ -262,36 +265,51 @@ public:
   uint32_t getTxSuccessCount() const { return _txSuccessCount; }
   uint32_t getTxFailCount() const { return _txFailCount; }
   uint32_t getTxErrCount() const { return _txErrCount; }
+  uint32_t getTxNoMemCount() const { return _txNoMemCount_u32; }
+  uint32_t getTxBusySkipCount() const { return _txBusySkipCount_u32; }
+  bool isTxBusy() const { return _txInFlight_b || millis() < _noMemBackoffUntil_ms; }
   uint32_t getLastTxTime() const { return _lastTxTime; }
   uint32_t getLastRxTime() const { return _lastRxTime; }
 
   esp_err_t sendBasicStateToBridge(const DapStateBasic_t &pkt) {
+    if (isAllZero(_hostMac)) return ESP_ERR_INVALID_ARG;
     logDebug("TX BasicState len=%u", (unsigned)sizeof(pkt));
-    return sendBroadcast((const uint8_t *)&pkt, sizeof(pkt));
+    return sendTo(_hostMac, (const uint8_t *)&pkt, sizeof(pkt));
   }
 
   esp_err_t sendExtendedStateToBridge(const DapStateExtended_t &pkt) {
+    if (isAllZero(_hostMac)) return ESP_ERR_INVALID_ARG;
     logDebug("TX ExtendedState len=%u", (unsigned)sizeof(pkt));
-    return sendBroadcast((const uint8_t *)&pkt, sizeof(pkt));
+    return sendTo(_hostMac, (const uint8_t *)&pkt, sizeof(pkt));
   }
 
   esp_err_t sendConfigEchoToBridge(const DapConfig_t &pkt) {
+    if (isAllZero(_hostMac)) return ESP_ERR_INVALID_ARG;
     logDebug("TX ConfigEcho len=%u", (unsigned)sizeof(pkt));
-    return sendBroadcast((const uint8_t *)&pkt, sizeof(pkt));
+    return sendTo(_hostMac, (const uint8_t *)&pkt, sizeof(pkt));
   }
 
   esp_err_t sendServoConfigResponseToBridge(const DAP_servo_config_st_t &pkt) {
+    if (isAllZero(_hostMac)) return ESP_ERR_INVALID_ARG;
     logDebug("TX ServoConfigResponse len=%u", (unsigned)sizeof(pkt));
-    return sendBroadcast((const uint8_t *)&pkt, sizeof(pkt));
+    return sendTo(_hostMac, (const uint8_t *)&pkt, sizeof(pkt));
   }
 
+  // Targets whichever sibling pedal handleActionsPacket's rudder mode-select
+  // most recently resolved as our partner (see _rudderPartnerId_u8) - safe
+  // no-op if no partner is currently resolved, rather than ever sending to
+  // a garbage/zero MAC.
   esp_err_t sendRudderSync(const DapRudder_t &pkt) {
+    if (_rudderPartnerId_u8 >= 3 || isAllZero(_pedalMac[_rudderPartnerId_u8])) {
+      return ESP_ERR_INVALID_ARG;
+    }
     _rudderTx = pkt;
     logDebug("TX RudderSync len=%u", (unsigned)sizeof(pkt));
-    return sendBroadcast((const uint8_t *)&pkt, sizeof(pkt));
+    return sendTo(_pedalMac[_rudderPartnerId_u8], (const uint8_t *)&pkt, sizeof(pkt));
   }
 
   void sendLogToBridge(const char *fmt, ...) {
+    if (isAllZero(_hostMac)) return;
     uint8_t buffer[250];
     char textBuf[240];
     va_list args;
@@ -308,7 +326,7 @@ public:
     buffer[3] = (uint8_t)len;
     memcpy(&buffer[4], textBuf, len);
     logDebug("TX Log: %s", textBuf);
-    sendBroadcast(buffer, 4 + len);
+    sendTo(_hostMac, buffer, 4 + len);
   }
 
   void handleRecv(const esp_now_recv_info_t *info, const uint8_t *data,
@@ -441,6 +459,9 @@ public:
   void handleSent(const esp_now_send_info_t *info,
                   esp_now_send_status_t status) {
     (void)info;
+    // Flow control (see sendTo() below): a send is only "in flight" until
+    // this callback fires, one way or the other.
+    _txInFlight_b = false;
     if (status == ESP_NOW_SEND_SUCCESS) {
       _txSuccessCount++;
     } else {
@@ -453,6 +474,8 @@ private:
   uint8_t _ownMac[6] = {0};
   uint8_t _hostMac[6] = {0};
   uint8_t _pedalMac[3][6] = {{0}};
+  uint8_t _registeredHostMac[6] = {0};
+  uint8_t _registeredPedalMac[3][6] = {{0}};
   uint8_t _currentChannel = 11;
   bool _started = false;
   bool _initialStatus = false;
@@ -465,6 +488,23 @@ private:
   bool _lastSendOk = true;
   DapRudder_t _rudderRx = {};
   DapRudder_t _rudderTx = {};
+  uint8_t _rudderPartnerId_u8 = PEDAL_ID_UNKNOWN;
+
+  // --- Unicast flow control -------------------------------------------
+  // History: this repo already tried unicast once (see commits fafe7737..
+  // 4bd7749d) and hit a real hardware lockup - rudder-sync packets at a
+  // 2ms interval exhausted the 32 ESP-IDF TX descriptors
+  // (ESP_ERR_ESPNOW_NO_MEM) because nothing paced app-level esp_now_send()
+  // calls against what the WiFi driver could actually retire (unicast
+  // frames cost more per-send than broadcast due to hardware ACK+retry).
+  // The fix that worked, ported here: track whether a send is still
+  // in-flight (cleared by handleSent(), with a 25ms safety-timeout
+  // auto-recovery in case the callback is ever dropped), and back off for
+  // 15ms after any ESP_ERR_ESPNOW_NO_MEM before attempting another send.
+  bool _txInFlight_b = false;
+  uint32_t _noMemBackoffUntil_ms = 0;
+  uint32_t _txNoMemCount_u32 = 0;
+  uint32_t _txBusySkipCount_u32 = 0;
 
   static bool isAllZero(const uint8_t *mac) {
     for (int i = 0; i < 6; i++) {
@@ -474,11 +514,32 @@ private:
     return true;
   }
 
-  esp_err_t sendBroadcast(const uint8_t *data, size_t len) {
-    _lastTxTime = millis();
-    esp_err_t res = esp_now_send(_broadcastMac, data, len);
+  esp_err_t sendTo(const uint8_t *mac, const uint8_t *data, size_t len) {
+    uint32_t now = millis();
+    if (now < _noMemBackoffUntil_ms) {
+      _txBusySkipCount_u32++;
+      return ESP_ERR_ESPNOW_NO_MEM;
+    }
+    if (_txInFlight_b) {
+      if (now - _lastTxTime > 25) {
+        // Safety-timeout recovery: the send callback never fired (dropped
+        // or stalled) - don't let one lost callback wedge TX forever.
+        _txInFlight_b = false;
+      } else {
+        _txBusySkipCount_u32++;
+        return ESP_ERR_ESPNOW_INTERNAL;
+      }
+    }
+    _txInFlight_b = true;
+    _lastTxTime = now;
+    esp_err_t res = esp_now_send(mac, data, len);
     if (res != ESP_OK) {
+      _txInFlight_b = false;
       _txErrCount++;
+      if (res == ESP_ERR_ESPNOW_NO_MEM) {
+        _noMemBackoffUntil_ms = now + 15;
+        _txNoMemCount_u32++;
+      }
       logDebug("TX failed: %s", esp_err_to_name(res));
 
       // ActiveSerial->printf("TX failed: %s", esp_err_to_name(res));
@@ -509,6 +570,75 @@ private:
       _lastSendOk = true;
     }
     return res;
+  }
+
+  esp_err_t sendBroadcast(const uint8_t *data, size_t len) {
+    return sendTo(_broadcastMac, data, len);
+  }
+
+  // Resolves who our rudder-sync partner pedal is, given our own role and
+  // the currently-active rudder action, so sendRudderSync() knows a
+  // concrete unicast target instead of relying on broadcast to reach
+  // whichever sibling happens to be relevant. Returns PEDAL_ID_UNKNOWN if
+  // localPedalId isn't part of the pair this rudderAct describes.
+  static uint8_t resolveRudderPartnerId(uint8_t localPedalId, uint8_t rudderAct) {
+    uint8_t a = PEDAL_ID_UNKNOWN, b = PEDAL_ID_UNKNOWN;
+    if (rudderAct == (uint8_t)RudderAction::RUDDER_THROTTLE_AND_BRAKE ||
+        rudderAct == (uint8_t)RudderAction::HELIRUDDER_THROTTLE_AND_BRAKE) {
+      a = PEDAL_ID_THROTTLE;
+      b = PEDAL_ID_BRAKE;
+    } else if (rudderAct == (uint8_t)RudderAction::RUDDER_THROTTLE_AND_CLUTCH ||
+               rudderAct == (uint8_t)RudderAction::HELIRUDDER_THROTTLE_AND_CLUTCH) {
+      a = PEDAL_ID_THROTTLE;
+      b = PEDAL_ID_CLUTCH;
+    } else {
+      return PEDAL_ID_UNKNOWN;
+    }
+    if (localPedalId == a) return b;
+    if (localPedalId == b) return a;
+    return PEDAL_ID_UNKNOWN;
+  }
+
+  // --- Unicast peer management ------------------------------------------
+  bool ensurePeer(const uint8_t *mac) {
+    if (isAllZero(mac)) return false;
+    if (esp_now_is_peer_exist(mac)) return true;
+    esp_now_peer_info_t peer = {};
+    memcpy(peer.peer_addr, mac, 6);
+    peer.channel = 0;
+    peer.ifidx = WIFI_IF_STA;
+    peer.encrypt = false;
+    return esp_now_add_peer(&peer) == ESP_OK;
+  }
+
+  // Reconciles the registered ESP-NOW peer table (host + siblings) against
+  // the desired _hostMac/_pedalMac[] - called from applyMacConfig() so this
+  // stays correct both at boot and whenever the host pushes an updated MAC
+  // table at runtime. Idempotent: a slot whose MAC hasn't changed is left
+  // alone. Self (matched via _ownMac) is skipped - a pedal never needs a
+  // peer entry for its own MAC.
+  void syncPeerTable() {
+    if (memcmp(_hostMac, _registeredHostMac, 6) != 0) {
+      if (!isAllZero(_registeredHostMac)) {
+        esp_now_del_peer(_registeredHostMac);
+        memset(_registeredHostMac, 0, 6);
+      }
+      if (!isAllZero(_hostMac) && ensurePeer(_hostMac)) {
+        memcpy(_registeredHostMac, _hostMac, 6);
+      }
+    }
+    for (int i = 0; i < 3; i++) {
+      if (!isAllZero(_ownMac) && macCheck(_ownMac, _pedalMac[i])) continue;
+      bool changed = memcmp(_pedalMac[i], _registeredPedalMac[i], 6) != 0;
+      if (!changed) continue;
+      if (!isAllZero(_registeredPedalMac[i])) {
+        esp_now_del_peer(_registeredPedalMac[i]);
+        memset(_registeredPedalMac[i], 0, 6);
+      }
+      if (!isAllZero(_pedalMac[i]) && ensurePeer(_pedalMac[i])) {
+        memcpy(_registeredPedalMac[i], _pedalMac[i], 6);
+      }
+    }
   }
 
   void handleConfigPacket(const uint8_t *data,
@@ -717,15 +847,17 @@ private:
       }
     }
 
-    // Rudder mode select - broadcast means we don't need to resolve a unicast
-    // target MAC any more, just flip the mode flags; the receive path above
-    // already accepts DapRudder_t packets from any configured sibling pedal.
+    // Rudder mode select - also resolves who sendRudderSync() should unicast
+    // to (see resolveRudderPartnerId()), since unicast needs a concrete
+    // target MAC instead of relying on broadcast to reach whichever sibling
+    // happens to be relevant.
     uint8_t rudderAct = dap_actions_st.payloadPedalAction_st.rudderAction_u8;
     if (rudderAct == (uint8_t)RudderAction::RUDDER_THROTTLE_AND_BRAKE ||
         rudderAct == (uint8_t)RudderAction::RUDDER_THROTTLE_AND_CLUTCH) {
       g_getRudderAction_b = true;
       dap_calculationVariables_st.rudderStatus_b = true;
       dap_calculationVariables_st.helicopterRudderStatus_b = false;
+      _rudderPartnerId_u8 = resolveRudderPartnerId(s_localPedalType_u8, rudderAct);
     } else if (rudderAct ==
                    (uint8_t)RudderAction::HELIRUDDER_THROTTLE_AND_BRAKE ||
                rudderAct ==
@@ -733,12 +865,14 @@ private:
       g_getHeliRudderAction_b = true;
       dap_calculationVariables_st.helicopterRudderStatus_b = true;
       dap_calculationVariables_st.rudderStatus_b = false;
+      _rudderPartnerId_u8 = resolveRudderPartnerId(s_localPedalType_u8, rudderAct);
     } else if (rudderAct == (uint8_t)RudderAction::RUDDER_CLEAR_RUDDER_STATUS) {
       dap_calculationVariables_st.rudderStatus_b = false;
       dap_calculationVariables_st.helicopterRudderStatus_b = false;
       dap_calculationVariables_st.rudderBrakeStatus_b = false;
       moveSlowlyToPosition_b = true;
       ResetRudderStrategyState();
+      _rudderPartnerId_u8 = PEDAL_ID_UNKNOWN;
     }
 
     uint8_t brakeAct =

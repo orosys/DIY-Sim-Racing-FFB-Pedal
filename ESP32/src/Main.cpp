@@ -4242,11 +4242,12 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
               ActiveSerial->printf(
                   "[ESPNOW TX] Sent basic state to Bridge "
                   "%02X:%02X:%02X:%02X:%02X:%02X, res=%s (ch=%d) [Sent:%u, "
-                  "Fail:%u, Err:%u]\n",
+                  "Fail:%u, Err:%u, NoMem:%u, BusySkip:%u]\n",
                   hostMac[0], hostMac[1], hostMac[2], hostMac[3], hostMac[4],
                   hostMac[5], esp_err_to_name(res), wirelessComm.getChannel(),
                   wirelessComm.getTxSuccessCount(),
-                  wirelessComm.getTxFailCount(), wirelessComm.getTxErrCount());
+                  wirelessComm.getTxFailCount(), wirelessComm.getTxErrCount(),
+                  wirelessComm.getTxNoMemCount(), wirelessComm.getTxBusySkipCount());
             }
 
             if (res == ESP_OK) {
@@ -4438,7 +4439,15 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
             (pedalId < 3)) {
           if (dap_calculationVariables_st.rudderStatus_b ||
               dap_calculationVariables_st.helicopterRudderStatus_b) {
-            if (!packetSentThisCycle) {
+            // Rudder sync is the exact packet type that historically stalled
+            // the WiFi TX FIFO under unicast (see the history note on
+            // WirelessCommunicationPedal::sendTo()) - if the driver is still
+            // busy with a prior send, skip building/sending this sample
+            // entirely rather than queue it. Deliberately don't touch
+            // rudderPacketsUpdateLast here, so the very next 2ms wake
+            // retries immediately (with a fresh sample) once the driver is
+            // free again, instead of waiting out a full stale interval.
+            if (!packetSentThisCycle && !wirelessComm.isTxBusy()) {
               rudderPacketsUpdateLast = millis();
               DapRudder_t rudderTxLocal;
               memset(&rudderTxLocal, 0, sizeof(rudderTxLocal));
@@ -4461,7 +4470,9 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
                       (uint8_t *)(&(rudderTxLocal.payloadHeader_st)),
                       sizeof(rudderTxLocal.payloadHeader_st) +
                           sizeof(rudderTxLocal.payloadRudderState_st));
-              // Broadcast - no unicast partner MAC to resolve any more.
+              // Unicasts to whichever sibling handleActionsPacket resolved
+              // as our rudder partner (see resolveRudderPartnerId()); safe
+              // no-op if no partner is currently resolved.
               esp_err_t res = wirelessComm.sendRudderSync(rudderTxLocal);
               if (res == ESP_OK) {
                 packetSentThisCycle = true;
@@ -4497,17 +4508,19 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
           // guaranteed to show up.
           ActiveSerial->printf(
               "Pedal:%d Diag: Heap=%u MinHeap=%u LargestFreeBlock=%u TxFail=%u "
-              "TxErr=%u RTT=%u\n",
+              "TxErr=%u TxNoMem=%u TxBusySkip=%u RTT=%u\n",
               espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8, freeHeap,
               minHeap, largestBlock, wirelessComm.getTxFailCount(),
-              wirelessComm.getTxErrCount(),
+              wirelessComm.getTxErrCount(), wirelessComm.getTxNoMemCount(),
+              wirelessComm.getTxBusySkipCount(),
               (uint32_t)g_currentSyncDelay_ms * 2);
           wirelessComm.sendLogToBridge(
               "Pedal:%d Diag: Heap=%u MinHeap=%u LargestFreeBlock=%u TxFail=%u "
-              "TxErr=%u RTT=%u",
+              "TxErr=%u TxNoMem=%u TxBusySkip=%u RTT=%u",
               espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8, freeHeap,
               minHeap, largestBlock, wirelessComm.getTxFailCount(),
-              wirelessComm.getTxErrCount(),
+              wirelessComm.getTxErrCount(), wirelessComm.getTxNoMemCount(),
+              wirelessComm.getTxBusySkipCount(),
               (uint32_t)g_currentSyncDelay_ms * 2);
         }
       }

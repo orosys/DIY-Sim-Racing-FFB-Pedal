@@ -545,8 +545,18 @@ void espNowCommunicationTxTask( void * pvParameters )
         }
       #endif
 
+      // Pace at most one send attempt per 2ms wake across all the
+      // categories below (config/action/servo-config/OTA) - unlike the
+      // pedal side's existing packetSentThisCycle discipline, nothing paced
+      // this loop before, and unicast's higher per-frame cost (hardware
+      // ACK+retry) makes back-to-back sends here a real risk of exhausting
+      // the driver's TX descriptor pool (see the history note on
+      // WirelessCommunicationBridge::sendTo()). sendTo() itself also
+      // self-limits (busy/backoff), so this is a belt-and-suspenders cap,
+      // not the only thing preventing overload.
+      bool sentThisCycle = false;
 
-      for(int i=0;i<3;i++)
+      for(int i=0;i<3 && !sentThisCycle;i++)
       {
         if(configUpdateAvailable[i])
         {
@@ -560,12 +570,13 @@ void espNowCommunicationTxTask( void * pvParameters )
             #ifdef USB_JOYSTICK
               tinyusbJoystick_.printf("Forward config to Pedal: %d, result:%s", i, esp_err_to_name(err));
             #endif
+            sentThisCycle = true;
           }
         }
       }
-      
 
-      for(int i=0; i<3; i++)
+
+      for(int i=0; i<3 && !sentThisCycle; i++)
       {
         if(dap_action_update[i] )
         {
@@ -583,6 +594,7 @@ void espNowCommunicationTxTask( void * pvParameters )
               syncPairingTableToPedals();
             }
             wirelessComm.sendActionToPedal(i, dap_actions_st[i]);
+            sentThisCycle = true;
             if (isConfigRequest) {
               ActiveSerial->printf("[L][DIAG] ConfigReq action forwarded to Pedal #%d\n", i);
               #ifdef USB_JOYSTICK
@@ -600,7 +612,7 @@ void espNowCommunicationTxTask( void * pvParameters )
         }
 
         // --- ADDED: Forward Servo Config to Pedals ---
-        for(int s=0; s<3; s++)
+        for(int s=0; s<3 && !sentThisCycle; s++)
         {
           if(update_servo_config[s])
           {
@@ -608,6 +620,7 @@ void espNowCommunicationTxTask( void * pvParameters )
             if(dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[s]==1)
             {
               wirelessComm.sendServoConfigToPedal(s, dap_servo_config_st[s]);
+              sentThisCycle = true;
             }
           }
         }
@@ -615,9 +628,9 @@ void espNowCommunicationTxTask( void * pvParameters )
       }
 
 
-    
+
       //forward the basic wifi info for pedals
-      if(g_pedalOtaAction_b)
+      if(g_pedalOtaAction_b && !sentThisCycle)
       {
         if (dap_action_ota_st.payloadOtaInfo_st.deviceId_u8 < 3) {
           wirelessComm.sendOtaToPedal(dap_action_ota_st.payloadOtaInfo_st.deviceId_u8, dap_action_ota_st);
@@ -625,7 +638,7 @@ void espNowCommunicationTxTask( void * pvParameters )
         }
         g_pedalOtaAction_b=false;
       }
-    }    
+    }
   }
 }
 
@@ -656,7 +669,7 @@ void clearPedalAssignmentAction(uint8_t targetIdx, const DapActions_t &action)
   }
 
   if (hasMac) {
-    wirelessComm.sendBroadcastRetry((const uint8_t*)&action, sizeof(DapActions_t), 5, 20);
+    wirelessComm.sendUnicastRetry(targetMac, (const uint8_t*)&action, sizeof(DapActions_t), 5, 20);
   }
 
   // Clear pairing in EEPROM & RAM
@@ -703,8 +716,9 @@ void pushPedalAssignmentAction(uint8_t sourceTag, uint8_t newRole, const DapActi
     return;
   }
 
-  // Broadcast a few times for reliability - no unicast peer/ACK needed.
-  wirelessComm.sendBroadcastRetry((const uint8_t*)&action, sizeof(DapActions_t), 3, 20);
+  // Unicast a few times for reliability - the target MAC is already known
+  // (resolved above), so send directly to it instead of broadcasting.
+  wirelessComm.sendUnicastRetry(targetMac, (const uint8_t*)&action, sizeof(DapActions_t), 3, 20);
   ActiveSerial->printf("[L]Assignment action sent to pedal: %02X:%02X:%02X:%02X:%02X:%02X, new role: %d\n",
                        targetMac[0], targetMac[1], targetMac[2], targetMac[3], targetMac[4], targetMac[5], newRole);
 
@@ -852,8 +866,11 @@ void handleWifiSetChannelRequest(uint8_t newChannel, bool isHid) {
   fwd.payloadFooter_st.enfOfFrame1_u8 = EOF_BYTE_1_U8;
   fwd.payloadFooter_st.checkSum_u16 = checksumCalculator((uint8_t*)(&(fwd.payloadHeader_st)), sizeof(fwd.payloadHeader_st) + sizeof(fwd.payloadWifiChannel_st));
 
-  // Broadcast a few times over ~200ms for reliability - no unicast peer/ACK needed.
-  wirelessComm.sendBroadcastRetry((const uint8_t*)&fwd, sizeof(DapWifiChannel_t), 4, 50);
+  // Every currently-known pedal needs to hear this (they all have to move
+  // channel together), so unicast to each one individually rather than a
+  // single broadcast - sent BEFORE switching the bridge's own channel below,
+  // so pedals still on the old channel actually receive it.
+  wirelessComm.sendToAllKnownPedalsRetry((const uint8_t*)&fwd, sizeof(DapWifiChannel_t), 4, 50);
 
   saveWifiChannelToEeprom(newChannel);
   wirelessComm.setChannel(newChannel);

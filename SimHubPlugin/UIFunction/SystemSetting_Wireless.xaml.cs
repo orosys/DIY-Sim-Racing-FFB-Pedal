@@ -561,12 +561,15 @@ namespace DiyFfbPedal.UIFunction
             // pedal's EEPROM: a pedal only learns the bridge's MAC via this
             // exact sync (there's no wireless path to fix it afterwards), so
             // syncing while the Bridge row is still "--" permanently blinds
-            // that pedal to every packet the bridge ever sends it - it can
-            // still transmit its own telemetry (broadcast doesn't need the
-            // bridge's MAC), so the plugin sees it, but every reply/config
-            // push/config-request the bridge sends back gets silently
-            // dropped forever, with no error anywhere. This produces a
-            // permanent "stuck on Read Pedal Config" with zero diagnostics.
+            // that pedal to every packet the bridge ever sends it. Wireless
+            // traffic is now unicast (ESP-NOW send targets the specific
+            // peer MAC directly - see WirelessCommunicationPedal::sendTo()
+            // in ESP32/include/WirelessCommunication_pedal.h), so an unknown
+            // bridge MAC blinds the pedal completely: it can't even transmit
+            // its own telemetry any more (that used to still get through
+            // under the old broadcast transport), so the plugin won't see
+            // the pedal at all rather than just seeing it stuck on "Read
+            // Pedal Config".
             var bridgeRow = NodeRows.FirstOrDefault(r => r.NodeIndex == 3);
             bool bridgeMacKnown = bridgeRow != null && !string.IsNullOrWhiteSpace(bridgeRow.MacAddress) &&
                                    bridgeRow.MacAddress != "--" && bridgeRow.MacAddress != "00:00:00:00:00:00";
@@ -576,8 +579,8 @@ namespace DiyFfbPedal.UIFunction
                     "The Bridge row has no known MAC address yet.\n\n" +
                     "Syncing now will write an empty bridge address into every connected pedal's EEPROM. " +
                     "A pedal only learns the bridge's MAC through this sync - there's no way to fix it wirelessly afterwards - " +
-                    "so any pedal synced this way will silently stop responding to the bridge (it'll still send telemetry, but " +
-                    "config/config-request replies will be dropped forever) until re-synced with a known Bridge MAC.\n\n" +
+                    "so any pedal synced this way will stop communicating with the bridge entirely (wireless traffic is unicast, " +
+                    "so it won't even be able to transmit telemetry) until re-synced with a known Bridge MAC.\n\n" +
                     "Run Auto-Detect first (with the bridge connected) so its MAC is known, or continue anyway?",
                     "Bridge MAC Unknown",
                     MessageBoxButton.YesNo,
