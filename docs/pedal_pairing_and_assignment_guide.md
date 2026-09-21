@@ -57,9 +57,7 @@ sequenceDiagram
 
 ### Step-by-Step Guide
 
-<video src="media/images/simhub_wireless_assignment.mp4" controls width="720"></video>
-
-*Video 1: End-to-end walkthrough of the Wireless Management tab - auto-detect, channel selection, and Sync to All Devices.*
+https://github.com/user-attachments/assets/96f13742-3679-4350-b759-af907de7c6d0
 
 1. **Connect devices via USB**:
    - Connect the ESP32-S3 Bridge to the PC via USB (it will show up as `USB-HID Online`).
