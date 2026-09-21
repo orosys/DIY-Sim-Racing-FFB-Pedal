@@ -58,6 +58,10 @@ namespace User.PluginSdkDemo
         public bool advanced_b = false;
         public bool[,,] Effect_status_prolife = new bool[6, 3, 8] { { { false, false, false, false, false, false, false, false }, { false, false, false, false, false, false, false, false }, { false, false, false, false, false, false, false, false } }, { { false, false, false, false, false, false, false, false }, { false, false, false, false, false, false, false, false }, { false, false, false, false, false, false, false, false } }, { { false, false, false, false, false, false, false, false }, { false, false, false, false, false, false, false, false }, { false, false, false, false, false, false, false, false } }, { { false, false, false, false, false, false, false, false }, { false, false, false, false, false, false, false, false }, { false, false, false, false, false, false, false, false } }, { { false, false, false, false, false, false, false, false }, { false, false, false, false, false, false, false, false }, { false, false, false, false, false, false, false, false } }, { { false, false, false, false, false, false, false, false }, { false, false, false, false, false, false, false, false }, { false, false, false, false, false, false, false, false } } };
         public bool[,] Effect_status_profile_initialized = new bool[6, 3];
+        public bool AutoProfileByGame = false;
+        public int DefaultProfileSlot = 0;
+        public System.Collections.Generic.Dictionary<string, int> GameProfileSlots =
+            new System.Collections.Generic.Dictionary<string, int>(System.StringComparer.OrdinalIgnoreCase);
         public string SSID_string = "";
         public string PASS_string = "";
         public bool[] LivePreview = new bool[3] { false, false, false };

@@ -586,6 +586,19 @@ namespace User.PluginSdkDemo.UIFunction
             SettingsChangedEvent(Settings);
             btn_apply_profile_Click_event?.Invoke(this, EventArgs.Empty);
         }
+
+        public void SelectProfile(uint profile)
+        {
+            if (profile > 5) return;
+            profile_select = profile;
+            ProfileTab.SelectedIndex = (int)profile;
+            calculation.profile_index = profile;
+            InitializeLinkedEffectStates(profile);
+            calculation.Update_Profile_Checkbox_b = true;
+            updateUI();
+            SettingsChangedEvent(Settings);
+            CalculationChangedEvent(calculation);
+        }
         public event EventHandler btn_send_profile_Click_event;
         private void btn_send_profile_Click(object sender, RoutedEventArgs e)
         {
