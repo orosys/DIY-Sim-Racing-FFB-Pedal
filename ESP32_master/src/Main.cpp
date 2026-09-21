@@ -588,13 +588,25 @@ void espNowCommunicationTxTask( void * pvParameters )
           bool isConfigRequest = dap_actions_st[i].payloadPedalAction_st.returnPedalConfig_u8 != 0;
           if(dap_bridge_state_st.payloadBridgeState_st.pedalAvailability_au8[i]==1)
           {
+            // The actual action send goes out FIRST, then the (lower-
+            // priority) pairing-table refresh below - not the other way
+            // around. syncPairingTableToPedals() fires up to 3 back-to-back
+            // unicast sends with no delay between them; under unicast's
+            // shared in-flight/backoff state (see the history note on
+            // WirelessCommunicationBridge::sendTo()), that burst was eating
+            // the one "send slot" this 2ms wake before the actual rudder
+            // action below ever got a chance to go out - the action send
+            // would be silently busy-skipped with no retry, since
+            // dap_action_update[i] is already cleared above. Reordering
+            // costs nothing here: the pairing table already exists in RAM
+            // from boot/last sync, this call just refreshes it.
+            wirelessComm.sendActionToPedal(i, dap_actions_st[i]);
+            sentThisCycle = true;
             if (i == PEDAL_ID_BRAKE &&
                 dap_actions_st[i].payloadPedalAction_st.rudderAction_u8 != 0 &&
                 dap_actions_st[i].payloadPedalAction_st.systemAction_u8 == 0) {
               syncPairingTableToPedals();
             }
-            wirelessComm.sendActionToPedal(i, dap_actions_st[i]);
-            sentThisCycle = true;
             if (isConfigRequest) {
               ActiveSerial->printf("[L][DIAG] ConfigReq action forwarded to Pedal #%d\n", i);
               #ifdef USB_JOYSTICK

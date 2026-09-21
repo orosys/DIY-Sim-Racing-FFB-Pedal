@@ -4235,20 +4235,20 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
             esp_err_t res =
                 wirelessComm.sendBasicStateToBridge(dap_state_basic_st_lcl);
 
-            static uint32_t lastTxDiagTime = 0;
-            if (millis() - lastTxDiagTime > 3000) {
-              lastTxDiagTime = millis();
-              const uint8_t *hostMac = wirelessComm.getHostMac();
-              ActiveSerial->printf(
-                  "[ESPNOW TX] Sent basic state to Bridge "
-                  "%02X:%02X:%02X:%02X:%02X:%02X, res=%s (ch=%d) [Sent:%u, "
-                  "Fail:%u, Err:%u, NoMem:%u, BusySkip:%u]\n",
-                  hostMac[0], hostMac[1], hostMac[2], hostMac[3], hostMac[4],
-                  hostMac[5], esp_err_to_name(res), wirelessComm.getChannel(),
-                  wirelessComm.getTxSuccessCount(),
-                  wirelessComm.getTxFailCount(), wirelessComm.getTxErrCount(),
-                  wirelessComm.getTxNoMemCount(), wirelessComm.getTxBusySkipCount());
-            }
+            // static uint32_t lastTxDiagTime = 0;
+            // if (millis() - lastTxDiagTime > 3000) {
+            //   lastTxDiagTime = millis();
+            //   const uint8_t *hostMac = wirelessComm.getHostMac();
+            //   ActiveSerial->printf(
+            //       "[ESPNOW TX] Sent basic state to Bridge "
+            //       "%02X:%02X:%02X:%02X:%02X:%02X, res=%s (ch=%d) [Sent:%u, "
+            //       "Fail:%u, Err:%u, NoMem:%u, BusySkip:%u]\n",
+            //       hostMac[0], hostMac[1], hostMac[2], hostMac[3], hostMac[4],
+            //       hostMac[5], esp_err_to_name(res), wirelessComm.getChannel(),
+            //       wirelessComm.getTxSuccessCount(),
+            //       wirelessComm.getTxFailCount(), wirelessComm.getTxErrCount(),
+            //       wirelessComm.getTxNoMemCount(), wirelessComm.getTxBusySkipCount());
+            // }
 
             if (res == ESP_OK) {
               packetSentThisCycle = true;
@@ -4447,7 +4447,7 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
             // rudderPacketsUpdateLast here, so the very next 2ms wake
             // retries immediately (with a fresh sample) once the driver is
             // free again, instead of waiting out a full stale interval.
-            if (!packetSentThisCycle && !wirelessComm.isTxBusy()) {
+            if (!packetSentThisCycle && !wirelessComm.shouldSkipRudderSyncForBusy()) {
               rudderPacketsUpdateLast = millis();
               DapRudder_t rudderTxLocal;
               memset(&rudderTxLocal, 0, sizeof(rudderTxLocal));
@@ -4490,6 +4490,30 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
             }
           } else {
             rudderPacketsUpdateLast = millis();
+          }
+
+          // TEMP DIAGNOSTIC: rudder sync is the newest unicast-specific
+          // logic (partner resolution + busy-skip) and the exact packet
+          // type/cadence that historically stalled this repo's earlier
+          // unicast attempt - this tells apart "partner never resolved" vs
+          // "stuck busy every attempt" vs "sends fine but never gets
+          // accepted on the other end" without needing hardware access to
+          // guess. Rate-limited to every 2s (rudder fires every 2ms, so an
+          // unconditional log here would flood the link). Remove once
+          // rudder sync is confirmed working again.
+          static uint32_t s_lastRudderDiagLogTime = 0;
+          if ((dap_calculationVariables_st.rudderStatus_b ||
+               dap_calculationVariables_st.helicopterRudderStatus_b) &&
+              millis() - s_lastRudderDiagLogTime > 2000) {
+            s_lastRudderDiagLogTime = millis();
+            wirelessComm.sendLogToBridge(
+                "[DIAG] Rudder: partner=%u TxOk=%u TxSkipNoPartner=%u "
+                "TxSkipBusy=%u RxAccepted=%u RxRejected=%u",
+                wirelessComm.getRudderPartnerId(), wirelessComm.getRudderTxOkCount(),
+                wirelessComm.getRudderTxSkipNoPartnerCount(),
+                wirelessComm.getRudderTxSkipBusyCount(),
+                wirelessComm.getRudderRxAcceptedCount(),
+                wirelessComm.getRudderRxRejectedCount());
           }
         }
 

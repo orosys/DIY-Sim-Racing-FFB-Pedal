@@ -271,6 +271,30 @@ public:
   uint32_t getLastTxTime() const { return _lastTxTime; }
   uint32_t getLastRxTime() const { return _lastRxTime; }
 
+  // TEMP DIAGNOSTICS for the unicast rudder-sync path - rudder is the exact
+  // packet type/cadence that historically caused the TX FIFO stall this
+  // repo already hit once under unicast (see the history note on sendTo()),
+  // and it's also the newest piece of unicast-specific logic (partner
+  // resolution). These make it possible to tell apart "partner never
+  // resolved" vs "stuck busy every attempt" vs "sends fine but receiver
+  // rejects it" from the field without guessing. Remove once rudder sync
+  // is confirmed working again.
+  uint8_t getRudderPartnerId() const { return _rudderPartnerId_u8; }
+  uint32_t getRudderTxOkCount() const { return _rudderTxOk_u32; }
+  uint32_t getRudderTxSkipNoPartnerCount() const { return _rudderTxSkipNoPartner_u32; }
+  uint32_t getRudderTxSkipBusyCount() const { return _rudderTxSkipBusy_u32; }
+  uint32_t getRudderRxAcceptedCount() const { return _rudderRxAccepted_u32; }
+  uint32_t getRudderRxRejectedCount() const { return _rudderRxRejected_u32; }
+  // Call from the rudder-sync task-loop call site instead of isTxBusy()
+  // directly, so a busy-skip there is counted here too.
+  bool shouldSkipRudderSyncForBusy() {
+    if (isTxBusy()) {
+      _rudderTxSkipBusy_u32++;
+      return true;
+    }
+    return false;
+  }
+
   esp_err_t sendBasicStateToBridge(const DapStateBasic_t &pkt) {
     if (isAllZero(_hostMac)) return ESP_ERR_INVALID_ARG;
     logDebug("TX BasicState len=%u", (unsigned)sizeof(pkt));
@@ -301,11 +325,16 @@ public:
   // a garbage/zero MAC.
   esp_err_t sendRudderSync(const DapRudder_t &pkt) {
     if (_rudderPartnerId_u8 >= 3 || isAllZero(_pedalMac[_rudderPartnerId_u8])) {
+      _rudderTxSkipNoPartner_u32++;
       return ESP_ERR_INVALID_ARG;
     }
     _rudderTx = pkt;
     logDebug("TX RudderSync len=%u", (unsigned)sizeof(pkt));
-    return sendTo(_pedalMac[_rudderPartnerId_u8], (const uint8_t *)&pkt, sizeof(pkt));
+    esp_err_t res = sendTo(_pedalMac[_rudderPartnerId_u8], (const uint8_t *)&pkt, sizeof(pkt));
+    if (res == ESP_OK) {
+      _rudderTxOk_u32++;
+    }
+    return res;
   }
 
   void sendLogToBridge(const char *fmt, ...) {
@@ -406,8 +435,10 @@ public:
             }
           }
         }
+        _rudderRxAccepted_u32++;
         logDebug("RX RudderSync accepted");
       } else {
+        _rudderRxRejected_u32++;
         logDebug("RX RudderSync dropped: bad version/CRC");
       }
       return;
@@ -489,6 +520,11 @@ private:
   DapRudder_t _rudderRx = {};
   DapRudder_t _rudderTx = {};
   uint8_t _rudderPartnerId_u8 = PEDAL_ID_UNKNOWN;
+  uint32_t _rudderTxOk_u32 = 0;
+  uint32_t _rudderTxSkipNoPartner_u32 = 0;
+  uint32_t _rudderTxSkipBusy_u32 = 0;
+  uint32_t _rudderRxAccepted_u32 = 0;
+  uint32_t _rudderRxRejected_u32 = 0;
 
   // --- Unicast flow control -------------------------------------------
   // History: this repo already tried unicast once (see commits fafe7737..
@@ -722,16 +758,28 @@ private:
 
     // TEMP DIAGNOSTIC (unconditional, not gated behind WIRELESS_COMM_DEBUG -
     // relayed to the PC's Serial Logs via sendLogToBridge) - tracking down
-    // why the config-echo request never completes over wireless. Only fires
-    // for the rare returnPedalConfig_u8 action, so it stays low-volume even
-    // though this handler otherwise runs for every high-frequency FFB action
-    // packet. Remove once the root cause is confirmed.
+    // why the config-echo request never completes over wireless (isConfigRequest)
+    // and why Brake never resolves a rudder partner while Throttle does
+    // (isRudderAction). Only fires for these two rare action subtypes, so it
+    // stays low-volume even though this handler otherwise runs for every
+    // high-frequency FFB action packet. Remove once both are confirmed fixed.
     bool isConfigRequest =
         dap_actions_st.payloadPedalAction_st.returnPedalConfig_u8 != 0;
+    bool isRudderAction =
+        dap_actions_st.payloadPedalAction_st.rudderAction_u8 != 0;
     if (isConfigRequest) {
       sendLogToBridge(
           "[DIAG] ConfigReq RX: incomingTag=%u myTag=%u localTag=%u typeOk=%u",
           incomingTag, myTag, s_localPedalType_u8,
+          (unsigned)(dap_actions_st.payloadHeader_st.payloadType_u8 ==
+                     DAP_PAYLOAD_TYPE_ACTION_U8));
+    }
+    if (isRudderAction) {
+      sendLogToBridge(
+          "[DIAG] RudderAct RX: incomingTag=%u myTag=%u localTag=%u "
+          "rudderAct=%u typeOk=%u",
+          incomingTag, myTag, s_localPedalType_u8,
+          dap_actions_st.payloadPedalAction_st.rudderAction_u8,
           (unsigned)(dap_actions_st.payloadHeader_st.payloadType_u8 ==
                      DAP_PAYLOAD_TYPE_ACTION_U8));
     }
@@ -743,6 +791,9 @@ private:
       if (isConfigRequest) {
         sendLogToBridge("[DIAG] ConfigReq DROPPED at type/tag gate");
       }
+      if (isRudderAction) {
+        sendLogToBridge("[DIAG] RudderAct DROPPED at type/tag gate");
+      }
       return;
     }
 
@@ -751,6 +802,9 @@ private:
         g_espNowErrorCode_u8 = 112;
       if (isConfigRequest) {
         sendLogToBridge("[DIAG] ConfigReq DROPPED: bad version");
+      }
+      if (isRudderAction) {
+        sendLogToBridge("[DIAG] RudderAct DROPPED: bad version");
       }
       logDebug("RX Actions dropped: bad version");
       return;
@@ -764,6 +818,9 @@ private:
         g_espNowErrorCode_u8 = 113;
       if (isConfigRequest) {
         sendLogToBridge("[DIAG] ConfigReq DROPPED: bad CRC");
+      }
+      if (isRudderAction) {
+        sendLogToBridge("[DIAG] RudderAct DROPPED: bad CRC");
       }
       logDebug("RX Actions dropped: bad CRC");
       return;
@@ -852,6 +909,12 @@ private:
     // target MAC instead of relying on broadcast to reach whichever sibling
     // happens to be relevant.
     uint8_t rudderAct = dap_actions_st.payloadPedalAction_st.rudderAction_u8;
+    // TEMP DIAGNOSTIC: edge-triggered (only logs when the resolved partner
+    // actually changes), so this stays low-volume despite handleActionsPacket
+    // running for every high-frequency FFB action packet. Confirms whether
+    // the rudder-enable action even reaches this pedal and what partner it
+    // resolves to. Remove once rudder sync is confirmed working again.
+    uint8_t prevRudderPartner = _rudderPartnerId_u8;
     if (rudderAct == (uint8_t)RudderAction::RUDDER_THROTTLE_AND_BRAKE ||
         rudderAct == (uint8_t)RudderAction::RUDDER_THROTTLE_AND_CLUTCH) {
       g_getRudderAction_b = true;
@@ -873,6 +936,11 @@ private:
       moveSlowlyToPosition_b = true;
       ResetRudderStrategyState();
       _rudderPartnerId_u8 = PEDAL_ID_UNKNOWN;
+    }
+    if (_rudderPartnerId_u8 != prevRudderPartner) {
+      sendLogToBridge(
+          "[DIAG] Rudder partner changed: %u -> %u (myRole=%u, rudderAct=%u)",
+          prevRudderPartner, _rudderPartnerId_u8, s_localPedalType_u8, rudderAct);
     }
 
     uint8_t brakeAct =
