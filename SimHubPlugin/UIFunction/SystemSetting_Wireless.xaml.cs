@@ -515,7 +515,7 @@ namespace DiyFfbPedal.UIFunction
                 {
                     System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                     {
-                        FileName = "https://github.com/ChrGri/DIY-Sim-Racing-FFB-Pedal/tree/master/docs",
+                        FileName = "https://github.com/ChrGri/DIY-Sim-Racing-FFB-Pedal/tree/master/docs/pedal_pairing_and_assignment_guide.md",
                         UseShellExecute = true
                     });
                 }
