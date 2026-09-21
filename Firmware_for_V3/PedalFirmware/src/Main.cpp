@@ -908,6 +908,11 @@ void IRAM_ATTR pedalUpdateTask( void * pvParameters )
   FunctionProfiler profiler_pedalUpdateTask;
   profiler_pedalUpdateTask.setName("PedalUpdate");
 
+  // Flash writes stop cache access on both cores. Defer EEPROM commits until
+  // step generation is idle so they cannot collide with stepper interrupts.
+  static bool eepromSavePending_b = false;
+  static uint32_t eepromSaveRequestTimeInMs_u32 = 0;
+
   for (;;)
   {
 
@@ -935,6 +940,25 @@ void IRAM_ATTR pedalUpdateTask( void * pvParameters )
 
     // start profiler 0, overall function
     profiler_pedalUpdateTask.start(0);
+
+    if (eepromSavePending_b)
+    {
+      bool motorIdle_b = (stepper != NULL) && (!stepper->isRunning());
+      bool saveTimeout_b = (millis() - eepromSaveRequestTimeInMs_u32) > 10000u;
+
+      if (motorIdle_b || saveTimeout_b)
+      {
+        if (!motorIdle_b && (stepper != NULL))
+        {
+          // If continuous commands kept the motor active, stop pulse generation
+          // before committing. The normal control loop resumes motion afterward.
+          stepper->forceStop();
+        }
+        Serial.println("Saving into EEPROM");
+        global_dap_config_class.storeConfigToEeprom();
+        eepromSavePending_b = false;
+      }
+    }
     
     
 
@@ -966,8 +990,11 @@ void IRAM_ATTR pedalUpdateTask( void * pvParameters )
           dap_config_pedalUpdateTask_st.payLoadHeader_.storeToEeprom = false; // set to false, thus at restart existing EEPROM config isn't restored to EEPROM
           uint16_t crc = checksumCalculator((uint8_t*)(&(dap_config_pedalUpdateTask_st.payLoadHeader_)), sizeof(dap_config_pedalUpdateTask_st.payLoadHeader_) + sizeof(dap_config_pedalUpdateTask_st.payLoadPedalConfig_));
           dap_config_pedalUpdateTask_st.payloadFooter_.checkSum = crc;
+          global_dap_config_class.setConfig(dap_config_pedalUpdateTask_st);
 
-          global_dap_config_class.storeConfigToEeprom();
+          eepromSavePending_b = true;
+          eepromSaveRequestTimeInMs_u32 = millis();
+          Serial.println("EEPROM save scheduled (deferred until motor is idle)");
         }
         
         updatePedalCalcParameters(); // update the calc parameters
@@ -2831,4 +2858,3 @@ void ESPNOW_SyncTask( void * pvParameters )
 
 }
 #endif
-

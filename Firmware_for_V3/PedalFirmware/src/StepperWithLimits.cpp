@@ -425,6 +425,10 @@ void StepperWithLimits::forceStop() {
   _stepper->forceStop();
 }
 
+bool StepperWithLimits::isRunning() {
+  return (_stepper != NULL) && _stepper->isRunning();
+}
+
 int8_t StepperWithLimits::moveTo(int32_t position, bool blocking) {
   _stepper->moveTo(position, blocking);
 
@@ -1170,6 +1174,5 @@ bool StepperWithLimits::servoIdleAction()
 
 	return servo_offset_compensation_steps_i32;
 }*/
-
 
 

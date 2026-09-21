@@ -57,6 +57,7 @@ public:
 	void correctPos();
 	void findMinMaxSensorless(DAP_config_st dap_config_st);
 	void forceStop();
+	bool isRunning();
 	int8_t moveTo(int32_t position, bool blocking = false);
 	void moveSlowlyToPos(int32_t targetPos_ui32);
 

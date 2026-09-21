@@ -62,6 +62,7 @@ void tunePidValues(DAP_config_st& config_st)
   control_strategy_u8 = config_st.payLoadPedalConfig_.control_strategy_b;
 
   myPID.SetTunings(config_st.payLoadPedalConfig_.PID_p_gain, config_st.payLoadPedalConfig_.PID_i_gain, config_st.payLoadPedalConfig_.PID_d_gain);
+  myPID.Reset();
 }
 
 int32_t MoveByPidStrategy(float loadCellReadingKg, float stepperPosFraction, StepperWithLimits* stepper, ForceCurve_Interpolated* forceCurve, const DAP_calculationVariables_st* calc_st, DAP_config_st* config_st, float absForceOffset_fl32, float changeVelocity) {
