@@ -454,7 +454,7 @@
                             <RowDefinition Height="90"/>
                             <RowDefinition Height="300"/>
                             <RowDefinition Height="140"/>
-                            <RowDefinition Height="190"/>
+                            <RowDefinition Height="220"/>
                             <RowDefinition Height="100"/>
                         </Grid.RowDefinitions>
                         <Grid Margin="20,15,20,10">
@@ -552,14 +552,20 @@
                             </Grid>
                         </Border>
                         <Border Grid.Row="3" Style="{StaticResource HomeCard}" Margin="20,5,20,5" Padding="16,8">
-                            <StackPanel>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="90"/>
+                                    <RowDefinition Height="42"/>
+                                </Grid.RowDefinitions>
                                 <TextBlock Text="QUICK PROFILES" Foreground="White" FontSize="16" FontWeight="Bold"/>
-                                <TextBlock Text="Apply saved pedal settings and effects in one click" Foreground="#FFABB4BE" FontSize="11" Margin="0,5,0,10"/>
-                                <Grid>
+                                <TextBlock Grid.Row="1" Text="Apply saved pedal settings and effects in one click" Foreground="#FFABB4BE" FontSize="11" Margin="0,4,0,5"/>
+                                <Grid Grid.Row="2">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions><RowDefinition Height="42"/><RowDefinition Height="42"/></Grid.RowDefinitions>
+                                    <Grid.RowDefinitions><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
                                     <Button x:Name="HomeSlotA" Grid.Row="0" Grid.Column="0" Style="{StaticResource HomeQuickButton}" Content="Slot A Apply" Tag="0" Click="HomeSlotApply_Click"/>
                                     <Button x:Name="HomeSlotB" Grid.Row="0" Grid.Column="1" Style="{StaticResource HomeQuickButton}" Content="Slot B Apply" Tag="1" Click="HomeSlotApply_Click"/>
                                     <Button x:Name="HomeSlotC" Grid.Row="0" Grid.Column="2" Style="{StaticResource HomeQuickButton}" Content="Slot C Apply" Tag="2" Click="HomeSlotApply_Click"/>
@@ -567,8 +573,10 @@
                                     <Button x:Name="HomeSlotE" Grid.Row="1" Grid.Column="1" Style="{StaticResource HomeQuickButton}" Content="Slot E Apply" Tag="4" Click="HomeSlotApply_Click"/>
                                     <Button x:Name="HomeSlotF" Grid.Row="1" Grid.Column="2" Style="{StaticResource HomeQuickButton}" Content="Slot F Apply" Tag="5" Click="HomeSlotApply_Click"/>
                                 </Grid>
-                                <TextBlock x:Name="HomeApplyFeedback" Foreground="#FFB5EFE3" FontSize="11" Margin="4,5,0,0" TextTrimming="CharacterEllipsis"/>
-                            </StackPanel>
+                                <Border Grid.Row="3" Background="#22232A31" CornerRadius="4" Margin="4,2,4,0" Padding="6,5" MinHeight="38">
+                                    <TextBlock x:Name="HomeApplyFeedback" Foreground="#FFB5EFE3" FontSize="11" VerticalAlignment="Center" TextWrapping="Wrap" LineHeight="15"/>
+                                </Border>
+                            </Grid>
                         </Border>
                         <Border Grid.Row="4" Style="{StaticResource HomeCard}" Margin="20,5,20,5" Padding="16,8">
                             <Grid>
