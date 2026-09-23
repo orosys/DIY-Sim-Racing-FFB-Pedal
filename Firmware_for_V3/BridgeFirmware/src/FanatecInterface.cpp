@@ -5,9 +5,15 @@
 
 #define ADDR_HANDBREAK_MIN 0
 #define ADDR_HANDBREAK_MAX 4
+#define ADDR_VIBRATION_MAGIC 32
+#define ADDR_VIBRATION_ENABLED 33
+#define VIBRATION_MAGIC 0xA7
 #define EEPROM_SIZE 64
 const uint8_t patternCalibrationHandbreakMin[] = {0x7B, 0x3, 0x1, 0x3, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x5B, 0x7D};
 const uint8_t patternCalibrationHandbreakMax[] = {0x7B, 0x3, 0x1, 0x3, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x6C, 0x7D};
+const uint8_t patternThrottleVibration[] = {0x7B, 0x0, 0xFF, 0x0, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40, 0x7D};
+const uint8_t patternBrakeVibration[] = {0x7B, 0x0, 0x0, 0xFF, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x9B, 0x7D};
+static const unsigned long VIBRATION_TIMEOUT_MS = 500;
 
 uint16_t _valCalibrationHandBreakMin;
 uint16_t _valCalibrationHandBreakMax;
@@ -21,7 +27,10 @@ bool matchesPattern(const uint8_t* buffer, const uint8_t* pattern, size_t length
 FanatecInterface::FanatecInterface(int rxPin, int txPin, int plugPin)
     : _rxPin(rxPin), _txPin(txPin), _plugPin(plugPin), _serial(&Serial1),
       _throttle(0), _brake(0), _clutch(0), _handbrake(0),
-      _connected(false), _connectedCallback(nullptr), _initialized(false),
+      _connected(false), _vibrationEnabled(false), _throttleVibration(0),
+      _brakeVibration(0), _lastThrottleVibrationAt(0), _lastBrakeVibrationAt(0),
+      _rxFrameIndex(0),
+      _lastRxByteAt(0), _connectedCallback(nullptr), _initialized(false),
       _plugState(false), _lastRawPlugState(false), _plugChangedAt(0),
       _handshakeStep(0), _handshakeMatched(0), _stepStartedAt(0) {
 }
@@ -44,6 +53,8 @@ void FanatecInterface::begin() {
 
     _valCalibrationHandBreakMin = readMin;
     _valCalibrationHandBreakMax = readMax;
+    _vibrationEnabled = EEPROM.read(ADDR_VIBRATION_MAGIC) == VIBRATION_MAGIC &&
+                        EEPROM.read(ADDR_VIBRATION_ENABLED) == 1;
 
     // Generate CRC table
     makeCRCTable(0x8C);
@@ -79,26 +90,45 @@ void FanatecInterface::communicationUpdate() {
 void FanatecInterface::update() {
     if (isPlugged()) {
         if (isConnected()) {
-            uint8_t rxBuffer[48];
-            size_t rxIndex = 0;
-
-            // Read expected number of bytes
-            while (rxIndex < sizeof(rxBuffer) && _serial->available()) {
-                uint8_t receivedByte = _serial->read();
-                rxBuffer[rxIndex++] = receivedByte;
-            }
-            if (rxIndex == sizeof(patternCalibrationHandbreakMin) && matchesPattern(rxBuffer, patternCalibrationHandbreakMin, sizeof(patternCalibrationHandbreakMin))) {
-                _valCalibrationHandBreakMin = _lastHandBreak;
-                EEPROM.put(ADDR_HANDBREAK_MIN, _lastHandBreak);
-                EEPROM.commit();
-                Serial.print("[L] HANDBREAK MIN New value saved: ");
-                Serial.println(_lastHandBreak);
-            } else if (rxIndex == sizeof(patternCalibrationHandbreakMax) && matchesPattern(rxBuffer, patternCalibrationHandbreakMax, sizeof(patternCalibrationHandbreakMax))) {
-                _valCalibrationHandBreakMax = _lastHandBreak;
-                EEPROM.put(ADDR_HANDBREAK_MAX, _lastHandBreak);
-                EEPROM.commit();
-                Serial.print("[L] HANDBREAK MAX New value saved: ");
-                Serial.println(_lastHandBreak);
+            // UART reads may split a wheelbase packet across task iterations.
+            for (size_t budget = 0; budget < 48 && _serial->available(); ++budget) {
+                const uint8_t receivedByte = _serial->read();
+                const unsigned long now = millis();
+                if (now - _lastRxByteAt > 20) _rxFrameIndex = 0;
+                _lastRxByteAt = now;
+                if (_rxFrameIndex == 0 && receivedByte != 0x7B) continue;
+                _rxFrame[_rxFrameIndex++] = receivedByte;
+                if (_rxFrameIndex != sizeof(_rxFrame)) continue;
+                _rxFrameIndex = 0;
+                if (_rxFrame[11] != 0x7D || generateCRC(&_rxFrame[1], 9) != _rxFrame[10]) continue;
+                if (matchesPattern(_rxFrame, patternCalibrationHandbreakMin, sizeof(_rxFrame))) {
+                    _valCalibrationHandBreakMin = _lastHandBreak;
+                    EEPROM.put(ADDR_HANDBREAK_MIN, _lastHandBreak);
+                    EEPROM.commit();
+                    Serial.print("[L] HANDBREAK MIN New value saved: ");
+                    Serial.println(_lastHandBreak);
+                } else if (matchesPattern(_rxFrame, patternCalibrationHandbreakMax, sizeof(_rxFrame))) {
+                    _valCalibrationHandBreakMax = _lastHandBreak;
+                    EEPROM.put(ADDR_HANDBREAK_MAX, _lastHandBreak);
+                    EEPROM.commit();
+                    Serial.print("[L] HANDBREAK MAX New value saved: ");
+                    Serial.println(_lastHandBreak);
+                } else if (matchesPattern(_rxFrame, patternThrottleVibration, sizeof(_rxFrame)) ||
+                           matchesPattern(_rxFrame, patternBrakeVibration, sizeof(_rxFrame)) ||
+                           (_rxFrame[1] == patternThrottleVibration[1] &&
+                           _rxFrame[4] == patternThrottleVibration[4] &&
+                           _rxFrame[5] == 0 && _rxFrame[6] == 0 &&
+                           _rxFrame[7] == 0 && _rxFrame[8] == 0 && _rxFrame[9] == 0)) {
+                    // The wheelbase sends each motor's active packet separately.
+                    if (_rxFrame[2]) {
+                        _throttleVibration = _rxFrame[2];
+                        _lastThrottleVibrationAt = now;
+                    }
+                    if (_rxFrame[3]) {
+                        _brakeVibration = _rxFrame[3];
+                        _lastBrakeVibrationAt = now;
+                    }
+                }
             }
             // Create and send pedal data packet
             uint8_t packet[12];
@@ -144,6 +174,34 @@ void FanatecInterface::onConnected(void (*callback)(bool)) {
 // Check if connected to the Fanatec device
 bool FanatecInterface::isConnected() {
     return _connected;
+}
+
+bool FanatecInterface::vibrationEnabled() const {
+    return _vibrationEnabled;
+}
+
+bool FanatecInterface::setVibrationEnabled(bool enabled) {
+    if (!_initialized) return false;
+    if (_vibrationEnabled == enabled && EEPROM.read(ADDR_VIBRATION_MAGIC) == VIBRATION_MAGIC) return true;
+    EEPROM.write(ADDR_VIBRATION_MAGIC, VIBRATION_MAGIC);
+    EEPROM.write(ADDR_VIBRATION_ENABLED, enabled ? 1 : 0);
+    if (!EEPROM.commit()) return false;
+    _vibrationEnabled = enabled;
+    if (!enabled) {
+        _throttleVibration = 0;
+        _brakeVibration = 0;
+    }
+    return true;
+}
+
+uint8_t FanatecInterface::throttleVibration() const {
+    return _vibrationEnabled && _connected && millis() - _lastThrottleVibrationAt <= VIBRATION_TIMEOUT_MS
+        ? _throttleVibration : 0;
+}
+
+uint8_t FanatecInterface::brakeVibration() const {
+    return _vibrationEnabled && _connected && millis() - _lastBrakeVibrationAt <= VIBRATION_TIMEOUT_MS
+        ? _brakeVibration : 0;
 }
 
 // Internal helper functions
@@ -239,8 +297,11 @@ void FanatecInterface::performCommunicationSteps() {
 void FanatecInterface::resetConnection() {
     const bool wasConnected = _connected;
     _connected = false;
+    _throttleVibration = 0;
+    _brakeVibration = 0;
     _handshakeStep = 0;
     _handshakeMatched = 0;
+    _rxFrameIndex = 0;
     // Discard old-session bytes before listening for a fresh 250 kbaud request.
     for (size_t budget = 0; budget < 256 && _serial->available(); ++budget) {
         _serial->read();

@@ -89,6 +89,7 @@ namespace User.PluginSdkDemo
 
 
         public DAP_bridge_state_st dap_bridge_state_st;
+        private bool _updatingFanatecVibrationToggle;
         public Basic_WIfi_info _basic_wifi_info;
         //private string stringValue;
         public bool[] waiting_for_pedal_config = new bool[3];
@@ -168,6 +169,8 @@ namespace User.PluginSdkDemo
                 _basic_wifi_info.WIFI_SSID[i] = 0;
             }
             InitializeComponent();
+            SystemSetting_Section.FanatecVibrationToggle.Checked += FanatecVibrationToggle_Changed;
+            SystemSetting_Section.FanatecVibrationToggle.Unchecked += FanatecVibrationToggle_Changed;
             
             //setting drawing color with Simhub theme workaround
             SolidColorBrush buttonBackground_ = btn_update.Background as SolidColorBrush;
