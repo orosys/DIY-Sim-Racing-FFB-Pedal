@@ -16,14 +16,14 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
-        <Border  HorizontalAlignment="Left" Height="272" VerticalAlignment="Top" Width="648" Background="#7F4E4E4E" CornerRadius="8,8,8,8" Padding="0,0,0,6">
+        <Border  HorizontalAlignment="Left" Height="272" VerticalAlignment="Top" Width="648" Style="{StaticResource Card}" Padding="0,0,0,6" Margin="0">
             <StackPanel HorizontalAlignment="Left" Height="272" VerticalAlignment="Top" Width="648">
                 <StackPanel Height="20" Width="648" VerticalAlignment="Top" HorizontalAlignment="Left" Orientation="Horizontal">
                     <Label Content="{SLoc DIYFFBPedalPlugin_TextPedalKinematicsTitle, 'PEDAL KINEMATIC SETTING'}" Width="200" Foreground="White" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="70,0,0,0" Height="20" VerticalAlignment="Top" Padding="0,0,0,0" VerticalContentAlignment="Center"/>
                 </StackPanel>
                 <StackPanel Height="205" Width="648" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,5,0,0">
                     <!-- Travel vs Force curve GUI elements -->
-                    <Canvas x:Name="canvas_kinematic" Height="200" Width="480" Background="#7F20232F" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="70,0,0,0" ClipToBounds="True">
+                    <Canvas x:Name="canvas_kinematic" Height="200" Width="480" Background="#141414" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="70,0,0,0" ClipToBounds="True">
                         <TextBlock x:Name="TextBlock_Warning_kinematics" Height="40" Width="200" FontFamily="Arial" FontSize="9" Foreground="#FFF44343" />
                         <!-- Physical pedal schematic layer (rendered behind kinematic dimension lines) -->
                         <Rectangle x:Name="schematic_base_rail" Height="20" Fill="#232733" Stroke="#3E4559" StrokeThickness="1" RadiusX="2" RadiusY="2"/>

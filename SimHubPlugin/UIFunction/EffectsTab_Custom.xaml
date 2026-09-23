@@ -58,7 +58,7 @@
                         <Label Content="{SLoc DIYFFBPedalPlugin_TabItemCustom1, 'CUSTOM1'}"  FontFamily="Arial Black" FontSize="12" Height="30" Width="120" Padding="0,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"  />
                     </Border>
                 </TabItem.Header>
-                <Border Background="#7F4E4E4E" CornerRadius="5,5,5,5" Height="240" BorderThickness="0,0,0,0" Width="525" >
+                <Border Style="{StaticResource Card}" Margin="0" Height="240" Width="525">
                     <StackPanel HorizontalAlignment="Left" Height="240" VerticalAlignment="Top" Width="525">
                         <StackPanel Height="20" Width="480" Orientation="Horizontal" HorizontalAlignment="Left">
                             <styles:SHToggleButton x:Name="checkbox_enable_CV1" Content="" Checked="checkbox_enable_CV1_Checked" Unchecked="checkbox_enable_CV1_Unchecked" IsChecked="False" FontSize="10" Width="35" Height="15" HorizontalAlignment="Left" FontFamily="Arial" ToolTip="The effect trigger was save in local, no need send config to Pedal"/>
@@ -67,8 +67,8 @@
                         <StackPanel  Height="90" Width="480" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                             <StackPanel>
                                 <Label Content="NCalc Script&#10;Binding:" Height="40" Width="65" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" HorizontalAlignment="Left" FontSize="10" HorizontalContentAlignment="Center" VerticalAlignment="Top"/>
-                                <styles:SHButtonPrimary x:Name="Bind_CV1" Click="Bind_CV1_Click" Width="60" Content="{SLoc DIYFFBPedalPlugin_TextBtnEditor, 'Script Editor'}" Height="20" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="10" MinHeight="20" />
-                                <styles:SHButtonPrimary x:Name="Btn_Clear1" Click="Clear_CV1_Click" Width="60" Content="{SLoc DIYFFBPedalPlugin_TextBtnClear, 'Clear'}" Height="20" Margin="0,2,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="10" MinHeight="20" />
+                                <Button Style="{StaticResource ModernPillButton}" x:Name="Bind_CV1" Click="Bind_CV1_Click" Width="60" Content="{SLoc DIYFFBPedalPlugin_TextBtnEditor, 'Script Editor'}" Height="20" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="10" MinHeight="20" />
+                                <Button Style="{StaticResource ModernPillButton}" x:Name="Btn_Clear1" Click="Clear_CV1_Click" Width="60" Content="{SLoc DIYFFBPedalPlugin_TextBtnClear, 'Clear'}" Height="20" Margin="0,2,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="10" MinHeight="20" />
                             </StackPanel>
                             <TextBox x:Name="textBox_CV1_string" Width="330" Height="90"  Margin="2,0,0,0" HorizontalAlignment="Left" MinHeight="20" FontSize="9" BorderThickness="0,0,0,0" TextWrapping="Wrap" ScrollViewer.CanContentScroll="True" VerticalScrollBarVisibility="Auto" IsEnabled="False"/>
                         </StackPanel>
@@ -85,7 +85,7 @@
                         <Label Content="{SLoc DIYFFBPedalPlugin_TabItemCustom2, 'CUSTOM2'}"  FontFamily="Arial Black" FontSize="12" Height="30" Width="120" Padding="0,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"  />
                     </Border>
                 </TabItem.Header>
-                <Border Background="#7F4E4E4E" CornerRadius="5,5,5,5" Height="240" BorderThickness="0,0,0,0" Width="525" >
+                <Border Style="{StaticResource Card}" Margin="0" Height="240" Width="525">
                     <StackPanel Height="240" VerticalAlignment="Top" Width="525">
                         <StackPanel Height="20" Width="480" Orientation="Horizontal" HorizontalAlignment="Left">
                             <styles:SHToggleButton x:Name="checkbox_enable_CV2" Content="" Checked="checkbox_enable_CV2_Checked" Unchecked="checkbox_enable_CV2_Unchecked" IsChecked="False" FontSize="10" Width="35" Height="15" HorizontalAlignment="Left" FontFamily="Arial" ToolTip="The effect trigger was save in local, no need send config to Pedal"/>
@@ -94,8 +94,8 @@
                         <StackPanel  Height="90" Width="480" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                             <StackPanel>
                                 <Label Content="NCalc Script&#10;Binding:" Height="40" Width="65" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" HorizontalAlignment="Left" FontSize="10" HorizontalContentAlignment="Center" VerticalAlignment="Top"/>
-                                <styles:SHButtonPrimary x:Name="Bind_CV2" Click="Bind_CV2_Click" Width="60" Content="{SLoc DIYFFBPedalPlugin_TextBtnEditor, 'Script Editor'}" Height="20" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="10" MinHeight="20" />
-                                <styles:SHButtonPrimary x:Name="Btn_Clear2" Click="Clear_CV2_Click" Width="60" Content="{SLoc DIYFFBPedalPlugin_TextBtnClear, 'Clear'}" Height="20" Margin="0,2,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="10" MinHeight="20" />
+                                <Button Style="{StaticResource ModernPillButton}" x:Name="Bind_CV2" Click="Bind_CV2_Click" Width="60" Content="{SLoc DIYFFBPedalPlugin_TextBtnEditor, 'Script Editor'}" Height="20" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="10" MinHeight="20" />
+                                <Button Style="{StaticResource ModernPillButton}" x:Name="Btn_Clear2" Click="Clear_CV2_Click" Width="60" Content="{SLoc DIYFFBPedalPlugin_TextBtnClear, 'Clear'}" Height="20" Margin="0,2,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="10" MinHeight="20" />
                             </StackPanel>
                             <TextBox x:Name="textBox_CV2_string" Width="330" Height="90"  Margin="2,0,0,0" HorizontalAlignment="Left" MinHeight="20" FontSize="9" BorderThickness="0,0,0,0" TextWrapping="Wrap" ScrollViewer.CanContentScroll="True" VerticalScrollBarVisibility="Auto" IsEnabled="False"/>
                         </StackPanel>
@@ -111,7 +111,7 @@
                         <Label Content="{SLoc DIYFFBPedalPlugin_TabItemCustom3, 'CUSTOM3'}"  FontFamily="Arial Black" FontSize="12" Height="30" Width="120" Padding="0,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"  />
                     </Border>
                 </TabItem.Header>
-                <Border Background="#7F4E4E4E" CornerRadius="5,5,5,5" Height="240" BorderThickness="0,0,0,0" Width="525" >
+                <Border Style="{StaticResource Card}" Margin="0" Height="240" Width="525">
                     <StackPanel Height="240" VerticalAlignment="Top" Width="525">
                         <StackPanel Height="20" Width="480" Orientation="Horizontal" HorizontalAlignment="Left">
                             <styles:SHToggleButton x:Name="checkbox_enable_CV3" Content="" Checked="checkbox_enable_CV3_Checked" Unchecked="checkbox_enable_CV3_Unchecked" IsChecked="False" FontSize="10" Width="35" Height="15" HorizontalAlignment="Left" FontFamily="Arial" ToolTip="The effect trigger was save in local, no need send config to Pedal"/>
@@ -120,8 +120,8 @@
                         <StackPanel  Height="90" Width="480" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                             <StackPanel>
                                 <Label Content="NCalc Script&#10;Binding:" Height="40" Width="65" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" HorizontalAlignment="Left" FontSize="10" HorizontalContentAlignment="Center" VerticalAlignment="Top"/>
-                                <styles:SHButtonPrimary x:Name="Bind_CV3" Click="Bind_CV3_Click" Width="60" Content="{SLoc DIYFFBPedalPlugin_TextBtnEditor, 'Script Editor'}" Height="20" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="10" MinHeight="20" />
-                                <styles:SHButtonPrimary x:Name="Btn_Clear3" Click="Clear_CV3_Click" Width="60" Content="{SLoc DIYFFBPedalPlugin_TextBtnClear, 'Clear'}" Height="20" Margin="0,2,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="10" MinHeight="20" />
+                                <Button Style="{StaticResource ModernPillButton}" x:Name="Bind_CV3" Click="Bind_CV3_Click" Width="60" Content="{SLoc DIYFFBPedalPlugin_TextBtnEditor, 'Script Editor'}" Height="20" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="10" MinHeight="20" />
+                                <Button Style="{StaticResource ModernPillButton}" x:Name="Btn_Clear3" Click="Clear_CV3_Click" Width="60" Content="{SLoc DIYFFBPedalPlugin_TextBtnClear, 'Clear'}" Height="20" Margin="0,2,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="10" MinHeight="20" />
                             </StackPanel>
                             <TextBox x:Name="textBox_CV3_string" Width="330" Height="90"  Margin="2,0,0,0" HorizontalAlignment="Left" MinHeight="20" FontSize="9" BorderThickness="0,0,0,0" TextWrapping="Wrap" ScrollViewer.CanContentScroll="True" VerticalScrollBarVisibility="Auto" IsEnabled="False"/>
                         </StackPanel>
@@ -137,7 +137,7 @@
                         <Label Content="{SLoc DIYFFBPedalPlugin_TabItemCustom4, 'CUSTOM4'}"  FontFamily="Arial Black" FontSize="12" Height="30" Width="120" Padding="0,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"  />
                     </Border>
                 </TabItem.Header>
-                <Border Background="#7F4E4E4E" CornerRadius="5,5,5,5" Height="240" BorderThickness="0,0,0,0" Width="525" >
+                <Border Style="{StaticResource Card}" Margin="0" Height="240" Width="525">
                     <StackPanel Height="240" VerticalAlignment="Top" Width="525">
                         <StackPanel Height="20" Width="480" Orientation="Horizontal" HorizontalAlignment="Left">
                             <styles:SHToggleButton x:Name="checkbox_enable_CV4" Content="" Checked="checkbox_enable_CV4_Checked" Unchecked="checkbox_enable_CV4_Unchecked" IsChecked="False" FontSize="10" Width="35" Height="15" HorizontalAlignment="Left" FontFamily="Arial" ToolTip="The effect trigger was save in local, no need send config to Pedal"/>
@@ -146,8 +146,8 @@
                         <StackPanel  Height="90" Width="480" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                             <StackPanel>
                                 <Label Content="NCalc Script&#10;Binding:" Height="40" Width="65" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" HorizontalAlignment="Left" FontSize="10" HorizontalContentAlignment="Center" VerticalAlignment="Top"/>
-                                <styles:SHButtonPrimary x:Name="Bind_CV4" Click="Bind_CV4_Click" Width="60" Content="{SLoc DIYFFBPedalPlugin_TextBtnEditor, 'Script Editor'}" Height="20" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="10" MinHeight="20" />
-                                <styles:SHButtonPrimary x:Name="Btn_Clear4" Click="Clear_CV4_Click" Width="60" Content="{SLoc DIYFFBPedalPlugin_TextBtnClear, 'Clear'}" Height="20" Margin="0,2,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="10" MinHeight="20" />
+                                <Button Style="{StaticResource ModernPillButton}" x:Name="Bind_CV4" Click="Bind_CV4_Click" Width="60" Content="{SLoc DIYFFBPedalPlugin_TextBtnEditor, 'Script Editor'}" Height="20" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="10" MinHeight="20" />
+                                <Button Style="{StaticResource ModernPillButton}" x:Name="Btn_Clear4" Click="Clear_CV4_Click" Width="60" Content="{SLoc DIYFFBPedalPlugin_TextBtnClear, 'Clear'}" Height="20" Margin="0,2,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="10" MinHeight="20" />
                             </StackPanel>
                             <TextBox x:Name="textBox_CV4_string" Width="330" Height="90"  Margin="2,0,0,0" HorizontalAlignment="Left" MinHeight="20" FontSize="9" BorderThickness="0,0,0,0" TextWrapping="Wrap" ScrollViewer.CanContentScroll="True" VerticalScrollBarVisibility="Auto" IsEnabled="False"/>
                         </StackPanel>

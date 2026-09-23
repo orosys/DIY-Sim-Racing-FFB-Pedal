@@ -251,12 +251,6 @@
     <Compile Include="UIFunction\EffectsTab_Custom.xaml.cs">
       <DependentUpon>EffectsTab_Custom.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UIFunction\EffectsTab_Custom1.xaml.cs">
-      <DependentUpon>EffectsTab_Custom1.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="UIFunction\EffectsTab_Custom2.xaml.cs">
-      <DependentUpon>EffectsTab_Custom2.xaml</DependentUpon>
-    </Compile>
     <Compile Include="UIFunction\EffectsTab_GForce.xaml.cs">
       <DependentUpon>EffectsTab_GForce.xaml</DependentUpon>
     </Compile>
@@ -456,14 +450,6 @@
     <Page Include="UIFunction\EffectsTab_Custom.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="UIFunction\EffectsTab_Custom1.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="UIFunction\EffectsTab_Custom2.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UIFunction\EffectsTab_GForce.xaml">
       <SubType>Designer</SubType>

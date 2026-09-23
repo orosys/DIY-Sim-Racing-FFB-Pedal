@@ -19,13 +19,13 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
-        <Border Background="#7F4E4E4E" Height="190" CornerRadius="8,8,8,8" Padding="0,0,0,6" BorderThickness="0,2,0,0" >
-            <StackPanel HorizontalAlignment="Left" Height="190" VerticalAlignment="Top" Width="648">
+        <Border Style="{StaticResource Card}" Margin="0" Height="200" Padding="0,0,0,6">
+            <StackPanel HorizontalAlignment="Left" Height="200" VerticalAlignment="Center" Width="648">
                 <StackPanel Height="20" Width="648" Orientation="Horizontal">
-                    <Label Content="{SLoc DIYFFBPedalPlugin_TextKFSettingTittle, 'Noise Reduction Filter'}" Height="15" Width="150" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial Black" HorizontalAlignment="Left" Margin="70,0,0,0"/>
+                    <Label Content="{SLoc DIYFFBPedalPlugin_TextKFSettingTittle, 'Noise Reduction Filter'}" Height="15" Width="150" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial Black" HorizontalAlignment="Left" Margin="15,0,0,0"/>
                 </StackPanel>
                 <StackPanel Height="50" Width="648" Orientation="Horizontal" HorizontalAlignment="Left">
-                    <Label Content="{SLoc DIYFFBPedalPlugin_TextKFSettingFilterModel, 'Filter Model:'}" Height="20" Width="60" FontSize="10" Padding="0,0,0,0" VerticalContentAlignment="Center" Margin="70,0,0,0"/>
+                    <Label Content="{SLoc DIYFFBPedalPlugin_TextKFSettingFilterModel, 'Filter Model:'}" Height="20" Width="60" FontSize="10" Padding="0,0,0,0" VerticalContentAlignment="Center" Margin="15,0,0,0"/>
                     <ComboBox x:Name="KF_filter_order"    Width="120" Height="10" FontSize="10" SelectedIndex="0" Margin="0,0,0,0" BorderThickness="0,0,0,0" SelectionChanged="KF_filter_order_SelectionChanged">
                         <ComboBoxItem Content="KF const. vel."/>
                         <ComboBoxItem Content="KF const. accel."/>
@@ -41,7 +41,7 @@
                     <localUI:SliderWithLabel x:Name="Slider_KF" SliderLength="480" SliderName="KF" SliderValue="128" MinValue="1" MaxValue="255" SliderValueChanged="KFValueChanged"/>
 
                 </StackPanel>
-                <StackPanel Height="20" Width="160" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="70,0,0,0">
+                <StackPanel Height="20" Width="160" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="15,0,0,0">
                     <styles:SHToggleButton x:Name="Checkbox_joystick_denoise" Content="" Checked="Checkbox_joystick_denoise_Checked" Unchecked="Checkbox_joystick_denoise_Unchecked" IsChecked="False" FontSize="10" Width="35" Height="15" HorizontalAlignment="Left" FontFamily="Arial" RenderTransformOrigin="0.5,0.5" Margin="-10,0,0,0" />
                     <Label Content="{SLoc DIYFFBPedalPlugin_TextKFSettingJoystickDenoiseToggle, 'Denoise for Joystick output'}" Height="20" Width="130" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" HorizontalAlignment="Left" FontSize="10" Margin="4,0,0,0"/>
                 </StackPanel>

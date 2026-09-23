@@ -33,24 +33,26 @@
                             <Setter.Value>
                                 <ControlTemplate TargetType="TabItem">
                                     <!--The four values of CornerRadius represent the four corners of the TabItem.-->
-                                    <Border Name="Border" BorderThickness="0,0,0,0" BorderBrush="Gainsboro" CornerRadius="5,5,5,5" Margin="0,0,2,0">
+                                    <Border Name="Border" BorderThickness="1" BorderBrush="#444444" CornerRadius="3" Margin="0,0,2,0">
                                         <ContentPresenter x:Name="ContentSite" VerticalAlignment="Center" HorizontalAlignment="Left" ContentSource="Header" Margin="0,0"/>
                                     </Border>
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsSelected" Value="True">
-                                            <Setter TargetName="Border" Property="Background" Value="#9F4E4E4E" />
+                                            <Setter TargetName="Border" Property="Background" Value="#4E4E4E" />
+                                            <Setter TargetName="Border" Property="BorderBrush" Value="#666666" />
                                             <Setter Property="TextElement.Foreground" Value="#FFFFFFFF" />
                                         </Trigger>
                                         <Trigger Property="IsSelected" Value="False">
-                                            <Setter TargetName="Border" Property="Background" Value="#004E4E4E" />
-                                            <Setter Property="TextElement.Foreground" Value="#7FFFFFFF" />
+                                            <Setter TargetName="Border" Property="Background" Value="#2A2A2A" />
+                                            <Setter Property="TextElement.Foreground" Value="#D0D0D0" />
                                         </Trigger>
                                         <MultiTrigger>
                                             <MultiTrigger.Conditions>
                                                 <Condition Property="IsMouseOver" SourceName="Border" Value="True"/>
                                                 <Condition Property="IsSelected" Value="False"/>
                                             </MultiTrigger.Conditions>
-                                            <Setter TargetName="Border" Property="Background" Value="#3C4E4E4E" />
+                                            <Setter TargetName="Border" Property="Background" Value="#383838" />
+                                            <Setter TargetName="Border" Property="BorderBrush" Value="#666666" />
                                         </MultiTrigger>
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
@@ -68,7 +70,14 @@
                     <TabItem.Header>
                         <Border Width="184.8" Height="40"><TextBlock Text="HOME" FontFamily="Arial Black" FontSize="24" VerticalAlignment="Center" HorizontalAlignment="Center"/></Border>
                     </TabItem.Header>
-                    <localFunction:HomeDashboard x:Name="HomeDashboardSection"/>
+                    <Border HorizontalAlignment="Left" Height="860" VerticalAlignment="Top" Width="924" CornerRadius="5,5,5,5" Margin="0,3,0,0">
+                        <StackPanel Height="905" Width="924" HorizontalAlignment="Left" VerticalAlignment="Top">
+                            <Canvas Height="6" Width="917" Background="#00333333" HorizontalAlignment="Left" Margin="0,1,0,1">
+                                <Line X1="2" Y1="3" X2="917" Y2="3" Stroke="{DynamicResource AccentColorBrush}" StrokeThickness="2" StrokeEndLineCap="Round" StrokeStartLineCap="Round" />
+                            </Canvas>
+                            <localFunction:HomeDashboard x:Name="HomeDashboardSection" HorizontalAlignment="Left" Width="917"/>
+                        </StackPanel>
+                    </Border>
                 </TabItem>
                 <TabItem x:Name="Tab_Pedals" Width="184.8" Height="40" Padding="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
                     <TabItem.Header>
@@ -101,24 +110,26 @@
                                                 <Setter.Value>
                                                     <ControlTemplate TargetType="TabItem">
                                                         <!--The four values of CornerRadius represent the four corners of the TabItem.-->
-                                                        <Border Name="Border" BorderThickness="0,0,0,0" BorderBrush="Gainsboro" CornerRadius="5,5,5,5" Margin="0,0,2,0">
+                                                        <Border Name="Border" BorderThickness="1" BorderBrush="#444444" CornerRadius="3" Margin="0,0,2,0">
                                                             <ContentPresenter x:Name="ContentSite" VerticalAlignment="Center" HorizontalAlignment="Left" ContentSource="Header" Margin="0,0"/>
                                                         </Border>
                                                         <ControlTemplate.Triggers>
                                                             <Trigger Property="IsSelected" Value="True">
-                                                                <Setter TargetName="Border" Property="Background" Value="#9F4E4E4E" />
+                                                                <Setter TargetName="Border" Property="Background" Value="#4E4E4E" />
+                                                                <Setter TargetName="Border" Property="BorderBrush" Value="#666666" />
                                                                 <Setter Property="TextElement.Foreground" Value="#FFFFFFFF" />
                                                             </Trigger>
                                                             <Trigger Property="IsSelected" Value="False">
-                                                                <Setter TargetName="Border" Property="Background" Value="#004E4E4E" />
-                                                                <Setter Property="TextElement.Foreground" Value="#7FFFFFFF" />
+                                                                <Setter TargetName="Border" Property="Background" Value="#2A2A2A" />
+                                                                <Setter Property="TextElement.Foreground" Value="#D0D0D0" />
                                                             </Trigger>
                                                             <MultiTrigger>
                                                                 <MultiTrigger.Conditions>
                                                                     <Condition Property="IsMouseOver" SourceName="Border" Value="True"/>
                                                                     <Condition Property="IsSelected" Value="False"/>
                                                                 </MultiTrigger.Conditions>
-                                                                <Setter TargetName="Border" Property="Background" Value="#3C4E4E4E" />
+                                                                <Setter TargetName="Border" Property="Background" Value="#383838" />
+                                                                <Setter TargetName="Border" Property="BorderBrush" Value="#666666" />
                                                             </MultiTrigger>
                                                         </ControlTemplate.Triggers>
                                                     </ControlTemplate>
@@ -175,103 +186,115 @@
                                 <StackPanel Width="210" Height="900" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-447.5,0,0,0">
                                     <StackPanel HorizontalAlignment="Center" Height="827" Grid.Row="3" VerticalAlignment="Top" Width="202" Grid.RowSpan="3">
 
-                                        <Border Background="#7F4E4E4E" Height="827" CornerRadius="5,5,5,5" BorderThickness="0,0,0,0" Width="202" HorizontalAlignment="Center" >
-                                            <StackPanel HorizontalAlignment="Center" Height="822" VerticalAlignment="Top" Width="192" Margin="0,5,0,0">
+                                        <!-- Connection -->
+                                        <Border Style="{StaticResource Card}" Padding="5" Margin="0,0,0,5" Width="202" HorizontalAlignment="Center">
+                                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Width="192">
                                                 <localFunction:InfoSection_Pedal x:Name="PedalInfo" />
-                                                <TextBox x:Name="textBox_VersionUpdate" HorizontalAlignment="Left" Grid.Column="2" Grid.Row="0" Grid.RowSpan="3" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="192" Height="25" AutomationProperties.Name="TextBox2" BorderBrush="#00CCCCCC" Background="#00252525" FontSize="8" FontFamily="Arial" />
-                                                <StackPanel Height="30" Width="250" Orientation="Horizontal">
+                                                <TextBox x:Name="textBox_VersionUpdate" HorizontalAlignment="Left" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="192" Height="25" AutomationProperties.Name="TextBox2" BorderBrush="#00CCCCCC" Background="#00252525" FontSize="8" FontFamily="Arial" />
+                                                <StackPanel Height="30" Orientation="Horizontal" Margin="0,4,0,0">
                                                     <ComboBox x:Name="SerialPortSelection" DropDownOpened="SerialPortSelection_DropDownOpened" SelectionChanged="SerialPortSelectionChanged" Width="76" ItemsSource="{Binding}" DisplayMemberPath="Display" SelectedValuePath="Value" FontSize="8" Height="20" MinHeight="20"/>
-                                                    
-                                                    <CheckBox x:Name="ConnectToPedal" Width="23" Height="30" IsChecked="False" IsEnabled="False" Content="" FontSize="8" Padding="0,0,0,0" Margin="5,0,0,0"/>
-                                                    <styles:SHButtonPrimary x:Name="btn_pedal_connect" Click="ConnectToPedal_click" Width="55"  Height="20" Content="Connect" HorizontalAlignment="Center" Margin="0,0,0,0" VerticalAlignment="Center" VerticalContentAlignment="Center" Padding="0,0,0,0" MinHeight="20"  FontFamily="Arial" FontSize="10"/>
+                                                    <!-- Hidden connect/disconnect state flag read/written by ConnectToPedal_click and updateUIfromConfig.cs - not a visible control -->
+                                                    <CheckBox x:Name="ConnectToPedal" IsChecked="False" Visibility="Collapsed"/>
+                                                    <Button x:Name="btn_pedal_connect" Style="{StaticResource ModernPillButton}" Click="ConnectToPedal_click" Width="55"  Height="20" Content="Connect" HorizontalAlignment="Center" Margin="8,0,0,0" VerticalAlignment="Center" VerticalContentAlignment="Center" Padding="0,0,0,0" MinHeight="20"  FontFamily="Arial" FontSize="10"/>
                                                 </StackPanel>
-                                                <localFunction:Listbox_PedalConfig x:Name="Listbox_PedalConfig"/>
-                                                <localFunction:SettingSection_Pedal x:Name="PedalSettingsSection" ConfigChanged="Tab_ConfigChanged" SettingsChanged="Tab_SettingsChanged" CalculationChanged="Tab_CalculationChanged" Margin="0,5,0,0"/>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <!-- Config Profiles -->
+                                        <Border Style="{StaticResource Card}" Padding="5" Margin="0,0,0,5" Width="202" HorizontalAlignment="Center">
+                                            <localFunction:Listbox_PedalConfig x:Name="Listbox_PedalConfig"/>
+                                        </Border>
+
+                                        <!-- Pedal Settings -->
+                                        <Border Style="{StaticResource Card}" Padding="5" Margin="0,0,0,5" Width="202" HorizontalAlignment="Center">
+                                            <localFunction:SettingSection_Pedal x:Name="PedalSettingsSection" ConfigChanged="Tab_ConfigChanged" SettingsChanged="Tab_SettingsChanged" CalculationChanged="Tab_CalculationChanged"/>
+                                        </Border>
+
+                                        <!-- Actions -->
+                                        <Border Style="{StaticResource Card}" Padding="5" Margin="0" Width="202" HorizontalAlignment="Center">
+                                            <StackPanel HorizontalAlignment="Center">
                                                 <StackPanel Orientation="Horizontal">
-                                                    <Button Style="{StaticResource IconGridButtonStyle}" Click="RestartPedal_click" ToolTip="Restart Pedal" Margin="0,5,0,0">
+                                                    <Button Style="{StaticResource IconGridButtonStyle}" Click="RestartPedal_click" ToolTip="Restart Pedal">
                                                         <StackPanel>
                                                             <Image Width="30" Height="30" Source="{StaticResource Restart}" />
                                                             <Label Content="{SLoc DIYFFBPedalPlugin_ButtonTextPedalRestart, 'Restart'}" Height="15" FontSize="8" FontFamily="Arial" Padding="0,0,0,0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
                                                         </StackPanel>
                                                     </Button>
-                                                    <Button Style="{StaticResource IconGridButtonStyle}" Click="btn_OnlineProfile_Click" ToolTip="Community Config" Margin="5,5,0,0">
+                                                    <Button Style="{StaticResource IconGridButtonStyle}" Click="btn_OnlineProfile_Click" ToolTip="Community Config" Margin="5,0,0,0">
                                                         <StackPanel>
                                                             <Image Width="30" Height="30" Source="{StaticResource CommunityConfig}" />
                                                             <Label Content="{SLoc DIYFFBPedalPlugin_ButtonTextGetOnlineConfig, 'Cloud Config'}" Height="15" FontSize="8" FontFamily="Arial" Padding="0,0,0,0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
                                                         </StackPanel>
                                                     </Button>
-                                                    <Button Style="{StaticResource IconGridButtonStyle}" Click="btn_PedalBootMode_Click" ToolTip="Get Pedal Sensor Info" Margin="5,5,0,0">
+                                                    <Button Style="{StaticResource IconGridButtonStyle}" Click="btn_PedalBootMode_Click" ToolTip="Get Pedal Sensor Info" Margin="5,0,0,0">
                                                         <StackPanel>
                                                             <Image Width="30" Height="30" Source="{StaticResource FirmwareDownload}" />
                                                             <Label Content="{SLoc DIYFFBPedalPlugin_ButtonTextFWFlash, 'Flash Mode'}" Height="15" FontSize="8" FontFamily="Arial" Padding="0,0,0,0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
                                                         </StackPanel>
                                                     </Button>
                                                 </StackPanel>
-                                                <StackPanel Orientation="Horizontal">
-                                                    <Button Style="{StaticResource IconGridButtonStyle}" Click="btn_Printlog_Click" ToolTip="Get Pedal Sensor Info" Margin="0,5,0,0">
+                                                <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                                    <Button Style="{StaticResource IconGridButtonStyle}" Click="btn_Printlog_Click" ToolTip="Get Pedal Sensor Info">
                                                         <StackPanel>
                                                             <Image Width="30" Height="30" Source="{StaticResource PedalInfo}" />
                                                             <Label Content="{SLoc DIYFFBPedalPlugin_ButtonTextGetPedalInfo, 'Pedal Info'}" Height="15" FontSize="8" FontFamily="Arial" Padding="0,0,0,0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
                                                         </StackPanel>
                                                     </Button>
 
-                                                    <Button Style="{StaticResource IconGridButtonStyle}" Click="btn_OTA_enable_Click" MouseRightButtonUp="btn_OtaHidden_Click" ToolTip="OTA update" Margin="5,5,5,0">
+                                                    <Button Style="{StaticResource IconGridButtonStyle}" Click="btn_OTA_enable_Click" MouseRightButtonUp="btn_OtaHidden_Click" ToolTip="OTA update" Margin="5,0,0,0">
                                                         <StackPanel>
                                                             <Image Width="30" Height="30" Source="{StaticResource OTA}" />
                                                             <Label Content="{SLoc DIYFFBPedalPlugin_ButtonTextPedalOta, 'OTA'}" Height="15" FontSize="8" FontFamily="Arial" Padding="0,0,0,0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
                                                         </StackPanel>
                                                     </Button>
-                                                    <Button Style="{StaticResource IconGridButtonStyle}" Click="btn_SerialMonitorWindow_Click" ToolTip="Serial Monitor" Margin="0,5,0,0">
+                                                    <Button Style="{StaticResource IconGridButtonStyle}" Click="btn_SerialMonitorWindow_Click" ToolTip="Serial Monitor" Margin="5,0,0,0">
                                                         <StackPanel>
                                                             <Image Width="30" Height="30" Source="{StaticResource Monitor}" />
                                                             <Label Content="{SLoc DIYFFBPedalPlugin_ButtonTextSerialMonitor, 'Serial Logs'}" Height="15" FontSize="8" FontFamily="Arial" Padding="0,0,0,0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
                                                         </StackPanel>
                                                     </Button>
                                                 </StackPanel>
-                                                <StackPanel Orientation="Horizontal">
-                                                    
-                                                </StackPanel>
-                                                <Border Background="#FF4E4E4E" Height="250" CornerRadius="8,8,8,8" BorderThickness="0,0,0,0" Width="192" HorizontalAlignment="Center" Margin="0,5,0,0" >
-                                                    <TextBox x:Name="TextBox2" TextWrapping="Wrap" Width="192" AutomationProperties.Name="TextBox2" Height="250" FontSize="9" Background="#004E4E4E" BorderBrush="#00CCCCCC" IsHitTestVisible="False" AllowDrop="True" HorizontalAlignment="Center"/>
-                                                </Border>
-                                                
                                             </StackPanel>
                                         </Border>
 
+                                        <!-- Status -->
+                                        <Border Style="{StaticResource Card}" Padding="5" Margin="0,5,0,0" Width="202" HorizontalAlignment="Center">
+                                            <StackPanel Width="192">
+                                                <Label Content="Status" Height="16" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial Black" FontSize="9" Foreground="#FFABB4BE"/>
+                                                <TextBox x:Name="TextBox2" TextWrapping="Wrap" Width="192" AutomationProperties.Name="TextBox2" Height="60" FontSize="9" Background="#141414" Foreground="White" BorderBrush="#00CCCCCC" IsHitTestVisible="False" AllowDrop="True" HorizontalAlignment="Center" VerticalScrollBarVisibility="Auto"/>
+                                            </StackPanel>
+                                        </Border>
 
                                     </StackPanel>
                                 </StackPanel>
 
                                 <StackPanel Height="900" Width="654" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-238,0,0,0">
-                                    <TabControl x:Name="Tab_main_1" Grid.Column="0" SelectionChanged="Tab_main_1_SelectionChanged" HorizontalAlignment="Left" Height="310" Grid.Row="0" VerticalAlignment="Top" Width="648" Padding="0,0,0,0" BorderThickness="0,0,0,0" Background="#00252525" Foreground="Transparent" Grid.RowSpan="2">
+                                    <TabControl x:Name="Tab_main_1" Grid.Column="0" SelectionChanged="Tab_main_1_SelectionChanged" HorizontalAlignment="Left" Height="310" Grid.Row="0" VerticalAlignment="Top" Width="648" Padding="0,6,0,0" BorderThickness="0,0,0,0" Background="#00252525" Foreground="Transparent" Grid.RowSpan="2">
                                         <TabControl.Resources>
                                             <Style TargetType="TabItem">
                                                 <Setter Property="Template">
                                                     <Setter.Value>
                                                         <ControlTemplate TargetType="TabItem">
-                                                            <!--The four values of CornerRadius represent the four corners of the TabItem.-->
-                                                            <Border Name="Border" BorderThickness="0,0,0,0" BorderBrush="Gainsboro" CornerRadius="5,5,5,5" Margin="0,0,2,0">
-                                                                <ContentPresenter x:Name="ContentSite"  
-                                VerticalAlignment="Center"  
-                                HorizontalAlignment="Left"  
-                                ContentSource="Header"  
-                                Margin="0,0"/>
+                                                            <Border Name="Border" BorderThickness="1" BorderBrush="#444444" CornerRadius="3" Margin="0,0,2,0">
+                                                                <ContentPresenter x:Name="ContentSite" VerticalAlignment="Center" HorizontalAlignment="Left" ContentSource="Header" Margin="0,0"/>
                                                             </Border>
                                                             <ControlTemplate.Triggers>
                                                                 <Trigger Property="IsSelected" Value="True">
-                                                                    <Setter TargetName="Border" Property="Background" Value="#7F4E4E4E" />
+                                                                    <Setter TargetName="Border" Property="Background" Value="#4E4E4E" />
+                                                                    <Setter TargetName="Border" Property="BorderBrush" Value="#666666" />
                                                                     <Setter Property="TextElement.Foreground" Value="#FFFFFFFF" />
                                                                 </Trigger>
                                                                 <Trigger Property="IsSelected" Value="False">
-                                                                    <Setter TargetName="Border" Property="Background" Value="#334E4E4E" />
-                                                                    <Setter Property="TextElement.Foreground" Value="#33FFFFFF" />
+                                                                    <Setter TargetName="Border" Property="Background" Value="#2A2A2A" />
+                                                                    <Setter Property="TextElement.Foreground" Value="#D0D0D0" />
                                                                 </Trigger>
                                                                 <MultiTrigger>
                                                                     <MultiTrigger.Conditions>
                                                                         <Condition Property="IsMouseOver" SourceName="Border" Value="True"/>
                                                                         <Condition Property="IsSelected" Value="False"/>
                                                                     </MultiTrigger.Conditions>
-                                                                    <Setter TargetName="Border" Property="Background" Value="#4C4E4E4E" />
+                                                                    <Setter TargetName="Border" Property="Background" Value="#383838" />
+                                                                    <Setter TargetName="Border" Property="BorderBrush" Value="#666666" />
                                                                 </MultiTrigger>
                                                             </ControlTemplate.Triggers>
                                                         </ControlTemplate>
@@ -305,35 +328,32 @@
                                         </TabItem>
 
                                     </TabControl>
-                                    <TabControl Grid.Column="0" HorizontalAlignment="Left" Height="235" Grid.Row="4" VerticalAlignment="Top" Width="648" Padding="0,0,0,0" BorderThickness="0,0,0,0" Background="#00252525" Foreground="Transparent" Margin="0,5,0,0">
+                                    <TabControl Grid.Column="0" HorizontalAlignment="Left" Height="235" Grid.Row="4" VerticalAlignment="Top" Width="648" Padding="0,6,0,0" BorderThickness="0,0,0,0" Background="#00252525" Foreground="Transparent" Margin="0,5,0,0">
                                         <TabControl.Resources>
                                             <Style TargetType="TabItem">
                                                 <Setter Property="Template">
                                                     <Setter.Value>
                                                         <ControlTemplate TargetType="TabItem">
-                                                            <!--The four values of CornerRadius represent the four corners of the TabItem.-->
-                                                            <Border Name="Border" BorderThickness="0,0,0,0" BorderBrush="Gainsboro" CornerRadius="5,5,5,5" Margin="0,0,2,0">
-                                                                <ContentPresenter x:Name="ContentSite"
-                                                VerticalAlignment="Center"
-                                                HorizontalAlignment="Left"
-                                                ContentSource="Header"
-                                                Margin="0,0"/>
+                                                            <Border Name="Border" BorderThickness="1" BorderBrush="#444444" CornerRadius="3" Margin="0,0,2,0">
+                                                                <ContentPresenter x:Name="ContentSite" VerticalAlignment="Center" HorizontalAlignment="Left" ContentSource="Header" Margin="0,0"/>
                                                             </Border>
                                                             <ControlTemplate.Triggers>
                                                                 <Trigger Property="IsSelected" Value="True">
-                                                                    <Setter TargetName="Border" Property="Background" Value="#7F4E4E4E" />
+                                                                    <Setter TargetName="Border" Property="Background" Value="#4E4E4E" />
+                                                                    <Setter TargetName="Border" Property="BorderBrush" Value="#666666" />
                                                                     <Setter Property="TextElement.Foreground" Value="#FFFFFFFF" />
                                                                 </Trigger>
                                                                 <Trigger Property="IsSelected" Value="False">
-                                                                    <Setter TargetName="Border" Property="Background" Value="#334E4E4E" />
-                                                                    <Setter Property="TextElement.Foreground" Value="#33FFFFFF" />
+                                                                    <Setter TargetName="Border" Property="Background" Value="#2A2A2A" />
+                                                                    <Setter Property="TextElement.Foreground" Value="#D0D0D0" />
                                                                 </Trigger>
                                                                 <MultiTrigger>
                                                                     <MultiTrigger.Conditions>
                                                                         <Condition Property="IsMouseOver" SourceName="Border" Value="True"/>
                                                                         <Condition Property="IsSelected" Value="False"/>
                                                                     </MultiTrigger.Conditions>
-                                                                    <Setter TargetName="Border" Property="Background" Value="#4C4E4E4E" />
+                                                                    <Setter TargetName="Border" Property="Background" Value="#383838" />
+                                                                    <Setter TargetName="Border" Property="BorderBrush" Value="#666666" />
                                                                 </MultiTrigger>
                                                             </ControlTemplate.Triggers>
                                                         </ControlTemplate>
@@ -389,35 +409,32 @@
 
 
                                     </TabControl>
-                                    <TabControl Grid.Column="0" SelectionChanged="TabControl_SelectionChanged_1" HorizontalAlignment="Left" Height="275" Grid.Row="5" VerticalAlignment="Center" Width="648" Padding="0,0,0,0" BorderThickness="0,0,0,0" Background="#00252525" Foreground="Transparent" Margin="0,5,0,0">
+                                    <TabControl Grid.Column="0" SelectionChanged="TabControl_SelectionChanged_1" HorizontalAlignment="Left" Height="275" Grid.Row="5" VerticalAlignment="Center" Width="648" Padding="0,6,0,0" BorderThickness="0,0,0,0" Background="#00252525" Foreground="Transparent" Margin="0,5,0,0">
                                         <TabControl.Resources>
                                             <Style TargetType="TabItem">
                                                 <Setter Property="Template">
                                                     <Setter.Value>
                                                         <ControlTemplate TargetType="TabItem">
-
-                                                            <Border Name="Border" BorderThickness="0,0,0,0" BorderBrush="Gainsboro" CornerRadius="5,5,5,5" Margin="0,0,2,0">
-                                                                <ContentPresenter x:Name="ContentSite"  
-                                                                    VerticalAlignment="Center"  
-                                                                    HorizontalAlignment="Left"  
-                                                                    ContentSource="Header"  
-                                                                    Margin="0,0"/>
+                                                            <Border Name="Border" BorderThickness="1" BorderBrush="#444444" CornerRadius="3" Margin="0,0,2,0">
+                                                                <ContentPresenter x:Name="ContentSite" VerticalAlignment="Center" HorizontalAlignment="Left" ContentSource="Header" Margin="0,0"/>
                                                             </Border>
                                                             <ControlTemplate.Triggers>
                                                                 <Trigger Property="IsSelected" Value="True">
-                                                                    <Setter TargetName="Border" Property="Background" Value="#7F4E4E4E" />
+                                                                    <Setter TargetName="Border" Property="Background" Value="#4E4E4E" />
+                                                                    <Setter TargetName="Border" Property="BorderBrush" Value="#666666" />
                                                                     <Setter Property="TextElement.Foreground" Value="#FFFFFFFF" />
                                                                 </Trigger>
                                                                 <Trigger Property="IsSelected" Value="False">
-                                                                    <Setter TargetName="Border" Property="Background" Value="#334E4E4E" />
-                                                                    <Setter Property="TextElement.Foreground" Value="#7FFFFFFF" />
+                                                                    <Setter TargetName="Border" Property="Background" Value="#2A2A2A" />
+                                                                    <Setter Property="TextElement.Foreground" Value="#D0D0D0" />
                                                                 </Trigger>
                                                                 <MultiTrigger>
                                                                     <MultiTrigger.Conditions>
                                                                         <Condition Property="IsMouseOver" SourceName="Border" Value="True"/>
                                                                         <Condition Property="IsSelected" Value="False"/>
                                                                     </MultiTrigger.Conditions>
-                                                                    <Setter TargetName="Border" Property="Background" Value="#4C4E4E4E" />
+                                                                    <Setter TargetName="Border" Property="Background" Value="#383838" />
+                                                                    <Setter TargetName="Border" Property="BorderBrush" Value="#666666" />
                                                                 </MultiTrigger>
                                                             </ControlTemplate.Triggers>
                                                         </ControlTemplate>

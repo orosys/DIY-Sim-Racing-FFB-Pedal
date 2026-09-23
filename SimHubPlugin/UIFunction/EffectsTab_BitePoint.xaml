@@ -16,13 +16,13 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
-        <Border Background="#7F4E4E4E" CornerRadius="8,8,8,8" Padding="0,0,0,6" Height="240" BorderThickness="0,2,0,0" >
+        <Border Style="{StaticResource Card}" Margin="0" Padding="0,0,0,6" Height="240">
             <StackPanel HorizontalAlignment="Left" Height="240" VerticalAlignment="Top" Width="648" Margin="0,0,0,0">
                 <StackPanel Height="20" Width="648" Orientation="Horizontal">
-                    <styles:SHToggleButton x:Name="checkbox_enable_bite_point" Content="" Checked="checkbox_enable_bite_point_Checked" Unchecked="checkbox_enable_bite_point_Unchecked" IsChecked="False" FontSize="10" Width="35" Height="15" HorizontalAlignment="Left" FontFamily="Arial"  Margin="60,0,0,0" ToolTip="The effect trigger was save in Pedal, need send config to Pedal to trigger it."/>
+                    <styles:SHToggleButton x:Name="checkbox_enable_bite_point" Content="" Checked="checkbox_enable_bite_point_Checked" Unchecked="checkbox_enable_bite_point_Unchecked" IsChecked="False" FontSize="10" Width="35" Height="15" HorizontalAlignment="Left" FontFamily="Arial"  Margin="15,0,0,0" ToolTip="The effect trigger was save in Pedal, need send config to Pedal to trigger it."/>
                     <Label Content="{SLoc DIYFFBPedalPlugin_TextEffectBiteTittle, 'Bite Point Vibration'}" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial Black" Width="200" Height="15" HorizontalAlignment="Left" Margin="4,0,0,0"/>
                 </StackPanel>
-                <Canvas x:Name="canvas_plot_BP" Height="50" Width="480" Background="#7F20232F" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left" Margin="70,2,0,0" >
+                <Canvas x:Name="canvas_plot_BP" Height="50" Width="480" Background="#141414" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left" Margin="15,2,0,0" >
                     <Polyline x:Name="Polyline_plot_BP" Height="50" Width="480" Points="0,25 80,25 160,25 240,25 320,25 400,25" Stroke="{DynamicResource AccentColorBrush}" Opacity="0.7" HorizontalAlignment="Left" VerticalAlignment="Center" StrokeThickness="2" />
 
                 </Canvas>

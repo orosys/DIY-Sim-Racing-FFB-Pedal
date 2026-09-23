@@ -16,8 +16,8 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
-        <Border Background="#7F4E4E4E" Height="200" CornerRadius="8,8,8,8" BorderThickness="0,2,0,0" Padding="0,0,0,8">
-            <StackPanel HorizontalAlignment="Left" Height="190" VerticalAlignment="Top" Width="648">
+        <Border Style="{StaticResource Card}" Margin="0" Height="200" Padding="0,0,0,8">
+            <StackPanel HorizontalAlignment="Left" Height="200" VerticalAlignment="Center" Width="648">
                 <StackPanel Height="20" Width="648" Orientation="Horizontal" Margin="0,3,0,0">
                     <Label Content="{SLoc DIYFFBPedalPlugin_TextGeneralSetting, 'General Settings'}" Height="18" Width="200" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial Black" HorizontalAlignment="Left" Margin="15,0,0,0"/>
                 </StackPanel>
