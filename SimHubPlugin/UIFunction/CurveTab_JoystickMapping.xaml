@@ -7,7 +7,7 @@
              xmlns:localUI="clr-namespace:DiyFfbPedal.UIElement"
              xmlns:styles="clr-namespace:SimHub.Plugins.Styles;assembly=SimHub.Plugins" mc:Ignorable="d" 
              xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-             d:DesignHeight="272" d:DesignWidth="540">
+             d:DesignHeight="272" d:DesignWidth="648">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -16,14 +16,14 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
-        <Border  HorizontalAlignment="Left" Height="272" VerticalAlignment="Top" Width="540" Background="#7F4E4E4E" CornerRadius="8,8,8,8" Padding="0,0,0,6">
-            <StackPanel HorizontalAlignment="Left" Height="272" VerticalAlignment="Top" Width="540">
+        <Border  HorizontalAlignment="Left" Height="272" VerticalAlignment="Top" Width="648" Background="#7F4E4E4E" CornerRadius="8,8,8,8" Padding="0,0,0,6">
+            <StackPanel HorizontalAlignment="Left" Height="272" VerticalAlignment="Top" Width="648">
                 
-                <StackPanel Height="20" Width="540" VerticalAlignment="Top" HorizontalAlignment="Left" Orientation="Horizontal">
+                <StackPanel Height="20" Width="648" VerticalAlignment="Top" HorizontalAlignment="Left" Orientation="Horizontal">
                     <Label Content="{SLoc DIYFFBPedalPlugin_TextJoystickMappingTittle, 'JOYSTICK MAPPING'}" Width="200" Foreground="White" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="70,0,0,0" Height="20" VerticalAlignment="Top" Padding="0,0,0,0" VerticalContentAlignment="Center"/>
                 </StackPanel>
-                <StackPanel Height="220" Width="540" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,5,0,0">
-                    <Canvas x:Name="mainCanvas" Height="200" Width="400" Background="#7F20232F" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="70,0,0,0" MouseRightButtonDown="Canvas_MouseRightButtonDown" ToolTip="Right-click on the canvas to add a control point, right-click a point to remove it">
+                <StackPanel Height="220" Width="648" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,5,0,0">
+                    <Canvas x:Name="mainCanvas" Height="200" Width="480" Background="#7F20232F" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="70,0,0,0" MouseRightButtonDown="Canvas_MouseRightButtonDown" ToolTip="Right-click on the canvas to add a control point, right-click a point to remove it">
                         <TextBlock x:Name="textDebug" Width="200" Height="10" Foreground="#7FFFFFFF" Text="" FontSize="8" FontFamily="Arial"/>
                         <TextBlock HorizontalAlignment="Center" VerticalAlignment="Top" Text="MAPPING" Width="80" Foreground="#7F7D7D7D" RenderTransformOrigin="0.5,0.5" Canvas.Left="-35" Canvas.Top="85" FontFamily="Arial Black" Height="13">
                             <TextBlock.RenderTransform>
@@ -37,7 +37,7 @@
                         </TextBlock>
                         <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="ORIGINAL VALUE" Width="120" Foreground="#7F7D7D7D" RenderTransformOrigin="0.5,0.5" Canvas.Left="140" Canvas.Top="186" FontFamily="Arial Black" TextAlignment="Center" Height="14" />
                         <TextBlock x:Name="text_point_pos" HorizontalAlignment="Left" VerticalAlignment="Top" Text="pos" Width="75" Foreground="White" RenderTransformOrigin="0.5,0.5" Canvas.Left="5" Canvas.Top="15" Height="40" FontSize="10" FontFamily="Arial"/>
-                        <Polygon x:Name="polygonCurveBackground"  Height="200" Width="400" Opacity="0.15" Points="0,200 80,160 160,120 240,80 320,40 400,0 400,200 0,200" StrokeThickness="4" RenderTransformOrigin="1,0.5"  HorizontalAlignment="Left" VerticalAlignment="Center" >
+                        <Polygon x:Name="polygonCurveBackground"  Height="200" Width="480" Opacity="0.15" Points="0,200 80,160 160,120 240,80 320,40 400,0 400,200 0,200" StrokeThickness="4" RenderTransformOrigin="1,0.5"  HorizontalAlignment="Left" VerticalAlignment="Center" >
                             <Polygon.Fill>
                                 <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
                                     <GradientStop Color="{DynamicResource AccentColor}" Offset="0"/>
@@ -45,7 +45,7 @@
                                 </LinearGradientBrush>
                             </Polygon.Fill>
                         </Polygon>
-                        <Polyline x:Name="Polyline_BrakeForceCurve" Stroke="{DynamicResource AccentColorBrush}" Height="200" Width="400" Opacity="0.7" Points="0,200 80,160 160,120 240,80 320,40 400,0" StrokeThickness="1" RenderTransformOrigin="1,0.5"  HorizontalAlignment="Left" VerticalAlignment="Center" />
+                        <Polyline x:Name="Polyline_BrakeForceCurve" Stroke="{DynamicResource AccentColorBrush}" Height="200" Width="480" Opacity="0.7" Points="0,200 80,160 160,120 240,80 320,40 400,0" StrokeThickness="1" RenderTransformOrigin="1,0.5"  HorizontalAlignment="Left" VerticalAlignment="Center" />
                         <Ellipse x:Name="rectState" Width="15" Height="15" Canvas.Left="25" Canvas.Top="76" Opacity="0.5" Fill="#CCEF0707" StrokeThickness="0" >
                             <Ellipse.Effect>
                                 <BlurEffect KernelType="Gaussian" RenderingBias="Quality" Radius="7"/>

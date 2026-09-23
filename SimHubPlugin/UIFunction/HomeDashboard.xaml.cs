@@ -10,23 +10,39 @@ namespace DiyFfbPedal.UIFunction
 {
     public partial class HomeDashboard : UserControl
     {
+        private static readonly Brush DisconnectedBrush = CreateFrozenBrush(171, 180, 190);
+
         private readonly Queue<KeyValuePair<DateTime, double>>[] history =
         {
             new Queue<KeyValuePair<DateTime, double>>(),
             new Queue<KeyValuePair<DateTime, double>>(),
             new Queue<KeyValuePair<DateTime, double>>()
         };
+        private readonly bool?[] lastConnected = new bool?[3];
+        private readonly int[] lastPercent = { -1, -1, -1 };
         private readonly DispatcherTimer refreshTimer;
         private DIY_FFB_Pedal plugin;
         private DIYFFBPedalControlUI parent;
         private int refreshTicks;
+
+        private static Brush CreateFrozenBrush(byte r, byte g, byte b)
+        {
+            SolidColorBrush brush = new SolidColorBrush(Color.FromRgb(r, g, b));
+            brush.Freeze();
+            return brush;
+        }
+
+        // Render priority lets the tick ride along with WPF's own render pass, so it
+        // never fires faster than the display can actually draw (effectively capped at
+        // the monitor's refresh rate) while still staying in step with it for smooth motion.
+        private const int SummaryRefreshEveryNthTick = 15; // ~250ms of text/status refresh at a 60fps tick rate
 
         public HomeDashboard()
         {
             InitializeComponent();
             refreshTimer = new DispatcherTimer(DispatcherPriority.Render)
             {
-                Interval = TimeSpan.FromMilliseconds(80)
+                Interval = TimeSpan.FromMilliseconds(1000.0 / 60.0)
             };
             refreshTimer.Tick += RefreshTimer_Tick;
             Loaded += delegate { refreshTimer.Start(); };
@@ -43,7 +59,7 @@ namespace DiyFfbPedal.UIFunction
 
         private void RefreshTimer_Tick(object sender, EventArgs e)
         {
-            if (IsVisible) UpdateDashboard(++refreshTicks % 7 == 0);
+            if (IsVisible) UpdateDashboard(++refreshTicks % SummaryRefreshEveryNthTick == 0);
         }
 
         private void UpdateDashboard(bool refreshSummary)
@@ -78,21 +94,32 @@ namespace DiyFfbPedal.UIFunction
             TextBlock effectsText = pedal == 0 ? Effects0 : pedal == 1 ? Effects1 : Effects2;
 
             percent = Math.Max(0, Math.Min(100, percent));
-            status.Text = connected ? "Connected" : "Disconnected";
-            status.Foreground = connected ? Brushes.LightGreen : new SolidColorBrush(Color.FromRgb(171, 180, 190));
-            value.Text = String.Format("{0:0}%", percent);
+            int roundedPercent = (int)Math.Round(percent);
+
+            if (lastConnected[pedal] != connected)
+            {
+                status.Text = connected ? "Connected" : "Disconnected";
+                status.Foreground = connected ? Brushes.LightGreen : DisconnectedBrush;
+                lastConnected[pedal] = connected;
+            }
             bar.Value = percent;
+            if (lastPercent[pedal] != roundedPercent)
+            {
+                value.Text = String.Format("{0:0}%", roundedPercent);
+                lastPercent[pedal] = roundedPercent;
+            }
 
             DateTime now = DateTime.UtcNow;
             Queue<KeyValuePair<DateTime, double>> pedalHistory = history[pedal];
             pedalHistory.Enqueue(new KeyValuePair<DateTime, double>(now, percent));
             while (pedalHistory.Count > 0 && now - pedalHistory.Peek().Key > TimeSpan.FromSeconds(10)) pedalHistory.Dequeue();
-            PointCollection points = new PointCollection();
+            PointCollection points = new PointCollection(pedalHistory.Count);
             foreach (KeyValuePair<DateTime, double> sample in pedalHistory)
             {
                 double x = 700 - (now - sample.Key).TotalSeconds * 70;
                 points.Add(new Point(x, 78 - sample.Value * 0.78));
             }
+            points.Freeze();
             graph.Points = points;
 
             if (!refreshSummary) return;

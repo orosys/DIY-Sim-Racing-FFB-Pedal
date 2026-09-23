@@ -6,8 +6,8 @@
              xmlns:local="clr-namespace:DiyFfbPedal.UIFunction"
              xmlns:styles="clr-namespace:SimHub.Plugins.Styles;assembly=SimHub.Plugins"
              mc:Ignorable="d" 
-             d:DesignHeight="850" d:DesignWidth="764"
-             HorizontalAlignment="Left" Width="764" Height="850" Background="Transparent">
+             d:DesignHeight="850" d:DesignWidth="917"
+             HorizontalAlignment="Left" Width="917" Height="850" Background="Transparent">
 
     <UserControl.Resources>
         <ResourceDictionary>
@@ -49,10 +49,10 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <StackPanel Orientation="Vertical" Width="764" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,0">
+    <StackPanel Orientation="Vertical" Width="917" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,0">
         
         <!-- Header & Control Bar (Width 764 matching tab bar) -->
-        <Border Background="#202020" CornerRadius="5" BorderBrush="#333333" BorderThickness="1" Padding="10,6" Width="764">
+        <Border Background="#202020" CornerRadius="5" BorderBrush="#333333" BorderThickness="1" Padding="10,6" Width="917">
             <StackPanel Orientation="Vertical">
                 <!-- Row 1: Title and Stream Status Badge -->
                 <Grid>
@@ -109,13 +109,13 @@
         </Border>
 
         <!-- Enlarged Plot Canvas Area (Width 764 matching tab bar, Height 580px) -->
-        <Border Background="#141414" BorderBrush="#333333" BorderThickness="1" CornerRadius="5" Margin="0,6,0,0" Width="764" Height="580" ClipToBounds="True">
+        <Border Background="#141414" BorderBrush="#333333" BorderThickness="1" CornerRadius="5" Margin="0,6,0,0" Width="917" Height="580" ClipToBounds="True">
             <Grid x:Name="grid_plot_host">
                 <!-- Background Gridlines & Axis Labels -->
-                <Canvas x:Name="canvas_grid" Width="762" Height="578" IsHitTestVisible="False"/>
+                <Canvas x:Name="canvas_grid" Width="914" Height="578" IsHitTestVisible="False"/>
                 
                 <!-- Main Polyline Trace Canvas with Right-Click Context Menu & Hover Data Tip -->
-                <Canvas x:Name="canvas_plot" Width="762" Height="578" Background="Transparent" Cursor="Cross"
+                <Canvas x:Name="canvas_plot" Width="914" Height="578" Background="Transparent" Cursor="Cross"
                         SizeChanged="Canvas_plot_SizeChanged"
                         MouseDown="Canvas_plot_MouseDown"
                         MouseMove="Canvas_plot_MouseMove"
@@ -152,7 +152,7 @@
         </Border>
 
         <!-- Compact Active Signals & Legend Card (Width 764, Height 100px) -->
-        <Border Background="#1E1E1E" BorderBrush="#333333" BorderThickness="1" CornerRadius="5" Margin="0,6,0,0" Width="764" Height="100" Padding="8,5">
+        <Border Background="#1E1E1E" BorderBrush="#333333" BorderThickness="1" CornerRadius="5" Margin="0,6,0,0" Width="917" Height="100" Padding="8,5">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>

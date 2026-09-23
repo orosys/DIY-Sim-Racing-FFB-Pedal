@@ -184,7 +184,7 @@ namespace DiyFfbPedal
             CheckForUpdateAsync();
         }
 
-        private const double RootScale_DesignWidth_d = 810.0;
+        private const double RootScale_DesignWidth_d = 972.0;
         private const double RootScale_DesignHeight_d = 910.0;
         private const double RootScale_MaxScale_d = 1.75;
         private const double RootScale_Deadband_d = 0.005;
@@ -850,7 +850,7 @@ namespace DiyFfbPedal
 
             // Draw Graphs
             double canvasWidth = canvas_rudder_latency_graph.ActualWidth;
-            if (canvasWidth <= 0) canvasWidth = 520;
+            if (canvasWidth <= 0) canvasWidth = 624;
 
             double latHeight = canvas_rudder_latency_graph.ActualHeight;
             if (latHeight <= 0) latHeight = 70;
