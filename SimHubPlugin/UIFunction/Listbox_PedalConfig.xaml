@@ -112,11 +112,7 @@
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
-            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                <Button Style="{StaticResource ModernPillButton}" Command="{Binding ApplyConfigCommand}" CommandParameter="{Binding ElementName=ConfigListBox, Path=SelectedItem}" Content="{SLoc DIYFFBPedalPlugin_TextApply, 'Apply'}" Width="55" Height="20" Margin="0,0,4,0" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="10" MinHeight="20" ToolTip="Apply the selected config"/>
-                <Button Style="{StaticResource ModernPillButton}" Command="{Binding SaveAsNewConfigCommand}" CommandParameter="{Binding ElementName=ConfigListBox, Path=SelectedItem}" Content="{SLoc DIYFFBPedalPlugin_TextConfigListSaveAs, 'Save as New'}" Width="80" Height="20" Margin="0,0,4,0" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="10" MinHeight="20" ToolTip="Save the current in-memory config as a new file"/>
-                <Button Style="{StaticResource ModernPillButton}" Command="{Binding DeleteConfigCommand}" CommandParameter="{Binding ElementName=ConfigListBox, Path=SelectedItem}" Content="{SLoc DIYFFBPedalPlugin_TextDelete, 'Delete'}" Width="45" Height="20" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="10" MinHeight="20" ToolTip="Delete the selected config"/>
-            </StackPanel>
+            <TextBlock Text="{SLoc DIYFFBPedalPlugin_TextConfigListContextMenuHint, 'Right-click a config for options'}" Foreground="#7F7D7D7D" FontFamily="Arial" FontSize="8" FontStyle="Italic" HorizontalAlignment="Center" Margin="0,4,0,0"/>
         </StackPanel>
     </Grid>
 </UserControl>

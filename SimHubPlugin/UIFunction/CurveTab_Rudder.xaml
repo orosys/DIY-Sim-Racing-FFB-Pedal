@@ -16,7 +16,7 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
-        <Border HorizontalAlignment="Left" Height="276" VerticalAlignment="Top" Width="648" Background="#7F4E4E4E" CornerRadius="8,8,8,8" Padding="0,0,0,6">
+        <Border HorizontalAlignment="Left" Height="276" VerticalAlignment="Top" Width="648" Style="{StaticResource Card}" Margin="0" Padding="0,0,0,6">
             <StackPanel HorizontalAlignment="Left" Height="270" VerticalAlignment="Top" Width="648">
                 <!-- Mode & Profile Header -->
                 <StackPanel Height="24" Width="648" VerticalAlignment="Top" HorizontalAlignment="Left" Orientation="Horizontal" Margin="0,2,0,0">
@@ -24,9 +24,9 @@
                     
                     <!-- Airplane Profile Selection (Visible in Airplane Mode) -->
                     <StackPanel x:Name="panel_AirplaneProfiles" Orientation="Horizontal" VerticalAlignment="Center" Margin="5,0,0,0">
-                        <styles:SHButtonPrimary x:Name="btn_linearcurve_rudder" Click="btn_linearcurve_rudder_Click" Width="48" Content="{SLoc DIYFFBPedalPlugin_BtnTextLinear, 'Linear'}" Height="18" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,0,0,0" FontFamily="Arial" FontSize="10" MinHeight="16" VerticalContentAlignment="Center" />
-                        <styles:SHButtonPrimary x:Name="btn_progressive_rudder" Click="btn_progressive_rudder_Click" Width="68" Content="{SLoc DIYFFBPedalPlugin_BtnTextProgressive, 'Progressive'}" Height="18" Margin="4,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="10" MinHeight="16" />
-                        <styles:SHButtonPrimary x:Name="btn_Scurve_rudder" Click="btn_Scurve_rudder_Click" Width="52" Content="{SLoc DIYFFBPedalPlugin_BtnTextSCurve, 'S-Curve'}" Height="18" Margin="4,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="10" MinHeight="16" />
+                        <Button Style="{StaticResource ModernPillButton}" x:Name="btn_linearcurve_rudder" Click="btn_linearcurve_rudder_Click" Width="48" Content="{SLoc DIYFFBPedalPlugin_BtnTextLinear, 'Linear'}" Height="18" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,0,0,0" FontFamily="Arial" FontSize="10" MinHeight="16" VerticalContentAlignment="Center" />
+                        <Button Style="{StaticResource ModernPillButton}" x:Name="btn_progressive_rudder" Click="btn_progressive_rudder_Click" Width="68" Content="{SLoc DIYFFBPedalPlugin_BtnTextProgressive, 'Progressive'}" Height="18" Margin="4,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="10" MinHeight="16" />
+                        <Button Style="{StaticResource ModernPillButton}" x:Name="btn_Scurve_rudder" Click="btn_Scurve_rudder_Click" Width="52" Content="{SLoc DIYFFBPedalPlugin_BtnTextSCurve, 'S-Curve'}" Height="18" Margin="4,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="10" MinHeight="16" />
                     </StackPanel>
 
                     <!-- Helicopter Free-Floating Badge (Visible in Heli Mode) -->
@@ -44,7 +44,7 @@
                 <!-- Center Graph & Visualization -->
                 <StackPanel Height="205" Width="648" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,2,0,0">
                     <Grid Height="200" Width="540" Margin="15,0,0,0">
-                        <Canvas x:Name="canvas_rudder_curve" Height="200" Width="540" Background="#7F20232F" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left" VerticalAlignment="Top">
+                        <Canvas x:Name="canvas_rudder_curve" Height="200" Width="540" Background="#141414" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left" VerticalAlignment="Top">
                             <!-- Axis Labels -->
                             <TextBlock HorizontalAlignment="Center" VerticalAlignment="Top" Text="FORCE (KG)" Width="80" Foreground="#7F7D7D7D" RenderTransformOrigin="0.5,0.5" Canvas.Left="-30" Canvas.Top="85" FontFamily="Arial Black" Height="13" FontSize="9">
                                 <TextBlock.RenderTransform>

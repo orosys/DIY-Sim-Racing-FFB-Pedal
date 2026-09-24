@@ -14,7 +14,7 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
-        <Border HorizontalAlignment="Left" Height="272" VerticalAlignment="Top" Width="648" Background="#7F4E4E4E" CornerRadius="8" Padding="0,0,0,4">
+        <Border HorizontalAlignment="Left" Height="272" VerticalAlignment="Top" Width="648" Style="{StaticResource Card}" Margin="0" Padding="0,0,0,4">
             <Grid Width="648" Height="268">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="317"/>
@@ -30,7 +30,7 @@
                             <TextBlock Text="SYMMETRICAL" Foreground="#00FFCC" FontSize="8" FontWeight="Bold" FontFamily="Arial"/>
                         </Border>
                     </StackPanel>
-                    <Canvas x:Name="canvasYaw" Height="190" Width="264" Background="#7F20232F" HorizontalAlignment="Center" MouseRightButtonDown="CanvasYaw_MouseRightButtonDown" ToolTip="Right-click canvas to add point, right-click point to remove">
+                    <Canvas x:Name="canvasYaw" Height="190" Width="264" Background="#141414" HorizontalAlignment="Center" MouseRightButtonDown="CanvasYaw_MouseRightButtonDown" ToolTip="Right-click canvas to add point, right-click point to remove">
                         <TextBlock Text="MAP %" Width="60" Foreground="#7F7D7D7D" RenderTransformOrigin="0.5,0.5" Canvas.Left="-26" Canvas.Top="85" FontFamily="Arial Black" FontSize="8" Height="12">
                             <TextBlock.RenderTransform>
                                 <RotateTransform Angle="-90"/>
@@ -55,10 +55,10 @@
                         <TextBlock x:Name="textStateYaw" Width="45" Height="10" Foreground="#7FFFFFFF" Text="50%" FontSize="8" FontFamily="Arial"/>
                     </Canvas>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
-                        <styles:SHButtonPrimary x:Name="btn_yaw_linear" Click="btn_yaw_linear_Click" Width="44" Content="Linear" Height="16" Margin="0,0,0,0" Padding="0" FontFamily="Arial" FontSize="9" MinHeight="16" VerticalContentAlignment="Center"/>
-                        <styles:SHButtonPrimary x:Name="btn_yaw_scurve" Click="btn_yaw_scurve_Click" Width="52" Content="S-Curve" Height="16" Margin="3,0,0,0" Padding="0" FontFamily="Arial" FontSize="9" MinHeight="16" VerticalContentAlignment="Center"/>
-                        <styles:SHButtonPrimary x:Name="btn_yaw_expo" Click="btn_yaw_expo_Click" Width="44" Content="Expo" Height="16" Margin="3,0,0,0" Padding="0" FontFamily="Arial" FontSize="9" MinHeight="16" VerticalContentAlignment="Center"/>
-                        <styles:SHButtonPrimary x:Name="btn_yaw_log" Click="btn_yaw_log_Click" Width="44" Content="Log" Height="16" Margin="3,0,0,0" Padding="0" FontFamily="Arial" FontSize="9" MinHeight="16" VerticalContentAlignment="Center"/>
+                        <Button Style="{StaticResource ModernPillButton}" x:Name="btn_yaw_linear" Click="btn_yaw_linear_Click" Width="44" Content="Linear" Height="16" Margin="0,0,0,0" Padding="0" FontFamily="Arial" FontSize="9" MinHeight="16" VerticalContentAlignment="Center"/>
+                        <Button Style="{StaticResource ModernPillButton}" x:Name="btn_yaw_scurve" Click="btn_yaw_scurve_Click" Width="52" Content="S-Curve" Height="16" Margin="3,0,0,0" Padding="0" FontFamily="Arial" FontSize="9" MinHeight="16" VerticalContentAlignment="Center"/>
+                        <Button Style="{StaticResource ModernPillButton}" x:Name="btn_yaw_expo" Click="btn_yaw_expo_Click" Width="44" Content="Expo" Height="16" Margin="3,0,0,0" Padding="0" FontFamily="Arial" FontSize="9" MinHeight="16" VerticalContentAlignment="Center"/>
+                        <Button Style="{StaticResource ModernPillButton}" x:Name="btn_yaw_log" Click="btn_yaw_log_Click" Width="44" Content="Log" Height="16" Margin="3,0,0,0" Padding="0" FontFamily="Arial" FontSize="9" MinHeight="16" VerticalContentAlignment="Center"/>
                     </StackPanel>
                 </StackPanel>
 
@@ -73,7 +73,7 @@
                             <TextBlock Text="UNIPOLAR" Foreground="#FFCC00" FontSize="8" FontWeight="Bold" FontFamily="Arial"/>
                         </Border>
                     </StackPanel>
-                    <Canvas x:Name="canvasToe" Height="190" Width="264" Background="#7F20232F" HorizontalAlignment="Center" MouseRightButtonDown="CanvasToe_MouseRightButtonDown" ToolTip="Right-click canvas to add point, right-click point to remove">
+                    <Canvas x:Name="canvasToe" Height="190" Width="264" Background="#141414" HorizontalAlignment="Center" MouseRightButtonDown="CanvasToe_MouseRightButtonDown" ToolTip="Right-click canvas to add point, right-click point to remove">
                         <TextBlock Text="MAP %" Width="60" Foreground="#7F7D7D7D" RenderTransformOrigin="0.5,0.5" Canvas.Left="-26" Canvas.Top="85" FontFamily="Arial Black" FontSize="8" Height="12">
                             <TextBlock.RenderTransform>
                                 <RotateTransform Angle="-90"/>
@@ -98,10 +98,10 @@
                         <TextBlock x:Name="textStateToe" Width="45" Height="10" Foreground="#7FFFFFFF" Text="0%" FontSize="8" FontFamily="Arial"/>
                     </Canvas>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
-                        <styles:SHButtonPrimary x:Name="btn_toe_linear" Click="btn_toe_linear_Click" Width="44" Content="Linear" Height="16" Margin="0,0,0,0" Padding="0" FontFamily="Arial" FontSize="9" MinHeight="16" VerticalContentAlignment="Center"/>
-                        <styles:SHButtonPrimary x:Name="btn_toe_scurve" Click="btn_toe_scurve_Click" Width="52" Content="S-Curve" Height="16" Margin="3,0,0,0" Padding="0" FontFamily="Arial" FontSize="9" MinHeight="16" VerticalContentAlignment="Center"/>
-                        <styles:SHButtonPrimary x:Name="btn_toe_expo" Click="btn_toe_expo_Click" Width="44" Content="Expo" Height="16" Margin="3,0,0,0" Padding="0" FontFamily="Arial" FontSize="9" MinHeight="16" VerticalContentAlignment="Center"/>
-                        <styles:SHButtonPrimary x:Name="btn_toe_log" Click="btn_toe_log_Click" Width="44" Content="Log" Height="16" Margin="3,0,0,0" Padding="0" FontFamily="Arial" FontSize="9" MinHeight="16" VerticalContentAlignment="Center"/>
+                        <Button Style="{StaticResource ModernPillButton}" x:Name="btn_toe_linear" Click="btn_toe_linear_Click" Width="44" Content="Linear" Height="16" Margin="0,0,0,0" Padding="0" FontFamily="Arial" FontSize="9" MinHeight="16" VerticalContentAlignment="Center"/>
+                        <Button Style="{StaticResource ModernPillButton}" x:Name="btn_toe_scurve" Click="btn_toe_scurve_Click" Width="52" Content="S-Curve" Height="16" Margin="3,0,0,0" Padding="0" FontFamily="Arial" FontSize="9" MinHeight="16" VerticalContentAlignment="Center"/>
+                        <Button Style="{StaticResource ModernPillButton}" x:Name="btn_toe_expo" Click="btn_toe_expo_Click" Width="44" Content="Expo" Height="16" Margin="3,0,0,0" Padding="0" FontFamily="Arial" FontSize="9" MinHeight="16" VerticalContentAlignment="Center"/>
+                        <Button Style="{StaticResource ModernPillButton}" x:Name="btn_toe_log" Click="btn_toe_log_Click" Width="44" Content="Log" Height="16" Margin="3,0,0,0" Padding="0" FontFamily="Arial" FontSize="9" MinHeight="16" VerticalContentAlignment="Center"/>
                     </StackPanel>
                 </StackPanel>
             </Grid>

@@ -16,7 +16,7 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
-        <Border Background="#7F4E4E4E" CornerRadius="8,8,8,8" BorderThickness="0,2,0,0" Padding="0,0,0,4">
+        <Border Style="{StaticResource Card}" Margin="0" Height="190" Padding="0,0,0,4" VerticalAlignment="Top">
             <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Width="648">
                 
                 <!-- Section Header & Keybinding/State Info -->

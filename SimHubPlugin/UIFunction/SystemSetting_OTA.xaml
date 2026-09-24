@@ -18,7 +18,7 @@
     <Grid>
         <Border Background="#7F4E4E4E" Height="177" CornerRadius="5,5,5,5" BorderThickness="0,2,0,0" >
             <StackPanel Width="648" Height="177" HorizontalAlignment="Left" VerticalAlignment="Top">
-                <Label Content="OTA Setting" Height="15" Width="150" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial Black" HorizontalAlignment="Left" Margin="70,0,0,0"/>
+                <Label Content="OTA Setting" Height="15" Width="150" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial Black" HorizontalAlignment="Left" Margin="15,0,0,0"/>
                 <StackPanel HorizontalAlignment="Left" Height="25" VerticalAlignment="Center" Width="648" Grid.Column="1" Grid.Row="5" Orientation="Horizontal">
                     <Label Content="SSID:" Height="15" Width="40" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" HorizontalAlignment="Left" Margin="72,0,0,0" FontSize="10"/>
                     <TextBox x:Name="textbox_SSID" TextChanged="textbox_SSID_TextChanged" Height="20" Width="150" Padding="0,0,0,0" FontFamily="Arial" HorizontalAlignment="Left" BorderThickness="0,0,0,0" MaxLength="30" MinHeight="15" FontSize="10"/>
@@ -32,7 +32,7 @@
                 <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Orientation="Horizontal" Width="648" Height="20">
                     <Label x:Name="Label_update_channel_notice" HorizontalAlignment="Center" Margin="72,0,0,0" Width="480" FontFamily="Arial" Foreground="Red" FontSize="8" Padding="0,0,0,0" />
                 </StackPanel>
-                <StackPanel Height="20" Width="160" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="70,0,0,0">
+                <StackPanel Height="20" Width="160" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="15,0,0,0">
                     <styles:SHToggleButton x:Name="Checkbox_Force_flash" Content="" IsChecked="False" FontSize="10" Width="35" Height="15" HorizontalAlignment="Left" FontFamily="Arial" ToolTip="Force update to the selected version" RenderTransformOrigin="0.5,0.5" Margin="-10,0,0,0" Checked="Checkbox_Force_flash_Checked" Unchecked="Checkbox_Force_flash_Unchecked"/>
                     <Label Content="Force Flash Firmware" Height="20" Width="130" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" HorizontalAlignment="Left" FontSize="10" Margin="4,0,0,0"/>
                 </StackPanel>

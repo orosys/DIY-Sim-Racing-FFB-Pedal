@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:styles="clr-namespace:SimHub.Plugins.Styles;assembly=SimHub.Plugins"
              mc:Ignorable="d" 
-             d:DesignHeight="290" d:DesignWidth="642">
+             d:DesignHeight="290" d:DesignWidth="648">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -49,8 +49,8 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <Grid Width="642" HorizontalAlignment="Left">
-        <Border Background="#7F353535" CornerRadius="5" BorderThickness="0,2,0,0" BorderBrush="#00E5FF" Padding="6,4">
+    <Grid Width="648" HorizontalAlignment="Left" VerticalAlignment="Top">
+        <Border Style="{StaticResource Card}" Margin="0" Padding="8,6" VerticalAlignment="Top">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
