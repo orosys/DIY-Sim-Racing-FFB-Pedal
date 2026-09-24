@@ -278,11 +278,11 @@ namespace DiyFfbPedal.UIFunction
             plot_context_menu.Items.Add(new Separator());
 
             var menuZoomXIn = new MenuItem { Header = "Zoom In X  (↔+)" };
-            menuZoomXIn.Click += (s, e) => ZoomX(0.75, (canvas_plot.ActualWidth > 0 ? canvas_plot.ActualWidth : 762) / 2.0);
+            menuZoomXIn.Click += (s, e) => ZoomX(0.75, (canvas_plot.ActualWidth > 0 ? canvas_plot.ActualWidth : 914) / 2.0);
             plot_context_menu.Items.Add(menuZoomXIn);
 
             var menuZoomXOut = new MenuItem { Header = "Zoom Out X (↔−)" };
-            menuZoomXOut.Click += (s, e) => ZoomX(1.33, (canvas_plot.ActualWidth > 0 ? canvas_plot.ActualWidth : 762) / 2.0);
+            menuZoomXOut.Click += (s, e) => ZoomX(1.33, (canvas_plot.ActualWidth > 0 ? canvas_plot.ActualWidth : 914) / 2.0);
             plot_context_menu.Items.Add(menuZoomXOut);
 
             var menuZoomYIn = new MenuItem { Header = "Zoom In Y  (↕+)" };
@@ -569,7 +569,7 @@ namespace DiyFfbPedal.UIFunction
                 tb_stream_status.Foreground = new SolidColorBrush(Color.FromRgb(0x9E, 0x9E, 0x9E));
             }
 
-            double width = canvas_plot.ActualWidth > 0 ? canvas_plot.ActualWidth : 762;
+            double width = canvas_plot.ActualWidth > 0 ? canvas_plot.ActualWidth : 914;
             double height = canvas_plot.ActualHeight > 0 ? canvas_plot.ActualHeight : 578;
 
             DrawGridlines(width, height);
@@ -876,7 +876,7 @@ namespace DiyFfbPedal.UIFunction
         private void Canvas_plot_MouseMove(object sender, MouseEventArgs e)
         {
             Point pos = e.GetPosition(canvas_plot);
-            double width = canvas_plot.ActualWidth > 0 ? canvas_plot.ActualWidth : 762;
+            double width = canvas_plot.ActualWidth > 0 ? canvas_plot.ActualWidth : 914;
             double height = canvas_plot.ActualHeight > 0 ? canvas_plot.ActualHeight : 578;
 
             // 1. Handle Panning (Strg/Ctrl + Drag or Left Drag)
@@ -1105,12 +1105,12 @@ namespace DiyFfbPedal.UIFunction
 
         private void BtnZoomXIn_Click(object sender, RoutedEventArgs e)
         {
-            ZoomX(0.75, (canvas_plot.ActualWidth > 0 ? canvas_plot.ActualWidth : 762) / 2.0);
+            ZoomX(0.75, (canvas_plot.ActualWidth > 0 ? canvas_plot.ActualWidth : 914) / 2.0);
         }
 
         private void BtnZoomXOut_Click(object sender, RoutedEventArgs e)
         {
-            ZoomX(1.33, (canvas_plot.ActualWidth > 0 ? canvas_plot.ActualWidth : 762) / 2.0);
+            ZoomX(1.33, (canvas_plot.ActualWidth > 0 ? canvas_plot.ActualWidth : 914) / 2.0);
         }
 
         private void BtnZoomYIn_Click(object sender, RoutedEventArgs e)
@@ -1175,7 +1175,7 @@ namespace DiyFfbPedal.UIFunction
         private void ZoomX(double factor, double cursorX)
         {
             _isZoomed = true;
-            double width = canvas_plot.ActualWidth > 0 ? canvas_plot.ActualWidth : 762;
+            double width = canvas_plot.ActualWidth > 0 ? canvas_plot.ActualWidth : 914;
             double normX = Math.Max(0.0, Math.Min(1.0, cursorX / width));
             double cursorAge = _xViewOffsetSec + (1.0 - normX) * _windowSeconds;
 
@@ -1207,7 +1207,7 @@ namespace DiyFfbPedal.UIFunction
 
         private void ApplyRegionalZoom(Point p1, Point p2)
         {
-            double width = canvas_plot.ActualWidth > 0 ? canvas_plot.ActualWidth : 762;
+            double width = canvas_plot.ActualWidth > 0 ? canvas_plot.ActualWidth : 914;
             double height = canvas_plot.ActualHeight > 0 ? canvas_plot.ActualHeight : 578;
 
             double x1 = Math.Min(p1.X, p2.X);
