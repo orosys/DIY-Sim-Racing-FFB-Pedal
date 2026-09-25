@@ -3680,6 +3680,33 @@ void IRAM_ATTR_FLAG serialCommunicationTaskRx(void *pvParameters) {
                   "[MAC] Stored & Applied MAC Addresses table via Serial COM. "
                   "Channel: %d\n",
                   received_macs.payloadMacAddresses_st.wifiChannel_u8);
+
+              // applyMacConfig() only updates who our peers are (host +
+              // siblings), never who WE are - a pedal's own role
+              // (s_localPedalType_u8) was previously only ever taught by an
+              // explicit config commit (storeToEeprom=1 DapConfig_t) or the
+              // dedicated assignment mechanism below, never by "Sync to All
+              // Devices" alone. That's why users had to manually push a
+              // config after pairing before a pedal was recognized as the
+              // right role. Close that gap here: if our own hardware MAC is
+              // in this table under a role slot that differs from our
+              // current role, drive it through the same
+              // persist-and-restart path SET_ASSIGNMENT_x already uses.
+              const uint8_t *ownMac = wirelessComm.getOwnMac();
+              for (int slot = 0; slot < 3; slot++) {
+                if (macCheck(ownMac, received_macs.payloadMacAddresses_st
+                                          .macAddress_aau8[slot])) {
+                  if (s_localPedalType_u8 != (uint8_t)slot) {
+                    ActiveSerial->printf(
+                        "[MAC] Own MAC matches role slot %d (current role "
+                        "%d) - updating assignment.\n",
+                        slot, s_localPedalType_u8);
+                    g_newAssignedRole_u8 = (uint8_t)slot;
+                    g_assignmentUpdate_b = true;
+                  }
+                  break;
+                }
+              }
             }
 
             // Always reply with current MAC table + own hardware MAC & node
