@@ -1404,6 +1404,17 @@ void serialCommunicationRxTask( void * pvParameters)
                 // on tab load) sends an all-zero payload just to ask for the
                 // current table back, and must not overwrite the live one.
                 wirelessComm.applyMacConfig(macCfg_local);
+                // applyMacConfig() only updates the bridge's own routing
+                // table (who is peered as what) - it never tells the pedals
+                // themselves what role they now hold. Without this, a pedal
+                // whose MAC was just (re)assigned to a slot keeps whatever
+                // role it last held until someone manually pushes a config
+                // to it, and every action/config addressed to its new role
+                // gets rejected by its own stale-identity check in the
+                // meantime. syncPairingTableToPedals() unicasts the
+                // assignment to each already-known pedal MAC so it can
+                // adopt its new role immediately.
+                syncPairingTableToPedals();
               }
 
               DapMacAddresses_t reply = loadMacAddressesFromEeprom();
@@ -2256,6 +2267,10 @@ void hidCommunicaitonRxTask(void *pvParameters)
             // tab load) sends an all-zero payload just to ask for the
             // current table back, and must not overwrite the live one.
             wirelessComm.applyMacConfig(macCfg);
+            // See the identical comment on the serial variant above: without
+            // this, a pedal (re)assigned to a role slot never learns its new
+            // role until someone manually pushes a config to it.
+            syncPairingTableToPedals();
           }
 
           DapMacAddresses_t reply = loadMacAddressesFromEeprom();

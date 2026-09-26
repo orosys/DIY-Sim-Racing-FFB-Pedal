@@ -717,30 +717,27 @@ private:
         g_espNowErrorCode_u8 = 104;
     }
 
-    // Target Role Protection: once assigned, an incoming (non-EEPROM-store)
-    // config must match our own role.
-    if (structChecker && s_localPedalType_u8 < 3 &&
-        dap_config_espnow_recv_st.payloadHeader_st.storeToEeprom_u8 == 0) {
-      if (dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8 !=
-          s_localPedalType_u8) {
-        structChecker = false;
-      }
-    }
-
     if (!structChecker) {
       logDebug("RX Config dropped: validation failed (err=%u)",
                g_espNowErrorCode_u8);
       return;
     }
 
+    // No role-tag check here any more: this packet only ever reached this
+    // pedal's radio because the bridge unicast it here, backed by the
+    // admin's own MAC table - delivery IS the authorization now (see the
+    // history note on WirelessCommunicationPedal::sendTo()). So the
+    // pedal's in-memory identity simply tracks whatever a legitimately-
+    // addressed config says, immediately, live or persisted, rather than
+    // rejecting anything that disagrees with a possibly-stale prior belief
+    // (which was the actual cause of "need to send a config to the pedal
+    // first" reports - the pedal was refusing packets meant for it).
+    // EEPROM persistence is unaffected: that still only happens when
+    // storeToEeprom_u8==1, below.
     g_lastMasterHeartbeat_ms = millis();
     configDataPackage_t configPackage_st;
     configPackage_st.config_st = dap_config_espnow_recv_st;
-    if (dap_config_espnow_recv_st.payloadHeader_st.storeToEeprom_u8 == 1 ||
-        s_localPedalType_u8 == PEDAL_ID_UNKNOWN) {
-      s_localPedalType_u8 =
-          dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8;
-    }
+    s_localPedalType_u8 = dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8;
     xQueueSend(s_configUpdateAvailableQueue, &configPackage_st, 0);
     if (dap_config_espnow_recv_st.payloadHeader_st.storeToEeprom_u8 == 1) {
       g_configUpdateBuzzer_b = true;
@@ -753,17 +750,13 @@ private:
     DapActions_t dap_actions_st;
     memcpy(&dap_actions_st, data, sizeof(DapActions_t));
 
+    // incomingTag/myTag are kept only for the TEMP DIAGNOSTIC log lines
+    // below (no longer used for gating - see the comment on the removed
+    // tag-match check further down).
     uint8_t incomingTag = dap_actions_st.payloadHeader_st.pedalTag_u8;
     uint8_t myTag =
         dap_config_espnow_recv_st.payloadPedalConfig_st.pedalType_u8;
     uint8_t sysAct = dap_actions_st.payloadPedalAction_st.systemAction_u8;
-
-    bool isAssignmentAction =
-        (sysAct == (uint8_t)PedalSystemAction::CLEAR_ASSIGNMENT ||
-         sysAct == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_0 ||
-         sysAct == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_1 ||
-         sysAct == (uint8_t)PedalSystemAction::SET_ASSIGNMENT_2 ||
-         sysAct == (uint8_t)PedalSystemAction::ASSIGNMENT_CHECK_BEEP);
 
     // TEMP DIAGNOSTIC (unconditional, not gated behind WIRELESS_COMM_DEBUG -
     // relayed to the PC's Serial Logs via sendLogToBridge) - tracking down
@@ -793,10 +786,17 @@ private:
                      DAP_PAYLOAD_TYPE_ACTION_U8));
     }
 
+    // No role-tag check here any more: this packet only ever reached this
+    // pedal's radio because the bridge unicast it here, backed by the
+    // admin's own MAC table - delivery IS the authorization now (see the
+    // history note on WirelessCommunicationPedal::sendTo()). Re-checking a
+    // role tag against this pedal's own possibly-stale belief was the
+    // actual cause of the "wrong pedal ignores an action meant for it"
+    // reports (rudder partner never resolving, config-request actions
+    // silently dropped, etc.) - only structural validity is checked here
+    // now.
     if (dap_actions_st.payloadHeader_st.payloadType_u8 !=
-            DAP_PAYLOAD_TYPE_ACTION_U8 ||
-        !(isAssignmentAction || incomingTag == myTag ||
-          incomingTag == s_localPedalType_u8)) {
+        DAP_PAYLOAD_TYPE_ACTION_U8) {
       if (isConfigRequest) {
         sendLogToBridge("[DIAG] ConfigReq DROPPED at type/tag gate");
       }
@@ -1100,13 +1100,10 @@ private:
       logDebug("RX ServoConfig dropped: bad CRC");
       return;
     }
-    if (s_localPedalType_u8 < 3 &&
-        received_servo_config.payloadHeader_st.pedalTag_u8 !=
-            s_localPedalType_u8) {
-      sendLogToBridge("[DIAG] ServoConfig DROPPED: role tag mismatch");
-      logDebug("RX ServoConfig dropped: role tag mismatch");
-      return;
-    }
+    // No role-tag check here any more: this packet only ever reached this
+    // pedal's radio because the bridge unicast it here, backed by the
+    // admin's own MAC table - delivery IS the authorization now (see the
+    // history note on WirelessCommunicationPedal::sendTo()).
     if (s_servoConfigRxQueue != NULL) {
       xQueueSend(s_servoConfigRxQueue, &received_servo_config, (TickType_t)0);
     }

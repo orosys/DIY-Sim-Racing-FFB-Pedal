@@ -197,6 +197,10 @@ namespace User.PluginSdkDemo
             
             indexOfSelectedPedal_u = plugin.Settings.table_selected;
             MyTab.SelectedIndex = (int)indexOfSelectedPedal_u;
+            if (HomeDashboardSection != null)
+            {
+                HomeDashboardSection.Initialize(plugin, this);
+            }
 
 
             //auto connection with timmer
@@ -214,6 +218,23 @@ namespace User.PluginSdkDemo
             RefreshGameProfileUI();
             plugin.RequestAutomaticProfileRefresh();
 
+        }
+
+        public bool IsHomePedalConnected(int pedal)
+        {
+            return Plugin != null && pedal >= 0 && pedal < 3 &&
+                (Plugin._calculations.PedalAvailability[pedal] || Plugin._calculations.PedalSerialAvailability[pedal]);
+        }
+
+        public double GetHomePedalPercent(int pedal)
+        {
+            if (pedal < 0 || pedal >= Pedal_position_reading.Length) return 0;
+            return Pedal_position_reading[pedal] * 100.0 / 32767.0;
+        }
+
+        public void ShowHomeTarget(bool system)
+        {
+            Function_Tab_seleciton.SelectedItem = system ? Tab_System : Tab_Pedals;
         }
 
 
