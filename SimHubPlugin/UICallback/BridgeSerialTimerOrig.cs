@@ -512,6 +512,7 @@ namespace DiyFfbPedal
 
                                 if ((check_payload_state_b) && check_crc_state_b)
                                 {
+                                    UpdateFanatecVibrationStatus(bridge_state.payloadBridgeState_.Bridge_action);
                                     //Bridge_RSSI = bridge_state.payloadBridgeState_.Pedal_RSSI;
                                     if (Plugin._calculations.bridgeConnectionStatus == BridgeConnectStateEnum.BRIDGE_ENTRY_CONNECT)
                                     {
