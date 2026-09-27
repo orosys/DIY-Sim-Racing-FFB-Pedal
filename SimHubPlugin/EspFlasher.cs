@@ -35,9 +35,26 @@ namespace DiyFfbPedal
             return exePath;
         }
 
+        // Live snapshot of present COM devices (WMI). SerialPort.GetPortNames() reads the
+        // registry, which keeps entries of unplugged devices - e.g. the bootloader's COM number
+        // from a previous flash, or the pedal's app port after it already left - and must not be
+        // used to detect the re-enumeration.
+        private static Dictionary<string, VidPidResult> SnapshotPresentPorts()
+        {
+            return ComPortHelper.GetPresentPorts(forceRefresh: true)
+                .GroupBy(p => p.ComPortName, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+        }
+
+        private static string DescribeSnapshot(Dictionary<string, VidPidResult> ports)
+        {
+            return ports.Count == 0 ? "none" : string.Join(", ", ports.Values.Select(p => $"{p.ComPortName} [{p.Vid ?? "?"}:{p.Pid ?? "?"}]"));
+        }
+
         private async Task<string> TouchAndResolveBootloaderPortAsync(string comPort)
         {
-            var initialPorts = new HashSet<string>(SerialPort.GetPortNames().Distinct(), StringComparer.OrdinalIgnoreCase);
+            var initialPorts = SnapshotPresentPorts();
+            OnOutputReceived?.Invoke(this, $"Ports before reset: {DescribeSnapshot(initialPorts)}");
 
             try
             {
@@ -71,28 +88,35 @@ namespace DiyFfbPedal
             bool originalGone = false;
             string pendingCandidate = null;
             var reportedIgnored = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            string lastSnapshotText = null;
 
             for (int i = 0; i < 30; i++)
             {
                 await Task.Delay(200);
-                var currentPorts = SerialPort.GetPortNames().Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
-                bool originalPresent = currentPorts.Any(p => p.Equals(comPort, StringComparison.OrdinalIgnoreCase));
+                var currentPorts = SnapshotPresentPorts();
+                string snapshotText = DescribeSnapshot(currentPorts);
+                if (snapshotText != lastSnapshotText)
+                {
+                    OnOutputReceived?.Invoke(this, $"Ports now: {snapshotText}");
+                    lastSnapshotText = snapshotText;
+                }
+
+                bool originalPresent = currentPorts.ContainsKey(comPort);
                 if (!originalPresent) originalGone = true;
 
                 string candidate = null;
                 if (originalGone)
                 {
-                    foreach (var p in currentPorts.Where(p => !initialPorts.Contains(p)))
+                    foreach (var p in currentPorts.Values.Where(p => !initialPorts.ContainsKey(p.ComPortName)))
                     {
-                        var info = ComPortHelper.GetVidPidFromComPort(p, forceRefresh: true);
-                        if (info.Found && info.Vid == "303A")
+                        if (p.Vid == "303A")
                         {
-                            candidate = p;
+                            candidate = p.ComPortName;
                             break;
                         }
-                        if (reportedIgnored.Add(p))
+                        if (reportedIgnored.Add(p.ComPortName))
                         {
-                            OnOutputReceived?.Invoke(this, $"Ignoring new port {p} ({(info.Found ? $"VID {info.Vid}" : "not present")}) - not an ESP32 bootloader.");
+                            OnOutputReceived?.Invoke(this, $"Ignoring new port {p.ComPortName} (VID {p.Vid ?? "?"}) - not an ESP32 bootloader.");
                         }
                     }
                 }
@@ -124,7 +148,7 @@ namespace DiyFfbPedal
         // Final guard right before esptool starts: never hand over a port that vanished again.
         private string EnsurePortExists(string uploadPort, string fallbackPort)
         {
-            bool exists = SerialPort.GetPortNames().Any(p => p.Equals(uploadPort, StringComparison.OrdinalIgnoreCase));
+            bool exists = SnapshotPresentPorts().ContainsKey(uploadPort);
             if (exists || string.Equals(uploadPort, fallbackPort, StringComparison.OrdinalIgnoreCase))
             {
                 return uploadPort;

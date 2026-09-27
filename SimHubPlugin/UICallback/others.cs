@@ -225,29 +225,17 @@ namespace DiyFfbPedal
 
             var SerialPortSelectionArray = new List<SerialPortChoice>();
             
-            string[] comPorts = SerialPort.GetPortNames();
-            var SerialPortList = new List<string>();
-            comPorts = comPorts.Distinct().ToArray(); // unique
+            // Only ports of devices that are actually connected (see GetPresentPorts).
+            var presentPorts = ComPortHelper.GetPresentPorts(forceRefresh: true);
             Plugin.comportList.Clear();
-            SerialPortList.Clear();
-     
-            if (comPorts.Length > 0)
+
+            if (presentPorts.Count > 0)
             {
-
-                foreach (string portName in comPorts)
+                foreach (var port in presentPorts)
                 {
-                    
-                    //SerialPortSelectionArray.Add(new SerialPortChoice(portName, portName));
-                    //int index = Plugin.comportList.FindIndex(item => item.ComPortName == portName);
-                    var parseResult= ComPortHelper.GetVidPidFromComPort(portName);
-                    Plugin.comportList.Add(parseResult);
-                    var portDeviceName = portName+" "+parseResult.DeviceName;
-                    //SerialPortList.Add((string)Plugin.comportList[index].DeviceName);
-                    SerialPortSelectionArray.Add(new SerialPortChoice(portDeviceName, portName));
-                    
-
+                    Plugin.comportList.Add(port);
+                    SerialPortSelectionArray.Add(new SerialPortChoice(ComPortHelper.DisplayName(port), port.ComPortName));
                 }
-                
             }
             else
             {

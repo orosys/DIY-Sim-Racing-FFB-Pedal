@@ -404,48 +404,15 @@ namespace DiyFfbPedal
             // This is the list we will return
             var portChoices = new List<SerialPortChoice>();
 
-            // Your logic starts here:
-            //string[] comPorts = System.IO.Ports.SerialPort.GetPortNames();
-
-            // After (guaranteed to be unique)
-            string[] comPorts = System.IO.Ports.SerialPort.GetPortNames().Distinct().ToArray();
-
-            // 🌟 MODIFIED SECTION STARTS HERE 🌟
-            // Use LINQ to sort the COM ports numerically.
-            comPorts = comPorts
-                .Select(port => new
-                {
-                    Name = port,
-                    // Use Regex to extract the number from the string (e.g., "COM17" -> 17)
-                    Number = int.TryParse(
-                        System.Text.RegularExpressions.Regex.Match(port, @"\d+").Value,
-                        out int num) ? num : int.MaxValue
-                })
-                // Order by the extracted number
-                .OrderBy(p => p.Number)
-                // Select just the port name string back
-                .Select(p => p.Name)
-                .ToArray();
-            // 🌟 MODIFIED SECTION ENDS HERE 🌟
-
-            if (comPorts.Length > 0)
+            // Only ports of devices that are actually connected (sorted by number) -
+            // SerialPort.GetPortNames() also returns stale registry entries of
+            // unplugged devices, which showed up as "COMx ()".
+            var presentPorts = ComPortHelper.GetPresentPorts(forceRefresh: true);
+            if (presentPorts.Count > 0)
             {
-                // Use a simple loop, Distinct() is good but GetPortNames()
-                // usually doesn't return duplicates anyway.
-                foreach (string portName in comPorts)
+                foreach (var port in presentPorts)
                 {
-                    // Get additional details about the port (your helper method)
-                    // Example: ComPortHelper.GetVidPidFromComPort(portName) might return
-                    // an object with a DeviceName property like "USB-SERIAL CH340".
-                    var parseResult = ComPortHelper.GetVidPidFromComPort(portName);
-
-                    // Create a user-friendly display name, e.g., "COM3 USB-SERIAL CH340"
-                    string friendlyName = $"{portName} ({parseResult.DeviceName})";
-
-                    // Add the new object to our list.
-                    // The first parameter is what the user sees.
-                    // The second parameter is the value used by the program.
-                    portChoices.Add(new SerialPortChoice(friendlyName, portName));
+                    portChoices.Add(new SerialPortChoice(ComPortHelper.DisplayName(port), port.ComPortName));
                 }
             }
             else

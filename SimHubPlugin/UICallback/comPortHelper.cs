@@ -93,7 +93,34 @@ namespace DiyFfbPedal
             {
                 RefreshCache();
             }
-            return _cachedPorts.Values.ToList();
+            return _cachedPorts.Values
+                .OrderBy(p => int.TryParse(Regex.Match(p.ComPortName, @"\d+").Value, out int num) ? num : int.MaxValue)
+                .ToList();
+        }
+
+        // Short, user-facing label for a port: known DIY FFB devices by
+        // VID/PID, otherwise the Windows device name without "(COMx)".
+        public static string Describe(VidPidResult port)
+        {
+            if (port.Vid == "303A")
+            {
+                switch (port.Pid)
+                {
+                    case "8332": return "Pedal: Clutch / unassigned";
+                    case "8333": return "Pedal: Brake";
+                    case "8334": return "Pedal: Throttle";
+                    case "8331": return "Bridge";
+                    default: return "ESP32 USB";
+                }
+            }
+            return Regex.Replace(port.DeviceName ?? "", @"\s*\(COM\d+\)\s*$", "");
+        }
+
+        // "COM31  (Pedal: Throttle)" - used by all COM port dropdowns.
+        public static string DisplayName(VidPidResult port)
+        {
+            string desc = Describe(port);
+            return string.IsNullOrWhiteSpace(desc) ? port.ComPortName : $"{port.ComPortName}  ({desc})";
         }
 
         // forceRefresh: bypass the 5 s cache, e.g. while watching a device

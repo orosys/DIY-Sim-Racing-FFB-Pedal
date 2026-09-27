@@ -81,41 +81,26 @@ namespace DiyFfbPedal.UIFunction
             else if (CboFirmware.Items.Count > 0) CboFirmware.SelectedIndex = 0;
         }
 
-        private void BtnRefreshCom_Click(object sender, RoutedEventArgs e) => RefreshPorts();
+        // Re-enumerate every time the list is opened (replaces the former Refresh button).
+        private void CboComPorts_DropDownOpened(object sender, EventArgs e) => RefreshPorts();
 
         private void RefreshPorts()
         {
+            string previousPort = SelectedPort;
             CboComPorts.Items.Clear();
 
             // Only ports of devices that are actually connected - GetPortNames() also
             // returns stale registry entries of unplugged devices.
-            var sortedPorts = ComPortHelper.GetPresentPorts(forceRefresh: true)
-                .OrderBy(p => int.TryParse(System.Text.RegularExpressions.Regex.Match(p.ComPortName, @"\d+").Value, out int num) ? num : int.MaxValue)
-                .ToList();
-
-            foreach (var port in sortedPorts)
+            foreach (var port in ComPortHelper.GetPresentPorts(forceRefresh: true))
             {
-                CboComPorts.Items.Add(new System.Windows.Controls.ComboBoxItem { Content = $"{port.ComPortName}  {DescribePort(port)}", Tag = port.ComPortName });
-            }
-            if (CboComPorts.Items.Count > 0) CboComPorts.SelectedIndex = 0;
-        }
-
-        private static string DescribePort(VidPidResult port)
-        {
-            if (port.Vid == "303A")
-            {
-                switch (port.Pid)
+                var item = new System.Windows.Controls.ComboBoxItem { Content = ComPortHelper.DisplayName(port), Tag = port.ComPortName };
+                CboComPorts.Items.Add(item);
+                if (string.Equals(port.ComPortName, previousPort, StringComparison.OrdinalIgnoreCase))
                 {
-                    case "8332": return "(Pedal: Clutch / unassigned)";
-                    case "8333": return "(Pedal: Brake)";
-                    case "8334": return "(Pedal: Throttle)";
-                    case "8331": return "(Bridge)";
-                    default: return "(ESP32 USB)";
+                    CboComPorts.SelectedItem = item;
                 }
             }
-            // Fall back to the Windows device name without the trailing "(COMx)"
-            string name = System.Text.RegularExpressions.Regex.Replace(port.DeviceName ?? "", @"\s*\(COM\d+\)\s*$", "");
-            return string.IsNullOrWhiteSpace(name) ? "" : $"({name})";
+            if (CboComPorts.SelectedItem == null && CboComPorts.Items.Count > 0) CboComPorts.SelectedIndex = 0;
         }
 
         private string SelectedPort => (CboComPorts.SelectedItem as System.Windows.Controls.ComboBoxItem)?.Tag as string;
