@@ -3,16 +3,15 @@
 #include "FanatecInterface.h"
 #include <EEPROM.h>
 
-#define ADDR_VIBRATION_MAGIC 32
-#define ADDR_VIBRATION_ENABLED 33
+// EEPROM is initialised once in setup() (256 bytes). Bytes 15..42 hold the
+// ESP-NOW pairing registry, so the vibration flag lives behind it.
+#define ADDR_VIBRATION_MAGIC 64
+#define ADDR_VIBRATION_ENABLED 65
 #define VIBRATION_MAGIC 0xA7
-#define EEPROM_SIZE 64
-const uint8_t patternThrottleVibration[] = {0x7B, 0x0, 0xFF, 0x0, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40, 0x7D};
-const uint8_t patternBrakeVibration[] = {0x7B, 0x0, 0x0, 0xFF, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x9B, 0x7D};
 static const unsigned long VIBRATION_TIMEOUT_MS = 500;
 
-static bool matchesPattern(const uint8_t* buffer, const uint8_t* pattern, size_t length) {
-    return memcmp(buffer, pattern, length) == 0;
+static bool eepromReady() {
+    return EEPROM.length() > ADDR_VIBRATION_ENABLED;
 }
 
 // Constructor
@@ -30,11 +29,11 @@ void FanatecInterface::begin() {
     _serial->begin(250000, SERIAL_8N1, _rxPin, _txPin);
     pinMode(_plugPin, INPUT_PULLDOWN);
 
-    if (EEPROM.begin(EEPROM_SIZE)) {
+    if (eepromReady()) {
         _vibrationEnabled = EEPROM.read(ADDR_VIBRATION_MAGIC) == VIBRATION_MAGIC &&
                             EEPROM.read(ADDR_VIBRATION_ENABLED) == 1;
     } else {
-        Serial.println("[L] Failed to initialise EEPROM for Fanatec vibration");
+        Serial.println("[L] EEPROM not initialised, Fanatec vibration setting unavailable");
     }
 
     // Generate CRC table
@@ -80,13 +79,21 @@ void FanatecInterface::update() {
                 _rxFrame[_rxFrameIndex++] = receivedByte;
                 if (_rxFrameIndex != sizeof(_rxFrame)) continue;
                 _rxFrameIndex = 0;
-                if (_rxFrame[11] != 0x7D || generateCRC(&_rxFrame[1], 9) != _rxFrame[10]) continue;
-                if (matchesPattern(_rxFrame, patternThrottleVibration, sizeof(_rxFrame)) ||
-                    matchesPattern(_rxFrame, patternBrakeVibration, sizeof(_rxFrame)) ||
-                    (_rxFrame[1] == patternThrottleVibration[1] &&
-                     _rxFrame[4] == patternThrottleVibration[4] &&
-                     _rxFrame[5] == 0 && _rxFrame[6] == 0 &&
-                     _rxFrame[7] == 0 && _rxFrame[8] == 0 && _rxFrame[9] == 0)) {
+                if (_rxFrame[11] != 0x7D || generateCRC(&_rxFrame[1], 9) != _rxFrame[10]) {
+                    // Misaligned frame: resync on the next start byte inside it.
+                    for (size_t i = 1; i < sizeof(_rxFrame); ++i) {
+                        if (_rxFrame[i] == 0x7B) {
+                            _rxFrameIndex = sizeof(_rxFrame) - i;
+                            memmove(_rxFrame, &_rxFrame[i], _rxFrameIndex);
+                            break;
+                        }
+                    }
+                    continue;
+                }
+                // Vibration packet: {0x7B, 0x00, throttle, brake, 0x01, 0 x5, CRC, 0x7D}
+                if (_rxFrame[1] == 0x00 && _rxFrame[4] == 0x01 &&
+                    _rxFrame[5] == 0 && _rxFrame[6] == 0 &&
+                    _rxFrame[7] == 0 && _rxFrame[8] == 0 && _rxFrame[9] == 0) {
                     // The wheelbase sends each motor's active packet separately.
                     if (_rxFrame[2]) {
                         _throttleVibration = _rxFrame[2];
@@ -142,6 +149,7 @@ bool FanatecInterface::vibrationEnabled() const {
 }
 
 bool FanatecInterface::setVibrationEnabled(bool enabled) {
+    if (!eepromReady()) return false;
     if (_vibrationEnabled == enabled && EEPROM.read(ADDR_VIBRATION_MAGIC) == VIBRATION_MAGIC) return true;
     EEPROM.write(ADDR_VIBRATION_MAGIC, VIBRATION_MAGIC);
     EEPROM.write(ADDR_VIBRATION_ENABLED, enabled ? 1 : 0);

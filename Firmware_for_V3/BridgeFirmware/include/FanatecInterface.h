@@ -62,7 +62,7 @@ private:
 
     // Connection status
     bool _connected;
-    bool _vibrationEnabled;
+    volatile bool _vibrationEnabled; // written by Serial_Task, read by ESP-NOW task
     volatile uint8_t _throttleVibration;
     volatile uint8_t _brakeVibration;
     volatile unsigned long _lastThrottleVibrationAt;

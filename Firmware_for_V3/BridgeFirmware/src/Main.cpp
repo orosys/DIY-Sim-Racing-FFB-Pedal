@@ -310,6 +310,10 @@ void setup()
   #ifdef ESPNow_Pairing_function
     //button read setup
     pinMode(Pairing_GPIO, INPUT_PULLUP);
+  #endif
+  #if defined(ESPNow_Pairing_function) || defined(Fanatec_comunication)
+    // Single EEPROM init for all users. A second EEPROM.begin() with a
+    // different size would truncate the stored blob.
     EEPROM.begin(256);
   #endif
 /*
