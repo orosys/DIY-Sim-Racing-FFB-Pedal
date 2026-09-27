@@ -712,6 +712,39 @@ void clearPedalAssignmentAction(uint8_t targetIdx, const DapActions_t &action)
   syncPairingTableToPedals();
 }
 
+// dap_actions_st[] is a single "latest wins" slot per pedal, but the plugin
+// streams regular FFB action packets continuously and HID delivers several
+// per batch - a one-shot request (config read-back, system action) that is
+// followed by a regular action before the TX loop runs used to be silently
+// overwritten, leaving the plugin stuck on "Read Pedal Config". Carry such
+// one-shot fields over into the newer action until it is actually sent.
+void queuePedalAction(int pedalIdx, const DapActions_t &incoming)
+{
+  DapActions_t merged = incoming;
+  if (dap_action_update[pedalIdx])
+  {
+    const PayloadPedalAction_t &pending = dap_actions_st[pedalIdx].payloadPedalAction_st;
+    bool changed = false;
+    if (pending.returnPedalConfig_u8 != 0 && merged.payloadPedalAction_st.returnPedalConfig_u8 == 0)
+    {
+      merged.payloadPedalAction_st.returnPedalConfig_u8 = pending.returnPedalConfig_u8;
+      changed = true;
+    }
+    if (pending.systemAction_u8 != 0 && merged.payloadPedalAction_st.systemAction_u8 == 0)
+    {
+      merged.payloadPedalAction_st.systemAction_u8 = pending.systemAction_u8;
+      changed = true;
+    }
+    if (changed)
+    {
+      merged.payloadFooter_st.checkSum_u16 = checksumCalculator((uint8_t*)(&(merged.payloadHeader_st)),
+          sizeof(merged.payloadHeader_st) + sizeof(merged.payloadPedalAction_st));
+    }
+  }
+  memcpy(&dap_actions_st[pedalIdx], &merged, sizeof(DapActions_t));
+  dap_action_update[pedalIdx] = true;
+}
+
 void pushPedalAssignmentAction(uint8_t sourceTag, uint8_t newRole, const DapActions_t &action)
 {
   if (newRole > 2) {
@@ -1132,8 +1165,7 @@ void serialCommunicationRxTask( void * pvParameters)
                 } else if(pedalIdx == PEDAL_ID_CLUTCH || pedalIdx == PEDAL_ID_BRAKE || pedalIdx == PEDAL_ID_THROTTLE)
                 {
                   //forward to pedal
-                  memcpy(&dap_actions_st[pedalIdx], &dap_actions_st_local, sizeof(DapActions_t));
-                  dap_action_update[pedalIdx] = true;
+                  queuePedalAction(pedalIdx, dap_actions_st_local);
                 }
               }
             #endif
@@ -2249,8 +2281,7 @@ void hidCommunicaitonRxTask(void *pvParameters)
             } else if(pedalIdx == PEDAL_ID_CLUTCH || pedalIdx == PEDAL_ID_BRAKE || pedalIdx == PEDAL_ID_THROTTLE)
             {
               //forward to pedal
-              memcpy(&dap_actions_st[pedalIdx], &tinyusbJoystick_.tmpAction[i], sizeof(DapActions_t));
-              dap_action_update[pedalIdx] = true;
+              queuePedalAction(pedalIdx, tinyusbJoystick_.tmpAction[i]);
             }
             tinyusbJoystick_.isActionGet[i]=false;
           }

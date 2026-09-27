@@ -16,7 +16,7 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
-        <Border  HorizontalAlignment="Left" Height="276" VerticalAlignment="Top" Width="648" Style="{StaticResource Card}" Padding="0,0,0,8" Margin="0">
+        <Border  HorizontalAlignment="Left" Height="281" VerticalAlignment="Top" Width="648" Style="{StaticResource Card}" Padding="0,0,0,8" Margin="0">
             <StackPanel HorizontalAlignment="Left" Height="276" VerticalAlignment="Top" Width="648">
                 
                 <StackPanel Height="20" Width="648" VerticalAlignment="Top" HorizontalAlignment="Left" Orientation="Horizontal">

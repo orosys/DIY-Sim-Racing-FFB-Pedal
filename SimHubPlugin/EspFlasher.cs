@@ -176,8 +176,11 @@ namespace DiyFfbPedal
             // Perform 1200-bps touch and dynamically resolve the bootloader port (e.g. if COM35 switched to COM34)
             string uploadPort = await TouchAndResolveBootloaderPortAsync(comPort);
 
-            // Erase the NVS / EEPROM partition (Offset 0x9000, Size 0x6000 covers 20KB/24KB)
-            string args = $"--chip esp32s3 --port {uploadPort} --baud 460800 --after hard-reset erase-region 0x9000 0x6000";
+            // Erase exactly the NVS / EEPROM partition (0x9000, size 0x5000 in every
+            // partition table used by pedal and bridge). otadata starts right after it at
+            // 0xE000 and holds the boot_app0 record that selects app0 - erasing into it
+            // leaves the device without a valid boot selection until it is reflashed.
+            string args = $"--chip esp32s3 --port {uploadPort} --baud 460800 --after hard-reset erase-region 0x9000 0x5000";
 
             var psi = new ProcessStartInfo
             {
@@ -196,7 +199,7 @@ namespace DiyFfbPedal
                     process.OutputDataReceived += (s, e) => { if (e.Data != null) OnOutputReceived?.Invoke(this, e.Data); };
                     process.ErrorDataReceived += (s, e) => { if (e.Data != null) OnOutputReceived?.Invoke(this, "ERROR: " + e.Data); };
 
-                    OnOutputReceived?.Invoke(this, $"Starting EEPROM / NVS erase on {uploadPort} (0x9000 - 0xF000)...");
+                    OnOutputReceived?.Invoke(this, $"Starting EEPROM / NVS erase on {uploadPort} (0x9000 - 0xE000)...");
                     process.Start();
                     process.BeginOutputReadLine();
                     process.BeginErrorReadLine();

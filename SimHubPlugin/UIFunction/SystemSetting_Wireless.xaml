@@ -73,7 +73,7 @@
 
                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
                         <TextBlock Text="Wi-Fi Ch:" FontFamily="Arial" FontSize="8" Foreground="#AAAAAA" VerticalAlignment="Center" Margin="0,0,3,0"/>
-                        <ComboBox x:Name="combo_select_channel" Width="55" Height="20" FontSize="8" VerticalAlignment="Center" Padding="3,0">
+                        <ComboBox x:Name="combo_select_channel" Width="80" Height="20" FontSize="8" VerticalAlignment="Center" Padding="3,0">
                             <ComboBoxItem Content="Ch 1" Tag="1"/>
                             <ComboBoxItem Content="Ch 2" Tag="2"/>
                             <ComboBoxItem Content="Ch 3" Tag="3"/>

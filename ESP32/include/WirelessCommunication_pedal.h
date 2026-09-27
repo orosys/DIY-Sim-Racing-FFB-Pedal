@@ -307,16 +307,19 @@ public:
     return sendTo(_hostMac, (const uint8_t *)&pkt, sizeof(pkt));
   }
 
+  // One-shot replies (config echo, servo registers) use sendToWithRetry():
+  // they are sent right after the periodic state packet, which is usually
+  // still in flight, and a busy-skip in sendTo() would drop them silently.
   esp_err_t sendConfigEchoToBridge(const DapConfig_t &pkt) {
     if (isAllZero(_hostMac)) return ESP_ERR_INVALID_ARG;
     logDebug("TX ConfigEcho len=%u", (unsigned)sizeof(pkt));
-    return sendTo(_hostMac, (const uint8_t *)&pkt, sizeof(pkt));
+    return sendToWithRetry(_hostMac, (const uint8_t *)&pkt, sizeof(pkt));
   }
 
   esp_err_t sendServoConfigResponseToBridge(const DAP_servo_config_st_t &pkt) {
     if (isAllZero(_hostMac)) return ESP_ERR_INVALID_ARG;
     logDebug("TX ServoConfigResponse len=%u", (unsigned)sizeof(pkt));
-    return sendTo(_hostMac, (const uint8_t *)&pkt, sizeof(pkt));
+    return sendToWithRetry(_hostMac, (const uint8_t *)&pkt, sizeof(pkt));
   }
 
   // Targets whichever sibling pedal handleActionsPacket's rudder mode-select
@@ -614,6 +617,21 @@ private:
     } else {
       _lastSendOk = true;
     }
+    return res;
+  }
+
+  // Waits (bounded) for the send slot instead of giving up on the first
+  // busy/backoff skip - for packets that are sent once and never repeated.
+  esp_err_t sendToWithRetry(const uint8_t *mac, const uint8_t *data,
+                            size_t len, uint32_t timeoutMs = 60) {
+    uint32_t start = millis();
+    esp_err_t res;
+    do {
+      res = sendTo(mac, data, len);
+      if (res == ESP_OK)
+        return res;
+      vTaskDelay(pdMS_TO_TICKS(2));
+    } while (millis() - start < timeoutMs);
     return res;
   }
 

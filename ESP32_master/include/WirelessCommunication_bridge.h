@@ -301,22 +301,43 @@ public:
     }
   }
 
+  // Waits (bounded) for the send slot instead of giving up on the first
+  // busy/backoff skip in sendTo() - for one-shot packets (config, servo
+  // registers, config read-back / system actions) that are never repeated.
+  esp_err_t sendToWithRetry(const uint8_t *mac, const uint8_t *data, size_t len, uint32_t timeoutMs = 60) {
+    uint32_t start = millis();
+    esp_err_t res;
+    do {
+      res = sendTo(mac, data, len);
+      if (res == ESP_OK) return res;
+      vTaskDelay(pdMS_TO_TICKS(2));
+    } while (millis() - start < timeoutMs);
+    return res;
+  }
+
   esp_err_t sendConfigToPedal(uint8_t pedalIdx, const DapConfig_t &pkt) {
     if (pedalIdx >= 3 || isAllZeroMac(_pedalMac[pedalIdx])) return ESP_ERR_INVALID_ARG;
     logDebug("TX Config to pedal #%u", pedalIdx);
-    return sendTo(_pedalMac[pedalIdx], (const uint8_t *)&pkt, sizeof(pkt));
+    return sendToWithRetry(_pedalMac[pedalIdx], (const uint8_t *)&pkt, sizeof(pkt));
   }
 
   esp_err_t sendActionToPedal(uint8_t pedalIdx, const DapActions_t &pkt) {
     if (pedalIdx >= 3 || isAllZeroMac(_pedalMac[pedalIdx])) return ESP_ERR_INVALID_ARG;
     logDebug("TX Action to pedal #%u", pedalIdx);
+    // Regular FFB actions are streamed continuously, so a skipped one is
+    // superseded by the next; only one-shot requests need the retry.
+    bool oneShot = pkt.payloadPedalAction_st.returnPedalConfig_u8 != 0 ||
+                   pkt.payloadPedalAction_st.systemAction_u8 != 0;
+    if (oneShot) {
+      return sendToWithRetry(_pedalMac[pedalIdx], (const uint8_t *)&pkt, sizeof(pkt));
+    }
     return sendTo(_pedalMac[pedalIdx], (const uint8_t *)&pkt, sizeof(pkt));
   }
 
   esp_err_t sendServoConfigToPedal(uint8_t pedalIdx, const DAP_servo_config_st_t &pkt) {
     if (pedalIdx >= 3 || isAllZeroMac(_pedalMac[pedalIdx])) return ESP_ERR_INVALID_ARG;
     logDebug("TX ServoConfig to pedal #%u", pedalIdx);
-    return sendTo(_pedalMac[pedalIdx], (const uint8_t *)&pkt, sizeof(pkt));
+    return sendToWithRetry(_pedalMac[pedalIdx], (const uint8_t *)&pkt, sizeof(pkt));
   }
 
   esp_err_t sendOtaToPedal(uint8_t pedalIdx, const DapActionOta_t &pkt) {
@@ -382,6 +403,23 @@ public:
 
     if (matchedSlot < 0 && !isLogPacket) {
       logDebug("RX dropped: sender not a provisioned pedal MAC");
+      // Rate-limited: shows a pedal that IS transmitting but from a MAC the
+      // bridge doesn't have in its table (no RSSI would ever appear).
+      static uint32_t lastRejectPrint_u32 = 0;
+      if (millis() - lastRejectPrint_u32 > 3000) {
+        lastRejectPrint_u32 = millis();
+        const uint8_t *m = info->src_addr;
+        ActiveSerial->printf(
+            "[ESPNOW RX] Rejected unknown sender %02X:%02X:%02X:%02X:%02X:%02X "
+            "(len=%d, type=%u)\n",
+            m[0], m[1], m[2], m[3], m[4], m[5], len, data[2]);
+#ifdef USB_JOYSTICK
+        tinyusbJoystick_.printf(
+            "[ESPNOW RX] Rejected unknown sender %02X:%02X:%02X:%02X:%02X:%02X "
+            "(len=%d, type=%u)\n",
+            m[0], m[1], m[2], m[3], m[4], m[5], len, data[2]);
+#endif
+      }
       return;
     }
 
