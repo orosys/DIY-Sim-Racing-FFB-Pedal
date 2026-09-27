@@ -14,16 +14,9 @@
 // both ActiveSerial and (when built with USB_JOYSTICK) the USB HID text log.
 // #define WIRELESS_COMM_DEBUG
 
-#define WIFI_CH_EEPROM_MAGIC 0xA6
 #ifndef EEPROM_offset
 #define EEPROM_offset 15
 #endif
-#define WIFI_CH_EEPROM_OFFSET 60
-struct WifiChannelConfig_t {
-  uint8_t magic_u8;
-  uint8_t channel_u8;
-  uint8_t checksum_u8;
-};
 
 int g_rssiDisplay_i32;
 bool g_espNowNoDevice_b = false;
@@ -105,25 +98,16 @@ inline void storeMacAddressesToEeprom(DapMacAddresses_t &macCfg) {
   EEPROM.commit();
 }
 
-inline uint8_t loadWifiChannelFromEeprom() {
-  WifiChannelConfig_t cfg;
-  EEPROM.get(WIFI_CH_EEPROM_OFFSET, cfg);
-  if (cfg.magic_u8 == WIFI_CH_EEPROM_MAGIC &&
-      (uint8_t)(cfg.magic_u8 ^ cfg.channel_u8) == cfg.checksum_u8 &&
-      cfg.channel_u8 >= 1 && cfg.channel_u8 <= 14) {
-    return cfg.channel_u8;
-  }
-  return 11;
-}
-
+// The Wi-Fi channel is persisted only as wifiChannel_u8 of the stored MAC
+// table, which is what applyMacConfig() applies at boot. (A separate channel
+// record used to be written here but was never read back, so runtime
+// channel changes were lost on reboot.)
 inline void saveWifiChannelToEeprom(uint8_t ch) {
-  if (ch < 1 || ch > 14) return;
-  WifiChannelConfig_t cfg;
-  cfg.magic_u8 = WIFI_CH_EEPROM_MAGIC;
-  cfg.channel_u8 = ch;
-  cfg.checksum_u8 = (uint8_t)(WIFI_CH_EEPROM_MAGIC ^ ch);
-  EEPROM.put(WIFI_CH_EEPROM_OFFSET, cfg);
-  EEPROM.commit();
+  if (ch < 1 || ch > 13) return;
+  DapMacAddresses_t macCfg = loadMacAddressesFromEeprom();
+  if (macCfg.payloadMacAddresses_st.wifiChannel_u8 == ch) return;
+  macCfg.payloadMacAddresses_st.wifiChannel_u8 = ch;
+  storeMacAddressesToEeprom(macCfg);
 }
 
 // Forward declarations - ESP-NOW's C callback API needs plain function

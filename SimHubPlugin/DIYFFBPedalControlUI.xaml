@@ -192,7 +192,7 @@
                                                 <localFunction:InfoSection_Pedal x:Name="PedalInfo" />
                                                 <TextBox x:Name="textBox_VersionUpdate" HorizontalAlignment="Left" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="192" Height="25" AutomationProperties.Name="TextBox2" BorderBrush="#00CCCCCC" Background="#00252525" FontSize="8" FontFamily="Arial" />
                                                 <StackPanel Height="30" Orientation="Horizontal" Margin="0,4,0,0">
-                                                    <ComboBox x:Name="SerialPortSelection" DropDownOpened="SerialPortSelection_DropDownOpened" SelectionChanged="SerialPortSelectionChanged" Width="76" ItemsSource="{Binding}" DisplayMemberPath="Display" SelectedValuePath="Value" FontSize="8" Height="20" MinHeight="20"/>
+                                                    <ComboBox x:Name="SerialPortSelection" DropDownOpened="SerialPortSelection_DropDownOpened" SelectionChanged="SerialPortSelectionChanged" Width="124" ItemsSource="{Binding}" DisplayMemberPath="Display" SelectedValuePath="Value" FontSize="8" Height="20" MinHeight="20"/>
                                                     <!-- Hidden connect/disconnect state flag read/written by ConnectToPedal_click and updateUIfromConfig.cs - not a visible control -->
                                                     <CheckBox x:Name="ConnectToPedal" IsChecked="False" Visibility="Collapsed"/>
                                                     <Button x:Name="btn_pedal_connect" Style="{StaticResource ModernPillButton}" Click="ConnectToPedal_click" Width="55"  Height="20" Content="Connect" HorizontalAlignment="Center" Margin="8,0,0,0" VerticalAlignment="Center" VerticalContentAlignment="Center" Padding="0,0,0,0" MinHeight="20"  FontFamily="Arial" FontSize="10"/>
@@ -816,7 +816,7 @@
                                     </Border>
 
                                     <!-- 2.4 GHz Wi-Fi Frequency & Channel Optimizer Card -->
-                                    <Border Style="{StaticResource Card}" Padding="0" Height="118" Width="648" Margin="0,5,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                    <Border Style="{StaticResource Card}" Padding="0" Height="102" Width="648" Margin="0,5,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
                                         <Grid Margin="8,5,8,5">
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="Auto"/>
@@ -836,10 +836,11 @@
                                                 </StackPanel>
 
                                                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
-                                                    <Border Background="#22FFFFFF" BorderBrush="#44FFFFFF" BorderThickness="1" CornerRadius="3" Padding="5,1" Margin="2,0">
+                                                    <Button x:Name="btn_scan_wifi_channels" Click="btn_scan_wifi_channels_Click" Content="🔍 Scan Spectrum" Width="108" Height="18" Margin="0,0,4,0" Background="#2600AAFF" Foreground="#00CCFF" BorderBrush="#3300CCFF" BorderThickness="1" FontSize="8.5" FontFamily="Arial" FontWeight="SemiBold" Cursor="Hand" VerticalAlignment="Center" ToolTip="Scan all 2.4 GHz channels (1-13) for RF interference"/>
+                                                    <Border Background="#22FFFFFF" BorderBrush="#44FFFFFF" BorderThickness="1" CornerRadius="3" Padding="5,1" Margin="2,0" VerticalAlignment="Center">
                                                         <TextBlock x:Name="tb_wifi_ch_active" Text="Active: Ch 11" FontFamily="Consolas" FontSize="8.5" Foreground="#00FFCC" FontWeight="Bold"/>
                                                     </Border>
-                                                    <Border Background="#22FFFFFF" BorderBrush="#44FFFFFF" BorderThickness="1" CornerRadius="3" Padding="5,1" Margin="2,0">
+                                                    <Border Background="#22FFFFFF" BorderBrush="#44FFFFFF" BorderThickness="1" CornerRadius="3" Padding="5,1" Margin="2,0" VerticalAlignment="Center">
                                                         <TextBlock x:Name="tb_wifi_ch_rec" Text="Rec: --" FontFamily="Consolas" FontSize="8.5" Foreground="#E0E0E0"/>
                                                     </Border>
                                                 </StackPanel>
@@ -867,30 +868,6 @@
                                                     </ItemsControl.ItemTemplate>
                                                 </ItemsControl>
                                             </Border>
-
-                                            <!-- Row 2: Action Controls (Scan Spectrum & Switch Channel Apply) -->
-                                            <DockPanel Grid.Row="2" LastChildFill="False" Margin="0,2,0,3">
-                                                <Button x:Name="btn_scan_wifi_channels" Click="btn_scan_wifi_channels_Click" DockPanel.Dock="Left" Content="🔍 Scan Spectrum" Width="108" Height="20" Background="#2600AAFF" Foreground="#00CCFF" BorderBrush="#3300CCFF" BorderThickness="1" FontSize="8.5" FontFamily="Arial" FontWeight="SemiBold" Cursor="Hand" ToolTip="Scan all 2.4 GHz channels (1-13) for RF interference"/>
-                                                
-                                                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
-                                                    <TextBlock Text="Target:" FontFamily="Arial" FontSize="8.5" Foreground="#AAAAAA" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                                                    <ComboBox x:Name="combo_wifi_channel" SelectedValuePath="Tag" Width="58" Height="20" FontSize="8.5" VerticalAlignment="Center" Padding="3,0" IsEnabled="False" ToolTip="Recommended channel from the last scan (apply it from System &gt; Wireless)">
-                                                        <ComboBoxItem Content="Ch 1" Tag="1"/>
-                                                        <ComboBoxItem Content="Ch 2" Tag="2"/>
-                                                        <ComboBoxItem Content="Ch 3" Tag="3"/>
-                                                        <ComboBoxItem Content="Ch 4" Tag="4"/>
-                                                        <ComboBoxItem Content="Ch 5" Tag="5"/>
-                                                        <ComboBoxItem Content="Ch 6" Tag="6"/>
-                                                        <ComboBoxItem Content="Ch 7" Tag="7"/>
-                                                        <ComboBoxItem Content="Ch 8" Tag="8"/>
-                                                        <ComboBoxItem Content="Ch 9" Tag="9"/>
-                                                        <ComboBoxItem Content="Ch 10" Tag="10"/>
-                                                        <ComboBoxItem Content="Ch 11" Tag="11" IsSelected="True"/>
-                                                        <ComboBoxItem Content="Ch 12" Tag="12"/>
-                                                        <ComboBoxItem Content="Ch 13" Tag="13"/>
-                                                    </ComboBox>
-                                                </StackPanel>
-                                            </DockPanel>
 
                                             <!-- Row 3: Status & Recommendation Banner -->
                                             <Border Grid.Row="3" Background="#1100E5FF" BorderBrush="#2200E5FF" BorderThickness="1" CornerRadius="3" Padding="6,2">
@@ -931,7 +908,7 @@
                                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Width="192">
                                             <localFunction:InfoSection_System x:Name="SystemInfo" />
                                             <StackPanel HorizontalAlignment="Left" Height="22" VerticalAlignment="Top" Width="192" Orientation="Horizontal" Margin="0,2,0,0">
-                                                <ComboBox x:Name="SerialPortSelection_ESPNow" DropDownOpened="ESPNow_SerialPortSelection_DropDownOpened" SelectionChanged="ESPNow_SerialPortSelectionChanged" Width="100" ItemsSource="{Binding}" DisplayMemberPath="Display" SelectedValuePath="Value" FontSize="8" Height="20" HorizontalAlignment="Left" MinHeight="20"/>
+                                                <ComboBox x:Name="SerialPortSelection_ESPNow" DropDownOpened="ESPNow_SerialPortSelection_DropDownOpened" SelectionChanged="ESPNow_SerialPortSelectionChanged" Width="130" ItemsSource="{Binding}" DisplayMemberPath="Display" SelectedValuePath="Value" FontSize="8" Height="20" HorizontalAlignment="Left" MinHeight="20"/>
                                                 <Button x:Name="btn_connect_espnow_port" Style="{StaticResource ModernPillButton}" Click="btn_connect_espnow_port_Click" Width="55" Content="Connect" Height="20" Margin="3,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="10" MinHeight="20" />
                                             </StackPanel>
                                         </StackPanel>

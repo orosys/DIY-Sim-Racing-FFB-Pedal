@@ -10,7 +10,7 @@
                 
                 <StackPanel Orientation="Horizontal" Margin="0,10,0,5">
                     <Label Content="COM Port:" Width="80" Foreground="White" VerticalAlignment="Center"/>
-                    <ComboBox x:Name="CboComPorts" Width="100" Height="25"/>
+                    <ComboBox x:Name="CboComPorts" Width="260" Height="25"/>
                     <styles:SHButtonPrimary x:Name="BtnRefreshCom" Content="Refresh" Width="70" Height="25" Margin="5,0,0,0" Click="BtnRefreshCom_Click"/>
                 </StackPanel>
 

@@ -1544,10 +1544,6 @@ namespace DiyFfbPedal
 
                     if (tb_wifi_ch_active != null) tb_wifi_ch_active.Text = $"Active: Ch {wc.payloadWifiChannel_.currentChannel_u8}";
                     if (tb_wifi_ch_rec != null) tb_wifi_ch_rec.Text = $"Rec: Ch {wc.payloadWifiChannel_.recommendedChannel_u8}";
-                    if (combo_wifi_channel != null)
-                    {
-                        combo_wifi_channel.SelectedValue = wc.payloadWifiChannel_.recommendedChannel_u8.ToString();
-                    }
 
                     for (int ch = 1; ch <= payloadWifiChannel.ChannelCount && ch - 1 < WifiChannelBars.Count; ch++)
                     {
@@ -1622,7 +1618,6 @@ namespace DiyFfbPedal
             }
 
             if (tb_wifi_ch_rec != null) tb_wifi_ch_rec.Text = $"Rec: Ch {clicked.Channel}";
-            if (combo_wifi_channel != null) combo_wifi_channel.SelectedValue = clicked.Channel.ToString();
             if (tb_wifi_scan_status != null)
             {
                 tb_wifi_scan_status.Text = $"Channel {clicked.Channel} selected as target. Apply it from System > Wireless.";

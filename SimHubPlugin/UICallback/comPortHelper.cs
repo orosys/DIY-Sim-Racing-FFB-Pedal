@@ -84,10 +84,24 @@ namespace DiyFfbPedal
         }
 
 
-        public static VidPidResult GetVidPidFromComPort(string targetPort)
+        // COM ports of devices that are actually present. Unlike
+        // SerialPort.GetPortNames() (registry SERIALCOMM, may still list
+        // unplugged/ghost ports), this only returns live PnP devices.
+        public static List<VidPidResult> GetPresentPorts(bool forceRefresh = false)
+        {
+            if (forceRefresh || _cachedPorts == null || DateTime.Now - _lastCacheTime > CacheDuration)
+            {
+                RefreshCache();
+            }
+            return _cachedPorts.Values.ToList();
+        }
+
+        // forceRefresh: bypass the 5 s cache, e.g. while watching a device
+        // re-enumerate during flashing.
+        public static VidPidResult GetVidPidFromComPort(string targetPort, bool forceRefresh = false)
         {
             // Refresh the cache if it's empty or stale
-            if (_cachedPorts == null || DateTime.Now - _lastCacheTime > CacheDuration)
+            if (forceRefresh || _cachedPorts == null || DateTime.Now - _lastCacheTime > CacheDuration)
             {
                 RefreshCache();
             }

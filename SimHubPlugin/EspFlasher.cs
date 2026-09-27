@@ -61,31 +61,76 @@ namespace DiyFfbPedal
 
             OnOutputReceived?.Invoke(this, "Waiting for ESP32-S3 bootloader to enumerate...");
 
-            // Poll for up to 4 seconds (20 x 200ms) to detect if a new bootloader COM port appears
-            // (e.g. COM31 switched to COM23) or if the existing port re-appeared
-            string targetPort = comPort;
-            for (int i = 0; i < 20; i++)
+            // The bootloader may come up under a different COM number (e.g. COM31 -> COM23).
+            // Other devices (a bridge, a hub re-enumerating, ghost registry entries) can make
+            // unrelated ports appear in the same window, so a new port is only accepted if
+            //  - it appeared after the selected port went away (the pedal left its app),
+            //  - it is an Espressif device (VID 303A), and
+            //  - it is still present on the next poll (not a transient entry).
+            // Otherwise the selected port is used if it came back.
+            bool originalGone = false;
+            string pendingCandidate = null;
+            var reportedIgnored = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            for (int i = 0; i < 30; i++)
             {
                 await Task.Delay(200);
-                var currentPorts = SerialPort.GetPortNames().Distinct().ToArray();
+                var currentPorts = SerialPort.GetPortNames().Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+                bool originalPresent = currentPorts.Any(p => p.Equals(comPort, StringComparison.OrdinalIgnoreCase));
+                if (!originalPresent) originalGone = true;
 
-                // Check if any new port appeared that wasn't present originally
-                var newPort = currentPorts.FirstOrDefault(p => !initialPorts.Contains(p));
-                if (!string.IsNullOrEmpty(newPort))
+                string candidate = null;
+                if (originalGone)
                 {
-                    OnOutputReceived?.Invoke(this, $"Detected ESP32-S3 bootloader on new port: {newPort}");
-                    return newPort;
+                    foreach (var p in currentPorts.Where(p => !initialPorts.Contains(p)))
+                    {
+                        var info = ComPortHelper.GetVidPidFromComPort(p, forceRefresh: true);
+                        if (info.Found && info.Vid == "303A")
+                        {
+                            candidate = p;
+                            break;
+                        }
+                        if (reportedIgnored.Add(p))
+                        {
+                            OnOutputReceived?.Invoke(this, $"Ignoring new port {p} ({(info.Found ? $"VID {info.Vid}" : "not present")}) - not an ESP32 bootloader.");
+                        }
+                    }
                 }
 
-                // If original port is present in current ports
-                if (currentPorts.Any(p => p.Equals(comPort, StringComparison.OrdinalIgnoreCase)))
+                if (candidate != null)
                 {
-                    targetPort = comPort;
+                    if (string.Equals(candidate, pendingCandidate, StringComparison.OrdinalIgnoreCase))
+                    {
+                        OnOutputReceived?.Invoke(this, $"Detected ESP32-S3 bootloader on new port: {candidate}");
+                        return candidate;
+                    }
+                    pendingCandidate = candidate; // confirm on the next poll
+                    continue;
+                }
+                pendingCandidate = null;
+
+                // Bootloader re-used the original COM number
+                if (originalGone && originalPresent)
+                {
+                    OnOutputReceived?.Invoke(this, $"Bootloader re-appeared on {comPort}.");
+                    return comPort;
                 }
             }
 
-            OnOutputReceived?.Invoke(this, $"Using port: {targetPort}");
-            return targetPort;
+            OnOutputReceived?.Invoke(this, $"No new bootloader port detected, using port: {comPort}");
+            return comPort;
+        }
+
+        // Final guard right before esptool starts: never hand over a port that vanished again.
+        private string EnsurePortExists(string uploadPort, string fallbackPort)
+        {
+            bool exists = SerialPort.GetPortNames().Any(p => p.Equals(uploadPort, StringComparison.OrdinalIgnoreCase));
+            if (exists || string.Equals(uploadPort, fallbackPort, StringComparison.OrdinalIgnoreCase))
+            {
+                return uploadPort;
+            }
+            OnOutputReceived?.Invoke(this, $"{uploadPort} disappeared again, falling back to {fallbackPort}.");
+            return fallbackPort;
         }
 
         public async Task<bool> FlashFirmwareAsync(string comPort, string bootloaderPath, string partitionsPath, string bootAppPath, string firmwarePath)
@@ -108,7 +153,7 @@ namespace DiyFfbPedal
             }
 
             // Perform 1200-bps touch and dynamically resolve the bootloader port (e.g. if COM31 switched to COM23)
-            string uploadPort = await TouchAndResolveBootloaderPortAsync(comPort);
+            string uploadPort = EnsurePortExists(await TouchAndResolveBootloaderPortAsync(comPort), comPort);
 
             // Flash all FOUR files to their specific ESP32-S3 memory offsets using updated non-deprecated arguments
             string args = $"--chip esp32s3 --port {uploadPort} --baud 460800 --after hard-reset write-flash -z " +
@@ -174,7 +219,7 @@ namespace DiyFfbPedal
             }
 
             // Perform 1200-bps touch and dynamically resolve the bootloader port (e.g. if COM35 switched to COM34)
-            string uploadPort = await TouchAndResolveBootloaderPortAsync(comPort);
+            string uploadPort = EnsurePortExists(await TouchAndResolveBootloaderPortAsync(comPort), comPort);
 
             // Erase exactly the NVS / EEPROM partition (0x9000, size 0x5000 in every
             // partition table used by pedal and bridge). otadata starts right after it at

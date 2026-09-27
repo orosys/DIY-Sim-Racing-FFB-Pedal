@@ -87,23 +87,38 @@ namespace DiyFfbPedal.UIFunction
         {
             CboComPorts.Items.Clear();
 
-            string[] comPorts = SerialPort.GetPortNames().Distinct().ToArray();
-            var sortedPorts = comPorts
-                .Select(port => new
-                {
-                    Name = port,
-                    Number = int.TryParse(System.Text.RegularExpressions.Regex.Match(port, @"\d+").Value, out int num) ? num : int.MaxValue
-                })
-                .OrderBy(p => p.Number)
-                .Select(p => p.Name)
-                .ToArray();
+            // Only ports of devices that are actually connected - GetPortNames() also
+            // returns stale registry entries of unplugged devices.
+            var sortedPorts = ComPortHelper.GetPresentPorts(forceRefresh: true)
+                .OrderBy(p => int.TryParse(System.Text.RegularExpressions.Regex.Match(p.ComPortName, @"\d+").Value, out int num) ? num : int.MaxValue)
+                .ToList();
 
-            foreach (string port in sortedPorts)
+            foreach (var port in sortedPorts)
             {
-                CboComPorts.Items.Add(port);
+                CboComPorts.Items.Add(new System.Windows.Controls.ComboBoxItem { Content = $"{port.ComPortName}  {DescribePort(port)}", Tag = port.ComPortName });
             }
             if (CboComPorts.Items.Count > 0) CboComPorts.SelectedIndex = 0;
         }
+
+        private static string DescribePort(VidPidResult port)
+        {
+            if (port.Vid == "303A")
+            {
+                switch (port.Pid)
+                {
+                    case "8332": return "(Pedal: Clutch / unassigned)";
+                    case "8333": return "(Pedal: Brake)";
+                    case "8334": return "(Pedal: Throttle)";
+                    case "8331": return "(Bridge)";
+                    default: return "(ESP32 USB)";
+                }
+            }
+            // Fall back to the Windows device name without the trailing "(COMx)"
+            string name = System.Text.RegularExpressions.Regex.Replace(port.DeviceName ?? "", @"\s*\(COM\d+\)\s*$", "");
+            return string.IsNullOrWhiteSpace(name) ? "" : $"({name})";
+        }
+
+        private string SelectedPort => (CboComPorts.SelectedItem as System.Windows.Controls.ComboBoxItem)?.Tag as string;
 
         /// <summary>
         /// Extracts an embedded binary from the DLL to the Windows Temp folder
@@ -173,7 +188,7 @@ namespace DiyFfbPedal.UIFunction
                 return;
             }
 
-            string port = CboComPorts.SelectedItem.ToString();
+            string port = SelectedPort;
             string selectedBoardFolder = CboFirmware.SelectedValue.ToString();
 
             // Validation for custom file mode
@@ -270,7 +285,7 @@ namespace DiyFfbPedal.UIFunction
                 return;
             }
 
-            string port = CboComPorts.SelectedItem.ToString();
+            string port = SelectedPort;
             ForceDisconnectSerial(port);
 
             BtnFlash.IsEnabled = false;

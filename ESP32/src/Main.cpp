@@ -941,7 +941,7 @@ void setup() {
 
   // 1. EEPROM sehr früh laden, um den korrekten Pedal-Namen für das USB-Setup
   // zu ermitteln
-  EEPROM.begin(2048);
+  EEPROM.begin(DAP_EEPROM_SIZE_U32);
   global_dap_config_class.loadConfigFromEeprom();
   global_dap_config_class.getConfig(&dap_config_st_eeprom, 500);
 
@@ -1155,7 +1155,7 @@ void setup() {
   pedalLED.show();
 
   // Load config from EEPROM, if valid, overwrite initial config
-  EEPROM.begin(2048);
+  EEPROM.begin(DAP_EEPROM_SIZE_U32);
   global_dap_config_class.loadConfigFromEeprom();
   global_dap_config_class.getConfig(&dap_config_st_eeprom, 500);
 

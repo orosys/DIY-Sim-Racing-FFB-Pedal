@@ -15,14 +15,6 @@
 
 static const bool IS_ESPNOW_ENABLED = true;
 
-#define WIFI_CH_EEPROM_MAGIC 0xA6
-#define WIFI_CH_EEPROM_OFFSET 260
-struct WifiChannelConfig_t {
-  uint8_t magic_u8;
-  uint8_t channel_u8;
-  uint8_t checksum_u8;
-};
-
 // Uncomment to enable verbose wireless transport debug logging (ActiveSerial
 // only - the pedal has no tinyusbJoystick_-style USB HID text mirror, that
 // pattern is bridge-only). #define WIRELESS_COMM_DEBUG
@@ -65,28 +57,6 @@ volatile uint32_t g_lastPartnerTimestamp_ms = 0;
 volatile uint8_t g_currentSyncDelay_ms = 0;
 volatile uint32_t g_lastMasterHeartbeat_ms = 0;
 volatile bool g_saveWifiChannelDeferred_b = false;
-
-inline uint8_t loadWifiChannelFromEeprom() {
-  WifiChannelConfig_t cfg;
-  EEPROM.get(WIFI_CH_EEPROM_OFFSET, cfg);
-  if (cfg.magic_u8 == WIFI_CH_EEPROM_MAGIC &&
-      (uint8_t)(cfg.magic_u8 ^ cfg.channel_u8) == cfg.checksum_u8 &&
-      cfg.channel_u8 >= 1 && cfg.channel_u8 <= 14) {
-    return cfg.channel_u8;
-  }
-  return 11;
-}
-
-inline void saveWifiChannelToEeprom(uint8_t ch) {
-  if (ch < 1 || ch > 14)
-    return;
-  WifiChannelConfig_t cfg;
-  cfg.magic_u8 = WIFI_CH_EEPROM_MAGIC;
-  cfg.channel_u8 = ch;
-  cfg.checksum_u8 = (uint8_t)(WIFI_CH_EEPROM_MAGIC ^ ch);
-  EEPROM.put(WIFI_CH_EEPROM_OFFSET, cfg);
-  EEPROM.commit();
-}
 
 inline bool macCheck(const uint8_t *Mac_A, const uint8_t *Mac_B) {
   return memcmp(Mac_A, Mac_B, 6) == 0;
@@ -133,6 +103,20 @@ inline void storeMacAddressesToEeprom(DapMacAddresses_t &macCfg) {
       sizeof(macCfg.payloadHeader_st) + sizeof(macCfg.payloadMacAddresses_st));
   EEPROM.put(DAP_MAC_ADDRESSES_EEPROM_OFFSET_U32, macCfg);
   EEPROM.commit();
+}
+
+// The Wi-Fi channel is persisted only as wifiChannel_u8 of the stored MAC
+// table, which is what applyMacConfig() applies at boot. (A separate channel
+// record used to be written but was never read back, so runtime channel
+// changes were lost on reboot.)
+inline void saveWifiChannelToEeprom(uint8_t ch) {
+  if (ch < 1 || ch > 13)
+    return;
+  DapMacAddresses_t macCfg = loadMacAddressesFromEeprom();
+  if (macCfg.payloadMacAddresses_st.wifiChannel_u8 == ch)
+    return;
+  macCfg.payloadMacAddresses_st.wifiChannel_u8 = ch;
+  storeMacAddressesToEeprom(macCfg);
 }
 
 // Forward declarations - ESP-NOW's C callback API needs plain function
