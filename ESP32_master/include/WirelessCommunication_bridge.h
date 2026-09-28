@@ -251,6 +251,41 @@ public:
   uint32_t getTxBusySkipCount() const { return _txBusySkipCount_u32; }
   bool isTxBusy() const { return _txInFlight_b || millis() < _noMemBackoffUntil_ms; }
 
+  // TEMP DIAGNOSTIC: one status line for the bridge + one per provisioned
+  // pedal slot, so a single log shows where the pedal->bridge->plugin chain
+  // breaks. Remove once the wireless-recognition reports are resolved.
+  void printDiag() {
+    char line[230];
+    snprintf(line, sizeof(line),
+             "[DIAG] Bridge ch=%u ownMAC=%02X:%02X:%02X:%02X:%02X:%02X "
+             "RxUnknownMac=%u last=%02X:%02X:%02X:%02X:%02X:%02X",
+             _currentChannel, _ownMac[0], _ownMac[1], _ownMac[2], _ownMac[3],
+             _ownMac[4], _ownMac[5], _diagRxUnknownMac_u32,
+             _diagLastUnknownMac[0], _diagLastUnknownMac[1], _diagLastUnknownMac[2],
+             _diagLastUnknownMac[3], _diagLastUnknownMac[4], _diagLastUnknownMac[5]);
+    emitDiagLine(line);
+    uint32_t now = millis();
+    for (int p = 0; p < 3; p++) {
+      if (isAllZeroMac(_pedalMac[p])) continue;
+      char lastRx[16];
+      if (_diagLastRxMs_u32[p] == 0) {
+        snprintf(lastRx, sizeof(lastRx), "never");
+      } else {
+        snprintf(lastRx, sizeof(lastRx), "%ums", (unsigned)(now - _diagLastRxMs_u32[p]));
+      }
+      snprintf(line, sizeof(line),
+               "[DIAG] Slot%d MAC=%02X:%02X:%02X:%02X:%02X:%02X syncOn=%u "
+               "Rx=%u Accepted=%u DropSyncOff=%u DropBad=%u LastRx=%s RSSI=%d "
+               "TxOk=%u TxFail=%u",
+               p, _pedalMac[p][0], _pedalMac[p][1], _pedalMac[p][2],
+               _pedalMac[p][3], _pedalMac[p][4], _pedalMac[p][5],
+               (unsigned)_pedalWirelessSyncEnabled[p], _diagRx_u32[p],
+               _diagAccepted_u32[p], _diagDropSyncOff_u32[p], _diagDropBad_u32[p],
+               lastRx, (int)_rssi[p], _diagTxOk_u32[p], _diagTxFail_u32[p]);
+      emitDiagLine(line);
+    }
+  }
+
   esp_err_t sendBroadcast(const uint8_t *data, size_t len) {
     return sendTo(_broadcastMac, data, len);
   }
@@ -385,7 +420,14 @@ public:
       }
     }
 
+    if (matchedSlot >= 0) {
+      _diagRx_u32[matchedSlot]++;
+      _diagLastRxMs_u32[matchedSlot] = millis() | 1;
+    }
+
     if (matchedSlot < 0 && !isLogPacket) {
+      _diagRxUnknownMac_u32++;
+      memcpy(_diagLastUnknownMac, info->src_addr, 6);
       logDebug("RX dropped: sender not a provisioned pedal MAC");
       // Rate-limited: shows a pedal that IS transmitting but from a MAC the
       // bridge doesn't have in its table (no RSSI would ever appear).
@@ -440,6 +482,14 @@ public:
     } else {
       _txFailCount++;
     }
+    if (_txInFlightSlot_i8 >= 0) {
+      if (status == ESP_NOW_SEND_SUCCESS) {
+        _diagTxOk_u32[_txInFlightSlot_i8]++;
+      } else {
+        _diagTxFail_u32[_txInFlightSlot_i8]++;
+      }
+      _txInFlightSlot_i8 = -1;
+    }
   }
 
 private:
@@ -472,6 +522,27 @@ private:
   uint32_t _txNoMemCount_u32 = 0;
   uint32_t _txBusySkipCount_u32 = 0;
 
+  // TEMP DIAGNOSTIC counters, see printDiag().
+  uint32_t _diagRx_u32[3] = {0, 0, 0};
+  uint32_t _diagAccepted_u32[3] = {0, 0, 0};
+  uint32_t _diagDropSyncOff_u32[3] = {0, 0, 0};
+  uint32_t _diagDropBad_u32[3] = {0, 0, 0};
+  uint32_t _diagLastRxMs_u32[3] = {0, 0, 0};
+  uint32_t _diagTxOk_u32[3] = {0, 0, 0};
+  uint32_t _diagTxFail_u32[3] = {0, 0, 0};
+  uint32_t _diagRxUnknownMac_u32 = 0;
+  uint8_t _diagLastUnknownMac[6] = {0};
+  // Only one send is ever in flight, so the send callback can be attributed
+  // to the pedal slot it was addressed to.
+  volatile int8_t _txInFlightSlot_i8 = -1;
+
+  void emitDiagLine(const char *line) {
+    ActiveSerial->printf("[L]%s\n", line);
+#ifdef USB_JOYSTICK
+    tinyusbJoystick_.printf("%s", line);
+#endif
+  }
+
   esp_err_t sendTo(const uint8_t *mac, const uint8_t *data, size_t len) {
     uint32_t now = millis();
     if (now < _noMemBackoffUntil_ms) {
@@ -490,9 +561,14 @@ private:
     }
     _txInFlight_b = true;
     _lastSendTime_u32 = now;
+    _txInFlightSlot_i8 = -1;
+    for (int p = 0; p < 3; p++) {
+      if (macCheck(mac, _pedalMac[p])) { _txInFlightSlot_i8 = p; break; }
+    }
     esp_err_t res = esp_now_send(mac, data, len);
     if (res != ESP_OK) {
       _txInFlight_b = false;
+      _txInFlightSlot_i8 = -1;
       _txErrCount++;
       if (res == ESP_ERR_ESPNOW_NO_MEM) {
         _noMemBackoffUntil_ms = now + 15;
@@ -553,16 +629,19 @@ private:
     memcpy(&local, data, sizeof(DapStateBasic_t));
     if (local.payloadHeader_st.version_u8 != DAP_VERSION_CONFIG_U8 ||
         local.payloadHeader_st.payloadType_u8 != DAP_PAYLOAD_TYPE_STATE_BASIC_U8) {
+      _diagDropBad_u32[pedalTag]++;
       logDebug("RX StateBasic dropped: bad type/version");
       return;
     }
     uint16_t crc = checksumCalculator((uint8_t*)(&(local.payloadHeader_st)),
         sizeof(local.payloadHeader_st) + sizeof(local.payloadPedalStateBasic_st));
     if (crc != local.payloadFooter_st.checkSum_u16) {
+      _diagDropBad_u32[pedalTag]++;
       logDebug("RX StateBasic dropped: bad CRC");
       return;
     }
     if (!_pedalWirelessSyncEnabled[pedalTag]) {
+      _diagDropSyncOff_u32[pedalTag]++;
       return;
     }
     memcpy(&dap_state_basic_st[pedalTag], data, sizeof(DapStateBasic_t));
@@ -600,6 +679,7 @@ private:
       default:
         break;
     }
+    _diagAccepted_u32[pedalTag]++;
     logDebug("RX StateBasic accepted, pedal=%u", pedalTag);
   }
 
@@ -608,21 +688,25 @@ private:
     memcpy(&local, data, sizeof(DapStateExtended_t));
     if (local.payloadHeader_st.version_u8 != DAP_VERSION_CONFIG_U8 ||
         local.payloadHeader_st.payloadType_u8 != DAP_PAYLOAD_TYPE_STATE_EXTENDED_U8) {
+      _diagDropBad_u32[pedalTag]++;
       logDebug("RX StateExtended dropped: bad type/version");
       return;
     }
     uint16_t crc = checksumCalculator((uint8_t*)(&(local.payloadHeader_st)),
         sizeof(local.payloadHeader_st) + sizeof(local.payloadPedalStateExtended_st));
     if (crc != local.payloadFooter_st.checkSum_u16) {
+      _diagDropBad_u32[pedalTag]++;
       logDebug("RX StateExtended dropped: bad CRC");
       return;
     }
     if (!_pedalWirelessSyncEnabled[pedalTag]) {
+      _diagDropSyncOff_u32[pedalTag]++;
       return;
     }
     memcpy(&dap_state_extended_st[pedalTag], data, sizeof(DapStateExtended_t));
     dap_state_extended_st[pedalTag].payloadHeader_st.pedalTag_u8 = pedalTag;
     g_updateExtendState_ab[pedalTag] = true;
+    _diagAccepted_u32[pedalTag]++;
     logDebug("RX StateExtended accepted, pedal=%u", pedalTag);
   }
 
@@ -636,6 +720,7 @@ private:
                             pedalTag, (unsigned)_pedalWirelessSyncEnabled[pedalTag]);
     #endif
     if (!_pedalWirelessSyncEnabled[pedalTag]) {
+      _diagDropSyncOff_u32[pedalTag]++;
       return;
     }
     memcpy(&dap_config_st_Temp, data, sizeof(DapConfig_t));
@@ -652,6 +737,7 @@ private:
       memcpy(&dap_config_st_Gas, &dap_config_st_Temp, sizeof(DapConfig_t));
       memcpy(&dap_config_st[2], &dap_config_st_Temp, sizeof(DapConfig_t));
     }
+    _diagAccepted_u32[pedalTag]++;
     logDebug("RX ConfigEcho accepted, pedal=%u", pedalTag);
   }
 
@@ -669,21 +755,25 @@ private:
     #endif
     if (received_servo_config.payloadHeader_st.version_u8 != DAP_VERSION_CONFIG_U8 ||
         received_servo_config.payloadHeader_st.payloadType_u8 != DAP_PAYLOAD_TYPE_SERVO_CONFIG_U8) {
+      _diagDropBad_u32[pedalTag]++;
       logDebug("RX ServoConfig dropped: bad type/version");
       return;
     }
     uint16_t crc = checksumCalculator((uint8_t*)(&(received_servo_config.payloadHeader_st)),
         sizeof(received_servo_config.payloadHeader_st) + sizeof(received_servo_config.payloadServoConfig_st));
     if (crc != received_servo_config.payloadFooter_st.checkSum_u16) {
+      _diagDropBad_u32[pedalTag]++;
       logDebug("RX ServoConfig dropped: bad CRC");
       return;
     }
     if (!_pedalWirelessSyncEnabled[pedalTag]) {
+      _diagDropSyncOff_u32[pedalTag]++;
       return;
     }
     received_servo_config.payloadHeader_st.pedalTag_u8 = pedalTag;
     memcpy(&dap_servo_config_response_st[pedalTag], &received_servo_config, sizeof(DAP_servo_config_st_t));
     send_servo_config_to_host[pedalTag] = true;
+    _diagAccepted_u32[pedalTag]++;
     logDebug("RX ServoConfig accepted, pedal=%u", pedalTag);
   }
 

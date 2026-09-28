@@ -4665,6 +4665,14 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
           }
         }
 
+        // TEMP DIAGNOSTIC: wireless link status every 5s, see printDiag().
+        static uint32_t s_lastLinkDiagLogTime = 0;
+        if (millis() - s_lastLinkDiagLogTime > 5000) {
+          s_lastLinkDiagLogTime = millis();
+          wirelessComm.printDiag(
+              espnow_dap_config_st.payloadPedalConfig_st.pedalType_u8);
+        }
+
         // Periodic diagnostic telemetry: Report RF health and heap to SimHub
         // every 60s
         static uint32_t s_lastEspnowDiagLogTime = 0;

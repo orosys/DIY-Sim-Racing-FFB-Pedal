@@ -251,6 +251,42 @@ public:
   uint32_t getTxErrCount() const { return _txErrCount; }
   uint32_t getTxNoMemCount() const { return _txNoMemCount_u32; }
   uint32_t getTxBusySkipCount() const { return _txBusySkipCount_u32; }
+
+  // TEMP DIAGNOSTIC: pedal side of the wireless link status. Printed to the
+  // local serial port first, because when pedal->bridge is broken the
+  // wireless copy never arrives. Remove once the wireless-recognition
+  // reports are resolved.
+  void printDiag(uint8_t role) {
+    uint8_t hwChan = 0;
+    wifi_second_chan_t secChan;
+    esp_wifi_get_channel(&hwChan, &secChan);
+    char lastRx[16];
+    if (_diagLastHostRxMs_u32 == 0) {
+      snprintf(lastRx, sizeof(lastRx), "never");
+    } else {
+      snprintf(lastRx, sizeof(lastRx), "%ums",
+               (unsigned)(millis() - _diagLastHostRxMs_u32));
+    }
+    ActiveSerial->printf(
+        "[DIAG] Pedal role=%u ch=%u hwCh=%u ownMAC=%02X:%02X:%02X:%02X:%02X:%02X "
+        "bridgeMAC=%02X:%02X:%02X:%02X:%02X:%02X\n",
+        role, _currentChannel, hwChan, _ownMac[0], _ownMac[1], _ownMac[2],
+        _ownMac[3], _ownMac[4], _ownMac[5], _hostMac[0], _hostMac[1],
+        _hostMac[2], _hostMac[3], _hostMac[4], _hostMac[5]);
+    ActiveSerial->printf(
+        "[DIAG] Pedal TxOk=%u TxFail=%u TxErr=%u TxBusySkip=%u RxFromBridge=%u "
+        "LastRxFromBridge=%s BridgeRSSI=%d RxUnknown=%u "
+        "last=%02X:%02X:%02X:%02X:%02X:%02X\n",
+        _txSuccessCount, _txFailCount, _txErrCount, _txBusySkipCount_u32,
+        _diagRxFromHost_u32, lastRx, (int)_rssi[3], _diagRxUnknown_u32,
+        _diagLastUnknownMac[0], _diagLastUnknownMac[1], _diagLastUnknownMac[2],
+        _diagLastUnknownMac[3], _diagLastUnknownMac[4], _diagLastUnknownMac[5]);
+    sendLogToBridge(
+        "[DIAG] Pedal role=%u ch=%u TxOk=%u TxFail=%u RxFromBridge=%u "
+        "LastRxFromBridge=%s BridgeRSSI=%d",
+        role, _currentChannel, _txSuccessCount, _txFailCount,
+        _diagRxFromHost_u32, lastRx, (int)_rssi[3]);
+  }
   bool isTxBusy() const { return _txInFlight_b || millis() < _noMemBackoffUntil_ms; }
   uint32_t getLastTxTime() const { return _lastTxTime; }
   uint32_t getLastRxTime() const { return _lastRxTime; }
@@ -363,6 +399,15 @@ public:
 
     bool hasHost = !isAllZero(_hostMac);
     bool isHostSender = hasHost && macCheck(_hostMac, src);
+
+    if (isHostSender) {
+      _diagRxFromHost_u32++;
+      _diagLastHostRxMs_u32 = millis() | 1;
+    } else if (!macCheck(src, _pedalMac[0]) && !macCheck(src, _pedalMac[1]) &&
+               !macCheck(src, _pedalMac[2])) {
+      _diagRxUnknown_u32++;
+      memcpy(_diagLastUnknownMac, src, 6);
+    }
 
     if (info->rx_ctrl != NULL) {
       for (int i = 0; i < 3; i++) {
@@ -537,6 +582,12 @@ private:
   uint32_t _noMemBackoffUntil_ms = 0;
   uint32_t _txNoMemCount_u32 = 0;
   uint32_t _txBusySkipCount_u32 = 0;
+
+  // TEMP DIAGNOSTIC counters, see printDiag().
+  uint32_t _diagRxFromHost_u32 = 0;
+  uint32_t _diagLastHostRxMs_u32 = 0;
+  uint32_t _diagRxUnknown_u32 = 0;
+  uint8_t _diagLastUnknownMac[6] = {0};
 
   static bool isAllZero(const uint8_t *mac) {
     for (int i = 0; i < 6; i++) {
