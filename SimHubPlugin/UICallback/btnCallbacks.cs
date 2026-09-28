@@ -882,6 +882,27 @@ namespace DiyFfbPedal
             }
         }
 
+        private void UpdateFanatecVibrationStatus(byte status)
+        {
+            bool supported = (status & 0x40) != 0;
+            SystemSetting_Section.FanatecVibrationPanel.Visibility = supported ? Visibility.Visible : Visibility.Collapsed;
+            _updatingFanatecVibrationToggle = true;
+            try
+            {
+                SystemSetting_Section.FanatecVibrationToggle.IsChecked = supported && (status & 0x80) != 0;
+            }
+            finally { _updatingFanatecVibrationToggle = false; }
+        }
+
+        private void FanatecVibrationToggle_Changed(object sender, RoutedEventArgs e)
+        {
+            if (_updatingFanatecVibrationToggle || Plugin == null) return;
+            DAP_bridge_state_st command = default;
+            command.payloadBridgeState_.Bridge_action = (byte)(SystemSetting_Section.FanatecVibrationToggle.IsChecked == true ?
+                bridgeAction.BRIDGE_ACTION_FANATEC_VIBRATION_ON : bridgeAction.BRIDGE_ACTION_FANATEC_VIBRATION_OFF);
+            Plugin.SendBridgeAction(command);
+        }
+
         public void btn_Bridge_restart_Click(object sender, RoutedEventArgs e)
         {
             //write to bridge

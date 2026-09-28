@@ -875,6 +875,7 @@ namespace DiyFfbPedal
 
                                     if ((check_payload_state_b) && check_crc_state_b)
                                     {
+                                        UpdateFanatecVibrationStatus(bridge_state.payloadBridgeState_.Bridge_action);
                                         bufferByteAssignedToStruct.AsSpan(srcBufferOffset_0, sizeof(DAP_bridge_state_st)).Fill(true);
                                         lastTrueElementIndex = Math.Max(lastTrueElementIndex, srcBufferOffset_0 + sizeof(DAP_bridge_state_st));
 
