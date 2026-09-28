@@ -66,6 +66,13 @@ namespace DiyFfbPedal.UIFunction
         private readonly Dictionary<string, Path> _signalPaths = new Dictionary<string, Path>();
         private readonly Dictionary<string, (TextBlock Val, TextBlock Range)> _legendBindings = new Dictionary<string, (TextBlock, TextBlock)>();
 
+        // Per-signal min/max seen since last reset (used for auto-scaling, so the
+        // Y axis does not jump with every visible time window)
+        private readonly Dictionary<string, (double Min, double Max)> _seenRanges = new Dictionary<string, (double, double)>();
+
+        // Per-signal colored Y axis limit labels (top = upper limit, bottom = lower limit)
+        private readonly Dictionary<string, (TextBlock Top, TextBlock Bottom)> _axisLabels = new Dictionary<string, (TextBlock, TextBlock)>();
+
         // High performance telemetry buffer (contiguous value type array)
         private readonly object _dataLock = new object();
         private readonly List<TelemetryPoint> _points = new List<TelemetryPoint>(15000);
@@ -335,6 +342,7 @@ namespace DiyFfbPedal.UIFunction
             if (_activeSignalIds.Contains(sigId))
             {
                 _activeSignalIds.Remove(sigId);
+                _seenRanges.Remove(sigId);
             }
             else
             {
@@ -365,7 +373,15 @@ namespace DiyFfbPedal.UIFunction
             canvas_plot.Children.Clear();
             _signalPaths.Clear();
             _legendBindings.Clear();
+            _axisLabels.Clear();
             panel_legends.Children.Clear();
+
+            var axisTopPanel = new StackPanel { Orientation = Orientation.Horizontal, IsHitTestVisible = false };
+            var axisBottomPanel = new StackPanel { Orientation = Orientation.Horizontal, IsHitTestVisible = false };
+            Canvas.SetLeft(axisTopPanel, 4);
+            Canvas.SetTop(axisTopPanel, 2);
+            Canvas.SetLeft(axisBottomPanel, 4);
+            Canvas.SetBottom(axisBottomPanel, 2);
 
             tb_active_count.Text = $"({_activeSignalIds.Count} active)";
             tb_no_signals_hint.Visibility = _activeSignalIds.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
@@ -385,6 +401,12 @@ namespace DiyFfbPedal.UIFunction
                 };
                 _signalPaths[sigId] = path;
                 canvas_plot.Children.Add(path);
+
+                var tbAxisTop = CreateAxisLabel(sig.DefaultColor);
+                var tbAxisBottom = CreateAxisLabel(sig.DefaultColor);
+                axisTopPanel.Children.Add(tbAxisTop);
+                axisBottomPanel.Children.Add(tbAxisBottom);
+                _axisLabels[sigId] = (tbAxisTop, tbAxisBottom);
 
                 var legendBorder = new Border
                 {
@@ -469,6 +491,34 @@ namespace DiyFfbPedal.UIFunction
                 panel_legends.Children.Add(legendBorder);
 
                 _legendBindings[sigId] = (tbVal, tbRange);
+            }
+
+            // Axis labels on top of the signal paths
+            canvas_plot.Children.Add(axisTopPanel);
+            canvas_plot.Children.Add(axisBottomPanel);
+        }
+
+        private static TextBlock CreateAxisLabel(Color color)
+        {
+            return new TextBlock
+            {
+                Text = "",
+                Foreground = new SolidColorBrush(color),
+                Background = new SolidColorBrush(Color.FromArgb(0xB0, 0x11, 0x11, 0x11)),
+                FontSize = 10,
+                FontWeight = FontWeights.SemiBold,
+                Padding = new Thickness(3, 0, 3, 0),
+                Margin = new Thickness(0, 0, 4, 0),
+                IsHitTestVisible = false
+            };
+        }
+
+        private void ClearAxisLabels()
+        {
+            foreach (var pair in _axisLabels.Values)
+            {
+                pair.Top.Text = "";
+                pair.Bottom.Text = "";
             }
         }
 
@@ -623,6 +673,17 @@ namespace DiyFfbPedal.UIFunction
                     }
 
                     if (minVal == double.MaxValue) { minVal = 0; maxVal = 1; }
+                    else
+                    {
+                        // Merge visible window into the range seen so far
+                        if (_seenRanges.TryGetValue(sigId, out var seen))
+                        {
+                            minVal = Math.Min(minVal, seen.Min);
+                            maxVal = Math.Max(maxVal, seen.Max);
+                        }
+                        _seenRanges[sigId] = (minVal, maxVal);
+                    }
+
                     if (Math.Abs(maxVal - minVal) < 1e-6)
                     {
                         maxVal += 1.0;
@@ -673,6 +734,24 @@ namespace DiyFfbPedal.UIFunction
 
                     // Direct O(1) Legend Update
                     UpdateLegendDisplay(sigId, lastVal, minVal, maxVal, sig);
+
+                    // Y axis limits of the visible area (incl. Y zoom/pan)
+                    if (_axisLabels.TryGetValue(sigId, out var axis))
+                    {
+                        double axisTop, axisBottom;
+                        if (_autoScale)
+                        {
+                            axisTop = minVal + _yViewMax * valSpan;
+                            axisBottom = minVal + _yViewMin * valSpan;
+                        }
+                        else
+                        {
+                            axisTop = _yViewMax * 100.0;
+                            axisBottom = _yViewMin * 100.0;
+                        }
+                        axis.Top.Text = $"{axisTop.ToString(sig.Format)} {sig.Unit}";
+                        axis.Bottom.Text = $"{axisBottom.ToString(sig.Format)} {sig.Unit}";
+                    }
                 }
             }
         }
@@ -1150,6 +1229,7 @@ namespace DiyFfbPedal.UIFunction
             _yViewMin = 0.0;
             _yViewMax = 1.0;
             _xViewOffsetSec = 0.0;
+            lock (_dataLock) { _seenRanges.Clear(); }
             _isPanning = false;
             _isDraggingZoom = false;
             if (rect_zoom_selection != null) rect_zoom_selection.Visibility = Visibility.Collapsed;
@@ -1283,11 +1363,13 @@ namespace DiyFfbPedal.UIFunction
                         _unwrappedTimeSec = 0.0;
                         _latestTimeSec = 0.0;
                         _pauseTimeSec = 0.0;
+                        _seenRanges.Clear();
                     }
                     foreach (var path in _signalPaths.Values)
                     {
                         path.Data = null;
                     }
+                    ClearAxisLabels();
                     UpdatePedalButtonStyles();
                 }
             }
@@ -1344,11 +1426,13 @@ namespace DiyFfbPedal.UIFunction
                 _unwrappedTimeSec = 0.0;
                 _latestTimeSec = 0.0;
                 _pauseTimeSec = 0.0;
+                _seenRanges.Clear();
             }
             foreach (var path in _signalPaths.Values)
             {
                 path.Data = null;
             }
+            ClearAxisLabels();
             HideDataTip();
         }
 
