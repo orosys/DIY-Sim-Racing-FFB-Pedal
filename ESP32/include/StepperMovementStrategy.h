@@ -810,11 +810,8 @@ float IRAM_ATTR_FLAG MoveByAdmittanceStrategy(
 
   // 7. Final total force (Loadcell + Static Effect Weight + Dynamic Effect Force)
   float rawPilotForce_N = (loadCellReadingKg_fl32 * GRAVITY_N_KG);
-  // Subtle deadzone on pilot force (1.5 N) to prevent transmitting baseline drift
-  float cleanPilotForce_N = 0.0f;
-  if (rawPilotForce_N > 1.5f) {
-    cleanPilotForce_N = rawPilotForce_N - 1.5f;
-  }
+  // no deadzone here: the loadcell calibration already removes mean + 3 sigma of the idle reading
+  float cleanPilotForce_N = max(rawPilotForce_N, 0.0f);
   static float s_filteredPilotForce_N = 0.0f;
   const float PILOT_FORCE_TAU = 0.025f; // 25ms smoothing
   float pilot_alpha = 1.0f - expf(-dt_s / PILOT_FORCE_TAU);

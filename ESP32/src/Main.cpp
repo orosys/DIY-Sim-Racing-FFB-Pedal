@@ -2253,6 +2253,7 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
       }
 
       // 1 Hz debug print of the number of fresh loadcell samples per second
+#ifdef PRINT_LOADCELL_READING_FREQUENCY
       static uint32_t s_freshLoadcellSamples_u32 = 0;
       static uint32_t s_lastLoadcellRatePrintMs_u32 = 0;
       if (newLoadcellSample_b) {
@@ -2269,6 +2270,7 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
         s_freshLoadcellSamples_u32 = 0;
         s_lastLoadcellRatePrintMs_u32 = millis();
       }
+#endif
       profiler_pedalUpdateTask.end(2);
 
       // start profiler 3, loadcell reading conversion
@@ -2906,10 +2908,19 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
             }
           }
 
-          // target with lead, clipped to the hard endstops
-          float leadSteps_fl32 =
-              isStandstill_b ? 0.0f
-                             : feedForwardSpeedHz_fl32 * STEP_COMMAND_LEAD_S;
+          // target with lead, clipped to the hard endstops. At slow speed
+          // (< 1 step per cycle) the time-based lead is below one step, so
+          // keep at least MIN_LEAD_STEPS: the stepper ignores targets within
+          // 1 step, which made slow motion start-stop (logic analyzer: gaps
+          // after 10 % of the pulses at 2-3.3 kHz).
+          const float MIN_LEAD_STEPS = 2.0f;
+          float leadSteps_fl32 = 0.0f;
+          if (!isStandstill_b) {
+            leadSteps_fl32 = feedForwardSpeedHz_fl32 * STEP_COMMAND_LEAD_S;
+            if (fabsf(leadSteps_fl32) < MIN_LEAD_STEPS) {
+              leadSteps_fl32 = copysignf(MIN_LEAD_STEPS, feedForwardSpeedHz_fl32);
+            }
+          }
           float target_fl32 =
               constrain(Position_Next_fl32 + leadSteps_fl32,
                         (float)stepper->getHardEndstopMinPosition(),
@@ -2919,18 +2930,23 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
           if (distanceToTarget_fl32 > 1.0f) {
             float requiredSpeed =
                 fabsf(feedForwardSpeedHz_fl32 + correctionSpeedHz_fl32);
-            // never crawl: reach the target within (1 cycle + lead) at least
-            requiredSpeed = max(requiredSpeed,
-                                distanceToTarget_fl32 /
-                                    (nominalCycleTime_s_fl32 + STEP_COMMAND_LEAD_S));
+            // at standstill never crawl: reach the target within
+            // (1 cycle + lead) at least. Not while moving: there the target
+            // lies ahead on purpose and the speed must follow the model.
+            if (isStandstill_b) {
+              requiredSpeed = max(requiredSpeed,
+                                  distanceToTarget_fl32 /
+                                      (nominalCycleTime_s_fl32 + STEP_COMMAND_LEAD_S));
+            }
             if (requiredSpeed > (float)MAXIMUM_STEPPER_SPEED_U32) {
               requiredSpeed = (float)MAXIMUM_STEPPER_SPEED_U32;
             }
             stepper->moveToWithSpeed((int32_t)lroundf(target_fl32),
                                      (uint32_t)requiredSpeed);
-          } else if (stepper->isRunning()) {
-            // at the setpoint while still running toward an earlier lead
-            // target (model stopped): stop here instead of overshooting
+          } else if (isStandstill_b && stepper->isRunning()) {
+            // model stopped and at the setpoint while still running toward
+            // an earlier lead target: stop here instead of overshooting.
+            // Not while moving: that stopped slow motion every few cycles.
             stepper->forceStop();
           }
         } else {
