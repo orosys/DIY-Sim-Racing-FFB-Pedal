@@ -31,6 +31,7 @@
                         <ComboBoxItem Content="KF const. accel."/>
                         <ComboBoxItem Content="Exponential filter"/>
                         <ComboBoxItem Content="NONE"/>
+                        <ComboBoxItem Content="IMM adaptive (hold/move)"/>
                     </ComboBox>
                 </StackPanel>
                 <StackPanel Width="480" Height="50">

@@ -374,6 +374,9 @@ KalmanFilter1stOrder *kalman = NULL;
 #include "SignalFilter_2nd_order.h"
 KalmanFilter2ndOrder *kalman_2nd_order = NULL;
 
+#include "SignalFilter_IMM.h"
+KalmanFilterIMM *kalman_imm = NULL;
+
 /**********************************************************************************************/
 /*                                                                                            */
 /*                         loadcell definitions */
@@ -1303,6 +1306,7 @@ void setup() {
   // setup Kalman filters
   kalman = new KalmanFilter1stOrder(loadcell->getVarianceEstimate());
   kalman_2nd_order = new KalmanFilter2ndOrder(loadcell->getVarianceEstimate());
+  kalman_imm = new KalmanFilterIMM(loadcell->getVarianceEstimate());
 
   // Check if wakeup only by plugin trigger is requested
   if (dap_config_st_local.payloadPedalConfig_st.wakeOnPluginOnly_u8 == 1) {
@@ -2190,9 +2194,11 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
 
       // read loadcell data, when available
       profiler_pedalUpdateTask.start(2);
+      bool newLoadcellSample_b = false;
       if (xQueueReceive(s_loadcellDataQueue, &loadcellDataReceived_st,
                         (TickType_t)0) == pdPASS) {
         loadcellReading = loadcellDataReceived_st.loadcellReadingInKg_fl32;
+        newLoadcellSample_b = true;
       }
       profiler_pedalUpdateTask.end(2);
 
@@ -2231,9 +2237,11 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
                       .kfModelNoise_u8) /
                      5000.0f;
       static float lastPedalForce_fl32 = 0.0f;
+      static uint8_t s_lastKfModelOrder_u8 = 0xFF;
+      uint8_t kfModelOrder_u8 =
+          dap_config_pedalUpdateTask_st.payloadPedalConfig_st.kfModelOrder_u8;
       // const velocity model denoising filter
-      switch (
-          dap_config_pedalUpdateTask_st.payloadPedalConfig_st.kfModelOrder_u8) {
+      switch (kfModelOrder_u8) {
       case 0: // const. velocity Kalman filter
         filteredReading =
             kalman->filteredValue(pedalForce_fl32, 0.0f,
@@ -2258,6 +2266,29 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
             ((float)REPETITION_INTERVAL_PEDAL_UPDATE_TASK_IN_US_I64 * 1e-6f);
         lastPedalForce_fl32 = filteredReading;
         break;
+      case 4: // IMM Kalman filter (HOLD / MOVE hypotheses)
+      {
+        // the loadcell noise was identified in loadcell units, scale it to
+        // pedal force units (conversion is linear in the loadcell force)
+        float loadcellToPedalForceGain_fl32 = convertToPedalForce(
+            1.0f, sledPosition, &dap_config_pedalUpdateTask_st);
+        kalman_imm->setMeasurementVariance(
+            loadcell->getVarianceEstimate() * loadcellToPedalForceGain_fl32 *
+            loadcellToPedalForceGain_fl32);
+
+        // start from the current force when the filter gets selected
+        if (s_lastKfModelOrder_u8 != kfModelOrder_u8) {
+          kalman_imm->reset(pedalForce_fl32);
+        }
+
+        filteredReading = kalman_imm->filteredValue(
+            pedalForce_fl32, newLoadcellSample_b,
+            (float)REPETITION_INTERVAL_PEDAL_UPDATE_TASK_IN_US_I64 * 1e-6f,
+            dap_config_pedalUpdateTask_st.payloadPedalConfig_st
+                .kfModelNoise_u8);
+        changeVelocity = kalman_imm->changeVelocity();
+        break;
+      }
       default: // No filter
         filteredReading = pedalForce_fl32;
         changeVelocity =
@@ -2265,6 +2296,7 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
             ((float)REPETITION_INTERVAL_PEDAL_UPDATE_TASK_IN_US_I64 * 1e-6f);
         lastPedalForce_fl32 = filteredReading;
       }
+      s_lastKfModelOrder_u8 = kfModelOrder_u8;
       // write filter reading into calculation_st
       dap_calculationVariables_st.currentForceReading_fl32 = filteredReading;
 
@@ -3106,6 +3138,13 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
             brake_state * 255; // stepper->getBrakeResistorState();
         dap_state_extended_st_lcl_pedalUpdateTask.payloadPedalStateExtended_st
             .oscillationMonitorValue_u8 = 0.0f;
+        // IMM filter: probability of the MOVE hypothesis (0 = HOLD, 255 = MOVE)
+        if (dap_config_pedalUpdateTask_st.payloadPedalConfig_st
+                .kfModelOrder_u8 == 4) {
+          dap_state_extended_st_lcl_pedalUpdateTask.payloadPedalStateExtended_st
+              .oscillationMonitorValue_u8 =
+              (uint8_t)(kalman_imm->moveProbability() * 255.0f);
+        }
 
         dap_state_extended_st_lcl_pedalUpdateTask.payloadPedalStateExtended_st
             .admittance_expectedForce_N =
