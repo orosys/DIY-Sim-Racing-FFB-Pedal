@@ -14,7 +14,11 @@
 
 #define DEBUG_INFO_0_CYCLE_TIMER_U8 1U
 #define DEBUG_INFO_0_NET_RUNTIME_U8 2U
-// #define DEBUG_INFO_0_LOADCELL_READING 4
+// together with DEBUG_INFO_0_STATE_EXTENDED_INFO_STRUCT_U8 (e.g. 64 + 4 = 68):
+// send the state structs only every EXTENDED_STRUCT_DECIMATION_FACTOR_U8-th
+// cycle (1 kHz at 4 kHz loop) to avoid USB CDC buffer overflows / trace gaps
+#define DEBUG_INFO_0_EXTENDED_STRUCT_DECIMATED_U8 4U
+#define EXTENDED_STRUCT_DECIMATION_FACTOR_U8 4U
 #define DEBUG_INFO_0_SERVO_READINGS_U8 8U
 #define DEBUG_INFO_0_RESET_ALL_SERVO_ALARMS_U8 16U
 #define DEBUG_INFO_0_RESET_SERVO_TO_FACTORY_U8 32U
@@ -353,6 +357,15 @@ UsbComManager usbManager;
 USBCDC customUsbSerial;
 #endif
 
+// One-shot helper to start the serial/USB stack on core 0 (see setup())
+static SemaphoreHandle_t s_usbInitDone_sh = NULL;
+static uint8_t s_usbInitPedalId_u8 = 0;
+static void usbInitTask(void *pvParameters) {
+  usbManager.begin(s_usbInitPedalId_u8);
+  xSemaphoreGive(s_usbInitDone_sh);
+  vTaskDelete(NULL);
+}
+
 /**********************************************************************************************/
 /*                                                                                            */
 /*                         pedal mechanics definitions */
@@ -373,6 +386,14 @@ KalmanFilter1stOrder *kalman = NULL;
 
 #include "SignalFilter_2nd_order.h"
 KalmanFilter2ndOrder *kalman_2nd_order = NULL;
+
+#include "SignalFilter_IMM.h"
+KalmanFilterIMM *kalman_imm = NULL;
+
+// plate inertia identification for the IMM filter, requested after each homing
+#include "PlateInertiaIdentification.h"
+PlateInertiaIdentification plateInertiaIdentification;
+volatile bool g_plateInertiaIdentificationRequested_b = false;
 
 /**********************************************************************************************/
 /*                                                                                            */
@@ -614,11 +635,10 @@ void IRAM_ATTR_FLAG loadcellReadingTask(void *pvParameters) {
           loadcellDataPackage_t newLoadcellPackage;
           newLoadcellPackage.loadcellReadingInKg_fl32 = medianReading_fl32;
 
-          // Send the package to the queue. Use a timeout of 0 (non-blocking).
-          // If the queue is full, the data is simply dropped. This prevents
-          // this high-priority control task from ever blocking on a full serial
-          // buffer.
-          xQueueSend(s_loadcellDataQueue, &newLoadcellPackage, (TickType_t)0);
+          // Send the package to the queue (length 1). Overwrite instead of
+          // send: if the previous sample was not consumed yet, the newest
+          // sample wins. Never blocks this high-priority control task.
+          xQueueOverwrite(s_loadcellDataQueue, &newLoadcellPackage);
         }
       }
 
@@ -992,7 +1012,25 @@ void setup() {
 
   // Manager starten (er übernimmt CDC und Controller-Setup mit der finalen
   // Identität)
-  usbManager.begin(dap_config_st_local.payloadPedalConfig_st.pedalType_u8);
+  // Start the serial/USB stack from core 0: ESP-IDF allocates the USB (TinyUSB)
+  // and UART interrupts on the core that initializes them, and the (unpinned,
+  // max priority) usbd task is woken from that interrupt. setup() runs on
+  // core 1 (ARDUINO_RUNNING_CORE=1), so streaming traffic used to preempt the
+  // pedal and loadcell tasks on core 1 (loadcell samples dropped from
+  // ~1900/s to 300-500/s while streaming the extended state).
+  s_usbInitPedalId_u8 = dap_config_st_local.payloadPedalConfig_st.pedalType_u8;
+  s_usbInitDone_sh = xSemaphoreCreateBinary();
+  if ((s_usbInitDone_sh != NULL) &&
+      (xTaskCreatePinnedToCore(usbInitTask, "usbInit", 6144, NULL, 2, NULL,
+                               0) == pdPASS)) {
+    xSemaphoreTake(s_usbInitDone_sh, portMAX_DELAY);
+  } else {
+    usbManager.begin(s_usbInitPedalId_u8); // fallback: init on this core
+  }
+  if (s_usbInitDone_sh != NULL) {
+    vSemaphoreDelete(s_usbInitDone_sh);
+    s_usbInitDone_sh = NULL;
+  }
 
   // System-Pointer auf den Manager umbiegen
   ActiveSerial = &usbManager;
@@ -1303,6 +1341,7 @@ void setup() {
   // setup Kalman filters
   kalman = new KalmanFilter1stOrder(loadcell->getVarianceEstimate());
   kalman_2nd_order = new KalmanFilter2ndOrder(loadcell->getVarianceEstimate());
+  kalman_imm = new KalmanFilterIMM(loadcell->getVarianceEstimate());
 
   // Check if wakeup only by plugin trigger is requested
   if (dap_config_st_local.payloadPedalConfig_st.wakeOnPluginOnly_u8 == 1) {
@@ -1317,6 +1356,7 @@ void setup() {
   } else {
     g_pedalOperationalState_u8 = (uint8_t)PEDAL_STATE_ACTIVE_E;
     performPedalHomingSequence(dap_config_st_local);
+    g_plateInertiaIdentificationRequested_b = true;
   }
 
   // send to config handling task
@@ -1892,7 +1932,7 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
   bool local_OTA_status_b = false;
 
   AdmittanceDebugState_t admittanceDebugInfo_st;
-  AdmittanceStates_t admittanceStates_st;
+  AdmittanceStates_t admittanceStates_st = {};
 
   for (;;) {
 
@@ -2075,6 +2115,21 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
       uint32_t cycleCallTimeInUs_u32 = micros();
       cycleCount_u32++;
 
+      // Measured cycle time: the admittance model and the step command use
+      // the real elapsed time, so late cycles (task jitter) do not turn into
+      // start-stop motion. Clamped, so blocking phases (config update, slow
+      // repositioning) do not cause large integration steps.
+      static uint32_t s_lastCycleCallTimeInUs_u32 = 0;
+      const float nominalCycleTime_s_fl32 =
+          ((float)REPETITION_INTERVAL_PEDAL_UPDATE_TASK_IN_US_I64) * 1e-6f;
+      float cycleTime_s_fl32 = nominalCycleTime_s_fl32;
+      if (s_lastCycleCallTimeInUs_u32 != 0) {
+        cycleTime_s_fl32 = constrain(
+            (float)(cycleCallTimeInUs_u32 - s_lastCycleCallTimeInUs_u32) * 1e-6f,
+            0.5f * nominalCycleTime_s_fl32, 3.0f * nominalCycleTime_s_fl32);
+      }
+      s_lastCycleCallTimeInUs_u32 = cycleCallTimeInUs_u32;
+
       // get current position
       stepperPosFraction_fl32 = stepper->getCurrentPositionFraction();
       stepperPosCurrent_i32 = stepper->getCurrentPosition();
@@ -2190,10 +2245,32 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
 
       // read loadcell data, when available
       profiler_pedalUpdateTask.start(2);
+      bool newLoadcellSample_b = false;
       if (xQueueReceive(s_loadcellDataQueue, &loadcellDataReceived_st,
                         (TickType_t)0) == pdPASS) {
         loadcellReading = loadcellDataReceived_st.loadcellReadingInKg_fl32;
+        newLoadcellSample_b = true;
       }
+
+      // 1 Hz debug print of the number of fresh loadcell samples per second
+#ifdef PRINT_LOADCELL_READING_FREQUENCY
+      static uint32_t s_freshLoadcellSamples_u32 = 0;
+      static uint32_t s_lastLoadcellRatePrintMs_u32 = 0;
+      if (newLoadcellSample_b) {
+        s_freshLoadcellSamples_u32++;
+      }
+      if (millis() - s_lastLoadcellRatePrintMs_u32 >= 1000u) {
+        if (1/*dap_config_pedalUpdateTask_st.payloadPedalConfig_st.debugFlags0_u8 &
+            DEBUG_INFO_0_STATE_EXTENDED_INFO_STRUCT_U8*/) {
+          ActiveSerial->printf(
+              "[LC] %lu fresh samples/s\n",
+              (unsigned long)(s_freshLoadcellSamples_u32 * 1000u /
+                              (millis() - s_lastLoadcellRatePrintMs_u32)));
+        }
+        s_freshLoadcellSamples_u32 = 0;
+        s_lastLoadcellRatePrintMs_u32 = millis();
+      }
+#endif
       profiler_pedalUpdateTask.end(2);
 
       // start profiler 3, loadcell reading conversion
@@ -2231,9 +2308,11 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
                       .kfModelNoise_u8) /
                      5000.0f;
       static float lastPedalForce_fl32 = 0.0f;
+      static uint8_t s_lastKfModelOrder_u8 = 0xFF;
+      uint8_t kfModelOrder_u8 =
+          dap_config_pedalUpdateTask_st.payloadPedalConfig_st.kfModelOrder_u8;
       // const velocity model denoising filter
-      switch (
-          dap_config_pedalUpdateTask_st.payloadPedalConfig_st.kfModelOrder_u8) {
+      switch (kfModelOrder_u8) {
       case 0: // const. velocity Kalman filter
         filteredReading =
             kalman->filteredValue(pedalForce_fl32, 0.0f,
@@ -2258,6 +2337,45 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
             ((float)REPETITION_INTERVAL_PEDAL_UPDATE_TASK_IN_US_I64 * 1e-6f);
         lastPedalForce_fl32 = filteredReading;
         break;
+      case 4: // IMM Kalman filter (HOLD / MOVE hypotheses)
+      {
+        // the loadcell noise was identified in loadcell units, scale it to
+        // pedal force units (conversion is linear in the loadcell force)
+        float loadcellToPedalForceGain_fl32 = convertToPedalForce(
+            1.0f, sledPosition, &dap_config_pedalUpdateTask_st);
+        kalman_imm->setMeasurementVariance(
+            loadcell->getVarianceEstimate() * loadcellToPedalForceGain_fl32 *
+            loadcellToPedalForceGain_fl32);
+
+        // start from the current force when the filter gets selected
+        if (s_lastKfModelOrder_u8 != kfModelOrder_u8) {
+          kalman_imm->reset(pedalForce_fl32);
+        }
+
+        // known inputs: admittance model position and acceleration of the
+        // previous cycle (plate inertia and foot reaction are explained by them)
+        filteredReading = kalman_imm->filteredValue(
+            pedalForce_fl32, newLoadcellSample_b, cycleTime_s_fl32,
+            dap_config_pedalUpdateTask_st.payloadPedalConfig_st
+                .kfModelNoise_u8,
+            admittanceStates_st.physicalPos_m,
+            admittanceStates_st.virtualAcc_mps2);
+        changeVelocity = kalman_imm->changeVelocity();
+
+        // 1 Hz debug print of the estimated foot stiffness
+        static uint32_t s_lastImmDebugPrintMs_u32 = 0;
+        if ((dap_config_pedalUpdateTask_st.payloadPedalConfig_st
+                 .debugFlags0_u8 &
+             DEBUG_INFO_0_STATE_EXTENDED_INFO_STRUCT_U8) &&
+            (millis() - s_lastImmDebugPrintMs_u32 > 1000u)) {
+          s_lastImmDebugPrintMs_u32 = millis();
+          ActiveSerial->printf(
+              "[IMM] k_foot=%.0f kg/m, mu_hold=%.2f\n",
+              kalman_imm->footStiffness_kgPerM(),
+              kalman_imm->holdProbability());
+        }
+        break;
+      }
       default: // No filter
         filteredReading = pedalForce_fl32;
         changeVelocity =
@@ -2265,6 +2383,7 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
             ((float)REPETITION_INTERVAL_PEDAL_UPDATE_TASK_IN_US_I64 * 1e-6f);
         lastPedalForce_fl32 = filteredReading;
       }
+      s_lastKfModelOrder_u8 = kfModelOrder_u8;
       // write filter reading into calculation_st
       dap_calculationVariables_st.currentForceReading_fl32 = filteredReading;
 
@@ -2306,6 +2425,7 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
         delay(100);
         ActiveSerial->println("Waking up pedal -> running homing sequence");
         performPedalHomingSequence(dap_config_pedalUpdateTask_st);
+        g_plateInertiaIdentificationRequested_b = true;
         stepper->servoStatus = SERVO_CONNECTED;
         g_pedalOperationalState_u8 = (uint8_t)PEDAL_STATE_ACTIVE_E;
         servoActionLast = millis();
@@ -2588,12 +2708,102 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
             endstopBehavior_st.travelRange_mm_fl32, 0.0f,
             10.0f); // constrain the stiffness to a max value for safety
 
+        // HOLD probability of the IMM force filter adds damping near standstill
+        float holdProbability_01 =
+            (dap_config_pedalUpdateTask_st.payloadPedalConfig_st
+                 .kfModelOrder_u8 == 4)
+                ? kalman_imm->holdProbability()
+                : 0.0f;
+
         // Racing Pedal control algorithm (Throttle / Brake / Clutch)
         Position_Next_fl32 = MoveByAdmittanceStrategy(
             filteredReading, stepper, &forceCurve, &dap_calculationVariables_st,
             &dap_config_pedalUpdateTask_st, effectOffsets_st,
-            endstopBehavior_st, &admittanceDebugInfo_st, &admittanceStates_st);
+            endstopBehavior_st, &admittanceDebugInfo_st, &admittanceStates_st,
+            holdProbability_01, cycleTime_s_fl32);
         positionWithoutEffect = (int32_t)Position_Next_fl32;
+      }
+
+      // Plate inertia identification (IMM filter only, not in rudder mode, only
+      // if the experimental inertia compensation is enabled): runs once after
+      // each homing, moves the pedal along a small two-tone trajectory and
+      // identifies inertia coefficient and delay of the plate.
+      static float s_identRestSledPos_mm_fl32 = 0.0f;
+      static float s_identArcPerSledMm_m_fl32 = 0.0f;
+      if (g_plateInertiaIdentificationRequested_b) {
+        g_plateInertiaIdentificationRequested_b = false;
+        bool isRudderModeActive_b =
+            dap_calculationVariables_st.rudderStatus_b ||
+            dap_calculationVariables_st.helicopterRudderStatus_b;
+        if ((dap_config_pedalUpdateTask_st.payloadPedalConfig_st
+                 .kfModelOrder_u8 == 4) &&
+            kalman_imm->isInertiaCompensationEnabled() &&
+            !isRudderModeActive_b &&
+            (g_pedalOperationalState_u8 == (uint8_t)PEDAL_STATE_ACTIVE_E)) {
+          // local gain pedal arc (m) per sled mm at the rest position
+          s_identRestSledPos_mm_fl32 = sledPosition;
+          float leverArm_m_fl32 =
+              ((float)dap_config_pedalUpdateTask_st.payloadPedalConfig_st
+                   .lengthPedalB_i16 +
+               (float)dap_config_pedalUpdateTask_st.payloadPedalConfig_st
+                   .lengthPedalD_i16) *
+              0.001f;
+          float angleAtRest_deg_fl32 = pedalInclineAngleDeg(
+              s_identRestSledPos_mm_fl32, &dap_config_pedalUpdateTask_st);
+          float angleAtRestPlus1mm_deg_fl32 =
+              pedalInclineAngleDeg(s_identRestSledPos_mm_fl32 + 1.0f,
+                                   &dap_config_pedalUpdateTask_st);
+          s_identArcPerSledMm_m_fl32 =
+              fabsf(angleAtRestPlus1mm_deg_fl32 - angleAtRest_deg_fl32) *
+              DEG_TO_RAD_FL32 * leverArm_m_fl32;
+
+          if (s_identArcPerSledMm_m_fl32 > 1e-5f) {
+            float loadcellToPedalForceGain_fl32 = convertToPedalForce(
+                1.0f, sledPosition, &dap_config_pedalUpdateTask_st);
+            ActiveSerial->println("[IMM] Plate inertia identification started");
+            plateInertiaIdentification.start(
+                loadcell->getVarianceEstimate() *
+                loadcellToPedalForceGain_fl32 * loadcellToPedalForceGain_fl32);
+          }
+        }
+      }
+      if (plateInertiaIdentification.isActive()) {
+        float arcOffset_m_fl32 = plateInertiaIdentification.update(
+            (float)REPETITION_INTERVAL_PEDAL_UPDATE_TASK_IN_US_I64 * 1e-6f,
+            newLoadcellSample_b, pedalForce_fl32);
+
+        // override the strategy target with the excitation trajectory
+        float sledMmPerStep_fl32 =
+            motorRevolutionsPerSteps_fl32 *
+            (float)dap_config_pedalUpdateTask_st.payloadPedalConfig_st
+                .spindlePitch_mmPerRev_u8;
+        float targetSledPos_mm_fl32 =
+            s_identRestSledPos_mm_fl32 +
+            arcOffset_m_fl32 / s_identArcPerSledMm_m_fl32;
+        Position_Next_fl32 = (float)stepper->getMinPosition() +
+                             targetSledPos_mm_fl32 / sledMmPerStep_fl32;
+        positionWithoutEffect = (int32_t)Position_Next_fl32;
+
+        if (!plateInertiaIdentification.isActive()) {
+          if (plateInertiaIdentification.isResultValid()) {
+            kalman_imm->setInertiaModel(
+                plateInertiaIdentification.getInertiaCoefficient_kgPerMps2(),
+                plateInertiaIdentification.getDelay_s());
+            ActiveSerial->printf(
+                "[IMM] Plate inertia: c_m=%.4f kg/(m/s^2) (m_eq=%.3f kg), "
+                "delay=%.2f ms, k_g=%.1f kg/m\n",
+                plateInertiaIdentification.getInertiaCoefficient_kgPerMps2(),
+                plateInertiaIdentification.getInertiaCoefficient_kgPerMps2() *
+                    9.81f,
+                plateInertiaIdentification.getDelay_s() * 1000.0f,
+                plateInertiaIdentification.getGravityStiffness_kgPerM());
+          } else {
+            ActiveSerial->println(
+                "[IMM] Plate inertia identification failed (foot on pedal?), "
+                "keeping previous inertia model");
+          }
+          kalman_imm->reset(pedalForce_fl32);
+        }
       }
       // end profiler 4, movement strategy
       profiler_pedalUpdateTask.end(5);
@@ -2651,75 +2861,93 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
       if (doMovement_b) {
         static float Position_Last_fl32 = (float)stepper->getMinPosition();
         if (!moveSlowlyToPosition_b) {
-          static int32_t s_lastCommandedTarget_i32 = -1;
-          static uint32_t s_lastCommandedSpeed_u32 = 0;
+          // Jitter-tolerant step command:
+          // - speed = model velocity (feed-forward) + position correction
+          // - target = new setpoint + a lead of STEP_COMMAND_LEAD_S of travel,
+          //   so a late next cycle does not stop the pulses at the setpoint
+          //   (start-stop "grain"). On time, the next cycle retargets before
+          //   the lead is reached. No lead at standstill (exact positioning).
+          const float STEP_COMMAND_LEAD_S = 2.0f * nominalCycleTime_s_fl32;
+          const float STANDSTILL_SPEED_HZ = 10.0f;
 
-          // compute required speed to reach the target position within the next
-          // control cycle, so that the movement appears smooth and without
-          // delay. float distanceToMove = Position_Next_fl32 -
-          // (float)stepperPosCurrent_i32;
+          float previousSetpoint_fl32 = Position_Last_fl32;
           float distanceToMove = Position_Next_fl32 - Position_Last_fl32;
           Position_Last_fl32 = Position_Next_fl32;
 
-          // prevent very small movements, since it will induce pulse frequency
-          // of 1 / (REPETITION_INTERVAL_PEDAL_UPDATE_TASK_IN_US_I64 * 1e-6) Hz
-          // = 4000Hz with sign flips
-          float distanceToMoveAbs_fl32 = fabsf(distanceToMove);
+          // model velocity over the model step just computed (steps/s, signed)
+          float feedForwardSpeedHz_fl32 = distanceToMove / cycleTime_s_fl32;
+          bool isStandstill_b =
+              fabsf(feedForwardSpeedHz_fl32) < STANDSTILL_SPEED_HZ;
 
-          // Hardware distance (integer steps) for fallback and step-loss checks
-          int32_t hardwareDistance_i32 =
-              (int32_t)Position_Last_fl32 - stepper->getCurrentPosition();
-
-          if (distanceToMoveAbs_fl32 != 0 || abs(hardwareDistance_i32) > 1) {
-            float deltaTime_s_fl32 =
-                ((float)REPETITION_INTERVAL_PEDAL_UPDATE_TASK_IN_US_I64) *
-                1e-6f;
-            float requiredSpeed = distanceToMoveAbs_fl32 / deltaTime_s_fl32;
-
-            // slightly overspeed to make sure pulses reach in time
-            // requiredSpeed *= 1.1f;
-
-            // Catch-up: close servo lag. Standstill uses a high Kp; in-motion
-            // uses a milder gain so lag is bled off during the stroke instead
-            // of dumped when the model slows (that dump is the felt jerk).
-            float catchUpSpeedHz = 0.0f;
-            float targetPosFraction_fl32 =
-                stepper->getCurrentPositionFractionFromExternalPos(
-                    Position_Next_fl32 - stepper->getMinPosition());
-            bool isRudderModeActive =
-                dap_calculationVariables_st.rudderStatus_b ||
-                dap_calculationVariables_st.helicopterRudderStatus_b;
-            bool nearEndstop = (targetPosFraction_fl32 <= 0.02f ||
-                                targetPosFraction_fl32 >= 0.98f);
-            int32_t hardwareDistanceAbs_i32 = abs(hardwareDistance_i32);
-            if (hardwareDistanceAbs_i32 > 1 &&
-                (!isRudderModeActive || !nearEndstop)) {
-              if (fabsf(requiredSpeed) < 10.0f) {
-                const float catchUpKpStandstill_fl32 = 400.0f;
-                catchUpSpeedHz = (float)(hardwareDistanceAbs_i32 - 1) *
-                                 catchUpKpStandstill_fl32;
-              } else if (hardwareDistanceAbs_i32 > 16) {
-                const float catchUpKpMotion_fl32 = 80.0f;
-                const float catchUpMaxMotionHz_fl32 = 12000.0f;
-                catchUpSpeedHz = (float)(hardwareDistanceAbs_i32 - 16) *
-                                 catchUpKpMotion_fl32;
-                if (catchUpSpeedHz > catchUpMaxMotionHz_fl32) {
-                  catchUpSpeedHz = catchUpMaxMotionHz_fl32;
-                }
-              }
+          // Position correction: the servo should now be at the previous
+          // setpoint. Standstill uses a high gain; in motion a milder gain, so
+          // lag is bled off during the stroke instead of dumped when the model
+          // slows (that dump is the felt jerk).
+          float currentPos_fl32 = (float)stepper->getCurrentPosition();
+          float positionError_fl32 = previousSetpoint_fl32 - currentPos_fl32;
+          float targetPosFraction_fl32 =
+              stepper->getCurrentPositionFractionFromExternalPos(
+                  Position_Next_fl32 - stepper->getMinPosition());
+          bool isRudderModeActive =
+              dap_calculationVariables_st.rudderStatus_b ||
+              dap_calculationVariables_st.helicopterRudderStatus_b;
+          bool nearEndstop = (targetPosFraction_fl32 <= 0.02f ||
+                              targetPosFraction_fl32 >= 0.98f);
+          float correctionSpeedHz_fl32 = 0.0f;
+          const float correctionDeadband_fl32 = isStandstill_b ? 1.0f : 4.0f;
+          if ((fabsf(positionError_fl32) > correctionDeadband_fl32) &&
+              (!isRudderModeActive || !nearEndstop)) {
+            float errorOutsideDeadband_fl32 =
+                positionError_fl32 -
+                copysignf(correctionDeadband_fl32, positionError_fl32);
+            if (isStandstill_b) {
+              correctionSpeedHz_fl32 = 400.0f * errorOutsideDeadband_fl32;
+            } else {
+              correctionSpeedHz_fl32 = constrain(
+                  80.0f * errorOutsideDeadband_fl32, -12000.0f, 12000.0f);
             }
+          }
 
-            // total speed
-            requiredSpeed = requiredSpeed + catchUpSpeedHz;
+          // target with lead, clipped to the hard endstops. At slow speed
+          // (< 1 step per cycle) the time-based lead is below one step, so
+          // keep at least MIN_LEAD_STEPS: the stepper ignores targets within
+          // 1 step, which made slow motion start-stop (logic analyzer: gaps
+          // after 10 % of the pulses at 2-3.3 kHz).
+          const float MIN_LEAD_STEPS = 2.0f;
+          float leadSteps_fl32 = 0.0f;
+          if (!isStandstill_b) {
+            leadSteps_fl32 = feedForwardSpeedHz_fl32 * STEP_COMMAND_LEAD_S;
+            if (fabsf(leadSteps_fl32) < MIN_LEAD_STEPS) {
+              leadSteps_fl32 = copysignf(MIN_LEAD_STEPS, feedForwardSpeedHz_fl32);
+            }
+          }
+          float target_fl32 =
+              constrain(Position_Next_fl32 + leadSteps_fl32,
+                        (float)stepper->getHardEndstopMinPosition(),
+                        (float)stepper->getHardEndstopMaxPosition());
+          float distanceToTarget_fl32 = fabsf(target_fl32 - currentPos_fl32);
 
+          if (distanceToTarget_fl32 > 1.0f) {
+            float requiredSpeed =
+                fabsf(feedForwardSpeedHz_fl32 + correctionSpeedHz_fl32);
+            // at standstill never crawl: reach the target within
+            // (1 cycle + lead) at least. Not while moving: there the target
+            // lies ahead on purpose and the speed must follow the model.
+            if (isStandstill_b) {
+              requiredSpeed = max(requiredSpeed,
+                                  distanceToTarget_fl32 /
+                                      (nominalCycleTime_s_fl32 + STEP_COMMAND_LEAD_S));
+            }
             if (requiredSpeed > (float)MAXIMUM_STEPPER_SPEED_U32) {
               requiredSpeed = (float)MAXIMUM_STEPPER_SPEED_U32;
             }
-
-            stepper->moveToWithSpeed((int32_t)Position_Next_fl32,
-                                     requiredSpeed);
-            s_lastCommandedTarget_i32 = (int32_t)Position_Next_fl32;
-            s_lastCommandedSpeed_u32 = requiredSpeed;
+            stepper->moveToWithSpeed((int32_t)lroundf(target_fl32),
+                                     (uint32_t)requiredSpeed);
+          } else if (isStandstill_b && stepper->isRunning()) {
+            // model stopped and at the setpoint while still running toward
+            // an earlier lead target: stop here instead of overshooting.
+            // Not while moving: that stopped slow motion every few cycles.
+            stepper->forceStop();
           }
         } else {
           moveSlowlyToPosition_b = false;
@@ -2961,10 +3189,24 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
       // check if data needs to be send
       if ((dap_config_pedalUpdateTask_st.payloadPedalConfig_st.debugFlags0_u8 &
            DEBUG_INFO_0_STATE_EXTENDED_INFO_STRUCT_U8)) {
-        // send data every frame
-        sendPedalStructsViaSerialCounter_u8 = 0;
-        sendBasicFlag_b = true;
-        sendExtendedFlag_b = true;
+        if (dap_config_pedalUpdateTask_st.payloadPedalConfig_st.debugFlags0_u8 &
+            DEBUG_INFO_0_EXTENDED_STRUCT_DECIMATED_U8) {
+          // send data every N-th frame only, so the USB CDC buffer does not
+          // overflow and the trace has no gaps
+          sendPedalStructsViaSerialCounter_u8++;
+          bool sendNow_b = (sendPedalStructsViaSerialCounter_u8 >=
+                            EXTENDED_STRUCT_DECIMATION_FACTOR_U8);
+          if (sendNow_b) {
+            sendPedalStructsViaSerialCounter_u8 = 0;
+          }
+          sendBasicFlag_b = sendNow_b;
+          sendExtendedFlag_b = sendNow_b;
+        } else {
+          // send data every frame
+          sendPedalStructsViaSerialCounter_u8 = 0;
+          sendBasicFlag_b = true;
+          sendExtendedFlag_b = true;
+        }
       } else {
         // send data every N-th frame
         sendPedalStructsViaSerialCounter_u8++;
@@ -3106,6 +3348,13 @@ void IRAM_ATTR_FLAG pedalUpdateTask(void *pvParameters) {
             brake_state * 255; // stepper->getBrakeResistorState();
         dap_state_extended_st_lcl_pedalUpdateTask.payloadPedalStateExtended_st
             .oscillationMonitorValue_u8 = 0.0f;
+        // IMM filter: probability of the MOVE hypothesis (0 = HOLD, 255 = MOVE)
+        if (dap_config_pedalUpdateTask_st.payloadPedalConfig_st
+                .kfModelOrder_u8 == 4) {
+          dap_state_extended_st_lcl_pedalUpdateTask.payloadPedalStateExtended_st
+              .oscillationMonitorValue_u8 =
+              (uint8_t)(kalman_imm->moveProbability() * 255.0f);
+        }
 
         dap_state_extended_st_lcl_pedalUpdateTask.payloadPedalStateExtended_st
             .admittance_expectedForce_N =
@@ -4653,6 +4902,7 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
           // guess. Rate-limited to every 2s (rudder fires every 2ms, so an
           // unconditional log here would flood the link). Remove once
           // rudder sync is confirmed working again.
+#ifdef WIRELESS_DEBUG_INFO
           static uint32_t s_lastRudderDiagLogTime = 0;
           if ((dap_calculationVariables_st.rudderStatus_b ||
                dap_calculationVariables_st.helicopterRudderStatus_b) &&
@@ -4667,8 +4917,10 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
                 wirelessComm.getRudderRxAcceptedCount(),
                 wirelessComm.getRudderRxRejectedCount());
           }
+#endif
         }
 
+#ifdef WIRELESS_DEBUG_INFO
         // TEMP DIAGNOSTIC: wireless link status every 5s, see printDiag().
         static uint32_t s_lastLinkDiagLogTime = 0;
         if (millis() - s_lastLinkDiagLogTime > 5000) {
@@ -4707,6 +4959,7 @@ void IRAM_ATTR_FLAG espNowCommunicationTaskTx(void *pvParameters) {
               wirelessComm.getTxBusySkipCount(),
               (uint32_t)g_currentSyncDelay_ms * 2);
         }
+#endif
       }
 
 #ifdef ESPNow_debugg_rudder_st

@@ -366,6 +366,119 @@ static inline IRAM_ATTR_FLAG void AdaptVirtualMass(
     virtualMass_kg = baseMass_kg + g_massAdaptationOffset_kg;
 }
 
+// Contact oscillation detector state (see UpdateContactOscillationDamping)
+#define CONTACT_OSC_CROSSING_BUFFER_SIZE 8
+float g_contactOscHighPass_N = 0.0f;
+float g_contactOscBandPass_N = 0.0f;
+float g_contactOscPrevForce_N = 0.0f;
+float g_contactOscPeak_N = 0.0f;
+float g_contactOscLastHalfWavePeak_N = 0.0f;
+int8_t g_contactOscSign_i8 = 0;
+float g_contactOscCrossingTimes_s[CONTACT_OSC_CROSSING_BUFFER_SIZE] = {0};
+uint8_t g_contactOscCrossingIdx_u8 = 0;
+float g_contactOscTime_s = 0.0f;
+float g_contactOscForceLowPass_N = 0.0f;
+float g_contactOscForceAtDetection_N = 0.0f;
+float g_contactOscDampingMultiplier = 1.0f;
+
+/**
+ * @brief Contact oscillation detector with adaptive damping.
+ *
+ * A stiff contact (e.g. holding the pedal with the heel, ~10 N/mm) closes a loop
+ * force -> admittance model -> position -> contact -> force that oscillates at ~13-16 Hz
+ * with the servo and force-filter delays. More damping stabilizes it (simulation: ~3x the
+ * base damping), more virtual mass does not.
+ *
+ * Detection: band-pass (5-40 Hz) of the pilot force; oscillation = at least
+ * CONTACT_OSC_MIN_CROSSINGS sign changes with a half-wave peak above the threshold
+ * (4 % of the force, at least 1 N) within CONTACT_OSC_WINDOW_S (~2.5 periods). Presses and
+ * single stabs produce only one or two such crossings and do not trigger.
+ * Reaction: damping multiplier rises to CONTACT_OSC_DAMPING_MAX within ~50 ms. It decays
+ * slowly (10 s) while the contact persists, so the oscillation does not grow back, and quickly
+ * (0.3 s) once the pedal moves or the force drops below half the detection level (released).
+ *
+ * @return damping multiplier (>= 1)
+ */
+static inline IRAM_ATTR_FLAG float UpdateContactOscillationDamping(
+    float pilotForce_N, float vModelVel_mps, float dt_s, bool hasActiveEffect,
+    bool& isOscillating, float& bandPeak_N)
+{
+    const float CONTACT_OSC_HIGH_PASS_HZ = 5.0f;
+    const float CONTACT_OSC_LOW_PASS_HZ = 40.0f;
+    // Amplitude threshold relative to the force: leg tremor scales with the force (~1 % measured
+    // while holding), a contact oscillation reached ~20 % (throttle, heel). With an absolute
+    // threshold a brake at high force would trigger on tremor alone.
+    const float CONTACT_OSC_AMPLITUDE_MIN_N = 1.0f;
+    const float CONTACT_OSC_AMPLITUDE_RELATIVE = 0.04f;
+    // a contact oscillation needs contact: no detection below this mean force (load cell noise
+    // at rest, e.g. with a high-rated brake load cell)
+    const float CONTACT_OSC_MIN_FORCE_N = 3.0f;
+    const float CONTACT_OSC_WINDOW_S = 0.3f;
+    const uint8_t CONTACT_OSC_MIN_CROSSINGS = 5;
+    const float CONTACT_OSC_DAMPING_MAX = 3.0f;
+    const float CONTACT_OSC_RISE_TIME_S = 0.03f;
+    const float CONTACT_OSC_DECAY_HOLD_S = 10.0f;
+    const float CONTACT_OSC_DECAY_RELEASED_S = 0.3f;
+    const float CONTACT_OSC_MOVING_VELOCITY_MPS = 0.005f;
+    const float CONTACT_OSC_RELEASE_FORCE_RATIO = 0.5f;
+
+    g_contactOscTime_s += dt_s;
+
+    // band-pass: first order high-pass followed by first order low-pass
+    float highPassTau_s = 1.0f / (2.0f * PI * CONTACT_OSC_HIGH_PASS_HZ);
+    float highPassAlpha = highPassTau_s / (highPassTau_s + dt_s);
+    g_contactOscHighPass_N = highPassAlpha * (g_contactOscHighPass_N + pilotForce_N - g_contactOscPrevForce_N);
+    g_contactOscPrevForce_N = pilotForce_N;
+    g_contactOscBandPass_N += (1.0f - expf(-dt_s * 2.0f * PI * CONTACT_OSC_LOW_PASS_HZ)) * (g_contactOscHighPass_N - g_contactOscBandPass_N);
+
+    // mean contact force: relative amplitude threshold, and release detection below
+    g_contactOscForceLowPass_N += (1.0f - expf(-dt_s / 0.05f)) * (pilotForce_N - g_contactOscForceLowPass_N);
+    float amplitudeThreshold_N = max(CONTACT_OSC_AMPLITUDE_MIN_N,
+                                     CONTACT_OSC_AMPLITUDE_RELATIVE * g_contactOscForceLowPass_N);
+
+    // sign changes with sufficient half-wave amplitude
+    g_contactOscPeak_N = max(g_contactOscPeak_N, fabsf(g_contactOscBandPass_N));
+    int8_t sign_i8 = (g_contactOscBandPass_N > 0.0f) ? 1 : -1;
+    if (sign_i8 != g_contactOscSign_i8) {
+        if ((g_contactOscPeak_N >= amplitudeThreshold_N) &&
+            (g_contactOscForceLowPass_N >= CONTACT_OSC_MIN_FORCE_N) && !hasActiveEffect) {
+            g_contactOscCrossingTimes_s[g_contactOscCrossingIdx_u8] = g_contactOscTime_s;
+            g_contactOscCrossingIdx_u8 = (g_contactOscCrossingIdx_u8 + 1) % CONTACT_OSC_CROSSING_BUFFER_SIZE;
+        }
+        g_contactOscLastHalfWavePeak_N = g_contactOscPeak_N;
+        g_contactOscPeak_N = 0.0f;
+        g_contactOscSign_i8 = sign_i8;
+    }
+    uint8_t recentCrossings_u8 = 0;
+    for (uint8_t i = 0; i < CONTACT_OSC_CROSSING_BUFFER_SIZE; i++) {
+        float age_s = g_contactOscTime_s - g_contactOscCrossingTimes_s[i];
+        if ((g_contactOscCrossingTimes_s[i] > 0.0f) && (age_s <= CONTACT_OSC_WINDOW_S)) {
+            recentCrossings_u8++;
+        }
+    }
+    isOscillating = (recentCrossings_u8 >= CONTACT_OSC_MIN_CROSSINGS) && !hasActiveEffect;
+    bandPeak_N = g_contactOscLastHalfWavePeak_N;
+
+    // contact force level: remember it at detection, to recognize a release
+    if (isOscillating) {
+        g_contactOscForceAtDetection_N = (g_contactOscDampingMultiplier > 1.01f)
+            ? max(g_contactOscForceAtDetection_N, g_contactOscForceLowPass_N)
+            : g_contactOscForceLowPass_N;
+    }
+
+    // damping multiplier: fast rise, slow decay while the contact persists
+    if (isOscillating) {
+        g_contactOscDampingMultiplier += (1.0f - expf(-dt_s / CONTACT_OSC_RISE_TIME_S))
+                                         * (CONTACT_OSC_DAMPING_MAX - g_contactOscDampingMultiplier);
+    } else {
+        bool released_b = (fabsf(vModelVel_mps) > CONTACT_OSC_MOVING_VELOCITY_MPS) ||
+                          (g_contactOscForceLowPass_N < CONTACT_OSC_RELEASE_FORCE_RATIO * g_contactOscForceAtDetection_N);
+        float decay_s = released_b ? CONTACT_OSC_DECAY_RELEASED_S : CONTACT_OSC_DECAY_HOLD_S;
+        g_contactOscDampingMultiplier += (1.0f - expf(-dt_s / decay_s)) * (1.0f - g_contactOscDampingMultiplier);
+    }
+    return g_contactOscDampingMultiplier;
+}
+
 /**
  * @brief Calculates active damping including AOM Boost, Trajectory Shaping, and Elastomer Hysteresis.
  */
@@ -373,7 +486,8 @@ static inline IRAM_ATTR_FLAG float CalcActiveDamping(
     float dampingRatio_zeta, float virtualMass_kg, float currentStiffness_N_m,
     float vModelPos_01, float actualPosFraction_01,
     int32_t actualServoTrackingError_i32, float travelSteps_cnt, float effectForceOffset_fl32,
-    uint8_t dampingProgression_u8, float springForce_N, float vModelVel_mps, uint8_t elastomerModelSelection, float maxPedalForce_kg) 
+    uint8_t dampingProgression_u8, float springForce_N, float vModelVel_mps, uint8_t elastomerModelSelection, float maxPedalForce_kg,
+    float dt_s, float totalTravel_m)
 {
     // Calculate Base Damping based on mass and current stiffness: c_c = 2 * sqrt(m * k)
     float criticalDamping_Ns_m = 2.0f * sqrtf(virtualMass_kg * currentStiffness_N_m);
@@ -392,22 +506,48 @@ static inline IRAM_ATTR_FLAG float CalcActiveDamping(
         // producing large EMF. To reduce the lag, we increase the virtual damping so the servo can keep up.
         // =========================================================
         // actualPosFraction_01 is the physical position, vModelPos_01 is the target model position.
-        float trackingError_01 = fabsf(vModelPos_01 - actualPosFraction_01);
+        // Signed: pressing (v > 0) gives a negative servo tracking error.
+        float trackingError_01 = vModelPos_01 - actualPosFraction_01;
         if (travelSteps_cnt > 0.0001f) {
-            trackingError_01 = fabsf((float)actualServoTrackingError_i32 / travelSteps_cnt);
+            trackingError_01 = (float)actualServoTrackingError_i32 / travelSteps_cnt;
         }
+
+        // The servo lags its target by a speed-proportional amount even when it tracks perfectly
+        // well (following error ~ (1 - velocity feed-forward) * v / position gain; ~14 ms measured).
+        // Only the part beyond that expected lag indicates that the servo cannot keep up.
+        // Expected lag estimated online (least squares with forgetting), adapts to servo retuning.
+        static float s_sumErrorVel_fl32 = 0.0f;
+        static float s_sumVelSq_fl32 = 0.0f;
+        static float s_servoLag_s_fl32 = 0.0f;
+        // counts only while moving: 0.3 s of motion is a few presses, so the estimate follows a
+        // live servo retune quickly (2 s needed many presses, see trace 20260929_061357)
+        const float LAG_ESTIMATION_TIME_CONSTANT_S = 0.3f;
+        const float LAG_ESTIMATION_MIN_VELOCITY_MPS = 0.03f;
+        const float LAG_MAX_S = 0.04f;
+        float vModelVel_01ps = (totalTravel_m > 0.0001f) ? (vModelVel_mps / totalTravel_m) : 0.0f;
+        if (fabsf(vModelVel_mps) > LAG_ESTIMATION_MIN_VELOCITY_MPS) {
+            float forgetting_fl32 = expf(-dt_s / LAG_ESTIMATION_TIME_CONSTANT_S);
+            s_sumErrorVel_fl32 = forgetting_fl32 * s_sumErrorVel_fl32 - trackingError_01 * vModelVel_01ps;
+            s_sumVelSq_fl32 = forgetting_fl32 * s_sumVelSq_fl32 + vModelVel_01ps * vModelVel_01ps;
+            if (s_sumVelSq_fl32 > 1e-6f) {
+                s_servoLag_s_fl32 = constrain(s_sumErrorVel_fl32 / s_sumVelSq_fl32, 0.0f, LAG_MAX_S);
+            }
+        }
+        float unexpectedTrackingError_01 = fabsf(trackingError_01 + s_servoLag_s_fl32 * vModelVel_01ps);
 
         // Low-pass filter the tracking error to eliminate 100Hz Modbus step discontinuities
         static float s_smoothedTrackingError_01 = 0.0f;
         const float TAU_TRACKING_ERR = 0.015f; // 15ms smoothing
-        float alpha_err = 1.0f - expf(-0.00025f / TAU_TRACKING_ERR);
-        s_smoothedTrackingError_01 = (alpha_err * trackingError_01) + ((1.0f - alpha_err) * s_smoothedTrackingError_01);
+        float alpha_err = 1.0f - expf(-dt_s / TAU_TRACKING_ERR);
+        s_smoothedTrackingError_01 = (alpha_err * unexpectedTrackingError_01) + ((1.0f - alpha_err) * s_smoothedTrackingError_01);
 
-        // If smoothed tracking error exceeds 0.5% (~0.5-1mm), the model damping is dynamically
+        // If the smoothed unexpected tracking error exceeds 0.5% (~0.5-1mm), the model damping is
         // increased proportionally so that the servo can catch up without oscillating.
-        if (s_smoothedTrackingError_01 > 0.005f && fabsf(vModelVel_mps) > 0.03f) {
+        // Faded in between 20 and 40 mm/s instead of switched, so the damping does not jump.
+        float velocityWeight_01 = constrain((fabsf(vModelVel_mps) - 0.02f) / 0.02f, 0.0f, 1.0f);
+        if (s_smoothedTrackingError_01 > 0.005f) {
             float excessError = s_smoothedTrackingError_01 - 0.005f;
-            dampingMultiplier += constrain(excessError * 35.0f, 0.0f, 2.5f);
+            dampingMultiplier += velocityWeight_01 * constrain(excessError * 35.0f, 0.0f, 2.5f);
         }
     }
     
@@ -647,11 +787,17 @@ float IRAM_ATTR_FLAG MoveByAdmittanceStrategy(
   EffectOffsets_t effectOffsets_st, 
   EndstopBehavior_t endstopBehavior_st, 
   AdmittanceDebugState_t* debugState_st = nullptr,
-  AdmittanceStates_t *admittanceStates_pst = nullptr)
+  AdmittanceStates_t *admittanceStates_pst = nullptr,
+  float holdProbability_01 = 0.0f,
+  float cycleTime_s = 0.0f)
 {
   // --- 1. PHYSICAL PARAMETERS & CONFIGURATION ---
-  // Time step for integration (seconds). We use a constant interval for improved numerical stability.
-  float dt_s = ((float)REPETITION_INTERVAL_PEDAL_UPDATE_TASK_IN_US_I64) * 1e-6f;
+  // Time step for integration (seconds): the measured cycle time when given (already clamped by
+  // the caller), so the model advances in real time. With a fixed step, every late cycle slowed the
+  // setpoint in real time and the servo moved start-stop ("grain"). The Tustin integrator is stable
+  // for any step length; otherwise fall back to the nominal interval.
+  float dt_s = (cycleTime_s > 0.0f) ? cycleTime_s
+                                    : ((float)REPETITION_INTERVAL_PEDAL_UPDATE_TASK_IN_US_I64) * 1e-6f;
   const float GRAVITY_N_KG = 9.81f; // Conversion constant for Kg to Newtons
 
   // Convert virtual mass and damping from user configuration percentages
@@ -777,11 +923,8 @@ float IRAM_ATTR_FLAG MoveByAdmittanceStrategy(
 
   // 7. Final total force (Loadcell + Static Effect Weight + Dynamic Effect Force)
   float rawPilotForce_N = (loadCellReadingKg_fl32 * GRAVITY_N_KG);
-  // Subtle deadzone on pilot force (1.5 N) to prevent transmitting baseline drift
-  float cleanPilotForce_N = 0.0f;
-  if (rawPilotForce_N > 1.5f) {
-    cleanPilotForce_N = rawPilotForce_N - 1.5f;
-  }
+  // no deadzone here: the loadcell calibration already removes mean + 3 sigma of the idle reading
+  float cleanPilotForce_N = max(rawPilotForce_N, 0.0f);
   static float s_filteredPilotForce_N = 0.0f;
   const float PILOT_FORCE_TAU = 0.025f; // 25ms smoothing
   float pilot_alpha = 1.0f - expf(-dt_s / PILOT_FORCE_TAU);
@@ -828,20 +971,23 @@ float IRAM_ATTR_FLAG MoveByAdmittanceStrategy(
   
   bool hasActiveEffect = (effectOffsets_st.forceOffset_kg_fl32 != 0.0f) || (effectOffsets_st.forceOffset_Steps_fl32 != 0.0f);
 
-  // Call the detector with max force from config to calculate dynamic threshold
-  bool isOscillating = DetectAdmittanceOscillation(
-      externalForce_N, actualPosFraction_01, totalTravel_m, 
-      totalSpringReaction_N, idealBaseDamping_Ns_m, baseMass_kg, 
+  // Landi detector: only for telemetry (physical kinematics, expected force). Its threshold (25 N)
+  // and power gating missed the heel-contact oscillation (~3.4 N at 16 Hz), and the mass
+  // adaptation it drove does not stabilize a stiff contact (simulation).
+  DetectAdmittanceOscillation(
+      externalForce_N, actualPosFraction_01, totalTravel_m,
+      totalSpringReaction_N, idealBaseDamping_Ns_m, baseMass_kg,
       dt_s, config_st->payloadPedalConfig_st.maxForce_fl32, debugState_st, hasActiveEffect
   );
 
-  // --- 10. PASSIVE PARAMETER ADAPTATION (Position Gated) ---
-  AdaptVirtualMass(isOscillating
-    , dt_s
-    , baseMass_kg
-    , virtualMass_kg
-    , hasActiveEffect
-    , actualPosFraction_01);
+  // --- 10. CONTACT OSCILLATION DAMPING (replaces the virtual mass adaptation) ---
+  bool isOscillating = false;
+  float contactOscBandPeak_N = 0.0f;
+  float contactOscDampingMultiplier = UpdateContactOscillationDamping(
+      cleanPilotForce_N, g_vModelVel_mps, dt_s, hasActiveEffect, isOscillating, contactOscBandPeak_N);
+  if (debugState_st != nullptr) {
+      debugState_st->admittancePsi_N = contactOscBandPeak_N; // telemetry: band-pass half-wave peak
+  }
 
   // --- 11. DYNAMIC ADAPTIVE DAMPING ---
   // (Re-calculate active damping with the new adapted mass)
@@ -857,7 +1003,12 @@ float IRAM_ATTR_FLAG MoveByAdmittanceStrategy(
     , springForce_N
     , g_vModelVel_mps
     , ELASTOMER_MODEL_HUNT_CROSSLEY
-    , config_st->payloadPedalConfig_st.maxForce_fl32); 
+    , config_st->payloadPedalConfig_st.maxForce_fl32
+    , dt_s
+    , totalTravel_m);
+
+  // raise the damping while a contact oscillation is present (heel held against the pedal)
+  activeDamping_Ns_m *= contactOscDampingMultiplier;
 
   // =========================================================
   // NEUER FIX: Bump-Stop Hysteresis (Kinetische Energie absorbieren)
@@ -887,6 +1038,21 @@ float IRAM_ATTR_FLAG MoveByAdmittanceStrategy(
       if (activeDamping_Ns_m < requiredBumpDamping_Ns_m) {
           activeDamping_Ns_m = requiredBumpDamping_Ns_m;
       }
+  }
+
+  // =========================================================
+  // STATISTICAL STICTION (HOLD probability from the IMM force filter)
+  // =========================================================
+  // While the force filter is confident the foot is holding still, extra damping near
+  // zero velocity keeps residual noise from moving the pedal. It fades out with speed,
+  // so presses are unaffected, and enters the Tustin integrator like all other damping.
+  if (holdProbability_01 > 0.0f) {
+    // EXPERIMENTAL, off by default: mixed results in simulation (more jitter after a press)
+    const float HOLD_DAMPING_RATIO = 0.0f;
+    const float HOLD_DAMPING_VELOCITY_BAND_MPS = 0.02f;
+    float velocityWeight_01 = max(0.0f, 1.0f - fabsf(g_vModelVel_mps) / HOLD_DAMPING_VELOCITY_BAND_MPS);
+    float holdCriticalDamping_Ns_m = 2.0f * sqrtf(virtualMass_kg * currentStiffness_N_m);
+    activeDamping_Ns_m += holdProbability_01 * HOLD_DAMPING_RATIO * holdCriticalDamping_Ns_m * velocityWeight_01;
   }
 
   g_lastActiveDamping_Ns_m = activeDamping_Ns_m;
