@@ -373,7 +373,8 @@ static inline IRAM_ATTR_FLAG float CalcActiveDamping(
     float dampingRatio_zeta, float virtualMass_kg, float currentStiffness_N_m,
     float vModelPos_01, float actualPosFraction_01,
     int32_t actualServoTrackingError_i32, float travelSteps_cnt, float effectForceOffset_fl32,
-    uint8_t dampingProgression_u8, float springForce_N, float vModelVel_mps, uint8_t elastomerModelSelection, float maxPedalForce_kg) 
+    uint8_t dampingProgression_u8, float springForce_N, float vModelVel_mps, uint8_t elastomerModelSelection, float maxPedalForce_kg,
+    float dt_s, float totalTravel_m)
 {
     // Calculate Base Damping based on mass and current stiffness: c_c = 2 * sqrt(m * k)
     float criticalDamping_Ns_m = 2.0f * sqrtf(virtualMass_kg * currentStiffness_N_m);
@@ -392,22 +393,48 @@ static inline IRAM_ATTR_FLAG float CalcActiveDamping(
         // producing large EMF. To reduce the lag, we increase the virtual damping so the servo can keep up.
         // =========================================================
         // actualPosFraction_01 is the physical position, vModelPos_01 is the target model position.
-        float trackingError_01 = fabsf(vModelPos_01 - actualPosFraction_01);
+        // Signed: pressing (v > 0) gives a negative servo tracking error.
+        float trackingError_01 = vModelPos_01 - actualPosFraction_01;
         if (travelSteps_cnt > 0.0001f) {
-            trackingError_01 = fabsf((float)actualServoTrackingError_i32 / travelSteps_cnt);
+            trackingError_01 = (float)actualServoTrackingError_i32 / travelSteps_cnt;
         }
+
+        // The servo lags its target by a speed-proportional amount even when it tracks perfectly
+        // well (following error ~ (1 - velocity feed-forward) * v / position gain; ~14 ms measured).
+        // Only the part beyond that expected lag indicates that the servo cannot keep up.
+        // Expected lag estimated online (least squares with forgetting), adapts to servo retuning.
+        static float s_sumErrorVel_fl32 = 0.0f;
+        static float s_sumVelSq_fl32 = 0.0f;
+        static float s_servoLag_s_fl32 = 0.0f;
+        // counts only while moving: 0.3 s of motion is a few presses, so the estimate follows a
+        // live servo retune quickly (2 s needed many presses, see trace 20260929_061357)
+        const float LAG_ESTIMATION_TIME_CONSTANT_S = 0.3f;
+        const float LAG_ESTIMATION_MIN_VELOCITY_MPS = 0.03f;
+        const float LAG_MAX_S = 0.04f;
+        float vModelVel_01ps = (totalTravel_m > 0.0001f) ? (vModelVel_mps / totalTravel_m) : 0.0f;
+        if (fabsf(vModelVel_mps) > LAG_ESTIMATION_MIN_VELOCITY_MPS) {
+            float forgetting_fl32 = expf(-dt_s / LAG_ESTIMATION_TIME_CONSTANT_S);
+            s_sumErrorVel_fl32 = forgetting_fl32 * s_sumErrorVel_fl32 - trackingError_01 * vModelVel_01ps;
+            s_sumVelSq_fl32 = forgetting_fl32 * s_sumVelSq_fl32 + vModelVel_01ps * vModelVel_01ps;
+            if (s_sumVelSq_fl32 > 1e-6f) {
+                s_servoLag_s_fl32 = constrain(s_sumErrorVel_fl32 / s_sumVelSq_fl32, 0.0f, LAG_MAX_S);
+            }
+        }
+        float unexpectedTrackingError_01 = fabsf(trackingError_01 + s_servoLag_s_fl32 * vModelVel_01ps);
 
         // Low-pass filter the tracking error to eliminate 100Hz Modbus step discontinuities
         static float s_smoothedTrackingError_01 = 0.0f;
         const float TAU_TRACKING_ERR = 0.015f; // 15ms smoothing
-        float alpha_err = 1.0f - expf(-0.00025f / TAU_TRACKING_ERR);
-        s_smoothedTrackingError_01 = (alpha_err * trackingError_01) + ((1.0f - alpha_err) * s_smoothedTrackingError_01);
+        float alpha_err = 1.0f - expf(-dt_s / TAU_TRACKING_ERR);
+        s_smoothedTrackingError_01 = (alpha_err * unexpectedTrackingError_01) + ((1.0f - alpha_err) * s_smoothedTrackingError_01);
 
-        // If smoothed tracking error exceeds 0.5% (~0.5-1mm), the model damping is dynamically
+        // If the smoothed unexpected tracking error exceeds 0.5% (~0.5-1mm), the model damping is
         // increased proportionally so that the servo can catch up without oscillating.
-        if (s_smoothedTrackingError_01 > 0.005f && fabsf(vModelVel_mps) > 0.03f) {
+        // Faded in between 20 and 40 mm/s instead of switched, so the damping does not jump.
+        float velocityWeight_01 = constrain((fabsf(vModelVel_mps) - 0.02f) / 0.02f, 0.0f, 1.0f);
+        if (s_smoothedTrackingError_01 > 0.005f) {
             float excessError = s_smoothedTrackingError_01 - 0.005f;
-            dampingMultiplier += constrain(excessError * 35.0f, 0.0f, 2.5f);
+            dampingMultiplier += velocityWeight_01 * constrain(excessError * 35.0f, 0.0f, 2.5f);
         }
     }
     
@@ -647,11 +674,17 @@ float IRAM_ATTR_FLAG MoveByAdmittanceStrategy(
   EffectOffsets_t effectOffsets_st, 
   EndstopBehavior_t endstopBehavior_st, 
   AdmittanceDebugState_t* debugState_st = nullptr,
-  AdmittanceStates_t *admittanceStates_pst = nullptr)
+  AdmittanceStates_t *admittanceStates_pst = nullptr,
+  float holdProbability_01 = 0.0f,
+  float cycleTime_s = 0.0f)
 {
   // --- 1. PHYSICAL PARAMETERS & CONFIGURATION ---
-  // Time step for integration (seconds). We use a constant interval for improved numerical stability.
-  float dt_s = ((float)REPETITION_INTERVAL_PEDAL_UPDATE_TASK_IN_US_I64) * 1e-6f;
+  // Time step for integration (seconds): the measured cycle time when given (already clamped by
+  // the caller), so the model advances in real time. With a fixed step, every late cycle slowed the
+  // setpoint in real time and the servo moved start-stop ("grain"). The Tustin integrator is stable
+  // for any step length; otherwise fall back to the nominal interval.
+  float dt_s = (cycleTime_s > 0.0f) ? cycleTime_s
+                                    : ((float)REPETITION_INTERVAL_PEDAL_UPDATE_TASK_IN_US_I64) * 1e-6f;
   const float GRAVITY_N_KG = 9.81f; // Conversion constant for Kg to Newtons
 
   // Convert virtual mass and damping from user configuration percentages
@@ -857,7 +890,9 @@ float IRAM_ATTR_FLAG MoveByAdmittanceStrategy(
     , springForce_N
     , g_vModelVel_mps
     , ELASTOMER_MODEL_HUNT_CROSSLEY
-    , config_st->payloadPedalConfig_st.maxForce_fl32); 
+    , config_st->payloadPedalConfig_st.maxForce_fl32
+    , dt_s
+    , totalTravel_m);
 
   // =========================================================
   // NEUER FIX: Bump-Stop Hysteresis (Kinetische Energie absorbieren)
@@ -887,6 +922,21 @@ float IRAM_ATTR_FLAG MoveByAdmittanceStrategy(
       if (activeDamping_Ns_m < requiredBumpDamping_Ns_m) {
           activeDamping_Ns_m = requiredBumpDamping_Ns_m;
       }
+  }
+
+  // =========================================================
+  // STATISTICAL STICTION (HOLD probability from the IMM force filter)
+  // =========================================================
+  // While the force filter is confident the foot is holding still, extra damping near
+  // zero velocity keeps residual noise from moving the pedal. It fades out with speed,
+  // so presses are unaffected, and enters the Tustin integrator like all other damping.
+  if (holdProbability_01 > 0.0f) {
+    // EXPERIMENTAL, off by default: mixed results in simulation (more jitter after a press)
+    const float HOLD_DAMPING_RATIO = 0.0f;
+    const float HOLD_DAMPING_VELOCITY_BAND_MPS = 0.02f;
+    float velocityWeight_01 = max(0.0f, 1.0f - fabsf(g_vModelVel_mps) / HOLD_DAMPING_VELOCITY_BAND_MPS);
+    float holdCriticalDamping_Ns_m = 2.0f * sqrtf(virtualMass_kg * currentStiffness_N_m);
+    activeDamping_Ns_m += holdProbability_01 * HOLD_DAMPING_RATIO * holdCriticalDamping_Ns_m * velocityWeight_01;
   }
 
   g_lastActiveDamping_Ns_m = activeDamping_Ns_m;

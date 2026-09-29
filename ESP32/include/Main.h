@@ -577,7 +577,11 @@ static const uint32_t s_secondsPerMinute_u32 = 60;
 #else
 #define TASK_PRIORITY_PEDAL_UPDATE_TASK_UBASETYPE (UBaseType_t)3
 #define TASK_PRIORITY_JOYSTICKOUTPUT_TASK_UBASETYPE (UBaseType_t)1
-#define TASK_PRIORITY_LOADCELL_READING_TASK_UBASETYPE (UBaseType_t)2
+// Above the pedal update task (same core): the loadcell task blocks on the
+// ADC's DRDY interrupt and only runs a few us per sample. Below the pedal task
+// it was starved whenever the pedal task got busy (e.g. streaming the extended
+// state every cycle): ~300-500 instead of ~1900 samples/s.
+#define TASK_PRIORITY_LOADCELL_READING_TASK_UBASETYPE (UBaseType_t)4
 #define TASK_PRIORITY_SERIALCOMMUNICATION_TASK_UBASETYPE (UBaseType_t)1
 #define TASK_PRIORITY_SERIALCOMMUNICATION_TX_TASK_UBASETYPE (UBaseType_t)1
 #define TASK_PRIORITY_ESPNOW_TASK_UBASETYPE (UBaseType_t)2

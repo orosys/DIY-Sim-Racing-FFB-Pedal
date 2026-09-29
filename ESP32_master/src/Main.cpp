@@ -2294,6 +2294,7 @@ void miscTask(void *pvParameters)
   {
     if (ulTaskNotifyTake(pdTRUE, portMAX_DELAY) > 0)
     {
+#ifdef WIRELESS_DEBUG_INFO
       // TEMP DIAGNOSTIC: periodic wireless link status, see printDiag().
       static uint32_t s_lastWirelessDiag_u32 = 0;
       if (millis() - s_lastWirelessDiag_u32 > 5000)
@@ -2301,6 +2302,7 @@ void miscTask(void *pvParameters)
         s_lastWirelessDiag_u32 = millis();
         wirelessComm.printDiag();
       }
+#endif
     }
   }
 }
